@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { useAuth } from "@/hooks/useAuth";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,10 +9,12 @@ import {
   CheckCircle2,
   Camera,
   Play,
-  Square,
   ExternalLink,
   CheckSquare,
-  Loader2
+  Loader2,
+  Navigation,
+  AlertTriangle,
+  Image as ImageIcon
 } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
@@ -27,8 +28,15 @@ interface Job {
   checklist: string[];
   start_time: string | null;
   end_time: string | null;
-  photo_urls: string[];
-  clients: { name: string } | null;
+  notes: string | null;
+  clients: { name: string; access_codes: string | null } | null;
+}
+
+interface JobPhoto {
+  id: string;
+  photo_url: string;
+  photo_type: 'before' | 'after';
+  created_at: string;
 }
 
 interface JobDetailViewProps {
@@ -39,17 +47,69 @@ interface JobDetailViewProps {
 
 export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewProps) {
   const [currentJob, setCurrentJob] = useState(job);
+  const [photos, setPhotos] = useState<JobPhoto[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [photoType, setPhotoType] = useState<'before' | 'after'>('before');
+
+  useEffect(() => {
+    fetchPhotos();
+  }, [job.id]);
+
+  const fetchPhotos = async () => {
+    const { data } = await supabase
+      .from("job_photos")
+      .select("*")
+      .eq("job_id", job.id)
+      .order("created_at", { ascending: true });
+    
+    setPhotos((data as JobPhoto[]) || []);
+  };
+
+  const captureGPSLocation = (): Promise<{ lat: number; lng: number } | null> => {
+    return new Promise((resolve) => {
+      if (!navigator.geolocation) {
+        toast.warning("GPS not available on this device");
+        resolve(null);
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          resolve({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          });
+        },
+        (error) => {
+          console.error("GPS Error:", error);
+          toast.warning("Could not capture GPS location. Proceeding without it.");
+          resolve(null);
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      );
+    });
+  };
 
   const handleStartJob = async () => {
     setIsUpdating(true);
+    
+    // Capture GPS location
+    const location = await captureGPSLocation();
+    
+    const updateData: Record<string, unknown> = {
+      status: "in_progress",
+      start_time: new Date().toISOString()
+    };
+    
+    if (location) {
+      updateData.location_lat = location.lat;
+      updateData.location_lng = location.lng;
+    }
+
     const { error } = await supabase
       .from("jobs")
-      .update({ 
-        status: "in_progress", 
-        start_time: new Date().toISOString() 
-      })
+      .update(updateData)
       .eq("id", currentJob.id);
 
     if (error) {
@@ -60,13 +120,19 @@ export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewPr
         status: "in_progress", 
         start_time: new Date().toISOString() 
       });
-      toast.success("Job started!");
+      toast.success(location ? "Job started with GPS location!" : "Job started!");
       onUpdate();
     }
     setIsUpdating(false);
   };
 
   const handleCompleteJob = async () => {
+    // Check if at least one photo is uploaded
+    if (photos.length === 0) {
+      toast.error("Please upload at least one photo before completing the job");
+      return;
+    }
+    
     setIsUpdating(true);
     const { error } = await supabase
       .from("jobs")
@@ -96,29 +162,50 @@ export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewPr
 
     setIsUploading(true);
     
-    // For demo purposes, we'll simulate upload
-    // In production, this would upload to Supabase Storage
-    const newPhotoUrls = [...(currentJob.photo_urls || [])];
-    
     for (const file of Array.from(files)) {
-      // Create a local URL for preview
-      const localUrl = URL.createObjectURL(file);
-      newPhotoUrls.push(localUrl);
-    }
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${currentJob.id}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      
+      // Upload to Supabase Storage
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('job-evidence')
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
 
-    const { error } = await supabase
-      .from("jobs")
-      .update({ photo_urls: newPhotoUrls })
-      .eq("id", currentJob.id);
+      if (uploadError) {
+        console.error('Upload error:', uploadError);
+        toast.error(`Failed to upload ${file.name}`);
+        continue;
+      }
 
-    if (error) {
-      toast.error("Failed to upload photos");
-    } else {
-      setCurrentJob({ ...currentJob, photo_urls: newPhotoUrls });
-      toast.success(`${files.length} photo(s) uploaded!`);
+      // Get public URL
+      const { data: urlData } = supabase.storage
+        .from('job-evidence')
+        .getPublicUrl(uploadData.path);
+
+      // Save to job_photos table
+      const { error: dbError } = await supabase
+        .from('job_photos')
+        .insert({
+          job_id: currentJob.id,
+          photo_url: urlData.publicUrl,
+          photo_type: photoType
+        });
+
+      if (dbError) {
+        console.error('DB error:', dbError);
+        toast.error(`Failed to save photo record`);
+      }
     }
     
+    await fetchPhotos();
+    toast.success(`${files.length} photo(s) uploaded!`);
     setIsUploading(false);
+    
+    // Reset file input
+    e.target.value = '';
   };
 
   const openInMaps = () => {
@@ -127,71 +214,115 @@ export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewPr
   };
 
   const checklist = Array.isArray(currentJob.checklist) ? currentJob.checklist : [];
+  const beforePhotos = photos.filter(p => p.photo_type === 'before');
+  const afterPhotos = photos.filter(p => p.photo_type === 'after');
+
+  const calculateDuration = () => {
+    if (!currentJob.start_time) return null;
+    const endTime = currentJob.end_time ? new Date(currentJob.end_time) : new Date();
+    const startTime = new Date(currentJob.start_time);
+    const diffMs = endTime.getTime() - startTime.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const hours = Math.floor(diffMins / 60);
+    const mins = diffMins % 60;
+    return hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
+  };
 
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-card border-b border-border sticky top-0 z-10 px-4 py-4">
+      <header className="bg-card border-b border-border sticky top-0 z-10 px-4 py-4 safe-area-inset-top">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={onBack}>
-            <ArrowLeft className="h-5 w-5" />
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={onBack}
+            className="h-12 w-12"
+          >
+            <ArrowLeft className="h-6 w-6" />
           </Button>
-          <div>
-            <h1 className="text-lg font-bold text-foreground">
+          <div className="flex-1">
+            <h1 className="text-xl font-bold text-foreground truncate">
               {currentJob.clients?.name || "Job Details"}
             </h1>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               {format(new Date(currentJob.scheduled_date), "MMMM d, yyyy")}
             </p>
           </div>
         </div>
       </header>
 
-      <main className="px-4 py-6 space-y-6">
-        {/* Location Card */}
+      <main className="px-4 py-6 space-y-5 pb-32">
+        {/* Location Card with Maps Button */}
         <Card className="border-border shadow-sm">
-          <CardContent className="p-4">
-            <div className="flex items-start justify-between">
+          <CardContent className="p-5">
+            <div className="flex items-start justify-between gap-3">
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-2">
                   <MapPin className="h-5 w-5 text-primary" />
-                  <span className="font-medium text-foreground">Location</span>
+                  <span className="font-semibold text-foreground">Location</span>
                 </div>
-                <p className="text-muted-foreground ml-7">{currentJob.location}</p>
+                <p className="text-muted-foreground ml-7 text-base">{currentJob.location}</p>
               </div>
-              <Button variant="outline" size="sm" onClick={openInMaps}>
-                <ExternalLink className="h-4 w-4 mr-1" />
+              <Button 
+                onClick={openInMaps}
+                className="h-14 px-5 bg-primary"
+              >
+                <Navigation className="h-5 w-5 mr-2" />
                 Maps
               </Button>
             </div>
           </CardContent>
         </Card>
 
-        {/* Time Card */}
+        {/* Access Codes (if available) */}
+        {currentJob.clients?.access_codes && (
+          <Card className="border-warning/50 bg-warning/5 shadow-sm">
+            <CardContent className="p-5">
+              <div className="flex items-center gap-2 mb-2">
+                <AlertTriangle className="h-5 w-5 text-warning" />
+                <span className="font-semibold text-foreground">Access Codes</span>
+              </div>
+              <p className="text-foreground ml-7 text-base font-mono">
+                {currentJob.clients.access_codes}
+              </p>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Time & Duration Card */}
         <Card className="border-border shadow-sm">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2 mb-3">
+          <CardContent className="p-5">
+            <div className="flex items-center gap-2 mb-4">
               <Clock className="h-5 w-5 text-primary" />
-              <span className="font-medium text-foreground">Schedule</span>
+              <span className="font-semibold text-foreground">Schedule</span>
             </div>
-            <div className="ml-7 space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Scheduled Time:</span>
+            <div className="ml-7 space-y-3">
+              <div className="flex justify-between text-base">
+                <span className="text-muted-foreground">Scheduled:</span>
                 <span className="font-medium text-foreground">{currentJob.scheduled_time}</span>
               </div>
               {currentJob.start_time && (
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Started At:</span>
+                <div className="flex justify-between text-base">
+                  <span className="text-muted-foreground">Started:</span>
                   <span className="font-medium text-success">
                     {format(new Date(currentJob.start_time), "h:mm a")}
                   </span>
                 </div>
               )}
               {currentJob.end_time && (
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Completed At:</span>
+                <div className="flex justify-between text-base">
+                  <span className="text-muted-foreground">Completed:</span>
                   <span className="font-medium text-success">
                     {format(new Date(currentJob.end_time), "h:mm a")}
+                  </span>
+                </div>
+              )}
+              {currentJob.start_time && (
+                <div className="flex justify-between text-base pt-2 border-t border-border">
+                  <span className="text-muted-foreground">Duration:</span>
+                  <span className="font-bold text-primary">
+                    {calculateDuration()}
                   </span>
                 </div>
               )}
@@ -202,8 +333,8 @@ export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewPr
         {/* Checklist Card */}
         {checklist.length > 0 && (
           <Card className="border-border shadow-sm">
-            <CardHeader className="pb-2">
-              <CardTitle className="flex items-center gap-2 text-base">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-lg">
                 <CheckSquare className="h-5 w-5 text-primary" />
                 Task Checklist
               </CardTitle>
@@ -211,9 +342,12 @@ export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewPr
             <CardContent className="pt-0">
               <div className="space-y-3">
                 {checklist.map((task, index) => (
-                  <div key={index} className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-                    <CheckCircle2 className="h-5 w-5 text-muted-foreground" />
-                    <span className="text-foreground">{task}</span>
+                  <div 
+                    key={index} 
+                    className="flex items-center gap-4 p-4 rounded-xl bg-muted/50"
+                  >
+                    <CheckCircle2 className="h-6 w-6 text-muted-foreground flex-shrink-0" />
+                    <span className="text-foreground text-base">{task}</span>
                   </div>
                 ))}
               </div>
@@ -221,100 +355,177 @@ export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewPr
           </Card>
         )}
 
-        {/* Photos Section */}
-        <Card className="border-border shadow-sm">
-          <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Camera className="h-5 w-5 text-primary" />
-              Before & After Photos
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="pt-0">
-            {/* Photo Grid */}
-            {currentJob.photo_urls && currentJob.photo_urls.length > 0 && (
-              <div className="grid grid-cols-3 gap-2 mb-4">
-                {currentJob.photo_urls.map((url, index) => (
-                  <div key={index} className="aspect-square rounded-lg bg-muted overflow-hidden">
-                    <img 
-                      src={url} 
-                      alt={`Photo ${index + 1}`}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                ))}
+        {/* Admin Notes */}
+        {currentJob.notes && (
+          <Card className="border-border shadow-sm">
+            <CardContent className="p-5">
+              <div className="flex items-center gap-2 mb-2">
+                <CheckSquare className="h-5 w-5 text-primary" />
+                <span className="font-semibold text-foreground">Notes from Admin</span>
               </div>
-            )}
-            
-            {/* Upload Button */}
-            <label className="block">
-              <input
-                type="file"
-                accept="image/*"
-                multiple
-                className="hidden"
-                onChange={handlePhotoUpload}
-                disabled={isUploading || currentJob.status === "completed"}
-              />
-              <Button 
-                variant="outline" 
-                className="w-full" 
-                disabled={isUploading || currentJob.status === "completed"}
-                asChild
-              >
-                <span>
-                  {isUploading ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Uploading...
-                    </>
-                  ) : (
-                    <>
-                      <Camera className="h-4 w-4 mr-2" />
-                      Upload Photos
-                    </>
-                  )}
-                </span>
-              </Button>
-            </label>
-          </CardContent>
-        </Card>
+              <p className="text-muted-foreground ml-7 text-base">
+                {currentJob.notes}
+              </p>
+            </CardContent>
+          </Card>
+        )}
 
-        {/* Action Buttons */}
-        <div className="pt-4 space-y-3">
+        {/* Photos Section - Only visible after starting */}
+        {currentJob.status !== "pending" && (
+          <Card className="border-border shadow-sm">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Camera className="h-5 w-5 text-primary" />
+                Evidence Photos
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0 space-y-5">
+              {/* Photo Type Toggle */}
+              {currentJob.status === "in_progress" && (
+                <div className="flex gap-2">
+                  <Button
+                    variant={photoType === 'before' ? 'default' : 'outline'}
+                    className="flex-1 h-12"
+                    onClick={() => setPhotoType('before')}
+                  >
+                    Before
+                  </Button>
+                  <Button
+                    variant={photoType === 'after' ? 'default' : 'outline'}
+                    className="flex-1 h-12"
+                    onClick={() => setPhotoType('after')}
+                  >
+                    After
+                  </Button>
+                </div>
+              )}
+
+              {/* Before Photos */}
+              {beforePhotos.length > 0 && (
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground mb-2">Before ({beforePhotos.length})</p>
+                  <div className="grid grid-cols-3 gap-2">
+                    {beforePhotos.map((photo) => (
+                      <div key={photo.id} className="aspect-square rounded-lg bg-muted overflow-hidden">
+                        <img 
+                          src={photo.photo_url} 
+                          alt="Before"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* After Photos */}
+              {afterPhotos.length > 0 && (
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground mb-2">After ({afterPhotos.length})</p>
+                  <div className="grid grid-cols-3 gap-2">
+                    {afterPhotos.map((photo) => (
+                      <div key={photo.id} className="aspect-square rounded-lg bg-muted overflow-hidden">
+                        <img 
+                          src={photo.photo_url} 
+                          alt="After"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Empty State */}
+              {photos.length === 0 && (
+                <div className="flex flex-col items-center justify-center py-8 text-center">
+                  <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center mb-3">
+                    <ImageIcon className="h-8 w-8 text-muted-foreground" />
+                  </div>
+                  <p className="text-muted-foreground">No photos uploaded yet</p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Upload at least one photo to complete the job
+                  </p>
+                </div>
+              )}
+              
+              {/* Upload Button */}
+              {currentJob.status === "in_progress" && (
+                <label className="block">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    capture="environment"
+                    className="hidden"
+                    onChange={handlePhotoUpload}
+                    disabled={isUploading}
+                  />
+                  <Button 
+                    variant="outline" 
+                    className="w-full h-16 text-lg" 
+                    disabled={isUploading}
+                    asChild
+                  >
+                    <span>
+                      {isUploading ? (
+                        <>
+                          <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                          Uploading...
+                        </>
+                      ) : (
+                        <>
+                          <Camera className="h-5 w-5 mr-2" />
+                          📷 Take {photoType.charAt(0).toUpperCase() + photoType.slice(1)} Photo
+                        </>
+                      )}
+                    </span>
+                  </Button>
+                </label>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Action Buttons - Fixed at bottom */}
+        <div className="fixed bottom-0 left-0 right-0 p-4 bg-card border-t border-border safe-area-inset-bottom">
           {currentJob.status === "pending" && (
             <Button 
-              className="w-full h-14 text-lg"
+              className="w-full h-16 text-xl font-bold"
               onClick={handleStartJob}
               disabled={isUpdating}
             >
               {isUpdating ? (
-                <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                <Loader2 className="h-6 w-6 mr-2 animate-spin" />
               ) : (
-                <Play className="h-5 w-5 mr-2" />
+                <Play className="h-6 w-6 mr-2" />
               )}
-              Start Job
+              ▶ START JOB
             </Button>
           )}
 
           {currentJob.status === "in_progress" && (
             <Button 
-              className="w-full h-14 text-lg bg-success hover:bg-success/90"
+              className="w-full h-16 text-xl font-bold bg-success hover:bg-success/90"
               onClick={handleCompleteJob}
-              disabled={isUpdating}
+              disabled={isUpdating || photos.length === 0}
             >
               {isUpdating ? (
-                <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                <Loader2 className="h-6 w-6 mr-2 animate-spin" />
               ) : (
-                <CheckCircle2 className="h-5 w-5 mr-2" />
+                <CheckCircle2 className="h-6 w-6 mr-2" />
               )}
-              Complete Job
+              ■ FINISH JOB
+              {photos.length === 0 && (
+                <span className="ml-2 text-sm font-normal">(Upload photo first)</span>
+              )}
             </Button>
           )}
 
           {currentJob.status === "completed" && (
-            <div className="flex items-center justify-center gap-2 py-4 text-success">
-              <CheckCircle2 className="h-6 w-6" />
-              <span className="text-lg font-semibold">Job Completed</span>
+            <div className="flex items-center justify-center gap-3 py-4 text-success">
+              <CheckCircle2 className="h-8 w-8" />
+              <span className="text-xl font-bold">Job Completed!</span>
             </div>
           )}
         </div>

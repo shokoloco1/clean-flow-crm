@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       clients: {
         Row: {
+          access_codes: string | null
           address: string | null
           created_at: string
           email: string | null
@@ -26,6 +27,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          access_codes?: string | null
           address?: string | null
           created_at?: string
           email?: string | null
@@ -36,6 +38,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          access_codes?: string | null
           address?: string | null
           created_at?: string
           email?: string | null
@@ -47,6 +50,38 @@ export type Database = {
         }
         Relationships: []
       }
+      job_photos: {
+        Row: {
+          created_at: string
+          id: string
+          job_id: string
+          photo_type: string
+          photo_url: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          job_id: string
+          photo_type?: string
+          photo_url: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          job_id?: string
+          photo_type?: string
+          photo_url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_photos_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       jobs: {
         Row: {
           assigned_staff_id: string | null
@@ -56,6 +91,8 @@ export type Database = {
           end_time: string | null
           id: string
           location: string
+          location_lat: number | null
+          location_lng: number | null
           notes: string | null
           photo_urls: Json | null
           scheduled_date: string
@@ -72,6 +109,8 @@ export type Database = {
           end_time?: string | null
           id?: string
           location: string
+          location_lat?: number | null
+          location_lng?: number | null
           notes?: string | null
           photo_urls?: Json | null
           scheduled_date: string
@@ -88,6 +127,8 @@ export type Database = {
           end_time?: string | null
           id?: string
           location?: string
+          location_lat?: number | null
+          location_lng?: number | null
           notes?: string | null
           photo_urls?: Json | null
           scheduled_date?: string
