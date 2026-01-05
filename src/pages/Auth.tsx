@@ -23,12 +23,16 @@ export default function Auth() {
   const [signupRole, setSignupRole] = useState<"admin" | "staff">("staff");
 
   useEffect(() => {
-    if (!loading && user && role) {
-      if (role === "admin") {
-        navigate("/admin");
-      } else {
-        navigate("/staff");
-      }
+    if (!loading && user) {
+      // Small delay to ensure role is fetched
+      const timer = setTimeout(() => {
+        if (role === "admin") {
+          navigate("/admin", { replace: true });
+        } else if (role === "staff") {
+          navigate("/staff", { replace: true });
+        }
+      }, 100);
+      return () => clearTimeout(timer);
     }
   }, [user, role, loading, navigate]);
 
