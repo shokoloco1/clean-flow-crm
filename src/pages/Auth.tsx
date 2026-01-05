@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,8 +13,7 @@ import { Sparkles, Shield, Users } from "lucide-react";
 
 export default function Auth() {
   const navigate = useNavigate();
-  const { user, role, loading, signIn, signUp } = useAuth();
-  
+  const { user, session, role, loading, signIn, signUp, signOut, refreshRole } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
@@ -21,20 +21,39 @@ export default function Auth() {
   const [signupPassword, setSignupPassword] = useState("");
   const [signupName, setSignupName] = useState("");
   const [signupRole, setSignupRole] = useState<"admin" | "staff">("staff");
+  const [isBootstrapping, setIsBootstrapping] = useState(false);
+  const [bootstrapTried, setBootstrapTried] = useState(false);
 
   useEffect(() => {
-    if (!loading && user) {
-      // Small delay to ensure role is fetched
-      const timer = setTimeout(() => {
-        if (role === "admin") {
-          navigate("/admin", { replace: true });
-        } else if (role === "staff") {
-          navigate("/staff", { replace: true });
-        }
-      }, 100);
-      return () => clearTimeout(timer);
+    if (!loading && user && role) {
+      navigate(role === "admin" ? "/admin" : "/staff", { replace: true });
+      return;
     }
-  }, [user, role, loading, navigate]);
+
+    // If user is logged in but has no role, try one-time bootstrap (first user becomes admin)
+    if (!loading && user && !role && session && !bootstrapTried) {
+      setBootstrapTried(true);
+      supabase.functions
+        .invoke("bootstrap-role")
+        .then(async ({ error }) => {
+          if (error) return;
+          await refreshRole();
+        })
+        .catch(() => undefined);
+    }
+  }, [user, role, loading, navigate, session, bootstrapTried, refreshRole]);
+
+  const handleBootstrapAdmin = async () => {
+    setIsBootstrapping(true);
+    const { error } = await supabase.functions.invoke("bootstrap-role");
+    if (error) {
+      toast.error("Tu cuenta no tiene rol asignado. Pídele al admin que te asigne uno.");
+    } else {
+      await refreshRole();
+      toast.success("Rol admin asignado. Redirigiendo...");
+    }
+    setIsBootstrapping(false);
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -84,6 +103,45 @@ export default function Auth() {
     );
   }
 
+  // Logged in but no role assigned
+  if (user && !role) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4">
+        <div className="w-full max-w-md space-y-6">
+          <div className="text-center space-y-2">
+            <div className="flex items-center justify-center gap-2">
+              <div className="h-12 w-12 rounded-xl bg-primary flex items-center justify-center">
+                <Sparkles className="h-7 w-7 text-primary-foreground" />
+              </div>
+            </div>
+            <h1 className="text-3xl font-bold text-foreground">CleanFlow</h1>
+            <p className="text-muted-foreground">Tu cuenta no tiene un rol asignado</p>
+          </div>
+
+          <Card className="border-border shadow-lg">
+            <CardHeader>
+              <CardTitle>Acceso pendiente</CardTitle>
+              <CardDescription>
+                Para entrar, un administrador debe asignarte un rol (admin o staff).
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <Button
+                className="w-full"
+                onClick={handleBootstrapAdmin}
+                disabled={isBootstrapping}
+              >
+                {isBootstrapping ? "Configurando..." : "Configurar como Admin (solo 1ª vez)"}
+              </Button>
+              <Button variant="outline" className="w-full" onClick={signOut}>
+                Cerrar sesión
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4">
       <div className="w-full max-w-md space-y-8">
