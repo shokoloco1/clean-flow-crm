@@ -27,13 +27,11 @@ import {
   ClipboardList, 
   LogOut,
   Plus,
-  Building2,
   Sparkles,
   Activity,
   TrendingUp,
   Clock,
   Eye,
-  X,
   MapPin,
   Image as ImageIcon,
   Download,
@@ -42,6 +40,7 @@ import {
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import AlertsPanel from "@/components/AlertsPanel";
 
 interface Job {
   id: string;
@@ -608,8 +607,11 @@ export default function AdminDashboard() {
             </Card>
           </div>
 
-          {/* Sidebar - Live Feed */}
+          {/* Sidebar - Live Feed & Alerts */}
           <div className="space-y-6">
+            {/* Alerts Panel */}
+            <AlertsPanel />
+            
             <Card className="border-border shadow-sm">
               <CardHeader>
                 <div className="flex items-center gap-2">
