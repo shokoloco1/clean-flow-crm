@@ -1,1 +1,7 @@
 project_id = "edeprzdcvbejtnhoqawv"
+
+[functions.check-late-arrivals]
+verify_jwt = false
+
+[functions.bootstrap-role]
+verify_jwt = false
