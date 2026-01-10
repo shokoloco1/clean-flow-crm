@@ -21,6 +21,7 @@ import { format } from "date-fns";
 import { toast } from "sonner";
 import { useGeofence } from "@/hooks/useGeofence";
 import GeofenceStatus from "@/components/GeofenceStatus";
+import AdvancedChecklist from "@/components/AdvancedChecklist";
 
 interface Job {
   id: string;
@@ -392,30 +393,12 @@ export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewPr
           </CardContent>
         </Card>
 
-        {/* Checklist Card */}
-        {checklist.length > 0 && (
-          <Card className="border-border shadow-sm">
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <CheckSquare className="h-5 w-5 text-primary" />
-                Task Checklist
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <div className="space-y-3">
-                {checklist.map((task, index) => (
-                  <div 
-                    key={index} 
-                    className="flex items-center gap-4 p-4 rounded-xl bg-muted/50"
-                  >
-                    <CheckCircle2 className="h-6 w-6 text-muted-foreground flex-shrink-0" />
-                    <span className="text-foreground text-base">{task}</span>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
+        {/* Advanced Checklist */}
+        <AdvancedChecklist 
+          jobId={currentJob.id}
+          jobStatus={currentJob.status}
+          legacyChecklist={checklist}
+        />
 
         {/* Admin Notes */}
         {currentJob.notes && (
