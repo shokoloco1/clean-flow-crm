@@ -11,6 +11,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import StaffDashboard from "./pages/StaffDashboard";
 import PropertiesPage from "./pages/PropertiesPage";
 import ChecklistTemplatesPage from "./pages/ChecklistTemplatesPage";
+import StaffManagementPage from "./pages/StaffManagementPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -46,6 +47,14 @@ const App = () => (
               element={
                 <ProtectedRoute allowedRoles={["admin"]}>
                   <ChecklistTemplatesPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/admin/staff" 
+              element={
+                <ProtectedRoute allowedRoles={["admin"]}>
+                  <StaffManagementPage />
                 </ProtectedRoute>
               } 
             />
