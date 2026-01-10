@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import JobDetailView from "@/components/JobDetailView";
+import { NotificationCenter } from "@/components/NotificationCenter";
 
 interface Job {
   id: string;
@@ -145,14 +146,17 @@ export default function StaffDashboard() {
               <p className="text-sm text-muted-foreground">My Jobs Today</p>
             </div>
           </div>
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={signOut}
-            className="h-12 w-12"
-          >
-            <LogOut className="h-5 w-5" />
-          </Button>
+          <div className="flex items-center gap-2">
+            <NotificationCenter />
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={signOut}
+              className="h-12 w-12"
+            >
+              <LogOut className="h-5 w-5" />
+            </Button>
+          </div>
         </div>
       </header>
 
