@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -5,8 +6,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { MapPin, Clock, Image as ImageIcon, Download } from "lucide-react";
+import { MapPin, Clock, Image as ImageIcon, Download, FileText, Loader2 } from "lucide-react";
 import { format } from "date-fns";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { generateSingleJobPDF } from "@/lib/pdfUtils";
 import type { Job } from "./JobsList";
 
 export interface JobPhoto {
@@ -41,10 +45,38 @@ function getStatusColor(status: string) {
 }
 
 export function JobDetailDialog({ job, photos, onClose }: JobDetailDialogProps) {
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+
   if (!job) return null;
 
   const beforePhotos = photos.filter(p => p.photo_type === 'before');
   const afterPhotos = photos.filter(p => p.photo_type === 'after');
+
+  const handleDownloadPDF = async () => {
+    setIsGeneratingPDF(true);
+    try {
+      // Fetch checklist items for this job
+      const { data: checklistItems } = await supabase
+        .from('checklist_items')
+        .select('*')
+        .eq('job_id', job.id)
+        .order('sort_order');
+
+      const doc = generateSingleJobPDF(
+        job as Parameters<typeof generateSingleJobPDF>[0],
+        photos,
+        checklistItems || []
+      );
+      
+      doc.save(`trabajo_${job.clients?.name || 'job'}_${job.scheduled_date}.pdf`);
+      toast.success('PDF generado exitosamente');
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      toast.error('Error al generar el PDF');
+    } finally {
+      setIsGeneratingPDF(false);
+    }
+  };
 
   return (
     <Dialog open={!!job} onOpenChange={(open) => !open && onClose()}>
@@ -172,12 +204,26 @@ export function JobDetailDialog({ job, photos, onClose }: JobDetailDialogProps) 
           )}
 
           {/* Actions */}
-          {job.status === 'completed' && (
-            <Button variant="outline" className="w-full">
-              <Download className="h-4 w-4 mr-2" />
-              Download Report
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              className="flex-1"
+              onClick={handleDownloadPDF}
+              disabled={isGeneratingPDF}
+            >
+              {isGeneratingPDF ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Generando...
+                </>
+              ) : (
+                <>
+                  <FileText className="h-4 w-4 mr-2" />
+                  Descargar PDF
+                </>
+              )}
             </Button>
-          )}
+          </div>
         </div>
       </DialogContent>
     </Dialog>
