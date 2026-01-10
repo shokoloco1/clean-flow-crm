@@ -83,6 +83,47 @@ export type Database = {
         }
         Relationships: []
       }
+      job_alerts: {
+        Row: {
+          alert_type: string
+          created_at: string
+          id: string
+          is_resolved: boolean
+          job_id: string
+          message: string
+          resolved_at: string | null
+          resolved_by: string | null
+        }
+        Insert: {
+          alert_type: string
+          created_at?: string
+          id?: string
+          is_resolved?: boolean
+          job_id: string
+          message: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+        }
+        Update: {
+          alert_type?: string
+          created_at?: string
+          id?: string
+          is_resolved?: boolean
+          job_id?: string
+          message?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_alerts_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       job_photos: {
         Row: {
           created_at: string
@@ -118,10 +159,17 @@ export type Database = {
       jobs: {
         Row: {
           assigned_staff_id: string | null
+          checkin_distance_meters: number | null
+          checkin_lat: number | null
+          checkin_lng: number | null
           checklist: Json | null
+          checkout_distance_meters: number | null
+          checkout_lat: number | null
+          checkout_lng: number | null
           client_id: string | null
           created_at: string
           end_time: string | null
+          geofence_validated: boolean | null
           id: string
           location: string
           location_lat: number | null
@@ -138,10 +186,17 @@ export type Database = {
         }
         Insert: {
           assigned_staff_id?: string | null
+          checkin_distance_meters?: number | null
+          checkin_lat?: number | null
+          checkin_lng?: number | null
           checklist?: Json | null
+          checkout_distance_meters?: number | null
+          checkout_lat?: number | null
+          checkout_lng?: number | null
           client_id?: string | null
           created_at?: string
           end_time?: string | null
+          geofence_validated?: boolean | null
           id?: string
           location: string
           location_lat?: number | null
@@ -158,10 +213,17 @@ export type Database = {
         }
         Update: {
           assigned_staff_id?: string | null
+          checkin_distance_meters?: number | null
+          checkin_lat?: number | null
+          checkin_lng?: number | null
           checklist?: Json | null
+          checkout_distance_meters?: number | null
+          checkout_lat?: number | null
+          checkout_lng?: number | null
           client_id?: string | null
           created_at?: string
           end_time?: string | null
+          geofence_validated?: boolean | null
           id?: string
           location?: string
           location_lat?: number | null
