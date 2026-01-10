@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
-import { Plus, Home, ClipboardList, Users, Calendar, UserCircle } from "lucide-react";
+import { Plus, Home, ClipboardList, Users, Calendar, UserCircle, Repeat } from "lucide-react";
 
 interface QuickActionsProps {
   onNewJobClick: () => void;
@@ -57,6 +57,14 @@ export function QuickActions({ onNewJobClick }: QuickActionsProps) {
       onClick: () => navigate("/admin/calendar"),
       iconBg: "bg-primary/10",
       iconColor: "text-primary"
+    },
+    {
+      icon: Repeat,
+      title: "Recurring",
+      subtitle: "Auto-schedule",
+      onClick: () => navigate("/admin/recurring"),
+      iconBg: "bg-secondary/10",
+      iconColor: "text-secondary-foreground"
     }
   ];
 
