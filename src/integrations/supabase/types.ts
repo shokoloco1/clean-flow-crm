@@ -129,6 +129,7 @@ export type Database = {
           notes: string | null
           photo_urls: Json | null
           property_id: string | null
+          quality_score: number | null
           scheduled_date: string
           scheduled_time: string
           start_time: string | null
@@ -148,6 +149,7 @@ export type Database = {
           notes?: string | null
           photo_urls?: Json | null
           property_id?: string | null
+          quality_score?: number | null
           scheduled_date: string
           scheduled_time: string
           start_time?: string | null
@@ -167,6 +169,7 @@ export type Database = {
           notes?: string | null
           photo_urls?: Json | null
           property_id?: string | null
+          quality_score?: number | null
           scheduled_date?: string
           scheduled_time?: string
           start_time?: string | null
@@ -192,29 +195,50 @@ export type Database = {
       }
       profiles: {
         Row: {
+          certifications: Json | null
           created_at: string
           email: string
+          emergency_contact_name: string | null
+          emergency_contact_phone: string | null
           full_name: string
+          hire_date: string | null
+          hourly_rate: number | null
           id: string
+          is_active: boolean | null
           phone: string | null
+          skills: Json | null
           updated_at: string
           user_id: string
         }
         Insert: {
+          certifications?: Json | null
           created_at?: string
           email: string
+          emergency_contact_name?: string | null
+          emergency_contact_phone?: string | null
           full_name: string
+          hire_date?: string | null
+          hourly_rate?: number | null
           id?: string
+          is_active?: boolean | null
           phone?: string | null
+          skills?: Json | null
           updated_at?: string
           user_id: string
         }
         Update: {
+          certifications?: Json | null
           created_at?: string
           email?: string
+          emergency_contact_name?: string | null
+          emergency_contact_phone?: string | null
           full_name?: string
+          hire_date?: string | null
+          hourly_rate?: number | null
           id?: string
+          is_active?: boolean | null
           phone?: string | null
+          skills?: Json | null
           updated_at?: string
           user_id?: string
         }
@@ -323,6 +347,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      staff_availability: {
+        Row: {
+          created_at: string
+          day_of_week: number
+          end_time: string
+          id: string
+          is_available: boolean
+          start_time: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          day_of_week: number
+          end_time?: string
+          id?: string
+          is_available?: boolean
+          start_time?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          day_of_week?: number
+          end_time?: string
+          id?: string
+          is_available?: boolean
+          start_time?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       user_roles: {
         Row: {
