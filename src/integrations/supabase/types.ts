@@ -14,6 +14,56 @@ export type Database = {
   }
   public: {
     Tables: {
+      checklist_items: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          id: string
+          issue_note: string | null
+          issue_photo_url: string | null
+          job_id: string
+          room_name: string
+          sort_order: number
+          status: string
+          task_name: string
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          issue_note?: string | null
+          issue_photo_url?: string | null
+          job_id: string
+          room_name: string
+          sort_order?: number
+          status?: string
+          task_name: string
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          issue_note?: string | null
+          issue_photo_url?: string | null
+          job_id?: string
+          room_name?: string
+          sort_order?: number
+          status?: string
+          task_name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "checklist_items_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       checklist_templates: {
         Row: {
           created_at: string
