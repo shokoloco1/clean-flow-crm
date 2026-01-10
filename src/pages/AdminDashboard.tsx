@@ -7,6 +7,7 @@ import { format } from "date-fns";
 import { toast } from "sonner";
 import AlertsPanel from "@/components/AlertsPanel";
 import { CSVReports } from "@/components/CSVReports";
+import { PDFReports } from "@/components/PDFReports";
 import { MetricsDashboard } from "@/components/MetricsDashboard";
 import { NotificationCenter } from "@/components/NotificationCenter";
 import {
@@ -279,8 +280,9 @@ export default function AdminDashboard() {
           <MetricsDashboard />
         </div>
 
-        {/* CSV Reports Section */}
-        <div className="mt-8">
+        {/* Reports Section */}
+        <div className="mt-8 grid gap-6 lg:grid-cols-2">
+          <PDFReports />
           <CSVReports />
         </div>
       </main>
