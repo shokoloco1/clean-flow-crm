@@ -42,6 +42,7 @@ import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import AlertsPanel from "@/components/AlertsPanel";
 import { CSVReports } from "@/components/CSVReports";
+import { MetricsDashboard } from "@/components/MetricsDashboard";
 interface Job {
   id: string;
   location: string;
@@ -667,6 +668,11 @@ export default function AdminDashboard() {
               </CardContent>
             </Card>
           </div>
+        </div>
+
+        {/* Metrics Dashboard */}
+        <div className="mt-8">
+          <MetricsDashboard />
         </div>
 
         {/* CSV Reports Section */}
