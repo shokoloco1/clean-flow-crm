@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import AlertsPanel from "@/components/AlertsPanel";
 import { CSVReports } from "@/components/CSVReports";
 import { MetricsDashboard } from "@/components/MetricsDashboard";
+import { NotificationCenter } from "@/components/NotificationCenter";
 import {
   StatsCards,
   QuickActions,
@@ -238,10 +239,13 @@ export default function AdminDashboard() {
               <p className="text-sm text-muted-foreground">Admin Dashboard</p>
             </div>
           </div>
-          <Button variant="outline" size="sm" onClick={signOut}>
-            <LogOut className="h-4 w-4 mr-2" />
-            Sign Out
-          </Button>
+          <div className="flex items-center gap-2">
+            <NotificationCenter />
+            <Button variant="outline" size="sm" onClick={signOut}>
+              <LogOut className="h-4 w-4 mr-2" />
+              Sign Out
+            </Button>
+          </div>
         </div>
       </header>
 
