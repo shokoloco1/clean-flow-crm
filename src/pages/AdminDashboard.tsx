@@ -392,7 +392,7 @@ export default function AdminDashboard() {
           {/* Main Content - Jobs List */}
           <div className="lg:col-span-2 space-y-6">
             {/* Quick Actions */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
                 <DialogTrigger asChild>
                   <Card className="border-border shadow-sm hover:shadow-md transition-shadow cursor-pointer">
@@ -553,6 +553,21 @@ export default function AdminDashboard() {
                   <div>
                     <h3 className="font-semibold text-foreground">Staff</h3>
                     <p className="text-sm text-muted-foreground">Manage team</p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card 
+                className="border-border shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+                onClick={() => navigate("/admin/calendar")}
+              >
+                <CardContent className="flex items-center gap-4 p-6">
+                  <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <Calendar className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-foreground">Calendar</h3>
+                    <p className="text-sm text-muted-foreground">View schedule</p>
                   </div>
                 </CardContent>
               </Card>

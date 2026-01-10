@@ -12,6 +12,7 @@ import StaffDashboard from "./pages/StaffDashboard";
 import PropertiesPage from "./pages/PropertiesPage";
 import ChecklistTemplatesPage from "./pages/ChecklistTemplatesPage";
 import StaffManagementPage from "./pages/StaffManagementPage";
+import CalendarPage from "./pages/CalendarPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -55,6 +56,14 @@ const App = () => (
               element={
                 <ProtectedRoute allowedRoles={["admin"]}>
                   <StaffManagementPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/admin/calendar" 
+              element={
+                <ProtectedRoute allowedRoles={["admin"]}>
+                  <CalendarPage />
                 </ProtectedRoute>
               } 
             />
