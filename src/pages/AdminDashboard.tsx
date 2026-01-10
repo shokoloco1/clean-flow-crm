@@ -41,7 +41,7 @@ import { format } from "date-fns";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import AlertsPanel from "@/components/AlertsPanel";
-
+import { CSVReports } from "@/components/CSVReports";
 interface Job {
   id: string;
   location: string;
@@ -667,6 +667,11 @@ export default function AdminDashboard() {
               </CardContent>
             </Card>
           </div>
+        </div>
+
+        {/* CSV Reports Section */}
+        <div className="mt-8">
+          <CSVReports />
         </div>
       </main>
 
