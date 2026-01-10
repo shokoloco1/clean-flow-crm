@@ -36,10 +36,12 @@ import {
   X,
   MapPin,
   Image as ImageIcon,
-  Download
+  Download,
+  Home
 } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 interface Job {
   id: string;
@@ -90,6 +92,7 @@ interface Stats {
 
 export default function AdminDashboard() {
   const { signOut } = useAuth();
+  const navigate = useNavigate();
   const [jobs, setJobs] = useState<Job[]>([]);
   const [stats, setStats] = useState<Stats>({ todayJobs: 0, activeStaff: 0, completedToday: 0, completionRate: 0 });
   const [activities, setActivities] = useState<ActivityItem[]>([]);
@@ -390,7 +393,7 @@ export default function AdminDashboard() {
           {/* Main Content - Jobs List */}
           <div className="lg:col-span-2 space-y-6">
             {/* Quick Actions */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
                 <DialogTrigger asChild>
                   <Card className="border-border shadow-sm hover:shadow-md transition-shadow cursor-pointer">
@@ -399,8 +402,8 @@ export default function AdminDashboard() {
                         <Plus className="h-6 w-6 text-primary" />
                       </div>
                       <div>
-                        <h3 className="font-semibold text-foreground">Create New Job</h3>
-                        <p className="text-sm text-muted-foreground">Schedule a cleaning job</p>
+                        <h3 className="font-semibold text-foreground">New Job</h3>
+                        <p className="text-sm text-muted-foreground">Schedule cleaning</p>
                       </div>
                     </CardContent>
                   </Card>
@@ -510,14 +513,32 @@ export default function AdminDashboard() {
                 </DialogContent>
               </Dialog>
               
-              <Card className="border-border shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+              <Card 
+                className="border-border shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+                onClick={() => navigate("/admin/properties")}
+              >
                 <CardContent className="flex items-center gap-4 p-6">
                   <div className="h-12 w-12 rounded-xl bg-secondary/10 flex items-center justify-center">
-                    <Building2 className="h-6 w-6 text-secondary-foreground" />
+                    <Home className="h-6 w-6 text-secondary-foreground" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-foreground">Manage Clients</h3>
-                    <p className="text-sm text-muted-foreground">View and edit client database</p>
+                    <h3 className="font-semibold text-foreground">Properties</h3>
+                    <p className="text-sm text-muted-foreground">Manage locations</p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card 
+                className="border-border shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+                onClick={() => navigate("/admin/checklists")}
+              >
+                <CardContent className="flex items-center gap-4 p-6">
+                  <div className="h-12 w-12 rounded-xl bg-secondary/10 flex items-center justify-center">
+                    <ClipboardList className="h-6 w-6 text-secondary-foreground" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-foreground">Checklists</h3>
+                    <p className="text-sm text-muted-foreground">Manage templates</p>
                   </div>
                 </CardContent>
               </Card>

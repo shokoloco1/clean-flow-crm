@@ -9,6 +9,8 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import AdminDashboard from "./pages/AdminDashboard";
 import StaffDashboard from "./pages/StaffDashboard";
+import PropertiesPage from "./pages/PropertiesPage";
+import ChecklistTemplatesPage from "./pages/ChecklistTemplatesPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +30,22 @@ const App = () => (
               element={
                 <ProtectedRoute allowedRoles={["admin"]}>
                   <AdminDashboard />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/admin/properties" 
+              element={
+                <ProtectedRoute allowedRoles={["admin"]}>
+                  <PropertiesPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/admin/checklists" 
+              element={
+                <ProtectedRoute allowedRoles={["admin"]}>
+                  <ChecklistTemplatesPage />
                 </ProtectedRoute>
               } 
             />

@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      checklist_templates: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_default: boolean
+          name: string
+          tasks: Json
+          template_type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_default?: boolean
+          name: string
+          tasks?: Json
+          template_type?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_default?: boolean
+          name?: string
+          tasks?: Json
+          template_type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       clients: {
         Row: {
           access_codes: string | null
@@ -95,6 +128,7 @@ export type Database = {
           location_lng: number | null
           notes: string | null
           photo_urls: Json | null
+          property_id: string | null
           scheduled_date: string
           scheduled_time: string
           start_time: string | null
@@ -113,6 +147,7 @@ export type Database = {
           location_lng?: number | null
           notes?: string | null
           photo_urls?: Json | null
+          property_id?: string | null
           scheduled_date: string
           scheduled_time: string
           start_time?: string | null
@@ -131,6 +166,7 @@ export type Database = {
           location_lng?: number | null
           notes?: string | null
           photo_urls?: Json | null
+          property_id?: string | null
           scheduled_date?: string
           scheduled_time?: string
           start_time?: string | null
@@ -143,6 +179,13 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "jobs_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
             referencedColumns: ["id"]
           },
         ]
@@ -176,6 +219,110 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      properties: {
+        Row: {
+          access_codes: string | null
+          address: string
+          client_id: string | null
+          created_at: string
+          default_checklist_template_id: string | null
+          geofence_radius_meters: number
+          id: string
+          is_active: boolean
+          location_lat: number | null
+          location_lng: number | null
+          name: string
+          property_type: string
+          size_sqm: number | null
+          special_instructions: string | null
+          updated_at: string
+        }
+        Insert: {
+          access_codes?: string | null
+          address: string
+          client_id?: string | null
+          created_at?: string
+          default_checklist_template_id?: string | null
+          geofence_radius_meters?: number
+          id?: string
+          is_active?: boolean
+          location_lat?: number | null
+          location_lng?: number | null
+          name: string
+          property_type?: string
+          size_sqm?: number | null
+          special_instructions?: string | null
+          updated_at?: string
+        }
+        Update: {
+          access_codes?: string | null
+          address?: string
+          client_id?: string | null
+          created_at?: string
+          default_checklist_template_id?: string | null
+          geofence_radius_meters?: number
+          id?: string
+          is_active?: boolean
+          location_lat?: number | null
+          location_lng?: number | null
+          name?: string
+          property_type?: string
+          size_sqm?: number | null
+          special_instructions?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "properties_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "properties_default_checklist_template_id_fkey"
+            columns: ["default_checklist_template_id"]
+            isOneToOne: false
+            referencedRelation: "checklist_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      property_photos: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          photo_url: string
+          property_id: string
+          room_area: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          photo_url: string
+          property_id: string
+          room_area?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          photo_url?: string
+          property_id?: string
+          room_area?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_photos_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
