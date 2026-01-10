@@ -460,6 +460,78 @@ export type Database = {
           },
         ]
       }
+      recurring_schedules: {
+        Row: {
+          assigned_staff_id: string | null
+          checklist: Json | null
+          client_id: string | null
+          created_at: string
+          day_of_month: number | null
+          days_of_week: number[] | null
+          frequency: string
+          id: string
+          is_active: boolean
+          last_generated_date: string | null
+          location: string
+          next_generation_date: string | null
+          notes: string | null
+          property_id: string | null
+          scheduled_time: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_staff_id?: string | null
+          checklist?: Json | null
+          client_id?: string | null
+          created_at?: string
+          day_of_month?: number | null
+          days_of_week?: number[] | null
+          frequency: string
+          id?: string
+          is_active?: boolean
+          last_generated_date?: string | null
+          location: string
+          next_generation_date?: string | null
+          notes?: string | null
+          property_id?: string | null
+          scheduled_time?: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_staff_id?: string | null
+          checklist?: Json | null
+          client_id?: string | null
+          created_at?: string
+          day_of_month?: number | null
+          days_of_week?: number[] | null
+          frequency?: string
+          id?: string
+          is_active?: boolean
+          last_generated_date?: string | null
+          location?: string
+          next_generation_date?: string | null
+          notes?: string | null
+          property_id?: string | null
+          scheduled_time?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recurring_schedules_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recurring_schedules_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       staff_availability: {
         Row: {
           created_at: string
