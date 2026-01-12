@@ -15,6 +15,7 @@ import StaffManagementPage from "./pages/StaffManagementPage";
 import CalendarPage from "./pages/CalendarPage";
 import ClientsPage from "./pages/ClientsPage";
 import RecurringJobsPage from "./pages/RecurringJobsPage";
+import ClientPortal from "./pages/ClientPortal";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -93,6 +94,7 @@ const App = () => (
                 </ProtectedRoute>
               } 
             />
+            <Route path="/portal" element={<ClientPortal />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>

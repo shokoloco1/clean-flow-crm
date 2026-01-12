@@ -19,7 +19,8 @@ import { es } from "date-fns/locale";
 import { 
   LogOut, Sparkles, Plus, Search, Users, Building2, 
   Mail, Phone, MapPin, FileText, Edit, Trash2, Eye,
-  Briefcase, CheckCircle2, Clock, TrendingUp, ArrowLeft
+  Briefcase, CheckCircle2, Clock, TrendingUp, ArrowLeft,
+  Copy, ExternalLink, Link as LinkIcon
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -31,6 +32,7 @@ interface Client {
   address: string | null;
   access_codes: string | null;
   notes: string | null;
+  portal_token: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -54,7 +56,7 @@ interface ClientStats {
   completionRate: number;
 }
 
-const emptyClient: Omit<Client, 'id' | 'created_at' | 'updated_at'> = {
+const emptyClient: Omit<Client, 'id' | 'created_at' | 'updated_at' | 'portal_token'> = {
   name: '',
   email: '',
   phone: '',
@@ -71,7 +73,7 @@ export default function ClientsPage() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [clientToDelete, setClientToDelete] = useState<Client | null>(null);
-  const [formData, setFormData] = useState(emptyClient);
+  const [formData, setFormData] = useState<Omit<Client, 'id' | 'created_at' | 'updated_at' | 'portal_token'>>(emptyClient);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
 
   // Fetch clients
@@ -560,6 +562,52 @@ export default function ClientsPage() {
                   </TabsList>
 
                   <TabsContent value="info" className="space-y-4 mt-4">
+                    {/* Portal Access Card */}
+                    {selectedClient.portal_token && (
+                      <Card className="bg-primary/5 border-primary/20">
+                        <CardContent className="pt-6">
+                          <div className="flex items-center justify-between gap-4">
+                            <div className="flex items-center gap-3">
+                              <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                                <LinkIcon className="h-5 w-5 text-primary" />
+                              </div>
+                              <div>
+                                <p className="font-medium">Portal de Cliente</p>
+                                <p className="text-sm text-muted-foreground">
+                                  Comparte este enlace con el cliente
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  const url = `${window.location.origin}/portal?token=${selectedClient.portal_token}`;
+                                  navigator.clipboard.writeText(url);
+                                  toast.success("Enlace copiado al portapapeles");
+                                }}
+                              >
+                                <Copy className="h-4 w-4 mr-2" />
+                                Copiar
+                              </Button>
+                              <Button
+                                variant="default"
+                                size="sm"
+                                onClick={() => {
+                                  const url = `${window.location.origin}/portal?token=${selectedClient.portal_token}`;
+                                  window.open(url, '_blank');
+                                }}
+                              >
+                                <ExternalLink className="h-4 w-4 mr-2" />
+                                Abrir
+                              </Button>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
+
                     <Card>
                       <CardContent className="pt-6 space-y-4">
                         {selectedClient.email && (

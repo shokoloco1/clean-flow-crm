@@ -107,6 +107,7 @@ export type Database = {
           name: string
           notes: string | null
           phone: string | null
+          portal_token: string | null
           updated_at: string
         }
         Insert: {
@@ -118,6 +119,7 @@ export type Database = {
           name: string
           notes?: string | null
           phone?: string | null
+          portal_token?: string | null
           updated_at?: string
         }
         Update: {
@@ -129,6 +131,7 @@ export type Database = {
           name?: string
           notes?: string | null
           phone?: string | null
+          portal_token?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -638,6 +641,24 @@ export type Database = {
           p_user_id: string
         }
         Returns: string
+      }
+      get_client_portal_data: {
+        Args: { p_token: string }
+        Returns: {
+          client_id: string
+          client_name: string
+          end_time: string
+          id: string
+          location: string
+          notes: string
+          photos: Json
+          property_name: string
+          scheduled_date: string
+          scheduled_time: string
+          staff_name: string
+          start_time: string
+          status: string
+        }[]
       }
       get_user_role: {
         Args: { _user_id: string }
