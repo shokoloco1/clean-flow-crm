@@ -18,6 +18,7 @@ import ClientsPage from "./pages/ClientsPage";
 import RecurringJobsPage from "./pages/RecurringJobsPage";
 import ClientPortal from "./pages/ClientPortal";
 import SettingsPage from "./pages/SettingsPage";
+import InvoicesPage from "./pages/InvoicesPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -94,6 +95,14 @@ const App = () => (
             element={
               <ProtectedRoute allowedRoles={["admin"]}>
                 <SettingsPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/admin/invoices" 
+            element={
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <InvoicesPage />
               </ProtectedRoute>
             } 
           />
