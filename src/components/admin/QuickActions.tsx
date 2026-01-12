@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
-import { Plus, Home, ClipboardList, Users, Calendar, UserCircle, Repeat, Settings } from "lucide-react";
+import { Plus, Home, ClipboardList, Users, Calendar, UserCircle, Repeat, Settings, FileText } from "lucide-react";
 import { t } from "@/lib/i18n";
 
 interface QuickActionsProps {
@@ -68,12 +68,20 @@ export function QuickActions({ onNewJobClick }: QuickActionsProps) {
       iconColor: "text-secondary-foreground"
     },
     {
+      icon: FileText,
+      title: "Facturación",
+      subtitle: "Generar facturas",
+      onClick: () => navigate("/admin/invoices"),
+      iconBg: "bg-primary/10",
+      iconColor: "text-primary"
+    },
+    {
       icon: Settings,
       title: t("settings"),
       subtitle: t("systemConfig"),
       onClick: () => navigate("/admin/settings"),
-      iconBg: "bg-primary/10",
-      iconColor: "text-primary"
+      iconBg: "bg-secondary/10",
+      iconColor: "text-secondary-foreground"
     }
   ];
 
