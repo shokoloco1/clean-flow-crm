@@ -75,7 +75,7 @@ export default function AdminDashboard() {
       .from("jobs")
       .select(`
         id, location, scheduled_date, scheduled_time, status,
-        start_time, end_time, notes,
+        start_time, end_time, notes, created_at,
         clients (name),
         profiles:assigned_staff_id (full_name)
       `)
