@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { Sparkles, Shield, Users, ClipboardCheck, Camera, MapPin } from "lucide-react";
+import { Sparkles, Shield, Users, ClipboardCheck, Camera, MapPin, Building2 } from "lucide-react";
 
 export default function Index() {
   const navigate = useNavigate();
@@ -79,6 +79,18 @@ export default function Index() {
                 onClick={() => navigate("/auth")}
               >
                 Sign In
+              </Button>
+            </div>
+            
+            {/* Client Portal Link */}
+            <div className="mt-8 pt-8 border-t border-border/50">
+              <Button 
+                variant="ghost"
+                className="text-muted-foreground hover:text-foreground"
+                onClick={() => navigate("/portal")}
+              >
+                <Building2 className="h-4 w-4 mr-2" />
+                Acceso Portal de Clientes
               </Button>
             </div>
           </div>
