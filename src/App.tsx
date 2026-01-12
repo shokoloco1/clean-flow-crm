@@ -16,6 +16,7 @@ import CalendarPage from "./pages/CalendarPage";
 import ClientsPage from "./pages/ClientsPage";
 import RecurringJobsPage from "./pages/RecurringJobsPage";
 import ClientPortal from "./pages/ClientPortal";
+import SettingsPage from "./pages/SettingsPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -83,9 +84,17 @@ const App = () => (
               element={
                 <ProtectedRoute allowedRoles={["admin"]}>
                   <RecurringJobsPage />
-                </ProtectedRoute>
-              } 
-            />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/admin/settings" 
+            element={
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <SettingsPage />
+              </ProtectedRoute>
+            } 
+          />
             <Route 
               path="/staff"
               element={
