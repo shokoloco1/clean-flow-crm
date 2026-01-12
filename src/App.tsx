@@ -6,6 +6,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { OnboardingProvider } from "@/components/OnboardingProvider";
+import { PWAInstallBanner } from "@/components/PWAInstallBanner";
+import { OfflineIndicator } from "@/components/OfflineIndicator";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import AdminDashboard from "./pages/AdminDashboard";
@@ -19,6 +21,7 @@ import RecurringJobsPage from "./pages/RecurringJobsPage";
 import ClientPortal from "./pages/ClientPortal";
 import SettingsPage from "./pages/SettingsPage";
 import InvoicesPage from "./pages/InvoicesPage";
+import InstallPage from "./pages/InstallPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +31,7 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
+      <OfflineIndicator />
       <BrowserRouter>
         <AuthProvider>
           <OnboardingProvider>
@@ -115,8 +119,10 @@ const App = () => (
               } 
             />
             <Route path="/portal" element={<ClientPortal />} />
+            <Route path="/install" element={<InstallPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
+          <PWAInstallBanner />
           </OnboardingProvider>
         </AuthProvider>
       </BrowserRouter>
