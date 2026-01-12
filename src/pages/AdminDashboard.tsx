@@ -10,6 +10,7 @@ import { CSVReports } from "@/components/CSVReports";
 import { PDFReports } from "@/components/PDFReports";
 import { MetricsDashboard } from "@/components/MetricsDashboard";
 import { NotificationCenter } from "@/components/NotificationCenter";
+import { GlobalSearch } from "@/components/GlobalSearch";
 import {
   StatsCards,
   QuickActions,
@@ -241,6 +242,7 @@ export default function AdminDashboard() {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <GlobalSearch />
             <NotificationCenter />
             <Button variant="outline" size="sm" onClick={signOut}>
               <LogOut className="h-4 w-4 mr-2" />
