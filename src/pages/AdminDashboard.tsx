@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { LogOut, Sparkles } from "lucide-react";
+import { LogOut, Sparkles, HelpCircle } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import AlertsPanel from "@/components/AlertsPanel";
@@ -11,6 +11,8 @@ import { PDFReports } from "@/components/PDFReports";
 import { MetricsDashboard } from "@/components/MetricsDashboard";
 import { NotificationCenter } from "@/components/NotificationCenter";
 import { GlobalSearch } from "@/components/GlobalSearch";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { useOnboarding } from "@/components/OnboardingProvider";
 import {
   StatsCards,
   QuickActions,
@@ -29,6 +31,7 @@ import {
 
 export default function AdminDashboard() {
   const { signOut } = useAuth();
+  const { showOnboarding } = useOnboarding();
   const [jobs, setJobs] = useState<Job[]>([]);
   const [stats, setStats] = useState<Stats>({ todayJobs: 0, activeStaff: 0, completedToday: 0, completionRate: 0 });
   const [activities, setActivities] = useState<ActivityItem[]>([]);
@@ -244,15 +247,19 @@ export default function AdminDashboard() {
           <div className="flex items-center gap-2">
             <GlobalSearch />
             <NotificationCenter />
+            <Button variant="ghost" size="icon" onClick={showOnboarding} title="Ver tutorial">
+              <HelpCircle className="h-5 w-5" />
+            </Button>
             <Button variant="outline" size="sm" onClick={signOut}>
               <LogOut className="h-4 w-4 mr-2" />
-              Sign Out
+              Salir
             </Button>
           </div>
         </div>
       </header>
 
       <main className="container mx-auto px-4 py-8">
+        <Breadcrumbs />
         {/* Stats Cards */}
         <StatsCards stats={stats} />
 
