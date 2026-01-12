@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -6,11 +6,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { MapPin, Clock, Image as ImageIcon, Download, FileText, Loader2 } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { MapPin, Clock, Image as ImageIcon, FileText, Loader2, History } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { generateSingleJobPDF } from "@/lib/pdfUtils";
+import { JobTimeline } from "@/components/JobTimeline";
 import type { Job } from "./JobsList";
 
 export interface JobPhoto {
@@ -46,6 +48,32 @@ function getStatusColor(status: string) {
 
 export function JobDetailDialog({ job, photos, onClose }: JobDetailDialogProps) {
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const [checklistItems, setChecklistItems] = useState<{ completed_at: string | null; task_name: string }[]>([]);
+  const [alerts, setAlerts] = useState<{ created_at: string; message: string; is_resolved: boolean }[]>([]);
+
+  useEffect(() => {
+    if (job) {
+      fetchTimelineData();
+    }
+  }, [job]);
+
+  const fetchTimelineData = async () => {
+    if (!job) return;
+
+    const [checklistRes, alertsRes] = await Promise.all([
+      supabase
+        .from('checklist_items')
+        .select('completed_at, task_name')
+        .eq('job_id', job.id),
+      supabase
+        .from('job_alerts')
+        .select('created_at, message, is_resolved')
+        .eq('job_id', job.id)
+    ]);
+
+    setChecklistItems(checklistRes.data || []);
+    setAlerts(alertsRes.data || []);
+  };
 
   if (!job) return null;
 
@@ -90,140 +118,167 @@ export function JobDetailDialog({ job, photos, onClose }: JobDetailDialogProps) 
           </DialogTitle>
         </DialogHeader>
         
-        <div className="space-y-6 mt-4">
-          {/* Location */}
-          <div className="flex items-start gap-3">
-            <MapPin className="h-5 w-5 text-primary mt-0.5" />
-            <div>
-              <p className="text-sm text-muted-foreground">Location</p>
-              <p className="font-medium text-foreground">{job.location}</p>
-            </div>
-          </div>
+        <Tabs defaultValue="details" className="mt-4">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="details">Detalles</TabsTrigger>
+            <TabsTrigger value="timeline">
+              <History className="h-4 w-4 mr-2" />
+              Timeline
+            </TabsTrigger>
+          </TabsList>
 
-          {/* Time Info */}
-          <div className="flex items-start gap-3">
-            <Clock className="h-5 w-5 text-primary mt-0.5" />
-            <div className="flex-1">
-              <p className="text-sm text-muted-foreground">Schedule & Duration</p>
-              <div className="grid grid-cols-2 gap-4 mt-2">
-                <div>
-                  <p className="text-xs text-muted-foreground">Scheduled</p>
-                  <p className="font-medium text-foreground">
-                    {format(new Date(job.scheduled_date), "MMM d")} at {job.scheduled_time}
-                  </p>
+          <TabsContent value="details" className="space-y-6 mt-4">
+            {/* Location */}
+            <div className="flex items-start gap-3">
+              <MapPin className="h-5 w-5 text-primary mt-0.5" />
+              <div>
+                <p className="text-sm text-muted-foreground">Ubicación</p>
+                <p className="font-medium text-foreground">{job.location}</p>
+              </div>
+            </div>
+
+            {/* Time Info */}
+            <div className="flex items-start gap-3">
+              <Clock className="h-5 w-5 text-primary mt-0.5" />
+              <div className="flex-1">
+                <p className="text-sm text-muted-foreground">Horario y Duración</p>
+                <div className="grid grid-cols-2 gap-4 mt-2">
+                  <div>
+                    <p className="text-xs text-muted-foreground">Programado</p>
+                    <p className="font-medium text-foreground">
+                      {format(new Date(job.scheduled_date), "MMM d")} a las {job.scheduled_time}
+                    </p>
+                  </div>
+                  {job.start_time && (
+                    <div>
+                      <p className="text-xs text-muted-foreground">Iniciado</p>
+                      <p className="font-medium text-success">
+                        {format(new Date(job.start_time), "h:mm a")}
+                      </p>
+                    </div>
+                  )}
+                  {job.end_time && (
+                    <div>
+                      <p className="text-xs text-muted-foreground">Completado</p>
+                      <p className="font-medium text-success">
+                        {format(new Date(job.end_time), "h:mm a")}
+                      </p>
+                    </div>
+                  )}
+                  {job.start_time && job.end_time && (
+                    <div>
+                      <p className="text-xs text-muted-foreground">Duración</p>
+                      <p className="font-bold text-primary">
+                        {calculateDuration(job.start_time, job.end_time)}
+                      </p>
+                    </div>
+                  )}
                 </div>
-                {job.start_time && (
-                  <div>
-                    <p className="text-xs text-muted-foreground">Started</p>
-                    <p className="font-medium text-success">
-                      {format(new Date(job.start_time), "h:mm a")}
-                    </p>
+              </div>
+            </div>
+
+            {/* Photos Gallery */}
+            {photos.length > 0 && (
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <ImageIcon className="h-5 w-5 text-primary" />
+                  <p className="font-medium text-foreground">Fotos de Evidencia ({photos.length})</p>
+                </div>
+                
+                {beforePhotos.length > 0 && (
+                  <div className="mb-4">
+                    <p className="text-sm text-muted-foreground mb-2">Antes ({beforePhotos.length})</p>
+                    <div className="grid grid-cols-4 gap-2">
+                      {beforePhotos.map((photo) => (
+                        <a 
+                          key={photo.id} 
+                          href={photo.photo_url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="aspect-square rounded-lg bg-muted overflow-hidden hover:opacity-80 transition-opacity"
+                        >
+                          <img 
+                            src={photo.photo_url} 
+                            alt="Before"
+                            className="w-full h-full object-cover"
+                          />
+                        </a>
+                      ))}
+                    </div>
                   </div>
                 )}
-                {job.end_time && (
+
+                {afterPhotos.length > 0 && (
                   <div>
-                    <p className="text-xs text-muted-foreground">Completed</p>
-                    <p className="font-medium text-success">
-                      {format(new Date(job.end_time), "h:mm a")}
-                    </p>
-                  </div>
-                )}
-                {job.start_time && job.end_time && (
-                  <div>
-                    <p className="text-xs text-muted-foreground">Duration</p>
-                    <p className="font-bold text-primary">
-                      {calculateDuration(job.start_time, job.end_time)}
-                    </p>
+                    <p className="text-sm text-muted-foreground mb-2">Después ({afterPhotos.length})</p>
+                    <div className="grid grid-cols-4 gap-2">
+                      {afterPhotos.map((photo) => (
+                        <a 
+                          key={photo.id} 
+                          href={photo.photo_url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="aspect-square rounded-lg bg-muted overflow-hidden hover:opacity-80 transition-opacity"
+                        >
+                          <img 
+                            src={photo.photo_url} 
+                            alt="After"
+                            className="w-full h-full object-cover"
+                          />
+                        </a>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
-            </div>
-          </div>
+            )}
 
-          {/* Photos Gallery */}
-          {photos.length > 0 && (
-            <div>
-              <div className="flex items-center gap-2 mb-3">
-                <ImageIcon className="h-5 w-5 text-primary" />
-                <p className="font-medium text-foreground">Evidence Photos ({photos.length})</p>
+            {photos.length === 0 && job.status !== 'pending' && (
+              <div className="text-center py-6 bg-muted/50 rounded-lg">
+                <ImageIcon className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                <p className="text-muted-foreground">No hay fotos para este trabajo</p>
               </div>
-              
-              {beforePhotos.length > 0 && (
-                <div className="mb-4">
-                  <p className="text-sm text-muted-foreground mb-2">Before ({beforePhotos.length})</p>
-                  <div className="grid grid-cols-4 gap-2">
-                    {beforePhotos.map((photo) => (
-                      <a 
-                        key={photo.id} 
-                        href={photo.photo_url} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="aspect-square rounded-lg bg-muted overflow-hidden hover:opacity-80 transition-opacity"
-                      >
-                        <img 
-                          src={photo.photo_url} 
-                          alt="Before"
-                          className="w-full h-full object-cover"
-                        />
-                      </a>
-                    ))}
-                  </div>
-                </div>
-              )}
+            )}
+          </TabsContent>
 
-              {afterPhotos.length > 0 && (
-                <div>
-                  <p className="text-sm text-muted-foreground mb-2">After ({afterPhotos.length})</p>
-                  <div className="grid grid-cols-4 gap-2">
-                    {afterPhotos.map((photo) => (
-                      <a 
-                        key={photo.id} 
-                        href={photo.photo_url} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="aspect-square rounded-lg bg-muted overflow-hidden hover:opacity-80 transition-opacity"
-                      >
-                        <img 
-                          src={photo.photo_url} 
-                          alt="After"
-                          className="w-full h-full object-cover"
-                        />
-                      </a>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
+          <TabsContent value="timeline" className="mt-4">
+            <JobTimeline
+              job={{
+                id: job.id,
+                created_at: job.created_at,
+                start_time: job.start_time,
+                end_time: job.end_time,
+                status: job.status,
+                scheduled_date: job.scheduled_date,
+                scheduled_time: job.scheduled_time,
+              }}
+              photos={photos.map(p => ({ created_at: p.created_at, photo_type: p.photo_type }))}
+              checklistItems={checklistItems}
+              alerts={alerts}
+            />
+          </TabsContent>
+        </Tabs>
 
-          {photos.length === 0 && job.status !== 'pending' && (
-            <div className="text-center py-6 bg-muted/50 rounded-lg">
-              <ImageIcon className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-              <p className="text-muted-foreground">No photos uploaded for this job</p>
-            </div>
-          )}
-
-          {/* Actions */}
-          <div className="flex gap-2">
-            <Button 
-              variant="outline" 
-              className="flex-1"
-              onClick={handleDownloadPDF}
-              disabled={isGeneratingPDF}
-            >
-              {isGeneratingPDF ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Generando...
-                </>
-              ) : (
-                <>
-                  <FileText className="h-4 w-4 mr-2" />
-                  Descargar PDF
-                </>
-              )}
-            </Button>
-          </div>
+        {/* Actions */}
+        <div className="flex gap-2 mt-6">
+          <Button 
+            variant="outline" 
+            className="flex-1"
+            onClick={handleDownloadPDF}
+            disabled={isGeneratingPDF}
+          >
+            {isGeneratingPDF ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Generando...
+              </>
+            ) : (
+              <>
+                <FileText className="h-4 w-4 mr-2" />
+                Descargar PDF
+              </>
+            )}
+          </Button>
         </div>
       </DialogContent>
     </Dialog>
