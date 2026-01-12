@@ -1,6 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import { Plus, Home, ClipboardList, Users, Calendar, UserCircle, Repeat, Settings } from "lucide-react";
+import { t } from "@/lib/i18n";
 
 interface QuickActionsProps {
   onNewJobClick: () => void;
@@ -12,64 +13,64 @@ export function QuickActions({ onNewJobClick }: QuickActionsProps) {
   const actions = [
     {
       icon: Plus,
-      title: "New Job",
-      subtitle: "Schedule cleaning",
+      title: t("newJob"),
+      subtitle: t("scheduleClean"),
       onClick: onNewJobClick,
       iconBg: "bg-primary/10",
       iconColor: "text-primary"
     },
     {
       icon: Home,
-      title: "Properties",
-      subtitle: "Manage locations",
+      title: t("properties"),
+      subtitle: t("manageLocations"),
       onClick: () => navigate("/admin/properties"),
       iconBg: "bg-secondary/10",
       iconColor: "text-secondary-foreground"
     },
     {
       icon: UserCircle,
-      title: "Clients",
-      subtitle: "Manage clients",
+      title: t("clients"),
+      subtitle: t("manageClients"),
       onClick: () => navigate("/admin/clients"),
       iconBg: "bg-primary/10",
       iconColor: "text-primary"
     },
     {
       icon: ClipboardList,
-      title: "Checklists",
-      subtitle: "Manage templates",
+      title: t("checklists"),
+      subtitle: t("manageTemplates"),
       onClick: () => navigate("/admin/checklists"),
       iconBg: "bg-secondary/10",
       iconColor: "text-secondary-foreground"
     },
     {
       icon: Users,
-      title: "Staff",
-      subtitle: "Manage team",
+      title: t("staff"),
+      subtitle: t("manageTeam"),
       onClick: () => navigate("/admin/staff"),
       iconBg: "bg-primary/10",
       iconColor: "text-primary"
     },
     {
       icon: Calendar,
-      title: "Calendar",
-      subtitle: "View schedule",
+      title: t("calendar"),
+      subtitle: t("viewSchedule"),
       onClick: () => navigate("/admin/calendar"),
       iconBg: "bg-primary/10",
       iconColor: "text-primary"
     },
     {
       icon: Repeat,
-      title: "Recurring",
-      subtitle: "Auto-schedule",
+      title: t("recurring"),
+      subtitle: t("autoSchedule"),
       onClick: () => navigate("/admin/recurring"),
       iconBg: "bg-secondary/10",
       iconColor: "text-secondary-foreground"
     },
     {
       icon: Settings,
-      title: "Settings",
-      subtitle: "System config",
+      title: t("settings"),
+      subtitle: t("systemConfig"),
       onClick: () => navigate("/admin/settings"),
       iconBg: "bg-primary/10",
       iconColor: "text-primary"

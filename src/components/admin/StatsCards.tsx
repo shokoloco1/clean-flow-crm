@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar, Users, CheckCircle, TrendingUp } from "lucide-react";
+import { t } from "@/lib/i18n";
 
 export interface Stats {
   todayJobs: number;
@@ -17,7 +18,7 @@ export function StatsCards({ stats }: StatsCardsProps) {
     <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
       <Card className="border-border shadow-sm">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground">Today's Jobs</CardTitle>
+          <CardTitle className="text-sm font-medium text-muted-foreground">{t("todaysJobs")}</CardTitle>
           <Calendar className="h-5 w-5 text-primary" />
         </CardHeader>
         <CardContent>
@@ -27,7 +28,7 @@ export function StatsCards({ stats }: StatsCardsProps) {
       
       <Card className="border-border shadow-sm">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground">Completed Today</CardTitle>
+          <CardTitle className="text-sm font-medium text-muted-foreground">{t("completedToday")}</CardTitle>
           <CheckCircle className="h-5 w-5 text-success" />
         </CardHeader>
         <CardContent>
@@ -37,7 +38,7 @@ export function StatsCards({ stats }: StatsCardsProps) {
 
       <Card className="border-border shadow-sm">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground">Completion Rate</CardTitle>
+          <CardTitle className="text-sm font-medium text-muted-foreground">{t("completionRate")}</CardTitle>
           <TrendingUp className="h-5 w-5 text-primary" />
         </CardHeader>
         <CardContent>
@@ -47,7 +48,7 @@ export function StatsCards({ stats }: StatsCardsProps) {
       
       <Card className="border-border shadow-sm">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground">Total Staff</CardTitle>
+          <CardTitle className="text-sm font-medium text-muted-foreground">{t("totalStaff")}</CardTitle>
           <Users className="h-5 w-5 text-primary" />
         </CardHeader>
         <CardContent>

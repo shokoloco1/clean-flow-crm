@@ -1,6 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import { ChevronRight, Home } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { t } from "@/lib/i18n";
 
 interface BreadcrumbItem {
   label: string;
@@ -8,16 +9,16 @@ interface BreadcrumbItem {
 }
 
 const ROUTE_LABELS: Record<string, string> = {
-  admin: "Panel Admin",
-  staff: "Panel Staff",
-  properties: "Propiedades",
-  checklists: "Checklists",
-  clients: "Clientes",
-  calendar: "Calendario",
-  recurring: "Trabajos Recurrentes",
-  settings: "Configuración",
-  portal: "Portal Cliente",
-  auth: "Autenticación",
+  admin: t("adminPanel"),
+  staff: t("staffPanel"),
+  properties: t("properties"),
+  checklists: t("checklists"),
+  clients: t("clients"),
+  calendar: t("calendar"),
+  recurring: t("recurring"),
+  settings: t("settings"),
+  portal: t("clientPortal"),
+  auth: t("authentication"),
 };
 
 export function Breadcrumbs() {
