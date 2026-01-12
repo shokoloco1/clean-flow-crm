@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { Sparkles, Shield, Users, Eye, EyeOff } from "lucide-react";
 import { signupSchema, loginSchema, validatePassword } from "@/lib/passwordSecurity";
 import { PasswordStrengthIndicator } from "@/components/PasswordStrengthIndicator";
+import { t } from "@/lib/i18n";
 
 export default function Auth() {
   const navigate = useNavigate();
@@ -52,10 +53,10 @@ export default function Auth() {
     setIsBootstrapping(true);
     const { error } = await supabase.functions.invoke("bootstrap-role");
     if (error) {
-      toast.error("Tu cuenta no tiene rol asignado. Pídele al admin que te asigne uno.");
+      toast.error(t("noRoleContactAdmin"));
     } else {
       await refreshRole();
-      toast.success("Rol admin asignado. Redirigiendo...");
+      toast.success(t("roleAdminAssigned"));
     }
     setIsBootstrapping(false);
   };
@@ -85,10 +86,9 @@ export default function Auth() {
     const { error } = await signIn(loginEmail, loginPassword);
     
     if (error) {
-      // No revelar si el email existe o no (seguridad)
-      toast.error("Credenciales inválidas. Verifica tu email y contraseña.");
+      toast.error(t("invalidCredentials"));
     } else {
-      toast.success("¡Bienvenido de vuelta!");
+      toast.success(t("welcomeBack"));
     }
     
     setIsSubmitting(false);
@@ -113,7 +113,7 @@ export default function Auth() {
         errors[`signup_${field}`] = err.message;
       });
       setFormErrors(errors);
-      toast.error("Por favor corrige los errores del formulario");
+      toast.error(t("pleaseCorrectErrors"));
       return;
     }
     
@@ -123,12 +123,12 @@ export default function Auth() {
     
     if (error) {
       if (error.message?.includes("already registered")) {
-        toast.error("Este email ya está registrado. Inicia sesión en su lugar.");
+        toast.error(t("emailAlreadyRegistered"));
       } else {
-        toast.error(error.message || "Error al crear la cuenta");
+        toast.error(error.message || t("somethingWentWrong"));
       }
     } else {
-      toast.success("¡Cuenta creada exitosamente!");
+      toast.success(t("accountCreated"));
     }
     
     setIsSubmitting(false);
@@ -137,7 +137,7 @@ export default function Auth() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="animate-pulse text-primary">Loading...</div>
+        <div className="animate-pulse text-primary">{t("loading")}</div>
       </div>
     );
   }
@@ -153,15 +153,15 @@ export default function Auth() {
                 <Sparkles className="h-7 w-7 text-primary-foreground" />
               </div>
             </div>
-            <h1 className="text-3xl font-bold text-foreground">CleanFlow</h1>
-            <p className="text-muted-foreground">Tu cuenta no tiene un rol asignado</p>
+            <h1 className="text-3xl font-bold text-foreground">{t("appName")}</h1>
+            <p className="text-muted-foreground">{t("noRoleAssigned")}</p>
           </div>
 
           <Card className="border-border shadow-lg">
             <CardHeader>
-              <CardTitle>Acceso pendiente</CardTitle>
+              <CardTitle>{t("pendingAccess")}</CardTitle>
               <CardDescription>
-                Para entrar, un administrador debe asignarte un rol (admin o staff).
+                {t("pendingAccessDescription")}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
@@ -170,10 +170,10 @@ export default function Auth() {
                 onClick={handleBootstrapAdmin}
                 disabled={isBootstrapping}
               >
-                {isBootstrapping ? "Configurando..." : "Configurar como Admin (solo 1ª vez)"}
+                {isBootstrapping ? t("configuring") : t("configureAsAdmin")}
               </Button>
               <Button variant="outline" className="w-full" onClick={signOut}>
-                Cerrar sesión
+                {t("logout")}
               </Button>
             </CardContent>
           </Card>
@@ -190,23 +190,23 @@ export default function Auth() {
             <div className="h-12 w-12 rounded-xl bg-primary flex items-center justify-center">
               <Sparkles className="h-7 w-7 text-primary-foreground" />
             </div>
+            </div>
+            <h1 className="text-3xl font-bold text-foreground">{t("appName")}</h1>
+            <p className="text-muted-foreground">{t("professionalCleaningManagement")}</p>
           </div>
-          <h1 className="text-3xl font-bold text-foreground">CleanFlow</h1>
-          <p className="text-muted-foreground">Professional cleaning management</p>
-        </div>
 
-        <Card className="border-border shadow-lg">
+          <Card className="border-border shadow-lg">
           <CardHeader className="pb-4">
-            <CardTitle className="text-xl text-center">Welcome</CardTitle>
+            <CardTitle className="text-xl text-center">{t("welcome")}</CardTitle>
             <CardDescription className="text-center">
-              Sign in to your account or create a new one
+              {t("signInToAccount")}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="login" className="w-full">
               <TabsList className="grid w-full grid-cols-2 mb-6">
-                <TabsTrigger value="login">Sign In</TabsTrigger>
-                <TabsTrigger value="signup">Sign Up</TabsTrigger>
+                <TabsTrigger value="login">{t("login")}</TabsTrigger>
+                <TabsTrigger value="signup">{t("signup")}</TabsTrigger>
               </TabsList>
               
               <TabsContent value="login">
@@ -257,7 +257,7 @@ export default function Auth() {
                     )}
                   </div>
                   <Button type="submit" className="w-full" disabled={isSubmitting}>
-                    {isSubmitting ? "Iniciando sesión..." : "Iniciar Sesión"}
+                    {isSubmitting ? t("signingIn") : t("login")}
                   </Button>
                 </form>
               </TabsContent>
@@ -265,7 +265,7 @@ export default function Auth() {
               <TabsContent value="signup">
                 <form onSubmit={handleSignup} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="signup-name">Nombre Completo</Label>
+                    <Label htmlFor="signup-name">{t("fullName")}</Label>
                     <Input
                       id="signup-name"
                       type="text"
@@ -329,7 +329,7 @@ export default function Auth() {
                     )}
                   </div>
                   <div className="space-y-2">
-                    <Label>Tipo de Cuenta</Label>
+                    <Label>{t("accountType")}</Label>
                     <Select value={signupRole} onValueChange={(v) => setSignupRole(v as "admin" | "staff")}>
                       <SelectTrigger>
                         <SelectValue />
@@ -338,13 +338,13 @@ export default function Auth() {
                         <SelectItem value="admin">
                           <div className="flex items-center gap-2">
                             <Shield className="h-4 w-4" />
-                            <span>Admin (Propietario)</span>
+                            <span>{t("admin")}</span>
                           </div>
                         </SelectItem>
                         <SelectItem value="staff">
                           <div className="flex items-center gap-2">
                             <Users className="h-4 w-4" />
-                            <span>Staff (Limpiador)</span>
+                            <span>{t("staffRole")}</span>
                           </div>
                         </SelectItem>
                       </SelectContent>
@@ -355,7 +355,7 @@ export default function Auth() {
                     className="w-full" 
                     disabled={isSubmitting || validatePassword(signupPassword).strength === "weak"}
                   >
-                    {isSubmitting ? "Creando cuenta..." : "Crear Cuenta"}
+                    {isSubmitting ? t("creatingAccount") : t("signup")}
                   </Button>
                 </form>
               </TabsContent>
@@ -364,7 +364,7 @@ export default function Auth() {
         </Card>
 
         <p className="text-center text-sm text-muted-foreground">
-          CleanFlow — Gestiona tu negocio de limpieza
+          {t("appName")} — {t("appTagline")}
         </p>
       </div>
     </div>

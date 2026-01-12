@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Sparkles, Shield, Users, ClipboardCheck, Camera, MapPin, Building2 } from "lucide-react";
+import { t } from "@/lib/i18n";
 
 export default function Index() {
   const navigate = useNavigate();
@@ -21,23 +22,23 @@ export default function Index() {
   const features = [
     {
       icon: ClipboardCheck,
-      title: "Job Management",
-      description: "Schedule and track cleaning jobs with ease"
+      title: t("jobManagement"),
+      description: t("jobManagementDesc")
     },
     {
       icon: Camera,
-      title: "Proof of Work",
-      description: "Capture before & after photos for accountability"
+      title: t("proofOfWork"),
+      description: t("proofOfWorkDesc")
     },
     {
       icon: MapPin,
-      title: "Location Tracking",
-      description: "One-tap navigation to job sites"
+      title: t("locationTracking"),
+      description: t("locationTrackingDesc")
     },
     {
       icon: Users,
-      title: "Team Coordination",
-      description: "Assign jobs and monitor staff performance"
+      title: t("teamCoordination"),
+      description: t("teamCoordinationDesc")
     }
   ];
 
@@ -57,11 +58,11 @@ export default function Index() {
             </div>
             
             <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
-              CleanFlow
+              {t("appName")}
             </h1>
             
             <p className="text-xl text-muted-foreground mb-8 max-w-xl mx-auto">
-              The all-in-one CRM and job management platform for commercial cleaning businesses
+              {t("appDescription")}
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -70,7 +71,7 @@ export default function Index() {
                 className="h-12 px-8 text-lg"
                 onClick={() => navigate("/auth")}
               >
-                Get Started
+                {t("getStarted")}
               </Button>
               <Button 
                 size="lg" 
@@ -78,7 +79,7 @@ export default function Index() {
                 className="h-12 px-8 text-lg"
                 onClick={() => navigate("/auth")}
               >
-                Sign In
+                {t("signIn")}
               </Button>
             </div>
             
@@ -90,7 +91,7 @@ export default function Index() {
                 onClick={() => navigate("/portal")}
               >
                 <Building2 className="h-4 w-4 mr-2" />
-                Acceso Portal de Clientes
+                {t("clientPortalAccess")}
               </Button>
             </div>
           </div>
@@ -101,7 +102,7 @@ export default function Index() {
       <section className="py-16 bg-card">
         <div className="container mx-auto px-4">
           <h2 className="text-2xl md:text-3xl font-bold text-center text-foreground mb-12">
-            Everything You Need to Run Your Business
+            {t("everythingYouNeed")}
           </h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -129,12 +130,12 @@ export default function Index() {
               <div className="h-14 w-14 rounded-xl bg-primary flex items-center justify-center mb-6">
                 <Shield className="h-7 w-7 text-primary-foreground" />
               </div>
-              <h3 className="text-xl font-bold text-foreground mb-3">For Business Owners</h3>
+              <h3 className="text-xl font-bold text-foreground mb-3">{t("forBusinessOwners")}</h3>
               <ul className="space-y-2 text-muted-foreground">
-                <li>• Full dashboard with analytics</li>
-                <li>• Create and schedule jobs</li>
-                <li>• Manage clients and staff</li>
-                <li>• Track job completion in real-time</li>
+                <li>• {t("fullDashboardAnalytics")}</li>
+                <li>• {t("createScheduleJobs")}</li>
+                <li>• {t("manageClientsStaff")}</li>
+                <li>• {t("trackJobCompletion")}</li>
               </ul>
             </div>
             
@@ -142,12 +143,12 @@ export default function Index() {
               <div className="h-14 w-14 rounded-xl bg-secondary flex items-center justify-center mb-6">
                 <Users className="h-7 w-7 text-secondary-foreground" />
               </div>
-              <h3 className="text-xl font-bold text-foreground mb-3">For Cleaning Staff</h3>
+              <h3 className="text-xl font-bold text-foreground mb-3">{t("forCleaningStaff")}</h3>
               <ul className="space-y-2 text-muted-foreground">
-                <li>• Mobile-first interface</li>
-                <li>• View daily assigned jobs</li>
-                <li>• One-tap navigation to sites</li>
-                <li>• Upload before/after photos</li>
+                <li>• {t("mobileFirstInterface")}</li>
+                <li>• {t("viewDailyJobs")}</li>
+                <li>• {t("oneTapNavigation")}</li>
+                <li>• {t("uploadBeforeAfter")}</li>
               </ul>
             </div>
           </div>
@@ -159,10 +160,10 @@ export default function Index() {
         <div className="container mx-auto px-4 text-center">
           <div className="flex items-center justify-center gap-2 mb-2">
             <Sparkles className="h-5 w-5 text-primary" />
-            <span className="font-semibold text-foreground">CleanFlow</span>
+            <span className="font-semibold text-foreground">{t("appName")}</span>
           </div>
           <p className="text-sm text-muted-foreground">
-            Streamline your cleaning business operations
+            {t("streamlineOperations")}
           </p>
         </div>
       </footer>
