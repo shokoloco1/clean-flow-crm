@@ -1,14 +1,77 @@
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
 import { Plus, Home, ClipboardList, Users, Calendar, UserCircle, Repeat, Settings, FileText } from "lucide-react";
 import { t } from "@/lib/i18n";
+import { supabase } from "@/integrations/supabase/client";
 
 interface QuickActionsProps {
   onNewJobClick: () => void;
 }
 
+interface Counts {
+  properties: number;
+  clients: number;
+  staff: number;
+  recurring: number;
+  invoices: number;
+  pendingJobs: number;
+}
+
 export function QuickActions({ onNewJobClick }: QuickActionsProps) {
   const navigate = useNavigate();
+  const [counts, setCounts] = useState<Counts>({
+    properties: 0,
+    clients: 0,
+    staff: 0,
+    recurring: 0,
+    invoices: 0,
+    pendingJobs: 0,
+  });
+
+  useEffect(() => {
+    const fetchCounts = async () => {
+      const [
+        { count: propertiesCount },
+        { count: clientsCount },
+        { count: staffCount },
+        { count: recurringCount },
+        { count: invoicesCount },
+        { count: pendingJobsCount },
+      ] = await Promise.all([
+        supabase.from("properties").select("*", { count: "exact", head: true }).eq("is_active", true),
+        supabase.from("clients").select("*", { count: "exact", head: true }),
+        supabase.from("user_roles").select("*", { count: "exact", head: true }).eq("role", "staff"),
+        supabase.from("recurring_schedules").select("*", { count: "exact", head: true }).eq("is_active", true),
+        supabase.from("invoices").select("*", { count: "exact", head: true }).in("status", ["draft", "sent"]),
+        supabase.from("jobs").select("*", { count: "exact", head: true }).eq("status", "pending"),
+      ]);
+
+      setCounts({
+        properties: propertiesCount || 0,
+        clients: clientsCount || 0,
+        staff: staffCount || 0,
+        recurring: recurringCount || 0,
+        invoices: invoicesCount || 0,
+        pendingJobs: pendingJobsCount || 0,
+      });
+    };
+
+    fetchCounts();
+
+    // Subscribe to real-time updates
+    const channel = supabase
+      .channel('quick-actions-counts')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'jobs' }, fetchCounts)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'clients' }, fetchCounts)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'properties' }, fetchCounts)
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
 
   const actions = [
     {
@@ -17,7 +80,9 @@ export function QuickActions({ onNewJobClick }: QuickActionsProps) {
       subtitle: t("scheduleClean"),
       onClick: onNewJobClick,
       iconBg: "bg-primary/10",
-      iconColor: "text-primary"
+      iconColor: "text-primary",
+      badge: counts.pendingJobs > 0 ? counts.pendingJobs : undefined,
+      badgeClassName: "bg-warning text-warning-foreground",
     },
     {
       icon: Home,
@@ -25,7 +90,8 @@ export function QuickActions({ onNewJobClick }: QuickActionsProps) {
       subtitle: t("manageLocations"),
       onClick: () => navigate("/admin/properties"),
       iconBg: "bg-secondary/10",
-      iconColor: "text-secondary-foreground"
+      iconColor: "text-secondary-foreground",
+      badge: counts.properties,
     },
     {
       icon: UserCircle,
@@ -33,7 +99,8 @@ export function QuickActions({ onNewJobClick }: QuickActionsProps) {
       subtitle: t("manageClients"),
       onClick: () => navigate("/admin/clients"),
       iconBg: "bg-primary/10",
-      iconColor: "text-primary"
+      iconColor: "text-primary",
+      badge: counts.clients,
     },
     {
       icon: ClipboardList,
@@ -41,7 +108,7 @@ export function QuickActions({ onNewJobClick }: QuickActionsProps) {
       subtitle: t("manageTemplates"),
       onClick: () => navigate("/admin/checklists"),
       iconBg: "bg-secondary/10",
-      iconColor: "text-secondary-foreground"
+      iconColor: "text-secondary-foreground",
     },
     {
       icon: Users,
@@ -49,7 +116,8 @@ export function QuickActions({ onNewJobClick }: QuickActionsProps) {
       subtitle: t("manageTeam"),
       onClick: () => navigate("/admin/staff"),
       iconBg: "bg-primary/10",
-      iconColor: "text-primary"
+      iconColor: "text-primary",
+      badge: counts.staff,
     },
     {
       icon: Calendar,
@@ -57,7 +125,7 @@ export function QuickActions({ onNewJobClick }: QuickActionsProps) {
       subtitle: t("viewSchedule"),
       onClick: () => navigate("/admin/calendar"),
       iconBg: "bg-primary/10",
-      iconColor: "text-primary"
+      iconColor: "text-primary",
     },
     {
       icon: Repeat,
@@ -65,7 +133,8 @@ export function QuickActions({ onNewJobClick }: QuickActionsProps) {
       subtitle: t("autoSchedule"),
       onClick: () => navigate("/admin/recurring"),
       iconBg: "bg-secondary/10",
-      iconColor: "text-secondary-foreground"
+      iconColor: "text-secondary-foreground",
+      badge: counts.recurring,
     },
     {
       icon: FileText,
@@ -73,7 +142,8 @@ export function QuickActions({ onNewJobClick }: QuickActionsProps) {
       subtitle: "Generar facturas",
       onClick: () => navigate("/admin/invoices"),
       iconBg: "bg-primary/10",
-      iconColor: "text-primary"
+      iconColor: "text-primary",
+      badge: counts.invoices > 0 ? counts.invoices : undefined,
     },
     {
       icon: Settings,
@@ -81,25 +151,32 @@ export function QuickActions({ onNewJobClick }: QuickActionsProps) {
       subtitle: t("systemConfig"),
       onClick: () => navigate("/admin/settings"),
       iconBg: "bg-secondary/10",
-      iconColor: "text-secondary-foreground"
-    }
+      iconColor: "text-secondary-foreground",
+    },
   ];
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4">
       {actions.map((action) => (
         <Card 
           key={action.title}
-          className="border-border shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+          className="border-border shadow-sm hover:shadow-md transition-shadow cursor-pointer relative"
           onClick={action.onClick}
         >
-          <CardContent className="flex flex-col items-center gap-3 p-4 text-center">
-            <div className={`h-12 w-12 rounded-xl ${action.iconBg} flex items-center justify-center`}>
-              <action.icon className={`h-6 w-6 ${action.iconColor}`} />
+          <CardContent className="flex flex-col items-center gap-2 md:gap-3 p-3 md:p-4 text-center">
+            {action.badge !== undefined && action.badge > 0 && (
+              <span 
+                className={`absolute -top-2 -right-2 h-5 min-w-5 flex items-center justify-center text-xs rounded-full border font-semibold px-1.5 bg-secondary text-secondary-foreground ${action.badgeClassName || ""}`}
+              >
+                {action.badge > 99 ? "99+" : action.badge}
+              </span>
+            )}
+            <div className={`h-10 w-10 md:h-12 md:w-12 rounded-xl ${action.iconBg} flex items-center justify-center`}>
+              <action.icon className={`h-5 w-5 md:h-6 md:w-6 ${action.iconColor}`} />
             </div>
             <div>
-              <h3 className="font-semibold text-foreground text-sm">{action.title}</h3>
-              <p className="text-xs text-muted-foreground">{action.subtitle}</p>
+              <h3 className="font-semibold text-foreground text-xs md:text-sm">{action.title}</h3>
+              <p className="text-[10px] md:text-xs text-muted-foreground hidden sm:block">{action.subtitle}</p>
             </div>
           </CardContent>
         </Card>

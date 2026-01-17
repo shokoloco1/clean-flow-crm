@@ -126,32 +126,62 @@ export default function CalendarPage() {
   const fetchData = useCallback(async () => {
     setLoading(true);
     
-    const { data: jobsData, error } = await supabase
-      .from("jobs")
-      .select(`
-        id,
-        location,
-        scheduled_date,
-        scheduled_time,
-        status,
-        notes,
-        client_id,
-        assigned_staff_id,
-        clients (name),
-        profiles:assigned_staff_id (full_name)
-      `)
-      .order("scheduled_date", { ascending: true });
+    try {
+      // First get jobs with client info
+      const { data: jobsData, error: jobsError } = await supabase
+        .from("jobs")
+        .select(`
+          id,
+          location,
+          scheduled_date,
+          scheduled_time,
+          status,
+          notes,
+          client_id,
+          assigned_staff_id,
+          clients (name)
+        `)
+        .order("scheduled_date", { ascending: true });
 
-    if (error) {
-      toast.error("Error loading jobs");
+      if (jobsError) {
+        console.error("Error loading jobs:", jobsError);
+        toast.error("Error loading jobs: " + jobsError.message);
+        setLoading(false);
+        return;
+      }
+
+      // Get staff profiles separately to avoid join issues
+      const staffIds = [...new Set((jobsData || []).map(j => j.assigned_staff_id).filter(Boolean))];
+      let staffMap: Record<string, string> = {};
+      
+      if (staffIds.length > 0) {
+        const { data: profilesData } = await supabase
+          .from("profiles")
+          .select("user_id, full_name")
+          .in("user_id", staffIds);
+        
+        staffMap = (profilesData || []).reduce((acc, p) => {
+          acc[p.user_id] = p.full_name;
+          return acc;
+        }, {} as Record<string, string>);
+      }
+
+      // Combine jobs with staff names
+      const typedJobs: Job[] = (jobsData || []).map(job => ({
+        ...job,
+        profiles: job.assigned_staff_id && staffMap[job.assigned_staff_id] 
+          ? { full_name: staffMap[job.assigned_staff_id] } 
+          : null
+      })) as Job[];
+
+      setJobs(typedJobs);
+      setEvents(transformJobsToEvents(typedJobs));
+    } catch (err) {
+      console.error("Unexpected error:", err);
+      toast.error("Unexpected error loading jobs");
+    } finally {
       setLoading(false);
-      return;
     }
-
-    const typedJobs = (jobsData as unknown as Job[]) || [];
-    setJobs(typedJobs);
-    setEvents(transformJobsToEvents(typedJobs));
-    setLoading(false);
   }, [transformJobsToEvents]);
 
   const fetchClientsAndStaff = useCallback(async () => {

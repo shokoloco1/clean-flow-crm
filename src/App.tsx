@@ -1,3 +1,4 @@
+import { Suspense, lazy } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -10,21 +11,33 @@ import { PWAInstallBanner } from "@/components/PWAInstallBanner";
 import { OfflineIndicator } from "@/components/OfflineIndicator";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
-import AdminDashboard from "./pages/AdminDashboard";
-import StaffDashboard from "./pages/StaffDashboard";
-import PropertiesPage from "./pages/PropertiesPage";
-import ChecklistTemplatesPage from "./pages/ChecklistTemplatesPage";
-import StaffManagementPage from "./pages/StaffManagementPage";
-import CalendarPage from "./pages/CalendarPage";
-import ClientsPage from "./pages/ClientsPage";
-import RecurringJobsPage from "./pages/RecurringJobsPage";
-import ClientPortal from "./pages/ClientPortal";
-import SettingsPage from "./pages/SettingsPage";
-import InvoicesPage from "./pages/InvoicesPage";
-import InstallPage from "./pages/InstallPage";
-import NotFound from "./pages/NotFound";
+
+// Lazy load heavy pages for code splitting
+const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
+const StaffDashboard = lazy(() => import("./pages/StaffDashboard"));
+const PropertiesPage = lazy(() => import("./pages/PropertiesPage"));
+const ChecklistTemplatesPage = lazy(() => import("./pages/ChecklistTemplatesPage"));
+const StaffManagementPage = lazy(() => import("./pages/StaffManagementPage"));
+const CalendarPage = lazy(() => import("./pages/CalendarPage"));
+const ClientsPage = lazy(() => import("./pages/ClientsPage"));
+const RecurringJobsPage = lazy(() => import("./pages/RecurringJobsPage"));
+const ClientPortal = lazy(() => import("./pages/ClientPortal"));
+const SettingsPage = lazy(() => import("./pages/SettingsPage"));
+const InvoicesPage = lazy(() => import("./pages/InvoicesPage"));
+const InstallPage = lazy(() => import("./pages/InstallPage"));
+const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
+
+// Loading fallback component
+const PageLoader = () => (
+  <div className="min-h-screen flex items-center justify-center bg-background">
+    <div className="flex flex-col items-center gap-4">
+      <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary" />
+      <p className="text-sm text-muted-foreground">Cargando...</p>
+    </div>
+  </div>
+);
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -35,6 +48,7 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <OnboardingProvider>
+          <Suspense fallback={<PageLoader />}>
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
@@ -122,6 +136,7 @@ const App = () => (
             <Route path="/install" element={<InstallPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
+          </Suspense>
           <PWAInstallBanner />
           </OnboardingProvider>
         </AuthProvider>

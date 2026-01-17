@@ -10,6 +10,29 @@ export default defineConfig(({ mode }) => ({
     host: "::",
     port: 8080,
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Core React/Vendor
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          // UI components
+          'vendor-ui': ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-popover', '@radix-ui/react-select', '@radix-ui/react-tabs', '@radix-ui/react-tooltip'],
+          // Charts
+          'vendor-charts': ['recharts'],
+          // Calendar
+          'vendor-calendar': ['@fullcalendar/core', '@fullcalendar/react', '@fullcalendar/daygrid', '@fullcalendar/timegrid', '@fullcalendar/interaction'],
+          // PDF
+          'vendor-pdf': ['jspdf', 'jspdf-autotable'],
+          // Icons
+          'vendor-icons': ['lucide-react'],
+          // Supabase
+          'vendor-supabase': ['@supabase/supabase-js'],
+        },
+      },
+    },
+    chunkSizeWarningLimit: 600,
+  },
   plugins: [
     react(),
     mode === "development" && componentTagger(),
