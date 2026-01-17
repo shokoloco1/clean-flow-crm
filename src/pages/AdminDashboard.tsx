@@ -258,14 +258,14 @@ export default function AdminDashboard() {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-4 md:py-8">
         <Breadcrumbs />
         {/* Stats Cards */}
         <StatsCards stats={stats} />
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
           {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-4 md:space-y-6">
             {/* Quick Actions */}
             <QuickActions onNewJobClick={() => setIsCreateOpen(true)} />
 
@@ -277,10 +277,24 @@ export default function AdminDashboard() {
             />
           </div>
 
-          {/* Sidebar - Alerts & Activity */}
-          <div className="space-y-6">
+          {/* Sidebar - Alerts & Activity - Hidden on mobile, shown in drawer trigger */}
+          <div className="hidden lg:block space-y-6">
             <AlertsPanel />
             <ActivityFeed activities={activities} />
+          </div>
+          
+          {/* Mobile: Show sidebar content in collapsible sections */}
+          <div className="lg:hidden space-y-4">
+            <details className="group">
+              <summary className="flex items-center justify-between cursor-pointer p-3 bg-card border border-border rounded-lg">
+                <span className="font-semibold text-foreground">Alertas y Actividad</span>
+                <span className="transition-transform group-open:rotate-180">▼</span>
+              </summary>
+              <div className="mt-4 space-y-4">
+                <AlertsPanel />
+                <ActivityFeed activities={activities} />
+              </div>
+            </details>
           </div>
         </div>
 
