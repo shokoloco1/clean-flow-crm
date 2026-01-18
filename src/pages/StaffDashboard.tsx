@@ -97,7 +97,7 @@ export default function StaffDashboard() {
           bg: "bg-success/10", 
           text: "text-success", 
           border: "border-success/30",
-          label: "Completed",
+          label: "✅ Completado",
           pulse: false
         };
       case "in_progress": 
@@ -105,7 +105,7 @@ export default function StaffDashboard() {
           bg: "bg-warning/10", 
           text: "text-warning", 
           border: "border-warning",
-          label: "In Progress",
+          label: "🔄 En Progreso",
           pulse: true
         };
       default: 
@@ -113,7 +113,7 @@ export default function StaffDashboard() {
           bg: "bg-muted", 
           text: "text-muted-foreground", 
           border: "border-border",
-          label: "Pending",
+          label: "⏳ Pendiente",
           pulse: false
         };
     }
@@ -143,7 +143,7 @@ export default function StaffDashboard() {
             </div>
             <div>
               <h1 className="text-xl font-bold text-foreground">CleanFlow</h1>
-              <p className="text-sm text-muted-foreground">My Jobs Today</p>
+              <p className="text-sm text-muted-foreground">Mis Trabajos</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -167,14 +167,14 @@ export default function StaffDashboard() {
             <Calendar className="h-5 w-5 text-primary" />
           </div>
           <span className="text-xl font-semibold text-foreground">
-            {format(new Date(), "EEEE, MMMM d")}
+            {format(new Date(), "EEEE, d 'de' MMMM")}
           </span>
         </div>
 
         {loading ? (
           <div className="flex flex-col items-center justify-center py-16">
             <div className="h-12 w-12 rounded-full border-4 border-primary border-t-transparent animate-spin mb-4" />
-            <p className="text-muted-foreground">Loading your jobs...</p>
+            <p className="text-muted-foreground">Cargando tus trabajos...</p>
           </div>
         ) : jobs.length === 0 ? (
           /* Empty State - Friendly message */
@@ -183,9 +183,9 @@ export default function StaffDashboard() {
               <div className="h-20 w-20 rounded-full bg-success/10 flex items-center justify-center mb-6">
                 <Smile className="h-10 w-10 text-success" />
               </div>
-              <h3 className="text-2xl font-bold text-foreground mb-3">All Caught Up!</h3>
+              <h3 className="text-2xl font-bold text-foreground mb-3">🎉 ¡Día libre!</h3>
               <p className="text-muted-foreground text-lg">
-                No jobs scheduled for today. Enjoy your day off!
+                No tienes trabajos programados para hoy. ¡Disfruta tu día!
               </p>
             </CardContent>
           </Card>
@@ -193,7 +193,7 @@ export default function StaffDashboard() {
           <div className="space-y-4">
             {/* Jobs Count */}
             <p className="text-sm text-muted-foreground px-2">
-              {jobs.length} job{jobs.length > 1 ? "s" : ""} scheduled
+              📋 {jobs.length} trabajo{jobs.length > 1 ? "s" : ""} para hoy
             </p>
             
             {jobs.map((job) => {

@@ -182,24 +182,24 @@ export default function Auth() {
     );
   }
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4">
-      <div className="w-full max-w-md space-y-8">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-background via-background to-primary/5 p-4">
+      <div className="w-full max-w-md space-y-6">
         {/* Logo and branding */}
-        <div className="text-center space-y-2">
+        <div className="text-center space-y-3">
           <div className="flex items-center justify-center gap-2">
-            <div className="h-12 w-12 rounded-xl bg-primary flex items-center justify-center">
-              <Sparkles className="h-7 w-7 text-primary-foreground" />
+            <div className="h-14 w-14 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
+              <Sparkles className="h-8 w-8 text-primary-foreground" />
             </div>
-            </div>
-            <h1 className="text-3xl font-bold text-foreground">{t("appName")}</h1>
-            <p className="text-muted-foreground">{t("professionalCleaningManagement")}</p>
           </div>
+          <h1 className="text-3xl font-bold text-foreground">{t("appName")}</h1>
+          <p className="text-muted-foreground">{t("professionalCleaningManagement")}</p>
+        </div>
 
-          <Card className="border-border shadow-lg">
-          <CardHeader className="pb-4">
-            <CardTitle className="text-xl text-center">{t("welcome")}</CardTitle>
-            <CardDescription className="text-center">
-              {t("signInToAccount")}
+        <Card className="border-border shadow-xl">
+          <CardHeader className="pb-2 text-center">
+            <CardTitle className="text-xl">👋 {t("welcome")}</CardTitle>
+            <CardDescription>
+              Inicia sesión o crea tu cuenta gratis
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -256,8 +256,8 @@ export default function Auth() {
                       <p className="text-xs text-destructive">{formErrors.login_password}</p>
                     )}
                   </div>
-                  <Button type="submit" className="w-full" disabled={isSubmitting}>
-                    {isSubmitting ? t("signingIn") : t("login")}
+                  <Button type="submit" className="w-full h-12 text-base" disabled={isSubmitting}>
+                    {isSubmitting ? t("signingIn") : "🚀 Entrar"}
                   </Button>
                 </form>
               </TabsContent>
@@ -352,10 +352,10 @@ export default function Auth() {
                   </div>
                   <Button 
                     type="submit" 
-                    className="w-full" 
+                    className="w-full h-12 text-base" 
                     disabled={isSubmitting || validatePassword(signupPassword).strength === "weak"}
                   >
-                    {isSubmitting ? t("creatingAccount") : t("signup")}
+                    {isSubmitting ? t("creatingAccount") : "✨ Crear mi cuenta gratis"}
                   </Button>
                 </form>
               </TabsContent>
