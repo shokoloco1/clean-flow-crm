@@ -237,30 +237,31 @@ export function InviteStaffDialog({ open, onOpenChange }: InviteStaffDialogProps
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <UserPlus className="h-5 w-5 text-primary" />
-            {step === 1 ? "Agregar Nuevo Empleado" : "Habilidades y Certificaciones"}
+          <DialogTitle className="flex items-center gap-2 text-xl">
+            <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+              <UserPlus className="h-5 w-5 text-primary" />
+            </div>
+            {step === 1 ? "👤 Agregar Empleado" : "🛠️ Habilidades"}
           </DialogTitle>
           <DialogDescription>
             {step === 1 
-              ? "Ingresa los datos básicos del nuevo miembro del equipo"
-              : "Selecciona las habilidades y certificaciones (opcional)"}
+              ? "Paso 1 de 2: Ingresa los datos básicos del nuevo empleado"
+              : "Paso 2 de 2: Selecciona habilidades y certificaciones (opcional)"}
           </DialogDescription>
         </DialogHeader>
 
         {/* Progress indicator */}
         <div className="flex items-center gap-2 mb-4">
-          <div className={`flex-1 h-2 rounded-full ${step >= 1 ? 'bg-primary' : 'bg-muted'}`} />
-          <div className={`flex-1 h-2 rounded-full ${step >= 2 ? 'bg-primary' : 'bg-muted'}`} />
+          <div className={`flex-1 h-2 rounded-full transition-colors ${step >= 1 ? 'bg-primary' : 'bg-muted'}`} />
+          <div className={`flex-1 h-2 rounded-full transition-colors ${step >= 2 ? 'bg-primary' : 'bg-muted'}`} />
         </div>
 
         {step === 1 ? (
-          <div className="space-y-4">
+          <div className="space-y-5">
             {/* Basic Info Section */}
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="fullName" className="flex items-center gap-2">
-                  <User className="h-4 w-4 text-muted-foreground" />
+                <Label htmlFor="fullName" className="text-base font-medium">
                   Nombre Completo *
                 </Label>
                 <Input
@@ -271,7 +272,7 @@ export function InviteStaffDialog({ open, onOpenChange }: InviteStaffDialogProps
                     setFormData({ ...formData, fullName: e.target.value });
                     setErrors({ ...errors, fullName: "" });
                   }}
-                  className={errors.fullName ? "border-destructive" : ""}
+                  className={`h-12 ${errors.fullName ? "border-destructive" : ""}`}
                 />
                 {errors.fullName && (
                   <p className="text-xs text-destructive flex items-center gap-1">
@@ -282,8 +283,7 @@ export function InviteStaffDialog({ open, onOpenChange }: InviteStaffDialogProps
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="email" className="flex items-center gap-2">
-                  <Mail className="h-4 w-4 text-muted-foreground" />
+                <Label htmlFor="email" className="text-base font-medium">
                   Email *
                 </Label>
                 <Input
@@ -295,7 +295,7 @@ export function InviteStaffDialog({ open, onOpenChange }: InviteStaffDialogProps
                     setFormData({ ...formData, email: e.target.value });
                     setErrors({ ...errors, email: "" });
                   }}
-                  className={errors.email ? "border-destructive" : ""}
+                  className={`h-12 ${errors.email ? "border-destructive" : ""}`}
                 />
                 {errors.email && (
                   <p className="text-xs text-destructive flex items-center gap-1">
@@ -303,6 +303,9 @@ export function InviteStaffDialog({ open, onOpenChange }: InviteStaffDialogProps
                     {errors.email}
                   </p>
                 )}
+                <p className="text-xs text-muted-foreground">
+                  Se enviará un email con las instrucciones de acceso
+                </p>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -440,22 +443,22 @@ export function InviteStaffDialog({ open, onOpenChange }: InviteStaffDialogProps
         <DialogFooter className="flex-col sm:flex-row gap-2 mt-4">
           {step === 1 ? (
             <>
-              <Button variant="outline" onClick={handleClose} className="w-full sm:w-auto">
+              <Button variant="outline" onClick={handleClose} className="w-full sm:w-auto h-12">
                 Cancelar
               </Button>
-              <Button onClick={handleNextStep} className="w-full sm:w-auto">
-                Continuar
+              <Button onClick={handleNextStep} className="w-full sm:w-auto h-12">
+                Continuar →
               </Button>
             </>
           ) : (
             <>
-              <Button variant="outline" onClick={() => setStep(1)} className="w-full sm:w-auto">
-                Atrás
+              <Button variant="outline" onClick={() => setStep(1)} className="w-full sm:w-auto h-12">
+                ← Atrás
               </Button>
               <Button 
                 onClick={handleSubmit} 
                 disabled={createStaffMutation.isPending}
-                className="w-full sm:w-auto"
+                className="w-full sm:w-auto h-12"
               >
                 {createStaffMutation.isPending ? (
                   <>
@@ -463,10 +466,7 @@ export function InviteStaffDialog({ open, onOpenChange }: InviteStaffDialogProps
                     Creando...
                   </>
                 ) : (
-                  <>
-                    <UserPlus className="h-4 w-4 mr-2" />
-                    Agregar Empleado
-                  </>
+                  "✨ Agregar Empleado"
                 )}
               </Button>
             </>

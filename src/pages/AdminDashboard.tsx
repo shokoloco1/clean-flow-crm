@@ -236,12 +236,12 @@ export default function AdminDashboard() {
       <header className="bg-card border-b border-border sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg bg-primary flex items-center justify-center">
+            <div className="h-10 w-10 rounded-lg bg-primary flex items-center justify-center shadow-md shadow-primary/20">
               <Sparkles className="h-5 w-5 text-primary-foreground" />
             </div>
             <div>
               <h1 className="text-xl font-bold text-foreground">CleanFlow</h1>
-              <p className="text-sm text-muted-foreground">Admin Dashboard</p>
+              <p className="text-sm text-muted-foreground">Panel de Control</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -250,9 +250,12 @@ export default function AdminDashboard() {
             <Button variant="ghost" size="icon" onClick={showOnboarding} title="Ver tutorial">
               <HelpCircle className="h-5 w-5" />
             </Button>
-            <Button variant="outline" size="sm" onClick={signOut}>
+            <Button variant="outline" size="sm" onClick={signOut} className="hidden sm:flex">
               <LogOut className="h-4 w-4 mr-2" />
               Salir
+            </Button>
+            <Button variant="ghost" size="icon" onClick={signOut} className="sm:hidden">
+              <LogOut className="h-5 w-5" />
             </Button>
           </div>
         </div>

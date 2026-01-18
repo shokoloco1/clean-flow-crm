@@ -67,99 +67,125 @@ export function CreateJobDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Create New Job</DialogTitle>
+          <DialogTitle className="text-xl">📋 Nuevo Trabajo</DialogTitle>
+          <p className="text-sm text-muted-foreground">Llena los campos para programar un trabajo</p>
         </DialogHeader>
-        <div className="space-y-4 mt-4">
-          <div>
-            <Label>Client *</Label>
+        <div className="space-y-5 mt-4">
+          {/* Client Selection */}
+          <div className="space-y-2">
+            <Label className="text-base font-medium">Cliente *</Label>
             <Select 
               value={formData.client_id} 
               onValueChange={handleClientChange}
             >
-              <SelectTrigger>
-                <SelectValue placeholder="Select client" />
+              <SelectTrigger className="h-12">
+                <SelectValue placeholder="👤 Selecciona un cliente" />
               </SelectTrigger>
               <SelectContent>
-                {clients.map(client => (
-                  <SelectItem key={client.id} value={client.id}>
-                    {client.name}
-                  </SelectItem>
-                ))}
+                {clients.length === 0 ? (
+                  <p className="p-4 text-center text-muted-foreground">
+                    No hay clientes. Crea uno primero.
+                  </p>
+                ) : (
+                  clients.map(client => (
+                    <SelectItem key={client.id} value={client.id}>
+                      {client.name}
+                    </SelectItem>
+                  ))
+                )}
               </SelectContent>
             </Select>
           </div>
 
-          <div>
-            <Label>Location *</Label>
+          {/* Location */}
+          <div className="space-y-2">
+            <Label className="text-base font-medium">Dirección *</Label>
             <Input 
+              className="h-12"
               value={formData.location}
               onChange={(e) => onFormChange({ ...formData, location: e.target.value })}
-              placeholder="Enter address"
+              placeholder="📍 Ingresa la dirección del trabajo"
             />
           </div>
 
-          <div>
-            <Label>Assign Staff *</Label>
+          {/* Staff Assignment */}
+          <div className="space-y-2">
+            <Label className="text-base font-medium">Asignar a *</Label>
             <Select 
               value={formData.assigned_staff_id} 
               onValueChange={(v) => onFormChange({ ...formData, assigned_staff_id: v })}
             >
-              <SelectTrigger>
-                <SelectValue placeholder="Select staff member" />
+              <SelectTrigger className="h-12">
+                <SelectValue placeholder="🧹 Selecciona un empleado" />
               </SelectTrigger>
               <SelectContent>
-                {staffList.map(staff => (
-                  <SelectItem key={staff.user_id} value={staff.user_id}>
-                    {staff.full_name}
-                  </SelectItem>
-                ))}
+                {staffList.length === 0 ? (
+                  <p className="p-4 text-center text-muted-foreground">
+                    No hay empleados. Invita uno primero.
+                  </p>
+                ) : (
+                  staffList.map(staff => (
+                    <SelectItem key={staff.user_id} value={staff.user_id}>
+                      {staff.full_name}
+                    </SelectItem>
+                  ))
+                )}
               </SelectContent>
             </Select>
           </div>
 
+          {/* Date & Time */}
           <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label>Date *</Label>
+            <div className="space-y-2">
+              <Label className="text-base font-medium">📅 Fecha</Label>
               <Input 
                 type="date"
+                className="h-12"
                 value={formData.scheduled_date}
                 onChange={(e) => onFormChange({ ...formData, scheduled_date: e.target.value })}
               />
             </div>
-            <div>
-              <Label>Time *</Label>
+            <div className="space-y-2">
+              <Label className="text-base font-medium">🕐 Hora</Label>
               <Input 
                 type="time"
+                className="h-12"
                 value={formData.scheduled_time}
                 onChange={(e) => onFormChange({ ...formData, scheduled_time: e.target.value })}
               />
             </div>
           </div>
 
-          <div>
-            <Label>Task Checklist (one per line)</Label>
+          {/* Checklist */}
+          <div className="space-y-2">
+            <Label className="text-base font-medium">Lista de tareas (opcional)</Label>
             <Textarea 
               value={formData.checklist}
               onChange={(e) => onFormChange({ ...formData, checklist: e.target.value })}
-              placeholder="Empty trash bins&#10;Mop floors&#10;Clean windows"
-              rows={4}
+              placeholder="✓ Vaciar basura&#10;✓ Trapear pisos&#10;✓ Limpiar ventanas"
+              rows={3}
+              className="resize-none"
             />
+            <p className="text-xs text-muted-foreground">Una tarea por línea</p>
           </div>
 
-          <div>
-            <Label>Notes for Staff</Label>
+          {/* Notes */}
+          <div className="space-y-2">
+            <Label className="text-base font-medium">Notas para el empleado (opcional)</Label>
             <Textarea 
               value={formData.notes}
               onChange={(e) => onFormChange({ ...formData, notes: e.target.value })}
-              placeholder="Any special instructions..."
+              placeholder="Instrucciones especiales, códigos de acceso, etc..."
               rows={2}
+              className="resize-none"
             />
           </div>
 
-          <Button onClick={onSubmit} className="w-full">
-            Create Job
+          {/* Submit Button */}
+          <Button onClick={onSubmit} className="w-full h-12 text-base">
+            ✨ Crear Trabajo
           </Button>
         </div>
       </DialogContent>
