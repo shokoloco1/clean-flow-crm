@@ -26,6 +26,8 @@ const SettingsPage = lazy(() => import("./pages/SettingsPage"));
 const InvoicesPage = lazy(() => import("./pages/InvoicesPage"));
 const InstallPage = lazy(() => import("./pages/InstallPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+const PricingPage = lazy(() => import("./pages/PricingPage"));
+const SignupPage = lazy(() => import("./pages/SignupPage"));
 
 const queryClient = new QueryClient();
 
@@ -52,6 +54,8 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/pricing" element={<PricingPage />} />
+            <Route path="/signup" element={<SignupPage />} />
             <Route 
               path="/admin" 
               element={
