@@ -241,6 +241,13 @@ export type Database = {
             referencedRelation: "clients"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "invoices_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients_safe"
+            referencedColumns: ["id"]
+          },
         ]
       }
       job_alerts: {
@@ -407,10 +414,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "jobs_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients_safe"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "jobs_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "jobs_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties_safe"
             referencedColumns: ["id"]
           },
         ]
@@ -511,6 +532,13 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "portal_access_log_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients_safe"
             referencedColumns: ["id"]
           },
         ]
@@ -627,6 +655,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "properties_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients_safe"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "properties_default_checklist_template_id_fkey"
             columns: ["default_checklist_template_id"]
             isOneToOne: false
@@ -666,6 +701,13 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_photos_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties_safe"
             referencedColumns: ["id"]
           },
         ]
@@ -764,10 +806,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "recurring_schedules_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients_safe"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "recurring_schedules_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recurring_schedules_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties_safe"
             referencedColumns: ["id"]
           },
         ]
@@ -852,7 +908,115 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      clients_safe: {
+        Row: {
+          access_codes: string | null
+          address: string | null
+          created_at: string | null
+          email: string | null
+          id: string | null
+          name: string | null
+          notes: string | null
+          phone: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          access_codes?: string | null
+          address?: string | null
+          created_at?: string | null
+          email?: string | null
+          id?: string | null
+          name?: string | null
+          notes?: string | null
+          phone?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          access_codes?: string | null
+          address?: string | null
+          created_at?: string | null
+          email?: string | null
+          id?: string | null
+          name?: string | null
+          notes?: string | null
+          phone?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      properties_safe: {
+        Row: {
+          address: string | null
+          client_id: string | null
+          created_at: string | null
+          default_checklist_template_id: string | null
+          geofence_radius_meters: number | null
+          id: string | null
+          is_active: boolean | null
+          location_lat: number | null
+          location_lng: number | null
+          name: string | null
+          property_type: string | null
+          size_sqm: number | null
+          special_instructions: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          address?: string | null
+          client_id?: string | null
+          created_at?: string | null
+          default_checklist_template_id?: string | null
+          geofence_radius_meters?: number | null
+          id?: string | null
+          is_active?: boolean | null
+          location_lat?: number | null
+          location_lng?: number | null
+          name?: string | null
+          property_type?: string | null
+          size_sqm?: number | null
+          special_instructions?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          address?: string | null
+          client_id?: string | null
+          created_at?: string | null
+          default_checklist_template_id?: string | null
+          geofence_radius_meters?: number | null
+          id?: string | null
+          is_active?: boolean | null
+          location_lat?: number | null
+          location_lng?: number | null
+          name?: string | null
+          property_type?: string | null
+          size_sqm?: number | null
+          special_instructions?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "properties_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "properties_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients_safe"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "properties_default_checklist_template_id_fkey"
+            columns: ["default_checklist_template_id"]
+            isOneToOne: false
+            referencedRelation: "checklist_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       check_login_rate_limit: {
@@ -873,6 +1037,17 @@ export type Database = {
         }
         Returns: string
       }
+      get_client_for_job: {
+        Args: { _job_id: string }
+        Returns: {
+          address: string
+          email: string
+          id: string
+          name: string
+          notes: string
+          phone: string
+        }[]
+      }
       get_client_portal_data: {
         Args: { p_token: string }
         Returns: {
@@ -891,6 +1066,15 @@ export type Database = {
           status: string
         }[]
       }
+      get_login_attempts_for_monitoring: {
+        Args: { p_hours?: number }
+        Returns: {
+          attempted_at: string
+          email: string
+          ip_address: string
+          success: boolean
+        }[]
+      }
       get_user_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
@@ -901,6 +1085,14 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      is_staff_assigned_to_property: {
+        Args: { _property_id: string; _user_id: string }
+        Returns: boolean
+      }
+      promote_user_to_admin: {
+        Args: { _target_user_id: string }
+        Returns: undefined
       }
       record_login_attempt: {
         Args: { p_email: string; p_ip_address?: string; p_success: boolean }
