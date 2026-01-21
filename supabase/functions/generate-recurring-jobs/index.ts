@@ -30,8 +30,63 @@ Deno.serve(async (req) => {
 
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-    const supabase = createClient(supabaseUrl, supabaseKey)
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!
+    
+    // Check for authorization - either admin user or cron secret
+    const authHeader = req.headers.get('Authorization')
+    const cronSecret = req.headers.get('X-Cron-Secret')
+    const expectedCronSecret = Deno.env.get('CRON_SECRET')
+    
+    // Allow access via cron secret (for scheduled jobs)
+    const isCronRequest = expectedCronSecret && cronSecret === expectedCronSecret
+    
+    if (!isCronRequest) {
+      // Require user authentication for non-cron requests
+      if (!authHeader?.startsWith('Bearer ')) {
+        console.log('[generate-recurring-jobs] Unauthorized: No auth header')
+        return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+          status: 401,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
+
+      // Verify the user is an admin
+      const authedClient = createClient(supabaseUrl, supabaseAnonKey, {
+        global: { headers: { Authorization: authHeader } }
+      })
+
+      const token = authHeader.replace('Bearer ', '')
+      const { data: claimsData, error: claimsError } = await authedClient.auth.getClaims(token)
+      
+      if (claimsError || !claimsData?.claims) {
+        console.log('[generate-recurring-jobs] Unauthorized: Invalid token')
+        return new Response(JSON.stringify({ error: 'Invalid token' }), {
+          status: 401,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
+
+      const userId = claimsData.claims.sub
+      
+      // Check admin role using service client
+      const adminCheckClient = createClient(supabaseUrl, supabaseServiceKey)
+      const { data: roleData } = await adminCheckClient
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId)
+        .single()
+
+      if (roleData?.role !== 'admin') {
+        console.log('[generate-recurring-jobs] Forbidden: Admin access required')
+        return new Response(JSON.stringify({ error: 'Admin access required' }), {
+          status: 403,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
     const today = new Date()
     const todayStr = today.toISOString().split('T')[0]
