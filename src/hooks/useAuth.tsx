@@ -72,10 +72,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { error };
   };
 
-  const signUp = async (email: string, password: string, fullName: string, selectedRole: AppRole) => {
+  // Role is now assigned server-side via database trigger (default: staff)
+  // Admin promotion requires an existing admin to use promote_user_to_admin()
+  const signUp = async (email: string, password: string, fullName: string, _role?: AppRole) => {
     const redirectUrl = `${window.location.origin}/`;
     
-    const { data, error } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -84,18 +86,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     });
 
-    if (error) return { error };
-
-    // Create user role after signup
-    if (data.user && selectedRole) {
-      const { error: roleError } = await supabase
-        .from("user_roles")
-        .insert({ user_id: data.user.id, role: selectedRole });
-      
-      if (roleError) return { error: roleError as unknown as Error };
-    }
-
-    return { error: null };
+    // Role is automatically assigned as 'staff' by handle_new_user trigger
+    return { error };
   };
 
   const signOut = async () => {
