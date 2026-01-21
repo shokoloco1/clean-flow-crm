@@ -108,6 +108,7 @@ export type Database = {
           notes: string | null
           phone: string | null
           portal_token: string | null
+          portal_token_expires_at: string | null
           updated_at: string
         }
         Insert: {
@@ -120,6 +121,7 @@ export type Database = {
           notes?: string | null
           phone?: string | null
           portal_token?: string | null
+          portal_token_expires_at?: string | null
           updated_at?: string
         }
         Update: {
@@ -132,6 +134,7 @@ export type Database = {
           notes?: string | null
           phone?: string | null
           portal_token?: string | null
+          portal_token_expires_at?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -473,6 +476,41 @@ export type Database = {
             columns: ["related_job_id"]
             isOneToOne: false
             referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      portal_access_log: {
+        Row: {
+          accessed_at: string
+          action: string | null
+          client_id: string | null
+          id: string
+          ip_address: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          accessed_at?: string
+          action?: string | null
+          client_id?: string | null
+          id?: string
+          ip_address?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          accessed_at?: string
+          action?: string | null
+          client_id?: string | null
+          id?: string
+          ip_address?: string | null
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "portal_access_log_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
             referencedColumns: ["id"]
           },
         ]
@@ -867,6 +905,10 @@ export type Database = {
       record_login_attempt: {
         Args: { p_email: string; p_ip_address?: string; p_success: boolean }
         Returns: undefined
+      }
+      rotate_client_portal_token: {
+        Args: { p_client_id: string; p_validity_days?: number }
+        Returns: string
       }
       validate_client_portal_access: {
         Args: { p_client_id: string; p_token: string }
