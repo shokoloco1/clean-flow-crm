@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useRateLimit } from "@/hooks/useRateLimit";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,8 +9,9 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "sonner";
-import { Sparkles, Shield, Users, Eye, EyeOff } from "lucide-react";
+import { Sparkles, Shield, Users, Eye, EyeOff, AlertTriangle, Lock } from "lucide-react";
 import { signupSchema, loginSchema, validatePassword } from "@/lib/passwordSecurity";
 import { PasswordStrengthIndicator } from "@/components/PasswordStrengthIndicator";
 import { t } from "@/lib/i18n";
@@ -17,18 +19,45 @@ import { t } from "@/lib/i18n";
 export default function Auth() {
   const navigate = useNavigate();
   const { user, session, role, loading, signIn, signUp, signOut, refreshRole } = useAuth();
+  const { rateLimitState, checkRateLimit, recordAttempt, clearRateLimitState } = useRateLimit();
+  
+  const [activeTab, setActiveTab] = useState<"login" | "signup">("login");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Login form state
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
+  
+  // Signup form state
   const [signupEmail, setSignupEmail] = useState("");
   const [signupPassword, setSignupPassword] = useState("");
   const [signupName, setSignupName] = useState("");
   const [signupRole, setSignupRole] = useState<"admin" | "staff">("staff");
+  const [showSignupPassword, setShowSignupPassword] = useState(false);
+  
   const [isBootstrapping, setIsBootstrapping] = useState(false);
   const [bootstrapTried, setBootstrapTried] = useState(false);
-  const [showLoginPassword, setShowLoginPassword] = useState(false);
-  const [showSignupPassword, setShowSignupPassword] = useState(false);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+
+  // Reset form state when switching tabs
+  const handleTabChange = (value: string) => {
+    setActiveTab(value as "login" | "signup");
+    setFormErrors({});
+    clearRateLimitState();
+    
+    // Reset login form
+    setLoginEmail("");
+    setLoginPassword("");
+    setShowLoginPassword(false);
+    
+    // Reset signup form
+    setSignupEmail("");
+    setSignupPassword("");
+    setSignupName("");
+    setSignupRole("staff");
+    setShowSignupPassword(false);
+  };
 
   useEffect(() => {
     if (!loading && user && role) {
@@ -65,7 +94,14 @@ export default function Auth() {
     e.preventDefault();
     setFormErrors({});
     
-    // Validar con zod
+    // Check rate limiting first
+    const isBlocked = await checkRateLimit(loginEmail);
+    if (isBlocked) {
+      toast.error(`Demasiados intentos fallidos. Intenta de nuevo en ${rateLimitState.remainingMinutes} minutos.`);
+      return;
+    }
+    
+    // Validate with zod
     const result = loginSchema.safeParse({
       email: loginEmail,
       password: loginPassword
@@ -86,8 +122,10 @@ export default function Auth() {
     const { error } = await signIn(loginEmail, loginPassword);
     
     if (error) {
+      await recordAttempt(loginEmail, false);
       toast.error(t("invalidCredentials"));
     } else {
+      await recordAttempt(loginEmail, true);
       toast.success(t("welcomeBack"));
     }
     
@@ -98,7 +136,7 @@ export default function Auth() {
     e.preventDefault();
     setFormErrors({});
     
-    // Validar con zod
+    // Validate with zod
     const result = signupSchema.safeParse({
       email: signupEmail,
       password: signupPassword,
@@ -181,6 +219,7 @@ export default function Auth() {
       </div>
     );
   }
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-background via-background to-primary/5 p-4">
       <div className="w-full max-w-md space-y-6">
@@ -203,13 +242,32 @@ export default function Auth() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Tabs defaultValue="login" className="w-full">
+            <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
               <TabsList className="grid w-full grid-cols-2 mb-6">
                 <TabsTrigger value="login">{t("login")}</TabsTrigger>
                 <TabsTrigger value="signup">{t("signup")}</TabsTrigger>
               </TabsList>
               
               <TabsContent value="login">
+                {/* Rate limit warning */}
+                {rateLimitState.isBlocked && (
+                  <Alert variant="destructive" className="mb-4">
+                    <Lock className="h-4 w-4" />
+                    <AlertDescription>
+                      Cuenta bloqueada temporalmente. Intenta de nuevo en {rateLimitState.remainingMinutes} minutos.
+                    </AlertDescription>
+                  </Alert>
+                )}
+                
+                {rateLimitState.failedAttempts > 0 && !rateLimitState.isBlocked && (
+                  <Alert variant="default" className="mb-4 border-warning/50 bg-warning/10">
+                    <AlertTriangle className="h-4 w-4 text-warning" />
+                    <AlertDescription className="text-warning-foreground">
+                      {5 - rateLimitState.failedAttempts} intentos restantes antes del bloqueo.
+                    </AlertDescription>
+                  </Alert>
+                )}
+                
                 <form onSubmit={handleLogin} className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="login-email">Email</Label>
@@ -223,6 +281,7 @@ export default function Auth() {
                         setFormErrors((prev) => ({ ...prev, login_email: "" }));
                       }}
                       className={formErrors.login_email ? "border-destructive" : ""}
+                      disabled={rateLimitState.isBlocked}
                       required
                     />
                     {formErrors.login_email && (
@@ -242,12 +301,14 @@ export default function Auth() {
                           setFormErrors((prev) => ({ ...prev, login_password: "" }));
                         }}
                         className={formErrors.login_password ? "border-destructive pr-10" : "pr-10"}
+                        disabled={rateLimitState.isBlocked}
                         required
                       />
                       <button
                         type="button"
                         onClick={() => setShowLoginPassword(!showLoginPassword)}
                         className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                        disabled={rateLimitState.isBlocked}
                       >
                         {showLoginPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </button>
@@ -256,7 +317,11 @@ export default function Auth() {
                       <p className="text-xs text-destructive">{formErrors.login_password}</p>
                     )}
                   </div>
-                  <Button type="submit" className="w-full h-12 text-base" disabled={isSubmitting}>
+                  <Button 
+                    type="submit" 
+                    className="w-full h-12 text-base" 
+                    disabled={isSubmitting || rateLimitState.isBlocked}
+                  >
                     {isSubmitting ? t("signingIn") : "🚀 Entrar"}
                   </Button>
                 </form>

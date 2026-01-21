@@ -9,6 +9,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { OnboardingProvider } from "@/components/OnboardingProvider";
 import { PWAInstallBanner } from "@/components/PWAInstallBanner";
 import { OfflineIndicator } from "@/components/OfflineIndicator";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 
@@ -42,111 +43,115 @@ const PageLoader = () => (
 );
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <OfflineIndicator />
-      <BrowserRouter>
-        <AuthProvider>
-          <OnboardingProvider>
-          <Suspense fallback={<PageLoader />}>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/pricing" element={<PricingPage />} />
-            <Route path="/signup" element={<SignupPage />} />
-            <Route 
-              path="/admin" 
-              element={
-                <ProtectedRoute allowedRoles={["admin"]}>
-                  <AdminDashboard />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/admin/properties" 
-              element={
-                <ProtectedRoute allowedRoles={["admin"]}>
-                  <PropertiesPage />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/admin/checklists" 
-              element={
-                <ProtectedRoute allowedRoles={["admin"]}>
-                  <ChecklistTemplatesPage />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/admin/staff" 
-              element={
-                <ProtectedRoute allowedRoles={["admin"]}>
-                  <StaffManagementPage />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/admin/calendar" 
-              element={
-                <ProtectedRoute allowedRoles={["admin"]}>
-                  <CalendarPage />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/admin/clients" 
-              element={
-                <ProtectedRoute allowedRoles={["admin"]}>
-                  <ClientsPage />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/admin/recurring" 
-              element={
-                <ProtectedRoute allowedRoles={["admin"]}>
-                  <RecurringJobsPage />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/admin/settings" 
-            element={
-              <ProtectedRoute allowedRoles={["admin"]}>
-                <SettingsPage />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/admin/invoices" 
-            element={
-              <ProtectedRoute allowedRoles={["admin"]}>
-                <InvoicesPage />
-              </ProtectedRoute>
-            } 
-          />
-            <Route 
-              path="/staff"
-              element={
-                <ProtectedRoute allowedRoles={["staff"]}>
-                  <StaffDashboard />
-                </ProtectedRoute>
-              } 
-            />
-            <Route path="/portal" element={<ClientPortal />} />
-            <Route path="/install" element={<InstallPage />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-          </Suspense>
-          <PWAInstallBanner />
-          </OnboardingProvider>
-        </AuthProvider>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
+  <ErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <OfflineIndicator />
+        <BrowserRouter>
+          <AuthProvider>
+            <OnboardingProvider>
+              <ErrorBoundary>
+                <Suspense fallback={<PageLoader />}>
+                  <Routes>
+                    <Route path="/" element={<Index />} />
+                    <Route path="/auth" element={<Auth />} />
+                    <Route path="/pricing" element={<PricingPage />} />
+                    <Route path="/signup" element={<SignupPage />} />
+                    <Route 
+                      path="/admin" 
+                      element={
+                        <ProtectedRoute allowedRoles={["admin"]}>
+                          <AdminDashboard />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    <Route 
+                      path="/admin/properties" 
+                      element={
+                        <ProtectedRoute allowedRoles={["admin"]}>
+                          <PropertiesPage />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    <Route 
+                      path="/admin/checklists" 
+                      element={
+                        <ProtectedRoute allowedRoles={["admin"]}>
+                          <ChecklistTemplatesPage />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    <Route 
+                      path="/admin/staff" 
+                      element={
+                        <ProtectedRoute allowedRoles={["admin"]}>
+                          <StaffManagementPage />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    <Route 
+                      path="/admin/calendar" 
+                      element={
+                        <ProtectedRoute allowedRoles={["admin"]}>
+                          <CalendarPage />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    <Route 
+                      path="/admin/clients" 
+                      element={
+                        <ProtectedRoute allowedRoles={["admin"]}>
+                          <ClientsPage />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    <Route 
+                      path="/admin/recurring" 
+                      element={
+                        <ProtectedRoute allowedRoles={["admin"]}>
+                          <RecurringJobsPage />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    <Route 
+                      path="/admin/settings" 
+                      element={
+                        <ProtectedRoute allowedRoles={["admin"]}>
+                          <SettingsPage />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    <Route 
+                      path="/admin/invoices" 
+                      element={
+                        <ProtectedRoute allowedRoles={["admin"]}>
+                          <InvoicesPage />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    <Route 
+                      path="/staff"
+                      element={
+                        <ProtectedRoute allowedRoles={["staff"]}>
+                          <StaffDashboard />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    <Route path="/portal" element={<ClientPortal />} />
+                    <Route path="/install" element={<InstallPage />} />
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </Suspense>
+              </ErrorBoundary>
+              <PWAInstallBanner />
+            </OnboardingProvider>
+          </AuthProvider>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  </ErrorBoundary>
 );
 
 export default App;
