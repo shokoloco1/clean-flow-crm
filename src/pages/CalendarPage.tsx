@@ -144,7 +144,6 @@ export default function CalendarPage() {
         .order("scheduled_date", { ascending: true });
 
       if (jobsError) {
-        console.error("Error loading jobs:", jobsError);
         toast.error("Error loading jobs: " + jobsError.message);
         setLoading(false);
         return;
@@ -177,7 +176,6 @@ export default function CalendarPage() {
       setJobs(typedJobs);
       setEvents(transformJobsToEvents(typedJobs));
     } catch (err) {
-      console.error("Unexpected error:", err);
       toast.error("Unexpected error loading jobs");
     } finally {
       setLoading(false);

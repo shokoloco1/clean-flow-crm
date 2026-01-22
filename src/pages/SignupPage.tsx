@@ -107,7 +107,6 @@ const SignupPage = () => {
         navigate("/admin");
       }
     } catch (error: any) {
-      console.error("Signup error:", error);
       toast.error("Failed to create account", {
         description: error.message || "Please try again later.",
       });

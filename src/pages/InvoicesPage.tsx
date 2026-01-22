@@ -86,7 +86,6 @@ export default function InvoicesPage() {
 
     if (error) {
       toast.error("Error al cargar facturas");
-      console.error(error);
     } else {
       setInvoices(data as Invoice[]);
     }

@@ -41,7 +41,7 @@ export function useNotifications() {
       setNotifications(notifs);
       setUnreadCount(notifs.filter(n => !n.is_read).length);
     } catch (error) {
-      console.error('Error fetching notifications:', error);
+      // Silent fail - notifications are non-critical
     } finally {
       setLoading(false);
     }
@@ -61,7 +61,7 @@ export function useNotifications() {
       );
       setUnreadCount(prev => Math.max(0, prev - 1));
     } catch (error) {
-      console.error('Error marking notification as read:', error);
+      // Silent fail
     }
   }, []);
 
@@ -80,7 +80,7 @@ export function useNotifications() {
       setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
       setUnreadCount(0);
     } catch (error) {
-      console.error('Error marking all notifications as read:', error);
+      // Silent fail
     }
   }, [user]);
 
@@ -100,7 +100,7 @@ export function useNotifications() {
         setUnreadCount(prev => Math.max(0, prev - 1));
       }
     } catch (error) {
-      console.error('Error deleting notification:', error);
+      // Silent fail
     }
   }, [notifications]);
 
@@ -118,7 +118,7 @@ export function useNotifications() {
       setNotifications([]);
       setUnreadCount(0);
     } catch (error) {
-      console.error('Error clearing notifications:', error);
+      // Silent fail
     }
   }, [user]);
 
