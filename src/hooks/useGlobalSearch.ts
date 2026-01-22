@@ -139,7 +139,7 @@ export function useGlobalSearch() {
 
       setResults(searchResults);
     } catch (error) {
-      console.error("Search error:", error);
+      // Search failed - user sees empty results
     } finally {
       setLoading(false);
     }

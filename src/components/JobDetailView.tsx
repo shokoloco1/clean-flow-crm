@@ -109,7 +109,6 @@ export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewPr
           });
         },
         (error) => {
-          console.error("GPS Error:", error);
           toast.warning("No se pudo capturar ubicación GPS.");
           resolve(null);
         },

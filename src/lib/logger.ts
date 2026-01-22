@@ -1,4 +1,5 @@
 // Simple logging utility for debugging and error tracking
+// Only logs to console in development mode for production safety
 // Can be extended to integrate with services like Sentry, LogRocket, etc.
 
 type LogLevel = "info" | "warn" | "error" | "debug";
@@ -12,6 +13,9 @@ interface LogEntry {
 
 const logs: LogEntry[] = [];
 const MAX_LOGS = 100;
+
+// Check if we're in development mode
+const isDev = import.meta.env.DEV;
 
 function formatLog(level: LogLevel, message: string, data?: unknown): LogEntry {
   return {
@@ -32,19 +36,26 @@ function persistLog(entry: LogEntry) {
 export const logger = {
   info: (message: string, data?: unknown) => {
     const entry = formatLog("info", message, data);
-    console.log(`[INFO] ${message}`, data ?? "");
+    if (isDev) {
+      console.log(`[INFO] ${message}`, data ?? "");
+    }
     persistLog(entry);
   },
 
   warn: (message: string, data?: unknown) => {
     const entry = formatLog("warn", message, data);
-    console.warn(`[WARN] ${message}`, data ?? "");
+    if (isDev) {
+      console.warn(`[WARN] ${message}`, data ?? "");
+    }
     persistLog(entry);
   },
 
   error: (message: string, error?: unknown) => {
     const entry = formatLog("error", message, error);
-    console.error(`[ERROR] ${message}`, error ?? "");
+    // Always log errors but only to console in dev
+    if (isDev) {
+      console.error(`[ERROR] ${message}`, error ?? "");
+    }
     persistLog(entry);
     
     // Here you could integrate with error tracking services
@@ -52,7 +63,7 @@ export const logger = {
   },
 
   debug: (message: string, data?: unknown) => {
-    if (import.meta.env.DEV) {
+    if (isDev) {
       const entry = formatLog("debug", message, data);
       console.debug(`[DEBUG] ${message}`, data ?? "");
       persistLog(entry);

@@ -97,7 +97,6 @@ export default function ClientPortal() {
       setToken(accessToken);
       setAuthenticated(true);
     } catch (err: any) {
-      console.error("Portal error:", err);
       setError("Error al acceder al portal. Verifica tu código de acceso.");
       setAuthenticated(false);
     }

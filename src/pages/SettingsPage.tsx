@@ -70,7 +70,6 @@ export default function SettingsPage() {
         setSettings(newSettings);
       }
     } catch (error) {
-      console.error("Error fetching settings:", error);
       toast({
         title: "Error",
         description: "No se pudieron cargar las configuraciones",
@@ -106,7 +105,6 @@ export default function SettingsPage() {
         description: "Los cambios se han guardado correctamente",
       });
     } catch (error) {
-      console.error("Error saving settings:", error);
       toast({
         title: "Error",
         description: "No se pudieron guardar las configuraciones",

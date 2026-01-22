@@ -160,7 +160,7 @@ export function useGeofence() {
       });
 
     if (error) {
-      console.error("Failed to create alert:", error);
+      // Alert creation failed - non-blocking
     }
   }, []);
 

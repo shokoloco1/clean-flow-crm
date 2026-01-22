@@ -23,7 +23,6 @@ export function useRateLimit() {
       });
 
       if (error) {
-        console.error("Error checking rate limit:", error);
         return false; // Allow login attempt if check fails
       }
 
@@ -49,7 +48,6 @@ export function useRateLimit() {
 
       return false;
     } catch (err) {
-      console.error("Rate limit check error:", err);
       return false;
     }
   }, []);
@@ -76,7 +74,7 @@ export function useRateLimit() {
           });
         }
       } catch (err) {
-        console.error("Error recording login attempt:", err);
+        // Silently fail - don't block user action
       }
     },
     [checkRateLimit]

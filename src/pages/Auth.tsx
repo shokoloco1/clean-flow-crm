@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "sonner";
-import { Sparkles, Shield, Users, Eye, EyeOff, AlertTriangle, Lock } from "lucide-react";
+import { Sparkles, Shield, Users, Eye, EyeOff, AlertTriangle, Lock, CheckCircle } from "lucide-react";
 import { signupSchema, loginSchema, validatePassword } from "@/lib/passwordSecurity";
 import { PasswordStrengthIndicator } from "@/components/PasswordStrengthIndicator";
 import { t } from "@/lib/i18n";
@@ -23,6 +23,9 @@ export default function Auth() {
   
   const [activeTab, setActiveTab] = useState<"login" | "signup">("login");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showResetForm, setShowResetForm] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
+  const [resetSent, setResetSent] = useState(false);
   
   // Login form state
   const [loginEmail, setLoginEmail] = useState("");
@@ -45,6 +48,8 @@ export default function Auth() {
     setActiveTab(value as "login" | "signup");
     setFormErrors({});
     clearRateLimitState();
+    setShowResetForm(false);
+    setResetSent(false);
     
     // Reset login form
     setLoginEmail("");
@@ -57,6 +62,30 @@ export default function Auth() {
     setSignupName("");
     setSignupRole("staff");
     setShowSignupPassword(false);
+  };
+
+  const handlePasswordReset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!resetEmail) {
+      toast.error("Por favor ingresa tu email");
+      return;
+    }
+    
+    setIsSubmitting(true);
+    
+    const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+      redirectTo: `${window.location.origin}/auth?reset=true`,
+    });
+    
+    if (error) {
+      toast.error(error.message || "Error al enviar el email");
+    } else {
+      setResetSent(true);
+      toast.success("Email enviado. Revisa tu bandeja de entrada.");
+    }
+    
+    setIsSubmitting(false);
   };
 
   useEffect(() => {
@@ -249,82 +278,156 @@ export default function Auth() {
               </TabsList>
               
               <TabsContent value="login">
-                {/* Rate limit warning */}
-                {rateLimitState.isBlocked && (
-                  <Alert variant="destructive" className="mb-4">
-                    <Lock className="h-4 w-4" />
-                    <AlertDescription>
-                      Cuenta bloqueada temporalmente. Intenta de nuevo en {rateLimitState.remainingMinutes} minutos.
-                    </AlertDescription>
-                  </Alert>
-                )}
-                
-                {rateLimitState.failedAttempts > 0 && !rateLimitState.isBlocked && (
-                  <Alert variant="default" className="mb-4 border-warning/50 bg-warning/10">
-                    <AlertTriangle className="h-4 w-4 text-warning" />
-                    <AlertDescription className="text-warning-foreground">
-                      {5 - rateLimitState.failedAttempts} intentos restantes antes del bloqueo.
-                    </AlertDescription>
-                  </Alert>
-                )}
-                
-                <form onSubmit={handleLogin} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="login-email">Email</Label>
-                    <Input
-                      id="login-email"
-                      type="email"
-                      placeholder="tu@ejemplo.com"
-                      value={loginEmail}
-                      onChange={(e) => {
-                        setLoginEmail(e.target.value);
-                        setFormErrors((prev) => ({ ...prev, login_email: "" }));
-                      }}
-                      className={formErrors.login_email ? "border-destructive" : ""}
-                      disabled={rateLimitState.isBlocked}
-                      required
-                    />
-                    {formErrors.login_email && (
-                      <p className="text-xs text-destructive">{formErrors.login_email}</p>
+                {/* Password Reset Form */}
+                {showResetForm ? (
+                  <div className="space-y-4">
+                    {resetSent ? (
+                      <div className="text-center space-y-4">
+                        <div className="h-16 w-16 rounded-full bg-success/10 flex items-center justify-center mx-auto">
+                          <CheckCircle className="h-8 w-8 text-success" />
+                        </div>
+                        <h3 className="font-semibold text-foreground">¡Email enviado!</h3>
+                        <p className="text-sm text-muted-foreground">
+                          Revisa tu bandeja de entrada en <strong>{resetEmail}</strong> y sigue las instrucciones.
+                        </p>
+                        <Button 
+                          variant="outline" 
+                          className="w-full"
+                          onClick={() => {
+                            setShowResetForm(false);
+                            setResetSent(false);
+                            setResetEmail("");
+                          }}
+                        >
+                          Volver al login
+                        </Button>
+                      </div>
+                    ) : (
+                      <form onSubmit={handlePasswordReset} className="space-y-4">
+                        <div className="text-center mb-4">
+                          <h3 className="font-semibold text-foreground">¿Olvidaste tu contraseña?</h3>
+                          <p className="text-sm text-muted-foreground">
+                            Ingresa tu email y te enviaremos un enlace para restablecerla.
+                          </p>
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="reset-email">Email</Label>
+                          <Input
+                            id="reset-email"
+                            type="email"
+                            placeholder="tu@ejemplo.com"
+                            value={resetEmail}
+                            onChange={(e) => setResetEmail(e.target.value)}
+                            required
+                          />
+                        </div>
+                        <Button 
+                          type="submit" 
+                          className="w-full"
+                          disabled={isSubmitting}
+                        >
+                          {isSubmitting ? "Enviando..." : "Enviar enlace"}
+                        </Button>
+                        <Button 
+                          type="button"
+                          variant="ghost" 
+                          className="w-full"
+                          onClick={() => setShowResetForm(false)}
+                        >
+                          Volver al login
+                        </Button>
+                      </form>
                     )}
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="login-password">Contraseña</Label>
-                    <div className="relative">
-                      <Input
-                        id="login-password"
-                        type={showLoginPassword ? "text" : "password"}
-                        placeholder="••••••••"
-                        value={loginPassword}
-                        onChange={(e) => {
-                          setLoginPassword(e.target.value);
-                          setFormErrors((prev) => ({ ...prev, login_password: "" }));
-                        }}
-                        className={formErrors.login_password ? "border-destructive pr-10" : "pr-10"}
-                        disabled={rateLimitState.isBlocked}
-                        required
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowLoginPassword(!showLoginPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                        disabled={rateLimitState.isBlocked}
+                ) : (
+                  <>
+                    {/* Rate limit warning */}
+                    {rateLimitState.isBlocked && (
+                      <Alert variant="destructive" className="mb-4">
+                        <Lock className="h-4 w-4" />
+                        <AlertDescription>
+                          Cuenta bloqueada temporalmente. Intenta de nuevo en {rateLimitState.remainingMinutes} minutos.
+                        </AlertDescription>
+                      </Alert>
+                    )}
+                    
+                    {rateLimitState.failedAttempts > 0 && !rateLimitState.isBlocked && (
+                      <Alert variant="default" className="mb-4 border-warning/50 bg-warning/10">
+                        <AlertTriangle className="h-4 w-4 text-warning" />
+                        <AlertDescription className="text-warning-foreground">
+                          {5 - rateLimitState.failedAttempts} intentos restantes antes del bloqueo.
+                        </AlertDescription>
+                      </Alert>
+                    )}
+                    
+                    <form onSubmit={handleLogin} className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="login-email">Email</Label>
+                        <Input
+                          id="login-email"
+                          type="email"
+                          placeholder="tu@ejemplo.com"
+                          value={loginEmail}
+                          onChange={(e) => {
+                            setLoginEmail(e.target.value);
+                            setFormErrors((prev) => ({ ...prev, login_email: "" }));
+                          }}
+                          className={formErrors.login_email ? "border-destructive" : ""}
+                          disabled={rateLimitState.isBlocked}
+                          required
+                        />
+                        {formErrors.login_email && (
+                          <p className="text-xs text-destructive">{formErrors.login_email}</p>
+                        )}
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <Label htmlFor="login-password">Contraseña</Label>
+                          <button
+                            type="button"
+                            onClick={() => setShowResetForm(true)}
+                            className="text-xs text-primary hover:underline"
+                          >
+                            ¿Olvidaste tu contraseña?
+                          </button>
+                        </div>
+                        <div className="relative">
+                          <Input
+                            id="login-password"
+                            type={showLoginPassword ? "text" : "password"}
+                            placeholder="••••••••"
+                            value={loginPassword}
+                            onChange={(e) => {
+                              setLoginPassword(e.target.value);
+                              setFormErrors((prev) => ({ ...prev, login_password: "" }));
+                            }}
+                            className={formErrors.login_password ? "border-destructive pr-10" : "pr-10"}
+                            disabled={rateLimitState.isBlocked}
+                            required
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowLoginPassword(!showLoginPassword)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                            disabled={rateLimitState.isBlocked}
+                          >
+                            {showLoginPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          </button>
+                        </div>
+                        {formErrors.login_password && (
+                          <p className="text-xs text-destructive">{formErrors.login_password}</p>
+                        )}
+                      </div>
+                      <Button 
+                        type="submit" 
+                        className="w-full h-12 text-base" 
+                        disabled={isSubmitting || rateLimitState.isBlocked}
                       >
-                        {showLoginPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                      </button>
-                    </div>
-                    {formErrors.login_password && (
-                      <p className="text-xs text-destructive">{formErrors.login_password}</p>
-                    )}
-                  </div>
-                  <Button 
-                    type="submit" 
-                    className="w-full h-12 text-base" 
-                    disabled={isSubmitting || rateLimitState.isBlocked}
-                  >
-                    {isSubmitting ? t("signingIn") : "🚀 Entrar"}
-                  </Button>
-                </form>
+                        {isSubmitting ? t("signingIn") : "🚀 Entrar"}
+                      </Button>
+                    </form>
+                  </>
+                )}
               </TabsContent>
               
               <TabsContent value="signup">

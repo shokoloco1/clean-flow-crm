@@ -23,7 +23,8 @@ export class ErrorBoundary extends React.Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error("Error caught by boundary:", error, errorInfo);
+    // Error is already captured by getDerivedStateFromError
+    // In production, this would be sent to error tracking service
   }
 
   handleReload = () => {
