@@ -34,7 +34,7 @@ interface Job {
   end_time: string | null;
   notes: string | null;
   property_id: string | null;
-  clients: { name: string; access_codes: string | null } | null;
+  clients: { name: string } | null;
 }
 
 interface JobPhoto {
@@ -66,12 +66,22 @@ export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewPr
   const [photoType, setPhotoType] = useState<'before' | 'after'>('before');
   const [geofenceResult, setGeofenceResult] = useState<GeofenceResult | null>(null);
   const [geofenceChecked, setGeofenceChecked] = useState(false);
+  const [accessCode, setAccessCode] = useState<string | null>(null);
   
   const { validateGeofence, createGeofenceAlert, isChecking, error: geofenceError, clearError } = useGeofence();
 
   useEffect(() => {
     fetchPhotos();
+    fetchAccessCode();
   }, [job.id]);
+
+  const fetchAccessCode = async () => {
+    // Use secure function to get access code (only available within 2 hours of scheduled time)
+    const { data, error } = await supabase.rpc('get_job_access_code', { _job_id: job.id });
+    if (!error && data) {
+      setAccessCode(data);
+    }
+  };
 
   const fetchPhotos = async () => {
     const { data } = await supabase
@@ -338,16 +348,19 @@ export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewPr
           </CardContent>
         </Card>
 
-        {/* Access Codes (if available) */}
-        {currentJob.clients?.access_codes && (
+        {/* Access Codes - Only shown if within time window (2 hours before/after) */}
+        {accessCode && (
           <Card className="border-warning/50 bg-warning/5 shadow-sm">
             <CardContent className="p-5">
               <div className="flex items-center gap-2 mb-2">
                 <AlertTriangle className="h-5 w-5 text-warning" />
-                <span className="font-semibold text-foreground">Access Codes</span>
+                <span className="font-semibold text-foreground">Códigos de Acceso</span>
               </div>
               <p className="text-foreground ml-7 text-base font-mono">
-                {currentJob.clients.access_codes}
+                {accessCode}
+              </p>
+              <p className="text-muted-foreground text-xs ml-7 mt-1">
+                Solo visible 2h antes/después del horario programado
               </p>
             </CardContent>
           </Card>

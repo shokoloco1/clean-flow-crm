@@ -28,7 +28,7 @@ interface Job {
   end_time: string | null;
   notes: string | null;
   property_id: string | null;
-  clients: { name: string; access_codes: string | null } | null;
+  clients: { name: string } | null;
 }
 
 export default function StaffDashboard() {
@@ -80,7 +80,7 @@ export default function StaffDashboard() {
         end_time,
         notes,
         property_id,
-        clients (name, access_codes)
+        clients (name)
       `)
       .eq("assigned_staff_id", user?.id)
       .eq("scheduled_date", today)

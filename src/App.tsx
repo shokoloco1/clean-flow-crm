@@ -29,6 +29,8 @@ const InstallPage = lazy(() => import("./pages/InstallPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const PricingPage = lazy(() => import("./pages/PricingPage"));
 const SignupPage = lazy(() => import("./pages/SignupPage"));
+const TermsPage = lazy(() => import("./pages/TermsPage"));
+const PrivacyPage = lazy(() => import("./pages/PrivacyPage"));
 
 const queryClient = new QueryClient();
 
@@ -141,6 +143,8 @@ const App = () => (
                     />
                     <Route path="/portal" element={<ClientPortal />} />
                     <Route path="/install" element={<InstallPage />} />
+                    <Route path="/terms" element={<TermsPage />} />
+                    <Route path="/privacy" element={<PrivacyPage />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </Suspense>

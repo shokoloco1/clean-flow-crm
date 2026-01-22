@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -232,12 +232,24 @@ export default function Index() {
       {/* Footer */}
       <footer className="py-8 border-t border-border">
         <div className="container mx-auto px-4 text-center">
-          <div className="flex items-center justify-center gap-2 mb-2">
+          <div className="flex items-center justify-center gap-2 mb-4">
             <Sparkles className="h-5 w-5 text-primary" />
             <span className="font-bold text-foreground">{t("appName")}</span>
           </div>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-muted-foreground mb-4">
             {t("streamlineOperations")}
+          </p>
+          <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground">
+            <Link to="/terms" className="hover:text-foreground transition-colors">
+              Términos de Servicio
+            </Link>
+            <span>•</span>
+            <Link to="/privacy" className="hover:text-foreground transition-colors">
+              Política de Privacidad
+            </Link>
+          </div>
+          <p className="text-xs text-muted-foreground mt-4">
+            © {new Date().getFullYear()} CleanFlow. Todos los derechos reservados.
           </p>
         </div>
       </footer>
