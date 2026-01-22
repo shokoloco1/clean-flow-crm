@@ -594,6 +594,36 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles_sensitive: {
+        Row: {
+          created_at: string
+          emergency_contact_name: string | null
+          emergency_contact_phone: string | null
+          hourly_rate: number | null
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          emergency_contact_name?: string | null
+          emergency_contact_phone?: string | null
+          hourly_rate?: number | null
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          emergency_contact_name?: string | null
+          emergency_contact_phone?: string | null
+          hourly_rate?: number | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       properties: {
         Row: {
           access_codes: string | null
@@ -910,7 +940,6 @@ export type Database = {
     Views: {
       clients_safe: {
         Row: {
-          access_codes: string | null
           address: string | null
           created_at: string | null
           email: string | null
@@ -921,7 +950,6 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
-          access_codes?: string | null
           address?: string | null
           created_at?: string | null
           email?: string | null
@@ -932,7 +960,6 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
-          access_codes?: string | null
           address?: string | null
           created_at?: string | null
           email?: string | null
@@ -941,6 +968,48 @@ export type Database = {
           notes?: string | null
           phone?: string | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      profiles_safe: {
+        Row: {
+          certifications: Json | null
+          created_at: string | null
+          email: string | null
+          full_name: string | null
+          hire_date: string | null
+          id: string | null
+          is_active: boolean | null
+          phone: string | null
+          skills: Json | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          certifications?: Json | null
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          hire_date?: string | null
+          id?: string | null
+          is_active?: boolean | null
+          phone?: string | null
+          skills?: Json | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          certifications?: Json | null
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          hire_date?: string | null
+          id?: string | null
+          is_active?: boolean | null
+          phone?: string | null
+          skills?: Json | null
+          updated_at?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -1066,6 +1135,7 @@ export type Database = {
           status: string
         }[]
       }
+      get_job_access_code: { Args: { _job_id: string }; Returns: string }
       get_login_attempts_for_monitoring: {
         Args: { p_hours?: number }
         Returns: {
