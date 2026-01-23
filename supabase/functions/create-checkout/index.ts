@@ -66,6 +66,9 @@ serve(async (req) => {
       cancel_url: `${origin}/pricing?checkout=canceled`,
       allow_promotion_codes: true,
       billing_address_collection: "required",
+      subscription_data: {
+        trial_period_days: 5,
+      },
     });
 
     logStep("Checkout session created", { sessionId: session.id, url: session.url });
