@@ -1,14 +1,42 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import { Check, Sparkles, Building2, Users, CreditCard, Shield } from "lucide-react";
+import { Link, useSearchParams } from "react-router-dom";
+import { Check, Sparkles, Building2, Users, CreditCard, Shield, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { useSubscription, PRICE_IDS } from "@/hooks/useSubscription";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
 
 const PricingPage = () => {
   const [isAnnual, setIsAnnual] = useState(false);
+  const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+  const [searchParams] = useSearchParams();
+  const { user } = useAuth();
+  const { subscribed, plan: currentPlan, createCheckout } = useSubscription();
+
+  // Show message if checkout was canceled
+  if (searchParams.get("checkout") === "canceled") {
+    toast.info("Checkout cancelado", { id: "checkout-canceled" });
+  }
+
+  const handleSubscribe = async (planKey: keyof typeof PRICE_IDS) => {
+    if (!user) {
+      toast.error("Debes iniciar sesión para suscribirte");
+      return;
+    }
+
+    setLoadingPlan(planKey);
+    try {
+      await createCheckout(planKey, isAnnual);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Error al iniciar checkout");
+    } finally {
+      setLoadingPlan(null);
+    }
+  };
 
   const plans = [
     {
@@ -34,6 +62,7 @@ const PricingPage = () => {
       ctaVariant: "outline" as const,
       highlighted: false,
       icon: Users,
+      planKey: "starter" as const,
     },
     {
       name: "Professional",
@@ -57,6 +86,7 @@ const PricingPage = () => {
       ctaVariant: "default" as const,
       highlighted: true,
       icon: Sparkles,
+      planKey: "professional" as const,
     },
     {
       name: "Business",
@@ -80,6 +110,7 @@ const PricingPage = () => {
       ctaVariant: "outline" as const,
       highlighted: false,
       icon: Building2,
+      planKey: "business" as const,
     },
   ];
 
@@ -222,14 +253,23 @@ const PricingPage = () => {
                   </ul>
                 </CardContent>
                 <CardFooter className="pt-4">
-                  <Link to={plan.cta === "Contact Sales" ? "/contact" : "/signup"} className="w-full">
+                  {currentPlan === plan.planKey ? (
+                    <Badge className="w-full justify-center py-2" variant="secondary">
+                      Tu plan actual
+                    </Badge>
+                  ) : (
                     <Button
                       variant={plan.ctaVariant}
                       className={`w-full ${plan.highlighted ? "bg-primary hover:bg-primary/90" : ""}`}
+                      onClick={() => handleSubscribe(plan.planKey)}
+                      disabled={loadingPlan !== null}
                     >
+                      {loadingPlan === plan.planKey ? (
+                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                      ) : null}
                       {plan.cta}
                     </Button>
-                  </Link>
+                  )}
                 </CardFooter>
               </Card>
             ))}
