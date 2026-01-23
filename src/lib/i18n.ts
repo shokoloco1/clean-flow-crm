@@ -1,9 +1,400 @@
-// Simple i18n system with Spanish as default language
-// Can be extended to support multiple languages
+// i18n system with English as default language for Australian market
+// Supports English (default) and Spanish for Latino workforce
 
-type TranslationKey = keyof typeof translations.es;
+type TranslationKey = keyof typeof translations.en;
 
 const translations = {
+  en: {
+    // Common
+    loading: "Loading...",
+    save: "Save",
+    cancel: "Cancel",
+    delete: "Delete",
+    edit: "Edit",
+    view: "View",
+    create: "Create",
+    search: "Search",
+    filter: "Filter",
+    filters: "Filters",
+    clear: "Clear",
+    close: "Close",
+    back: "Back",
+    next: "Next",
+    previous: "Previous",
+    start: "Start",
+    complete: "Complete",
+    logout: "Sign Out",
+    login: "Sign In",
+    signup: "Create Account",
+    submit: "Submit",
+    confirm: "Confirm",
+    yes: "Yes",
+    no: "No",
+    all: "All",
+    none: "None",
+    unknown: "Unknown",
+    
+    // App
+    appName: "CleanFlow",
+    appTagline: "Manage your cleaning business effortlessly",
+    appDescription: "The complete CRM and job management platform for commercial cleaning businesses",
+    adminDashboard: "Admin Dashboard",
+    staffDashboard: "Staff Dashboard",
+    
+    // Navigation
+    home: "Home",
+    dashboard: "Dashboard",
+    jobs: "Jobs",
+    clients: "Clients",
+    properties: "Properties",
+    staff: "Staff",
+    calendar: "Calendar",
+    settings: "Settings",
+    checklists: "Checklists",
+    recurring: "Recurring Jobs",
+    reports: "Reports",
+    invoices: "Invoices",
+    pricing: "Pricing",
+    
+    // Auth
+    welcome: "Welcome",
+    welcomeBack: "Welcome back!",
+    signInToAccount: "Sign in to your account or create a new one",
+    professionalCleaningManagement: "Professional cleaning management",
+    email: "Email",
+    password: "Password",
+    fullName: "Full Name",
+    accountType: "Account Type",
+    admin: "Admin (Owner)",
+    staffRole: "Staff (Cleaner)",
+    signingIn: "Signing in...",
+    creatingAccount: "Creating account...",
+    invalidCredentials: "Invalid credentials. Please check your email and password.",
+    accountCreated: "Account created successfully!",
+    emailAlreadyRegistered: "This email is already registered. Please sign in instead.",
+    noRoleAssigned: "Your account doesn't have a role assigned",
+    pendingAccess: "Access pending",
+    pendingAccessDescription: "To access the system, an admin must assign you a role (admin or staff).",
+    configureAsAdmin: "Configure as Admin (first time only)",
+    configuring: "Configuring...",
+    roleAdminAssigned: "Admin role assigned. Redirecting...",
+    noRoleContactAdmin: "Your account has no role assigned. Please ask an admin to assign one.",
+    
+    // Dashboard
+    todaysJobs: "Today's Jobs",
+    completedToday: "Completed Today",
+    completionRate: "Completion Rate",
+    totalStaff: "Total Staff",
+    upcomingJobs: "Upcoming Jobs",
+    noJobsScheduled: "No jobs scheduled",
+    viewTutorial: "View tutorial",
+    
+    // Quick Actions
+    newJob: "New Job",
+    scheduleClean: "Schedule cleaning",
+    manageLocations: "Manage locations",
+    manageClients: "Manage clients",
+    manageTemplates: "Manage templates",
+    manageTeam: "Manage team",
+    viewSchedule: "View schedule",
+    autoSchedule: "Auto-schedule",
+    systemConfig: "System settings",
+    
+    // Jobs
+    jobDetails: "Job Details",
+    location: "Location",
+    scheduledDate: "Scheduled Date",
+    scheduledTime: "Scheduled Time",
+    schedule: "Schedule",
+    startTime: "Start Time",
+    endTime: "End Time",
+    duration: "Duration",
+    status: "Status",
+    notes: "Notes",
+    notesFromAdmin: "Notes from Admin",
+    assignedStaff: "Assigned Staff",
+    accessCodes: "Access Codes",
+    checklist: "Checklist",
+    photos: "Photos",
+    evidencePhotos: "Evidence Photos",
+    before: "Before",
+    after: "After",
+    noPhotosUploaded: "No photos uploaded yet",
+    uploadPhotoToComplete: "Upload at least one photo to complete the job",
+    uploadPhotos: "Upload Photos",
+    takePhoto: "Take Photo",
+    selectFromGallery: "Select from Gallery",
+    photosUploaded: "photo(s) uploaded!",
+    createJob: "Create Job",
+    jobCreated: "Job created successfully!",
+    failedToCreateJob: "Failed to create job",
+    fillRequiredFields: "Please fill in all required fields",
+    selectClient: "Select client",
+    selectStaff: "Select staff",
+    enterOneItemPerLine: "One item per line",
+    
+    // Job Status
+    pending: "Pending",
+    inProgress: "In Progress",
+    completed: "Completed",
+    cancelled: "Cancelled",
+    
+    // Geofence
+    verifyLocation: "Verify Location",
+    verifyingLocation: "Verifying...",
+    locationVerified: "Location Verified",
+    outsideArea: "Outside Area",
+    checkLocationFirst: "Verify your location first",
+    gpsNotAvailable: "GPS not available on this device",
+    couldNotCaptureGPS: "Could not capture GPS location.",
+    outsideGeofence: "You are {distance}m from the property. You must be within {radius}m.",
+    checkInOutsideArea: "Check-in outside allowed area. Distance: {distance}m (maximum: {radius}m)",
+    noPropertyAssigned: "This job has no property assigned",
+    
+    // Actions
+    startJob: "Start Job",
+    completeJob: "Complete Job",
+    startingJob: "Starting...",
+    completingJob: "Completing...",
+    jobStarted: "Job started",
+    jobStartedWithLocation: "Job started with location verified!",
+    jobCompleted: "Job completed! Great work!",
+    errorStartingJob: "Error starting job",
+    errorCompletingJob: "Error completing job",
+    uploadPhotoFirst: "Upload at least one photo before completing",
+    openMaps: "Open in Maps",
+    downloadPDF: "Download PDF",
+    generatingPDF: "Generating PDF...",
+    
+    // Alerts
+    activeAlerts: "Active Alerts",
+    noActiveAlerts: "No pending alerts",
+    loadingAlerts: "Loading alerts...",
+    alertResolved: "Alert resolved",
+    newAlertReceived: "New alert received",
+    lateArrival: "Late Arrival",
+    noShow: "No Show",
+    geofenceViolation: "Outside Area",
+    earlyCheckout: "Early Checkout",
+    
+    // Activity Feed
+    liveFeed: "Live Feed",
+    noActivityYet: "No activity yet today",
+    startedWork: "started",
+    completedWork: "completed",
+    
+    // Search
+    searchPlaceholder: "Search jobs, clients, properties...",
+    noResultsFound: "No results found.",
+    typeToSearchOrFilter: "Type to search or use filters",
+    jobStatus: "Job status",
+    allStatuses: "All statuses",
+    assignedStaffLabel: "Assigned staff",
+    allStaff: "All staff",
+    dateFrom: "From",
+    dateTo: "To",
+    job: "Job",
+    client: "Client",
+    property: "Property",
+    
+    // Client Portal
+    clientPortal: "Client Portal",
+    accessPortal: "Portal Access",
+    enterAccessCode: "Enter your unique access code to view your cleaning jobs",
+    accessCode: "Access code",
+    enterAccessCodePlaceholder: "Enter your access code",
+    verifying: "Verifying...",
+    accessPortalButton: "Access Portal",
+    noAccessCode: "Don't have a code? Contact your cleaning service provider.",
+    invalidAccessCode: "Invalid access code or no jobs registered",
+    portalAccessError: "Error accessing portal. Please check your access code.",
+    welcomeClient: "Welcome, {name}",
+    portalWelcomeMessage: "Here you can view the history of completed and scheduled cleaning services.",
+    scheduled: "Scheduled",
+    serviceDetails: "Service Details",
+    servicePhotos: "Service Photos",
+    poweredBy: "Powered by CleanFlow",
+    
+    // Onboarding
+    welcomeToCleanFlow: "Welcome to CleanFlow!",
+    yourProfessionalPlatform: "Your professional cleaning management platform",
+    onboardingDetail1: "Manage all your cleaning jobs in one place",
+    onboardingDetail2: "Track your team's performance in real-time",
+    onboardingDetail3: "Generate professional reports for your clients",
+    jobManagement: "Job Management",
+    jobManagementDesc: "Schedule and track jobs easily",
+    jobManagementDetail1: "Create jobs with custom checklists",
+    jobManagementDetail2: "Assign staff to each job",
+    jobManagementDetail3: "Real-time progress tracking",
+    clientsAndProperties: "Clients & Properties",
+    clientsAndPropertiesDesc: "Organise your client portfolio",
+    clientsDetail1: "Register clients with contact details",
+    clientsDetail2: "Manage multiple properties per client",
+    clientsDetail3: "Exclusive portal for clients to view their history",
+    geofencingControl: "Geofencing & Control",
+    geofencingDesc: "Automatic location verification",
+    geofencingDetail1: "GPS-validated check-in/check-out",
+    geofencingDetail2: "Automatic alerts for late arrivals",
+    geofencingDetail3: "Before and after photo evidence",
+    calendarRecurrence: "Calendar & Recurrence",
+    calendarDesc: "Plan ahead",
+    calendarDetail1: "Interactive calendar view",
+    calendarDetail2: "Automatic recurring jobs",
+    calendarDetail3: "Manage staff availability",
+    reportsMetrics: "Reports & Metrics",
+    reportsDesc: "Make informed decisions",
+    reportsDetail1: "Dashboard with key metrics",
+    reportsDetail2: "Export reports as PDF and CSV",
+    reportsDetail3: "Performance analysis by period",
+    letsStart: "Let's Start!",
+    
+    // Timeline
+    timeline: "Timeline",
+    details: "Details",
+    jobCreatedEvent: "Job created",
+    jobStartedEvent: "Job started",
+    checklistItemCompleted: "{task} completed",
+    issueReported: "Issue reported on {task}",
+    photosUploadedEvent: "{count} {type} uploaded",
+    alertGeneratedEvent: "Alert: {type}",
+    jobCompletedEvent: "Job completed",
+    jobCancelledEvent: "Job cancelled",
+    
+    // Breadcrumbs
+    adminPanel: "Admin Panel",
+    staffPanel: "Staff Panel",
+    authentication: "Authentication",
+    
+    // Landing page
+    getStarted: "Get Started",
+    signIn: "Sign In",
+    clientPortalAccess: "Client Portal Access",
+    everythingYouNeed: "Everything You Need for Your Business",
+    proofOfWork: "Proof of Work",
+    proofOfWorkDesc: "Capture before & after photos for accountability",
+    locationTracking: "Location Tracking",
+    locationTrackingDesc: "One-tap navigation to job site",
+    teamCoordination: "Team Coordination",
+    teamCoordinationDesc: "Assign jobs and monitor staff performance",
+    forBusinessOwners: "For Business Owners",
+    fullDashboardAnalytics: "Full dashboard with analytics",
+    createScheduleJobs: "Create and schedule jobs",
+    manageClientsStaff: "Manage clients and staff",
+    trackJobCompletion: "Real-time job tracking",
+    forCleaningStaff: "For Cleaning Staff",
+    mobileFirstInterface: "Mobile-first interface",
+    viewDailyJobs: "View assigned jobs for the day",
+    oneTapNavigation: "One-tap navigation to sites",
+    uploadBeforeAfter: "Upload before/after photos",
+    streamlineOperations: "Streamline your cleaning business operations",
+    
+    // Hero/Landing
+    heroTitle: "Manage your cleaning business without the stress",
+    heroSubtitle: "The easiest tool to organise jobs, clients and employees. Start free!",
+    benefit1: "Save up to 5 hours per week",
+    benefit2: "Improve client communication",
+    benefit3: "Increase team productivity",
+    benefit4: "Reduce errors and missed jobs",
+    startFreeTrial: "Start Free Trial",
+    alreadyHaveAccount: "Already have an account",
+    setupInMinutes: "Setup in less than 2 minutes",
+    noCreditCard: "No credit card required",
+    forOwners: "For Business Owners",
+    forStaff: "For Cleaning Staff",
+    dashboardAnalytics: "Full dashboard with analytics",
+    mobileFirst: "Mobile-first interface",
+    viewAssignedJobs: "View assigned jobs for the day",
+    oneTapNav: "One-tap navigation to sites",
+    uploadBeforeAfterPhotos: "Upload before/after photos",
+    
+    // Client Portal Section
+    areYouClient: "Are you a cleaning company client?",
+    accessClientPortal: "Access the client portal to view your service history",
+    
+    // Trust indicators
+    australianOwned: "Australian Owned",
+    securePayments: "Secure Payments",
+    mobileApps: "iOS & Android",
+    trustedBy: "Trusted by cleaning businesses across Australia",
+    jobsCompleted: "Jobs Completed",
+    happyBusinesses: "Happy Businesses",
+    averageRating: "Average Rating",
+    
+    // 404 Page
+    pageNotFound: "Page Not Found",
+    oopsLostInClouds: "Oops! Looks like you got lost in the clouds",
+    pageDoesntExist: "The page you're looking for doesn't exist or has been moved.",
+    backToHome: "Back to Home",
+    tryThese: "Maybe you were looking for one of these?",
+    
+    // Errors
+    error: "Error",
+    somethingWentWrong: "Something went wrong",
+    tryAgain: "Try again",
+    failedToLoad: "Failed to load",
+    failedToSave: "Failed to save",
+    failedToUpload: "Failed to upload",
+    
+    // Form validation
+    required: "Required",
+    invalidEmail: "Invalid email",
+    passwordTooShort: "Password too short",
+    pleaseCorrectErrors: "Please correct the form errors",
+    
+    // Invoicing
+    invoicing: "Invoicing",
+    invoiceNumber: "Invoice Number",
+    issueDate: "Issue Date",
+    dueDate: "Due Date",
+    subtotal: "Subtotal",
+    gst: "GST (10%)",
+    total: "Total",
+    draft: "Draft",
+    sent: "Sent",
+    paid: "Paid",
+    overdue: "Overdue",
+    taxInvoice: "Tax Invoice",
+    gstIncluded: "GST Included",
+    
+    // Australian specific
+    abn: "ABN",
+    abnNumber: "ABN Number",
+    businessName: "Business Name",
+    
+    // Success messages
+    success: "Success",
+    clientCreated: "Client created successfully",
+    clientUpdated: "Client updated successfully",
+    invoiceCreated: "Invoice created successfully",
+    
+    // Settings
+    companySettings: "Company Settings",
+    companyName: "Company Name",
+    companyLogo: "Company Logo",
+    geofenceRadius: "Geofence Radius",
+    workingHours: "Working Hours",
+    workingDays: "Working Days",
+    
+    // Subscription/Pricing
+    choosePlan: "Choose Your Plan",
+    monthly: "Monthly",
+    yearly: "Yearly",
+    savePercent: "Save {percent}%",
+    currentPlan: "Current Plan",
+    subscribe: "Subscribe",
+    manageSubscription: "Manage Subscription",
+    subscriptionActive: "Subscription Active",
+    perMonth: "/month",
+    perYear: "/year",
+    billedAnnually: "Billed annually",
+    features: "Features",
+    mostPopular: "Most Popular",
+    
+    // Footer
+    termsOfService: "Terms of Service",
+    privacyPolicy: "Privacy Policy",
+    allRightsReserved: "All rights reserved",
+  },
   es: {
     // Common
     loading: "Cargando...",
@@ -53,6 +444,8 @@ const translations = {
     checklists: "Checklists",
     recurring: "Trabajos Recurrentes",
     reports: "Reportes",
+    invoices: "Facturas",
+    pricing: "Precios",
     
     // Auth
     welcome: "Bienvenido",
@@ -286,6 +679,38 @@ const translations = {
     uploadBeforeAfter: "Subir fotos antes/después",
     streamlineOperations: "Optimiza las operaciones de tu negocio de limpieza",
     
+    // Hero/Landing
+    heroTitle: "Gestiona tu negocio de limpieza sin estrés",
+    heroSubtitle: "La herramienta más fácil para organizar trabajos, clientes y empleados. ¡Empieza gratis!",
+    benefit1: "Ahorra hasta 5 horas a la semana",
+    benefit2: "Mejora la comunicación con clientes",
+    benefit3: "Aumenta la productividad del equipo",
+    benefit4: "Reduce errores y olvidos",
+    startFreeTrial: "Empezar Gratis",
+    alreadyHaveAccount: "Ya tengo cuenta",
+    setupInMinutes: "Configuración en menos de 2 minutos",
+    noCreditCard: "Sin tarjeta de crédito",
+    forOwners: "Para Dueños y Admins",
+    forStaff: "Para el Equipo de Limpieza",
+    dashboardAnalytics: "Dashboard con todas las métricas clave",
+    mobileFirst: "App súper fácil de usar desde el celular",
+    viewAssignedJobs: "Ve tus trabajos del día de un vistazo",
+    oneTapNav: "Navega al lugar con un solo toque",
+    uploadBeforeAfterPhotos: "Sube fotos antes/después",
+    
+    // Client Portal Section
+    areYouClient: "¿Eres cliente de una empresa de limpieza?",
+    accessClientPortal: "Accede al portal de clientes para ver el historial de servicios",
+    
+    // Trust indicators
+    australianOwned: "Empresa Australiana",
+    securePayments: "Pagos Seguros",
+    mobileApps: "iOS y Android",
+    trustedBy: "Empresas de limpieza en toda Australia confían en nosotros",
+    jobsCompleted: "Trabajos Completados",
+    happyBusinesses: "Empresas Felices",
+    averageRating: "Calificación Promedio",
+    
     // 404 Page
     pageNotFound: "Página No Encontrada",
     oopsLostInClouds: "¡Ups! Parece que te perdiste en las nubes",
@@ -306,15 +731,84 @@ const translations = {
     invalidEmail: "Email inválido",
     passwordTooShort: "Contraseña muy corta",
     pleaseCorrectErrors: "Por favor corrige los errores del formulario",
+    
+    // Invoicing
+    invoicing: "Facturación",
+    newInvoice: "Nueva Factura",
+    invoiceNumber: "Número de Factura",
+    issueDate: "Fecha de Emisión",
+    dueDate: "Fecha de Vencimiento",
+    subtotal: "Subtotal",
+    gst: "GST (10%)",
+    total: "Total",
+    draft: "Borrador",
+    sent: "Enviada",
+    paid: "Pagada",
+    overdue: "Vencida",
+    taxInvoice: "Factura con Impuestos",
+    gstIncluded: "GST Incluido",
+    
+    // Australian specific
+    abn: "ABN",
+    abnNumber: "Número de ABN",
+    businessName: "Nombre de Empresa",
+    
+    // Success messages
+    success: "Éxito",
+    clientCreated: "Cliente creado exitosamente",
+    clientUpdated: "Cliente actualizado exitosamente",
+    invoiceCreated: "Factura creada exitosamente",
+    
+    // Settings
+    companySettings: "Configuración de Empresa",
+    companyName: "Nombre de Empresa",
+    companyLogo: "Logo de Empresa",
+    geofenceRadius: "Radio de Geofence",
+    workingHours: "Horas de Trabajo",
+    workingDays: "Días de Trabajo",
+    
+    // Subscription/Pricing
+    choosePlan: "Elige Tu Plan",
+    monthly: "Mensual",
+    yearly: "Anual",
+    savePercent: "Ahorra {percent}%",
+    currentPlan: "Plan Actual",
+    subscribe: "Suscribirse",
+    manageSubscription: "Gestionar Suscripción",
+    subscriptionActive: "Suscripción Activa",
+    perMonth: "/mes",
+    perYear: "/año",
+    billedAnnually: "Facturado anualmente",
+    features: "Características",
+    mostPopular: "Más Popular",
+    
+    // Footer
+    termsOfService: "Términos de Servicio",
+    privacyPolicy: "Política de Privacidad",
+    allRightsReserved: "Todos los derechos reservados",
   },
 };
 
 export type Language = keyof typeof translations;
 
-let currentLanguage: Language = "es";
+// Get initial language from localStorage or default to English
+const getInitialLanguage = (): Language => {
+  if (typeof window !== 'undefined') {
+    const stored = localStorage.getItem('cleanflow-language');
+    if (stored === 'en' || stored === 'es') {
+      return stored;
+    }
+  }
+  return "en"; // Default to English for Australian market
+};
+
+let currentLanguage: Language = getInitialLanguage();
 
 export function setLanguage(lang: Language) {
   currentLanguage = lang;
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('cleanflow-language', lang);
+  }
 }
 
 export function getLanguage(): Language {
@@ -322,7 +816,7 @@ export function getLanguage(): Language {
 }
 
 export function t(key: TranslationKey, params?: Record<string, string | number>): string {
-  let text = translations[currentLanguage][key] || key;
+  let text = translations[currentLanguage][key] || translations.en[key] || key;
   
   if (params) {
     Object.entries(params).forEach(([paramKey, value]) => {
