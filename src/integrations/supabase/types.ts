@@ -241,13 +241,6 @@ export type Database = {
             referencedRelation: "clients"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "invoices_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients_safe"
-            referencedColumns: ["id"]
-          },
         ]
       }
       job_alerts: {
@@ -414,24 +407,10 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "jobs_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients_safe"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "jobs_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "jobs_property_id_fkey"
-            columns: ["property_id"]
-            isOneToOne: false
-            referencedRelation: "properties_safe"
             referencedColumns: ["id"]
           },
         ]
@@ -532,13 +511,6 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "portal_access_log_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients_safe"
             referencedColumns: ["id"]
           },
         ]
@@ -685,13 +657,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "properties_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients_safe"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "properties_default_checklist_template_id_fkey"
             columns: ["default_checklist_template_id"]
             isOneToOne: false
@@ -731,13 +696,6 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "property_photos_property_id_fkey"
-            columns: ["property_id"]
-            isOneToOne: false
-            referencedRelation: "properties_safe"
             referencedColumns: ["id"]
           },
         ]
@@ -836,24 +794,10 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "recurring_schedules_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients_safe"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "recurring_schedules_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "recurring_schedules_property_id_fkey"
-            columns: ["property_id"]
-            isOneToOne: false
-            referencedRelation: "properties_safe"
             referencedColumns: ["id"]
           },
         ]
@@ -938,154 +882,7 @@ export type Database = {
       }
     }
     Views: {
-      clients_safe: {
-        Row: {
-          address: string | null
-          created_at: string | null
-          email: string | null
-          id: string | null
-          name: string | null
-          notes: string | null
-          phone: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          address?: string | null
-          created_at?: string | null
-          email?: string | null
-          id?: string | null
-          name?: string | null
-          notes?: string | null
-          phone?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          address?: string | null
-          created_at?: string | null
-          email?: string | null
-          id?: string | null
-          name?: string | null
-          notes?: string | null
-          phone?: string | null
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
-      profiles_safe: {
-        Row: {
-          certifications: Json | null
-          created_at: string | null
-          email: string | null
-          full_name: string | null
-          hire_date: string | null
-          id: string | null
-          is_active: boolean | null
-          phone: string | null
-          skills: Json | null
-          updated_at: string | null
-          user_id: string | null
-        }
-        Insert: {
-          certifications?: Json | null
-          created_at?: string | null
-          email?: string | null
-          full_name?: string | null
-          hire_date?: string | null
-          id?: string | null
-          is_active?: boolean | null
-          phone?: string | null
-          skills?: Json | null
-          updated_at?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          certifications?: Json | null
-          created_at?: string | null
-          email?: string | null
-          full_name?: string | null
-          hire_date?: string | null
-          id?: string | null
-          is_active?: boolean | null
-          phone?: string | null
-          skills?: Json | null
-          updated_at?: string | null
-          user_id?: string | null
-        }
-        Relationships: []
-      }
-      properties_safe: {
-        Row: {
-          address: string | null
-          client_id: string | null
-          created_at: string | null
-          default_checklist_template_id: string | null
-          geofence_radius_meters: number | null
-          id: string | null
-          is_active: boolean | null
-          location_lat: number | null
-          location_lng: number | null
-          name: string | null
-          property_type: string | null
-          size_sqm: number | null
-          special_instructions: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          address?: string | null
-          client_id?: string | null
-          created_at?: string | null
-          default_checklist_template_id?: string | null
-          geofence_radius_meters?: number | null
-          id?: string | null
-          is_active?: boolean | null
-          location_lat?: number | null
-          location_lng?: number | null
-          name?: string | null
-          property_type?: string | null
-          size_sqm?: number | null
-          special_instructions?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          address?: string | null
-          client_id?: string | null
-          created_at?: string | null
-          default_checklist_template_id?: string | null
-          geofence_radius_meters?: number | null
-          id?: string | null
-          is_active?: boolean | null
-          location_lat?: number | null
-          location_lng?: number | null
-          name?: string | null
-          property_type?: string | null
-          size_sqm?: number | null
-          special_instructions?: string | null
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "properties_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "properties_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients_safe"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "properties_default_checklist_template_id_fkey"
-            columns: ["default_checklist_template_id"]
-            isOneToOne: false
-            referencedRelation: "checklist_templates"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
+      [_ in never]: never
     }
     Functions: {
       check_login_rate_limit: {
@@ -1135,6 +932,19 @@ export type Database = {
           status: string
         }[]
       }
+      get_clients_safe: {
+        Args: never
+        Returns: {
+          address: string
+          created_at: string
+          email: string
+          id: string
+          name: string
+          notes: string
+          phone: string
+          updated_at: string
+        }[]
+      }
       get_job_access_code: { Args: { _job_id: string }; Returns: string }
       get_login_attempts_for_monitoring: {
         Args: { p_hours?: number }
@@ -1143,6 +953,41 @@ export type Database = {
           email: string
           ip_address: string
           success: boolean
+        }[]
+      }
+      get_profiles_safe: {
+        Args: never
+        Returns: {
+          certifications: Json
+          created_at: string
+          email: string
+          full_name: string
+          hire_date: string
+          id: string
+          is_active: boolean
+          phone: string
+          skills: Json
+          updated_at: string
+          user_id: string
+        }[]
+      }
+      get_properties_safe: {
+        Args: never
+        Returns: {
+          address: string
+          client_id: string
+          created_at: string
+          default_checklist_template_id: string
+          geofence_radius_meters: number
+          id: string
+          is_active: boolean
+          location_lat: number
+          location_lng: number
+          name: string
+          property_type: string
+          size_sqm: number
+          special_instructions: string
+          updated_at: string
         }[]
       }
       get_user_role: {
