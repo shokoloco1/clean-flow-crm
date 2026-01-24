@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
-import { Plus, Home, ClipboardList, Users, Calendar, UserCircle, Repeat, Settings, FileText } from "lucide-react";
+import { Plus, Home, ClipboardList, Users, Calendar, UserCircle, Repeat, Settings, FileText, DollarSign } from "lucide-react";
 import { t } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -144,6 +144,14 @@ export function QuickActions({ onNewJobClick }: QuickActionsProps) {
       iconBg: "bg-primary/10",
       iconColor: "text-primary",
       badge: counts.invoices > 0 ? counts.invoices : undefined,
+    },
+    {
+      icon: DollarSign,
+      title: "Precios",
+      subtitle: "Lista de precios",
+      onClick: () => navigate("/admin/price-lists"),
+      iconBg: "bg-secondary/10",
+      iconColor: "text-secondary-foreground",
     },
     {
       icon: Settings,
