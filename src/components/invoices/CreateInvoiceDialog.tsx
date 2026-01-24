@@ -20,7 +20,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
-import { Loader2, Plus, Trash2 } from "lucide-react";
+import { Loader2, Plus, Trash2, FileText } from "lucide-react";
+import { PriceListReference } from "@/components/price-lists/PriceListReference";
 import { format, differenceInMinutes } from "date-fns";
 import { toast } from "sonner";
 
@@ -291,7 +292,17 @@ export function CreateInvoiceDialog({
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Nueva Factura</DialogTitle>
+          <div className="flex items-center justify-between">
+            <DialogTitle>Nueva Factura</DialogTitle>
+            <PriceListReference 
+              trigger={
+                <Button variant="outline" size="sm" type="button">
+                  <FileText className="h-4 w-4 mr-2" />
+                  Ver Precios
+                </Button>
+              }
+            />
+          </div>
         </DialogHeader>
 
         <div className="space-y-6 py-4">
