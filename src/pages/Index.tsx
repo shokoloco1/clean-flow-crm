@@ -294,25 +294,6 @@ export default function Index() {
         </div>
       </section>
 
-      {/* Client Portal CTA */}
-      <section className="py-12 bg-card">
-        <div className="container mx-auto px-4 text-center">
-          <h3 className="text-xl font-semibold text-foreground mb-4">
-            {t("areYouClient")}
-          </h3>
-          <p className="text-muted-foreground mb-6">
-            {t("accessClientPortal")}
-          </p>
-          <Button 
-            variant="outline"
-            className="gap-2"
-            onClick={() => navigate("/portal")}
-          >
-            <Building2 className="h-4 w-4" />
-            {t("clientPortal")}
-          </Button>
-        </div>
-      </section>
 
       {/* Footer */}
       <footer className="py-8 border-t border-border">
