@@ -1,10 +1,12 @@
+import { forwardRef, ForwardRefRenderFunction } from "react";
 import { useNavigate } from "react-router-dom";
 import { usePWA } from "@/hooks/usePWA";
 import { Button } from "@/components/ui/button";
 import { Download, X, Smartphone } from "lucide-react";
 import { useState, useEffect } from "react";
+import { t } from "@/lib/i18n";
 
-export function PWAInstallBanner() {
+const PWAInstallBannerComponent: ForwardRefRenderFunction<HTMLDivElement> = (_, ref) => {
   const navigate = useNavigate();
   const { canInstall, install, isInstalled, isStandalone, isIOS } = usePWA();
   const [dismissed, setDismissed] = useState(false);
@@ -56,7 +58,7 @@ export function PWAInstallBanner() {
   }
 
   return (
-    <div className="fixed bottom-4 left-4 right-4 z-50 animate-in slide-in-from-bottom-4 duration-300">
+    <div ref={ref} className="fixed bottom-4 left-4 right-4 z-50 animate-in slide-in-from-bottom-4 duration-300">
       <div className="bg-card border border-border rounded-xl shadow-lg p-4 flex items-center gap-4">
         <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
           <Smartphone className="h-6 w-6 text-primary" />
@@ -64,10 +66,10 @@ export function PWAInstallBanner() {
         
         <div className="flex-1 min-w-0">
           <p className="font-medium text-foreground text-sm">
-            Instala CleanFlow
+            {t("appName")}
           </p>
           <p className="text-xs text-muted-foreground">
-            Acceso rápido desde tu pantalla de inicio
+            {t("mobileFirst")}
           </p>
         </div>
 
@@ -78,7 +80,7 @@ export function PWAInstallBanner() {
             className="gap-1"
           >
             <Download className="h-4 w-4" />
-            <span className="hidden sm:inline">Instalar</span>
+            <span className="hidden sm:inline">{t("create")}</span>
           </Button>
           
           <Button 
@@ -93,4 +95,7 @@ export function PWAInstallBanner() {
       </div>
     </div>
   );
-}
+};
+
+export const PWAInstallBanner = forwardRef(PWAInstallBannerComponent);
+PWAInstallBanner.displayName = "PWAInstallBanner";

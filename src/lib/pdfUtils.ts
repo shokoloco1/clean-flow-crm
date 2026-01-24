@@ -1,7 +1,7 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
+import { formatDateAU } from './australian';
 
 interface JobData {
   id: string;
@@ -44,7 +44,7 @@ export function generateSingleJobPDF(
   // Header
   doc.setFontSize(20);
   doc.setTextColor(40, 40, 40);
-  doc.text('Reporte de Trabajo', 14, 22);
+  doc.text('Job Report', 14, 22);
   
   // Job info box
   doc.setFillColor(245, 247, 250);
@@ -52,17 +52,17 @@ export function generateSingleJobPDF(
   
   doc.setFontSize(12);
   doc.setTextColor(60, 60, 60);
-  doc.text(`Cliente: ${job.clients?.name || 'N/A'}`, 18, 38);
-  doc.text(`Ubicación: ${job.location}`, 18, 46);
-  doc.text(`Fecha: ${format(new Date(job.scheduled_date), 'dd MMMM yyyy', { locale: es })}`, 18, 54);
-  doc.text(`Hora programada: ${job.scheduled_time.slice(0, 5)}`, 110, 54);
+  doc.text(`Client: ${job.clients?.name || 'N/A'}`, 18, 38);
+  doc.text(`Location: ${job.location}`, 18, 46);
+  doc.text(`Date: ${formatDateAU(job.scheduled_date)}`, 18, 54);
+  doc.text(`Scheduled Time: ${job.scheduled_time.slice(0, 5)}`, 110, 54);
   
   // Status badge
   const statusLabels: Record<string, string> = {
-    'completed': 'COMPLETADO',
-    'in_progress': 'EN PROGRESO',
-    'pending': 'PENDIENTE',
-    'cancelled': 'CANCELADO'
+    'completed': 'COMPLETED',
+    'in_progress': 'IN PROGRESS',
+    'pending': 'PENDING',
+    'cancelled': 'CANCELLED'
   };
   
   const statusColors: Record<string, [number, number, number]> = {
@@ -84,35 +84,35 @@ export function generateSingleJobPDF(
   // Staff info
   doc.setTextColor(60, 60, 60);
   doc.setFontSize(11);
-  doc.text(`Staff asignado: ${job.profiles?.full_name || 'Sin asignar'}`, 14, currentY);
+  doc.text(`Assigned Staff: ${job.profiles?.full_name || 'Unassigned'}`, 14, currentY);
   currentY += 8;
   
   // Time details
   if (job.start_time || job.end_time) {
     doc.setFontSize(10);
     if (job.start_time) {
-      doc.text(`Inicio: ${format(new Date(job.start_time), 'HH:mm')}`, 14, currentY);
+      doc.text(`Start: ${format(new Date(job.start_time), 'HH:mm')}`, 14, currentY);
     }
     if (job.end_time) {
-      doc.text(`Fin: ${format(new Date(job.end_time), 'HH:mm')}`, 60, currentY);
+      doc.text(`End: ${format(new Date(job.end_time), 'HH:mm')}`, 60, currentY);
     }
     if (job.start_time && job.end_time) {
       const duration = Math.round((new Date(job.end_time).getTime() - new Date(job.start_time).getTime()) / 60000);
-      doc.text(`Duración: ${duration} min`, 106, currentY);
+      doc.text(`Duration: ${duration} min`, 106, currentY);
     }
     currentY += 8;
   }
   
   // Quality & GPS
-  doc.text(`Calidad: ${job.quality_score ? `${job.quality_score}%` : 'N/A'}`, 14, currentY);
-  doc.text(`GPS Validado: ${job.geofence_validated ? 'Sí' : 'No'}`, 60, currentY);
+  doc.text(`Quality: ${job.quality_score ? `${job.quality_score}%` : 'N/A'}`, 14, currentY);
+  doc.text(`GPS Validated: ${job.geofence_validated ? 'Yes' : 'No'}`, 60, currentY);
   currentY += 12;
   
   // Notes
   if (job.notes) {
     doc.setFontSize(11);
     doc.setTextColor(40, 40, 40);
-    doc.text('Notas:', 14, currentY);
+    doc.text('Notes:', 14, currentY);
     currentY += 6;
     doc.setFontSize(9);
     doc.setTextColor(80, 80, 80);
@@ -137,7 +137,7 @@ export function generateSingleJobPDF(
     
     autoTable(doc, {
       startY: currentY,
-      head: [['Área', 'Tarea', 'Estado', 'Nota']],
+      head: [['Area', 'Task', 'Status', 'Note']],
       body: checklistData,
       styles: { fontSize: 8, cellPadding: 2 },
       headStyles: { fillColor: [59, 130, 246], textColor: 255 },
@@ -164,11 +164,11 @@ export function generateSingleJobPDF(
     
     doc.setFontSize(12);
     doc.setTextColor(40, 40, 40);
-    doc.text('Fotos de Evidencia', 14, currentY);
+    doc.text('Evidence Photos', 14, currentY);
     currentY += 6;
     doc.setFontSize(10);
     doc.setTextColor(80, 80, 80);
-    doc.text(`${beforeCount} fotos "antes" | ${afterCount} fotos "después"`, 14, currentY);
+    doc.text(`${beforeCount} "before" photos | ${afterCount} "after" photos`, 14, currentY);
   }
   
   // Footer
@@ -178,7 +178,7 @@ export function generateSingleJobPDF(
     doc.setFontSize(8);
     doc.setTextColor(150, 150, 150);
     doc.text(
-      `Generado: ${format(new Date(), 'dd/MM/yyyy HH:mm')} | Página ${i} de ${pageCount}`,
+      `Generated: ${format(new Date(), 'dd/MM/yyyy HH:mm')} | Page ${i} of ${pageCount}`,
       105, 
       290, 
       { align: 'center' }

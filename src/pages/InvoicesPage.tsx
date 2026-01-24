@@ -39,7 +39,6 @@ import {
   Loader2
 } from "lucide-react";
 import { format, parseISO } from "date-fns";
-import { es } from "date-fns/locale";
 import { toast } from "sonner";
 import { t } from "@/lib/i18n";
 import { CreateInvoiceDialog } from "@/components/invoices/CreateInvoiceDialog";

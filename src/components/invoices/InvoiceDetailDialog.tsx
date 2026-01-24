@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -27,10 +27,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Download, Loader2, Building2, Calendar, FileText } from "lucide-react";
 import { format, parseISO } from "date-fns";
-import { es } from "date-fns/locale";
 import { toast } from "sonner";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { t } from "@/lib/i18n";
+import { formatAUD } from "@/lib/australian";
 
 interface Invoice {
   id: string;
@@ -122,9 +123,9 @@ export function InvoiceDetailDialog({
       .eq("id", invoice.id);
 
     if (error) {
-      toast.error("Error al actualizar estado");
+      toast.error(t("error"));
     } else {
-      toast.success("Estado actualizado");
+      toast.success(t("success"));
       onUpdated();
     }
 
@@ -141,7 +142,7 @@ export function InvoiceDetailDialog({
       // Header
       doc.setFontSize(24);
       doc.setTextColor(37, 99, 235); // Primary blue
-      doc.text("FACTURA", 20, 25);
+      doc.text("TAX INVOICE", 20, 25);
 
       doc.setFontSize(12);
       doc.setTextColor(100);
@@ -151,12 +152,12 @@ export function InvoiceDetailDialog({
       doc.setFontSize(10);
       doc.setTextColor(60);
       doc.text("CleanFlow", 190, 20, { align: "right" });
-      doc.text("Sistema de Gestión de Limpieza", 190, 26, { align: "right" });
+      doc.text("Cleaning Management System", 190, 26, { align: "right" });
 
       // Client info
       doc.setFontSize(11);
       doc.setTextColor(0);
-      doc.text("Facturar a:", 20, 55);
+      doc.text("Bill to:", 20, 55);
       doc.setFontSize(12);
       doc.text(clientDetails.name, 20, 62);
       doc.setFontSize(10);
@@ -167,20 +168,20 @@ export function InvoiceDetailDialog({
 
       // Invoice details (right side)
       doc.setTextColor(0);
-      doc.text(`Fecha: ${format(parseISO(invoice.issue_date), "dd/MM/yyyy")}`, 190, 55, { align: "right" });
-      doc.text(`Vencimiento: ${format(parseISO(invoice.due_date), "dd/MM/yyyy")}`, 190, 62, { align: "right" });
+      doc.text(`Date: ${format(parseISO(invoice.issue_date), "dd/MM/yyyy")}`, 190, 55, { align: "right" });
+      doc.text(`Due: ${format(parseISO(invoice.due_date), "dd/MM/yyyy")}`, 190, 62, { align: "right" });
 
       // Items table
       const tableData = items.map((item) => [
         item.description,
         item.quantity.toString(),
-        `$${Number(item.unit_price).toFixed(2)}`,
-        `$${Number(item.total).toFixed(2)}`,
+        formatAUD(Number(item.unit_price)),
+        formatAUD(Number(item.total)),
       ]);
 
       autoTable(doc, {
         startY: 95,
-        head: [["Descripción", "Cantidad", "Precio Unit.", "Total"]],
+        head: [["Description", "Qty", "Unit Price", "Total"]],
         body: tableData,
         theme: "striped",
         headStyles: {
@@ -201,22 +202,22 @@ export function InvoiceDetailDialog({
 
       doc.setFontSize(10);
       doc.text("Subtotal:", 140, finalY);
-      doc.text(`$${Number(invoice.subtotal).toFixed(2)}`, 190, finalY, { align: "right" });
+      doc.text(formatAUD(Number(invoice.subtotal)), 190, finalY, { align: "right" });
 
-      doc.text(`Impuesto (${invoice.tax_rate}%):`, 140, finalY + 7);
-      doc.text(`$${Number(invoice.tax_amount).toFixed(2)}`, 190, finalY + 7, { align: "right" });
+      doc.text(`GST (${invoice.tax_rate}%):`, 140, finalY + 7);
+      doc.text(formatAUD(Number(invoice.tax_amount)), 190, finalY + 7, { align: "right" });
 
       doc.setFontSize(12);
       doc.setFont("helvetica", "bold");
       doc.text("TOTAL:", 140, finalY + 17);
-      doc.text(`$${Number(invoice.total).toFixed(2)}`, 190, finalY + 17, { align: "right" });
+      doc.text(formatAUD(Number(invoice.total)), 190, finalY + 17, { align: "right" });
 
       // Notes
       if (invoice.notes) {
         doc.setFont("helvetica", "normal");
         doc.setFontSize(9);
         doc.setTextColor(80);
-        doc.text("Notas:", 20, finalY + 30);
+        doc.text("Notes:", 20, finalY + 30);
         doc.text(invoice.notes, 20, finalY + 37);
       }
 
@@ -224,7 +225,7 @@ export function InvoiceDetailDialog({
       doc.setFontSize(8);
       doc.setTextColor(150);
       doc.text(
-        "Generado con CleanFlow - Sistema de Gestión de Limpieza",
+        "Generated with CleanFlow - Cleaning Management System",
         105,
         285,
         { align: "center" }
@@ -232,10 +233,10 @@ export function InvoiceDetailDialog({
 
       // Save
       doc.save(`${invoice.invoice_number}.pdf`);
-      toast.success("PDF descargado");
+      toast.success(t("success"));
     } catch (error) {
       console.error(error);
-      toast.error("Error al generar PDF");
+      toast.error(t("error"));
     }
 
     setGeneratingPDF(false);
@@ -244,14 +245,14 @@ export function InvoiceDetailDialog({
   const getStatusConfig = (status: string) => {
     switch (status) {
       case "paid":
-        return { label: "Pagada", className: "bg-success/10 text-success border-success/30" };
+        return { label: t("paid"), className: "bg-success/10 text-success border-success/30" };
       case "sent":
-        return { label: "Enviada", className: "bg-primary/10 text-primary border-primary/30" };
+        return { label: t("sent"), className: "bg-primary/10 text-primary border-primary/30" };
       case "overdue":
-        return { label: "Vencida", className: "bg-destructive/10 text-destructive border-destructive/30" };
+        return { label: t("overdue"), className: "bg-destructive/10 text-destructive border-destructive/30" };
       case "draft":
       default:
-        return { label: "Borrador", className: "bg-muted text-muted-foreground border-border" };
+        return { label: t("draft"), className: "bg-muted text-muted-foreground border-border" };
     }
   };
 
@@ -283,7 +284,7 @@ export function InvoiceDetailDialog({
             {/* Client & Dates */}
             <div className="grid grid-cols-2 gap-6">
               <div>
-                <p className="text-sm text-muted-foreground mb-1">Cliente</p>
+                <p className="text-sm text-muted-foreground mb-1">{t("client")}</p>
                 <div className="flex items-center gap-2">
                   <Building2 className="h-4 w-4 text-muted-foreground" />
                   <span className="font-medium">{clientDetails?.name}</span>
@@ -296,13 +297,13 @@ export function InvoiceDetailDialog({
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4 text-muted-foreground" />
                   <span className="text-sm">
-                    Emitida: {format(parseISO(invoice.issue_date), "dd/MM/yyyy")}
+                    {t("issueDate")}: {format(parseISO(invoice.issue_date), "dd/MM/yyyy")}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4 text-muted-foreground" />
                   <span className="text-sm">
-                    Vence: {format(parseISO(invoice.due_date), "dd/MM/yyyy")}
+                    {t("dueDate")}: {format(parseISO(invoice.due_date), "dd/MM/yyyy")}
                   </span>
                 </div>
               </div>
@@ -312,14 +313,14 @@ export function InvoiceDetailDialog({
 
             {/* Items */}
             <div>
-              <p className="text-sm font-medium mb-3">Ítems</p>
+              <p className="text-sm font-medium mb-3">{t("details")}</p>
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Descripción</TableHead>
-                    <TableHead className="text-center">Cant.</TableHead>
-                    <TableHead className="text-right">Precio</TableHead>
-                    <TableHead className="text-right">Total</TableHead>
+                    <TableHead>{t("notes")}</TableHead>
+                    <TableHead className="text-center">{t("all")}</TableHead>
+                    <TableHead className="text-right">{t("subtotal")}</TableHead>
+                    <TableHead className="text-right">{t("total")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -328,10 +329,10 @@ export function InvoiceDetailDialog({
                       <TableCell>{item.description}</TableCell>
                       <TableCell className="text-center">{item.quantity}</TableCell>
                       <TableCell className="text-right">
-                        ${Number(item.unit_price).toFixed(2)}
+                        {formatAUD(Number(item.unit_price))}
                       </TableCell>
                       <TableCell className="text-right font-medium">
-                        ${Number(item.total).toFixed(2)}
+                        {formatAUD(Number(item.total))}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -344,19 +345,19 @@ export function InvoiceDetailDialog({
               <CardContent className="py-4">
                 <div className="space-y-2">
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Subtotal</span>
-                    <span>${Number(invoice.subtotal).toFixed(2)}</span>
+                    <span className="text-muted-foreground">{t("subtotal")}</span>
+                    <span>{formatAUD(Number(invoice.subtotal))}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">
-                      Impuesto ({invoice.tax_rate}%)
+                      {t("gst")}
                     </span>
-                    <span>${Number(invoice.tax_amount).toFixed(2)}</span>
+                    <span>{formatAUD(Number(invoice.tax_amount))}</span>
                   </div>
                   <Separator />
                   <div className="flex justify-between text-lg font-bold">
-                    <span>Total</span>
-                    <span>${Number(invoice.total).toFixed(2)}</span>
+                    <span>{t("total")}</span>
+                    <span>{formatAUD(Number(invoice.total))}</span>
                   </div>
                 </div>
               </CardContent>
@@ -365,7 +366,7 @@ export function InvoiceDetailDialog({
             {/* Notes */}
             {invoice.notes && (
               <div>
-                <p className="text-sm text-muted-foreground mb-1">Notas</p>
+                <p className="text-sm text-muted-foreground mb-1">{t("notes")}</p>
                 <p className="text-sm">{invoice.notes}</p>
               </div>
             )}
@@ -382,10 +383,10 @@ export function InvoiceDetailDialog({
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="draft">Borrador</SelectItem>
-                    <SelectItem value="sent">Enviada</SelectItem>
-                    <SelectItem value="paid">Pagada</SelectItem>
-                    <SelectItem value="overdue">Vencida</SelectItem>
+                    <SelectItem value="draft">{t("draft")}</SelectItem>
+                    <SelectItem value="sent">{t("sent")}</SelectItem>
+                    <SelectItem value="paid">{t("paid")}</SelectItem>
+                    <SelectItem value="overdue">{t("overdue")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -395,7 +396,7 @@ export function InvoiceDetailDialog({
                 ) : (
                   <Download className="h-4 w-4 mr-2" />
                 )}
-                Descargar PDF
+                {t("downloadPDF")}
               </Button>
             </div>
           </div>

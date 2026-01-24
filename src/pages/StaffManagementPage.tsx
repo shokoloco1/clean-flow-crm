@@ -928,7 +928,7 @@ export default function StaffManagementPage() {
                                       })()}
                                     </p>
                                     <p className="text-xs text-muted-foreground mt-1">
-                                      Desde {new Date(selectedStaff.hire_date).toLocaleDateString('es-MX', { 
+                                      Since {new Date(selectedStaff.hire_date).toLocaleDateString('en-AU', { 
                                         year: 'numeric', 
                                         month: 'long', 
                                         day: 'numeric' 
@@ -950,7 +950,7 @@ export default function StaffManagementPage() {
                                   <div>
                                     <p className="text-sm text-muted-foreground">Ingresos Estimados</p>
                                     <p className="text-2xl font-bold">
-                                      ${(metrics.total_hours * selectedStaff.hourly_rate).toLocaleString('es-MX', { 
+                                      ${(metrics.total_hours * selectedStaff.hourly_rate).toLocaleString('en-AU', { 
                                         minimumFractionDigits: 2,
                                         maximumFractionDigits: 2 
                                       })}

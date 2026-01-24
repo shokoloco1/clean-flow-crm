@@ -7,9 +7,9 @@ import { Label } from '@/components/ui/label';
 import { Download, FileText, Users, AlertTriangle, Briefcase, Loader2, ClipboardCheck } from 'lucide-react';
 import { toast } from 'sonner';
 import { format, subDays, startOfMonth, endOfMonth } from 'date-fns';
-import { es } from 'date-fns/locale';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { t } from '@/lib/i18n';
 
 type ReportType = 'jobs' | 'staff' | 'alerts' | 'job-detail';
 
@@ -58,12 +58,12 @@ export function PDFReports() {
     doc.setFontSize(10);
     doc.setTextColor(100, 100, 100);
     doc.text(
-      `Período: ${format(new Date(dateRange.startDate), 'dd MMM yyyy', { locale: es })} - ${format(new Date(dateRange.endDate), 'dd MMM yyyy', { locale: es })}`,
+      `Period: ${format(new Date(dateRange.startDate), 'dd MMM yyyy')} - ${format(new Date(dateRange.endDate), 'dd MMM yyyy')}`,
       14, 30
     );
     
     // Generation date
-    doc.text(`Generado: ${format(new Date(), 'dd MMM yyyy HH:mm', { locale: es })}`, 14, 36);
+    doc.text(`Generated: ${format(new Date(), 'dd MMM yyyy HH:mm')}`, 14, 36);
     
     return 45; // Return Y position after header
   };
