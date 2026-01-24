@@ -13,40 +13,26 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { 
   UserPlus, 
-  Mail, 
-  User, 
   Phone, 
   DollarSign,
-  Briefcase,
   Award,
   AlertCircle,
   Loader2,
   CheckCircle2
 } from "lucide-react";
 
-const SKILL_OPTIONS = [
-  "Limpieza Residencial",
-  "Limpieza Comercial",
-  "Limpieza Profunda",
-  "Limpieza de Ventanas",
-  "Limpieza de Alfombras",
-  "Limpieza de Cocina Industrial",
-  "Manejo de Químicos",
-  "Limpieza Post-Construcción"
-];
-
 const CERTIFICATION_OPTIONS = [
-  "Manejo de Químicos Peligrosos",
-  "Primeros Auxilios",
-  "Seguridad Ocupacional",
-  "Limpieza Hospitalaria",
-  "Green Cleaning"
+  "First Aid Certificate",
+  "Working with Children Check",
+  "Police Check",
+  "White Card",
+  "Chemical Handling Certificate",
+  "Food Safety Certificate",
+  "COVID-19 Infection Control"
 ];
 
 interface InviteStaffDialogProps {
@@ -59,11 +45,9 @@ interface FormData {
   fullName: string;
   phone: string;
   hourlyRate: string;
-  skills: string[];
   certifications: string[];
   emergencyContactName: string;
   emergencyContactPhone: string;
-  sendInviteEmail: boolean;
 }
 
 const initialFormData: FormData = {
@@ -71,11 +55,9 @@ const initialFormData: FormData = {
   fullName: "",
   phone: "",
   hourlyRate: "",
-  skills: [],
   certifications: [],
   emergencyContactName: "",
-  emergencyContactPhone: "",
-  sendInviteEmail: true
+  emergencyContactPhone: ""
 };
 
 export function InviteStaffDialog({ open, onOpenChange }: InviteStaffDialogProps) {
@@ -89,19 +71,19 @@ export function InviteStaffDialog({ open, onOpenChange }: InviteStaffDialogProps
     const newErrors: Record<string, string> = {};
 
     if (!formData.email.trim()) {
-      newErrors.email = "El email es requerido";
+      newErrors.email = "Email is required";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = "Email inválido";
+      newErrors.email = "Invalid email address";
     }
 
     if (!formData.fullName.trim()) {
-      newErrors.fullName = "El nombre es requerido";
+      newErrors.fullName = "Name is required";
     } else if (formData.fullName.trim().length < 2) {
-      newErrors.fullName = "El nombre debe tener al menos 2 caracteres";
+      newErrors.fullName = "Name must be at least 2 characters";
     }
 
     if (formData.hourlyRate && isNaN(parseFloat(formData.hourlyRate))) {
-      newErrors.hourlyRate = "Ingresa un número válido";
+      newErrors.hourlyRate = "Please enter a valid number";
     }
 
     setErrors(newErrors);
@@ -125,11 +107,11 @@ export function InviteStaffDialog({ open, onOpenChange }: InviteStaffDialogProps
       });
 
       if (authError) throw authError;
-      if (!authData.user) throw new Error("No se pudo crear el usuario");
+      if (!authData.user) throw new Error("Could not create user");
 
       const userId = authData.user.id;
 
-      // 2. Create the profile
+      // 2. Create the profile (skills set to empty array)
       const { error: profileError } = await supabase
         .from("profiles")
         .insert({
@@ -138,7 +120,7 @@ export function InviteStaffDialog({ open, onOpenChange }: InviteStaffDialogProps
           full_name: formData.fullName,
           phone: formData.phone || null,
           hourly_rate: formData.hourlyRate ? parseFloat(formData.hourlyRate) : null,
-          skills: formData.skills,
+          skills: [],
           certifications: formData.certifications,
           emergency_contact_name: formData.emergencyContactName || null,
           emergency_contact_phone: formData.emergencyContactPhone || null,
@@ -177,10 +159,10 @@ export function InviteStaffDialog({ open, onOpenChange }: InviteStaffDialogProps
 
       return { email: formData.email, tempPassword };
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       toast({
-        title: "¡Empleado agregado!",
-        description: `${formData.fullName} ha sido registrado exitosamente.`,
+        title: "Employee added!",
+        description: `${formData.fullName} has been registered successfully.`,
       });
       queryClient.invalidateQueries({ queryKey: ["staff-list"] });
       handleClose();
@@ -189,11 +171,11 @@ export function InviteStaffDialog({ open, onOpenChange }: InviteStaffDialogProps
       console.error("Error creating staff:", error);
       
       if (error.message?.includes("already registered")) {
-        setErrors({ email: "Este email ya está registrado" });
+        setErrors({ email: "This email is already registered" });
       } else {
         toast({
-          title: "Error al crear empleado",
-          description: error.message || "Ocurrió un error inesperado",
+          title: "Error creating employee",
+          description: error.message || "An unexpected error occurred",
           variant: "destructive"
         });
       }
@@ -210,14 +192,6 @@ export function InviteStaffDialog({ open, onOpenChange }: InviteStaffDialogProps
   const handleNextStep = () => {
     if (validateForm()) {
       setStep(2);
-    }
-  };
-
-  const toggleSkill = (skill: string) => {
-    if (formData.skills.includes(skill)) {
-      setFormData({ ...formData, skills: formData.skills.filter(s => s !== skill) });
-    } else {
-      setFormData({ ...formData, skills: [...formData.skills, skill] });
     }
   };
 
@@ -241,12 +215,12 @@ export function InviteStaffDialog({ open, onOpenChange }: InviteStaffDialogProps
             <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
               <UserPlus className="h-5 w-5 text-primary" />
             </div>
-            {step === 1 ? "👤 Agregar Empleado" : "🛠️ Habilidades"}
+            {step === 1 ? "Add Employee" : "Certifications"}
           </DialogTitle>
           <DialogDescription>
             {step === 1 
-              ? "Paso 1 de 2: Ingresa los datos básicos del nuevo empleado"
-              : "Paso 2 de 2: Selecciona habilidades y certificaciones (opcional)"}
+              ? "Step 1 of 2: Enter the employee's basic information"
+              : "Step 2 of 2: Select certifications (optional)"}
           </DialogDescription>
         </DialogHeader>
 
@@ -262,11 +236,11 @@ export function InviteStaffDialog({ open, onOpenChange }: InviteStaffDialogProps
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="fullName" className="text-base font-medium">
-                  Nombre Completo *
+                  Full Name *
                 </Label>
                 <Input
                   id="fullName"
-                  placeholder="Ej: María García López"
+                  placeholder="e.g. Sarah Johnson"
                   value={formData.fullName}
                   onChange={(e) => {
                     setFormData({ ...formData, fullName: e.target.value });
@@ -289,7 +263,7 @@ export function InviteStaffDialog({ open, onOpenChange }: InviteStaffDialogProps
                 <Input
                   id="email"
                   type="email"
-                  placeholder="empleado@ejemplo.com"
+                  placeholder="employee@example.com.au"
                   value={formData.email}
                   onChange={(e) => {
                     setFormData({ ...formData, email: e.target.value });
@@ -304,7 +278,7 @@ export function InviteStaffDialog({ open, onOpenChange }: InviteStaffDialogProps
                   </p>
                 )}
                 <p className="text-xs text-muted-foreground">
-                  Se enviará un email con las instrucciones de acceso
+                  An email with login instructions will be sent
                 </p>
               </div>
 
@@ -312,12 +286,12 @@ export function InviteStaffDialog({ open, onOpenChange }: InviteStaffDialogProps
                 <div className="space-y-2">
                   <Label htmlFor="phone" className="flex items-center gap-2">
                     <Phone className="h-4 w-4 text-muted-foreground" />
-                    Teléfono
+                    Phone
                   </Label>
                   <Input
                     id="phone"
                     type="tel"
-                    placeholder="+52 123 456 7890"
+                    placeholder="04XX XXX XXX"
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                   />
@@ -326,13 +300,13 @@ export function InviteStaffDialog({ open, onOpenChange }: InviteStaffDialogProps
                 <div className="space-y-2">
                   <Label htmlFor="hourlyRate" className="flex items-center gap-2">
                     <DollarSign className="h-4 w-4 text-muted-foreground" />
-                    Tarifa/Hora
+                    Hourly Rate (AUD)
                   </Label>
                   <Input
                     id="hourlyRate"
                     type="number"
                     step="0.01"
-                    placeholder="150.00"
+                    placeholder="35.00"
                     value={formData.hourlyRate}
                     onChange={(e) => {
                       setFormData({ ...formData, hourlyRate: e.target.value });
@@ -352,16 +326,16 @@ export function InviteStaffDialog({ open, onOpenChange }: InviteStaffDialogProps
               <div className="space-y-3">
                 <Label className="flex items-center gap-2 text-sm font-medium">
                   <AlertCircle className="h-4 w-4 text-orange-500" />
-                  Contacto de Emergencia (Opcional)
+                  Emergency Contact (Optional)
                 </Label>
                 <div className="grid grid-cols-2 gap-4">
                   <Input
-                    placeholder="Nombre del contacto"
+                    placeholder="Contact name"
                     value={formData.emergencyContactName}
                     onChange={(e) => setFormData({ ...formData, emergencyContactName: e.target.value })}
                   />
                   <Input
-                    placeholder="Teléfono"
+                    placeholder="Phone number"
                     value={formData.emergencyContactPhone}
                     onChange={(e) => setFormData({ ...formData, emergencyContactPhone: e.target.value })}
                   />
@@ -371,43 +345,21 @@ export function InviteStaffDialog({ open, onOpenChange }: InviteStaffDialogProps
           </div>
         ) : (
           <div className="space-y-6">
-            {/* Skills Section */}
-            <div className="space-y-3">
-              <Label className="flex items-center gap-2">
-                <Briefcase className="h-4 w-4 text-muted-foreground" />
-                Habilidades
-              </Label>
-              <div className="flex flex-wrap gap-2">
-                {SKILL_OPTIONS.map((skill) => (
-                  <Badge
-                    key={skill}
-                    variant={formData.skills.includes(skill) ? "default" : "outline"}
-                    className="cursor-pointer transition-all hover:scale-105"
-                    onClick={() => toggleSkill(skill)}
-                  >
-                    {formData.skills.includes(skill) && (
-                      <CheckCircle2 className="h-3 w-3 mr-1" />
-                    )}
-                    {skill}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-
-            <Separator />
-
             {/* Certifications Section */}
             <div className="space-y-3">
               <Label className="flex items-center gap-2">
                 <Award className="h-4 w-4 text-muted-foreground" />
-                Certificaciones
+                Certifications
               </Label>
+              <p className="text-sm text-muted-foreground">
+                Select any certifications this employee holds
+              </p>
               <div className="flex flex-wrap gap-2">
                 {CERTIFICATION_OPTIONS.map((cert) => (
                   <Badge
                     key={cert}
                     variant={formData.certifications.includes(cert) ? "default" : "outline"}
-                    className="cursor-pointer transition-all hover:scale-105"
+                    className="cursor-pointer transition-all hover:scale-105 py-2 px-3"
                     onClick={() => toggleCertification(cert)}
                   >
                     {formData.certifications.includes(cert) && (
@@ -423,17 +375,14 @@ export function InviteStaffDialog({ open, onOpenChange }: InviteStaffDialogProps
 
             {/* Summary */}
             <div className="bg-muted/50 rounded-lg p-4 space-y-2">
-              <h4 className="font-medium text-sm">Resumen del Empleado</h4>
+              <h4 className="font-medium text-sm">Employee Summary</h4>
               <div className="text-sm text-muted-foreground space-y-1">
-                <p><strong>Nombre:</strong> {formData.fullName}</p>
+                <p><strong>Name:</strong> {formData.fullName}</p>
                 <p><strong>Email:</strong> {formData.email}</p>
-                {formData.phone && <p><strong>Teléfono:</strong> {formData.phone}</p>}
-                {formData.hourlyRate && <p><strong>Tarifa:</strong> ${formData.hourlyRate}/hora</p>}
-                {formData.skills.length > 0 && (
-                  <p><strong>Habilidades:</strong> {formData.skills.length} seleccionadas</p>
-                )}
+                {formData.phone && <p><strong>Phone:</strong> {formData.phone}</p>}
+                {formData.hourlyRate && <p><strong>Hourly Rate:</strong> ${formData.hourlyRate}/hr</p>}
                 {formData.certifications.length > 0 && (
-                  <p><strong>Certificaciones:</strong> {formData.certifications.length} seleccionadas</p>
+                  <p><strong>Certifications:</strong> {formData.certifications.length} selected</p>
                 )}
               </div>
             </div>
@@ -444,16 +393,16 @@ export function InviteStaffDialog({ open, onOpenChange }: InviteStaffDialogProps
           {step === 1 ? (
             <>
               <Button variant="outline" onClick={handleClose} className="w-full sm:w-auto h-12">
-                Cancelar
+                Cancel
               </Button>
               <Button onClick={handleNextStep} className="w-full sm:w-auto h-12">
-                Continuar →
+                Continue →
               </Button>
             </>
           ) : (
             <>
               <Button variant="outline" onClick={() => setStep(1)} className="w-full sm:w-auto h-12">
-                ← Atrás
+                ← Back
               </Button>
               <Button 
                 onClick={handleSubmit} 
@@ -463,10 +412,10 @@ export function InviteStaffDialog({ open, onOpenChange }: InviteStaffDialogProps
                 {createStaffMutation.isPending ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Creando...
+                    Creating...
                   </>
                 ) : (
-                  "✨ Agregar Empleado"
+                  "Add Employee"
                 )}
               </Button>
             </>
