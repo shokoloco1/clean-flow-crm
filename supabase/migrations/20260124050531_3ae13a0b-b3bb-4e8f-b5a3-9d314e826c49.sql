@@ -1,0 +1,15 @@
+-- Add property details columns for cleaning estimation
+ALTER TABLE public.properties ADD COLUMN IF NOT EXISTS bedrooms INTEGER DEFAULT 0;
+ALTER TABLE public.properties ADD COLUMN IF NOT EXISTS bathrooms INTEGER DEFAULT 0;
+ALTER TABLE public.properties ADD COLUMN IF NOT EXISTS living_areas INTEGER DEFAULT 0;
+ALTER TABLE public.properties ADD COLUMN IF NOT EXISTS floors INTEGER DEFAULT 1;
+ALTER TABLE public.properties ADD COLUMN IF NOT EXISTS floor_type TEXT DEFAULT 'mixed';
+ALTER TABLE public.properties ADD COLUMN IF NOT EXISTS has_pool BOOLEAN DEFAULT FALSE;
+ALTER TABLE public.properties ADD COLUMN IF NOT EXISTS has_garage BOOLEAN DEFAULT FALSE;
+ALTER TABLE public.properties ADD COLUMN IF NOT EXISTS has_pets BOOLEAN DEFAULT FALSE;
+ALTER TABLE public.properties ADD COLUMN IF NOT EXISTS pet_details TEXT;
+ALTER TABLE public.properties ADD COLUMN IF NOT EXISTS sofas INTEGER DEFAULT 0;
+ALTER TABLE public.properties ADD COLUMN IF NOT EXISTS dining_chairs INTEGER DEFAULT 0;
+ALTER TABLE public.properties ADD COLUMN IF NOT EXISTS beds INTEGER DEFAULT 0;
+ALTER TABLE public.properties ADD COLUMN IF NOT EXISTS rugs INTEGER DEFAULT 0;
+ALTER TABLE public.properties ADD COLUMN IF NOT EXISTS estimated_hours DECIMAL(4,2);
