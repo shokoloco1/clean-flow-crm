@@ -644,6 +644,7 @@ export type Database = {
           floor_type: string | null
           floors: number | null
           geofence_radius_meters: number
+          google_maps_link: string | null
           has_garage: boolean | null
           has_pets: boolean | null
           has_pool: boolean | null
@@ -654,11 +655,14 @@ export type Database = {
           location_lng: number | null
           name: string
           pet_details: string | null
+          post_code: string | null
           property_type: string
           rugs: number | null
           size_sqm: number | null
           sofas: number | null
           special_instructions: string | null
+          state: string | null
+          suburb: string | null
           updated_at: string
         }
         Insert: {
@@ -675,6 +679,7 @@ export type Database = {
           floor_type?: string | null
           floors?: number | null
           geofence_radius_meters?: number
+          google_maps_link?: string | null
           has_garage?: boolean | null
           has_pets?: boolean | null
           has_pool?: boolean | null
@@ -685,11 +690,14 @@ export type Database = {
           location_lng?: number | null
           name: string
           pet_details?: string | null
+          post_code?: string | null
           property_type?: string
           rugs?: number | null
           size_sqm?: number | null
           sofas?: number | null
           special_instructions?: string | null
+          state?: string | null
+          suburb?: string | null
           updated_at?: string
         }
         Update: {
@@ -706,6 +714,7 @@ export type Database = {
           floor_type?: string | null
           floors?: number | null
           geofence_radius_meters?: number
+          google_maps_link?: string | null
           has_garage?: boolean | null
           has_pets?: boolean | null
           has_pool?: boolean | null
@@ -716,11 +725,14 @@ export type Database = {
           location_lng?: number | null
           name?: string
           pet_details?: string | null
+          post_code?: string | null
           property_type?: string
           rugs?: number | null
           size_sqm?: number | null
           sofas?: number | null
           special_instructions?: string | null
+          state?: string | null
+          suburb?: string | null
           updated_at?: string
         }
         Relationships: [
