@@ -1,5 +1,4 @@
-import { useEffect, useState } from "react";
-import { useAuth } from "@/hooks/useAuth";
+import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Separator } from "@/components/ui/separator";
 import {
   Dialog,
   DialogContent,
@@ -36,7 +37,14 @@ import {
   Plane,
   Stethoscope,
   Camera,
-  X,
+  Bed,
+  Bath,
+  Sofa,
+  Car,
+  Dog,
+  Clock,
+  Waves,
+  Layers,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -57,6 +65,20 @@ interface Property {
   default_checklist_template_id: string | null;
   clients: { name: string } | null;
   checklist_templates: { name: string } | null;
+  bedrooms?: number;
+  bathrooms?: number;
+  living_areas?: number;
+  floors?: number;
+  floor_type?: string;
+  has_pool?: boolean;
+  has_garage?: boolean;
+  has_pets?: boolean;
+  pet_details?: string;
+  sofas?: number;
+  dining_chairs?: number;
+  beds?: number;
+  rugs?: number;
+  estimated_hours?: number;
 }
 
 interface Client {
@@ -84,6 +106,14 @@ const propertyTypeConfig = {
   medical: { icon: Stethoscope, label: "Medical", color: "bg-green-500/10 text-green-600" },
 };
 
+const floorTypeOptions = [
+  { value: "tile", label: "Tile" },
+  { value: "hardwood", label: "Hardwood" },
+  { value: "carpet", label: "Carpet" },
+  { value: "laminate", label: "Laminate" },
+  { value: "mixed", label: "Mixed" },
+];
+
 export default function PropertiesPage() {
   const navigate = useNavigate();
   const [properties, setProperties] = useState<Property[]>([]);
@@ -108,7 +138,37 @@ export default function PropertiesPage() {
     geofence_radius_meters: "100",
     client_id: "",
     default_checklist_template_id: "",
+    // New property details
+    bedrooms: "0",
+    bathrooms: "0",
+    living_areas: "0",
+    floors: "1",
+    floor_type: "mixed",
+    has_pool: false,
+    has_garage: false,
+    has_pets: false,
+    pet_details: "",
+    // Furniture
+    sofas: "0",
+    dining_chairs: "0",
+    beds: "0",
+    rugs: "0",
   });
+
+  // Calculate estimated cleaning time
+  const estimatedTime = useMemo(() => {
+    let minutes = 60; // Base time: 1 hour
+    minutes += parseInt(formData.bedrooms || "0") * 30; // +30 min per bedroom
+    minutes += parseInt(formData.bathrooms || "0") * 20; // +20 min per bathroom
+    minutes += parseInt(formData.living_areas || "0") * 15; // +15 min per living area
+    minutes += (parseInt(formData.floors || "1") - 1) * 15; // +15 min per additional floor
+    if (formData.has_pool) minutes += 30; // +30 min for pool
+    if (formData.has_garage) minutes += 15; // +15 min for garage
+
+    const hours = Math.floor(minutes / 60);
+    const remainingMinutes = minutes % 60;
+    return { hours, minutes: remainingMinutes, totalMinutes: minutes, totalHours: minutes / 60 };
+  }, [formData.bedrooms, formData.bathrooms, formData.living_areas, formData.floors, formData.has_pool, formData.has_garage]);
 
   useEffect(() => {
     fetchData();
@@ -147,6 +207,19 @@ export default function PropertiesPage() {
       geofence_radius_meters: "100",
       client_id: "",
       default_checklist_template_id: "",
+      bedrooms: "0",
+      bathrooms: "0",
+      living_areas: "0",
+      floors: "1",
+      floor_type: "mixed",
+      has_pool: false,
+      has_garage: false,
+      has_pets: false,
+      pet_details: "",
+      sofas: "0",
+      dining_chairs: "0",
+      beds: "0",
+      rugs: "0",
     });
     setEditingProperty(null);
   };
@@ -165,6 +238,19 @@ export default function PropertiesPage() {
       geofence_radius_meters: property.geofence_radius_meters.toString(),
       client_id: property.client_id || "",
       default_checklist_template_id: property.default_checklist_template_id || "",
+      bedrooms: property.bedrooms?.toString() || "0",
+      bathrooms: property.bathrooms?.toString() || "0",
+      living_areas: property.living_areas?.toString() || "0",
+      floors: property.floors?.toString() || "1",
+      floor_type: property.floor_type || "mixed",
+      has_pool: property.has_pool || false,
+      has_garage: property.has_garage || false,
+      has_pets: property.has_pets || false,
+      pet_details: property.pet_details || "",
+      sofas: property.sofas?.toString() || "0",
+      dining_chairs: property.dining_chairs?.toString() || "0",
+      beds: property.beds?.toString() || "0",
+      rugs: property.rugs?.toString() || "0",
     });
     setIsDialogOpen(true);
   };
@@ -212,6 +298,21 @@ export default function PropertiesPage() {
       geofence_radius_meters: parseInt(formData.geofence_radius_meters) || 100,
       client_id: formData.client_id || null,
       default_checklist_template_id: formData.default_checklist_template_id || null,
+      // New fields
+      bedrooms: parseInt(formData.bedrooms) || 0,
+      bathrooms: parseInt(formData.bathrooms) || 0,
+      living_areas: parseInt(formData.living_areas) || 0,
+      floors: parseInt(formData.floors) || 1,
+      floor_type: formData.floor_type,
+      has_pool: formData.has_pool,
+      has_garage: formData.has_garage,
+      has_pets: formData.has_pets,
+      pet_details: formData.has_pets ? formData.pet_details : null,
+      sofas: parseInt(formData.sofas) || 0,
+      dining_chairs: parseInt(formData.dining_chairs) || 0,
+      beds: parseInt(formData.beds) || 0,
+      rugs: parseInt(formData.rugs) || 0,
+      estimated_hours: parseFloat(estimatedTime.totalHours.toFixed(2)),
     };
 
     if (editingProperty) {
@@ -309,7 +410,7 @@ export default function PropertiesPage() {
 
         <main className="container mx-auto px-4 py-6 space-y-6">
           {/* Property Info Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {selectedProperty.clients && (
               <Card>
                 <CardContent className="p-4">
@@ -318,6 +419,48 @@ export default function PropertiesPage() {
                     <div>
                       <p className="text-sm text-muted-foreground">Client</p>
                       <p className="font-medium">{selectedProperty.clients.name}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {selectedProperty.bedrooms !== undefined && selectedProperty.bedrooms > 0 && (
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3">
+                    <Bed className="h-5 w-5 text-primary" />
+                    <div>
+                      <p className="text-sm text-muted-foreground">Bedrooms</p>
+                      <p className="font-medium">{selectedProperty.bedrooms}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {selectedProperty.bathrooms !== undefined && selectedProperty.bathrooms > 0 && (
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3">
+                    <Bath className="h-5 w-5 text-primary" />
+                    <div>
+                      <p className="text-sm text-muted-foreground">Bathrooms</p>
+                      <p className="font-medium">{selectedProperty.bathrooms}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {selectedProperty.estimated_hours && (
+              <Card className="bg-primary/5 border-primary/20">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3">
+                    <Clock className="h-5 w-5 text-primary" />
+                    <div>
+                      <p className="text-sm text-muted-foreground">Est. Time</p>
+                      <p className="font-medium">{selectedProperty.estimated_hours} hrs</p>
                     </div>
                   </div>
                 </CardContent>
@@ -349,6 +492,34 @@ export default function PropertiesPage() {
                 </div>
               </CardContent>
             </Card>
+
+            {selectedProperty.has_pool && (
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3">
+                    <Waves className="h-5 w-5 text-primary" />
+                    <div>
+                      <p className="text-sm text-muted-foreground">Pool/Spa</p>
+                      <p className="font-medium">Yes</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {selectedProperty.has_pets && (
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3">
+                    <Dog className="h-5 w-5 text-primary" />
+                    <div>
+                      <p className="text-sm text-muted-foreground">Pets</p>
+                      <p className="font-medium text-sm">{selectedProperty.pet_details || "Yes"}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {selectedProperty.location_lat && selectedProperty.location_lng && (
               <Card>
@@ -459,119 +630,368 @@ export default function PropertiesPage() {
               <DialogHeader>
                 <DialogTitle>{editingProperty ? "Edit Property" : "Add New Property"}</DialogTitle>
               </DialogHeader>
-              <div className="space-y-4 mt-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="col-span-2">
-                    <Label>Property Name *</Label>
-                    <Input
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      placeholder="e.g., Main Street Office"
-                    />
+              <div className="space-y-6 mt-4">
+                {/* Basic Info */}
+                <div className="space-y-4">
+                  <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                    <Building2 className="h-4 w-4" />
+                    Basic Information
+                  </h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="col-span-2">
+                      <Label>Property Name *</Label>
+                      <Input
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        placeholder="e.g., Smith Family Home"
+                      />
+                    </div>
+
+                    <div className="col-span-2">
+                      <Label>Address *</Label>
+                      <Input
+                        value={formData.address}
+                        onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                        placeholder="Full address"
+                      />
+                    </div>
+
+                    <div>
+                      <Label>Client</Label>
+                      <Select
+                        value={formData.client_id}
+                        onValueChange={(v) => setFormData({ ...formData, client_id: v })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select client" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {clients.map((client) => (
+                            <SelectItem key={client.id} value={client.id}>
+                              {client.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <Label>Property Type</Label>
+                      <Select
+                        value={formData.property_type}
+                        onValueChange={(v) => setFormData({ ...formData, property_type: v })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="residential">Residential</SelectItem>
+                          <SelectItem value="commercial">Commercial</SelectItem>
+                          <SelectItem value="airbnb">Airbnb</SelectItem>
+                          <SelectItem value="medical">Medical</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+
+                <Separator />
+
+                {/* Property Details - NEW SECTION */}
+                <div className="space-y-4">
+                  <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                    <Home className="h-4 w-4" />
+                    Property Details
+                  </h3>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <div>
+                      <Label className="flex items-center gap-1">
+                        <Bed className="h-3 w-3" />
+                        Bedrooms
+                      </Label>
+                      <Input
+                        type="number"
+                        min="0"
+                        max="10"
+                        value={formData.bedrooms}
+                        onChange={(e) => setFormData({ ...formData, bedrooms: e.target.value })}
+                      />
+                    </div>
+
+                    <div>
+                      <Label className="flex items-center gap-1">
+                        <Bath className="h-3 w-3" />
+                        Bathrooms
+                      </Label>
+                      <Input
+                        type="number"
+                        min="0"
+                        max="10"
+                        value={formData.bathrooms}
+                        onChange={(e) => setFormData({ ...formData, bathrooms: e.target.value })}
+                      />
+                    </div>
+
+                    <div>
+                      <Label className="flex items-center gap-1">
+                        <Sofa className="h-3 w-3" />
+                        Living Areas
+                      </Label>
+                      <Input
+                        type="number"
+                        min="0"
+                        max="5"
+                        value={formData.living_areas}
+                        onChange={(e) => setFormData({ ...formData, living_areas: e.target.value })}
+                      />
+                    </div>
+
+                    <div>
+                      <Label className="flex items-center gap-1">
+                        <Layers className="h-3 w-3" />
+                        Floors/Levels
+                      </Label>
+                      <Input
+                        type="number"
+                        min="1"
+                        max="5"
+                        value={formData.floors}
+                        onChange={(e) => setFormData({ ...formData, floors: e.target.value })}
+                      />
+                    </div>
                   </div>
 
-                  <div className="col-span-2">
-                    <Label>Address *</Label>
-                    <Input
-                      value={formData.address}
-                      onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                      placeholder="Full address"
-                    />
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label>Main Floor Type</Label>
+                      <Select
+                        value={formData.floor_type}
+                        onValueChange={(v) => setFormData({ ...formData, floor_type: v })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {floorTypeOptions.map((option) => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <Label>Size (sqm)</Label>
+                      <Input
+                        type="number"
+                        value={formData.size_sqm}
+                        onChange={(e) => setFormData({ ...formData, size_sqm: e.target.value })}
+                        placeholder="e.g., 150"
+                      />
+                    </div>
                   </div>
+
+                  {/* Checkboxes for amenities */}
+                  <div className="flex flex-wrap gap-6">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="has_pool"
+                        checked={formData.has_pool}
+                        onCheckedChange={(checked) => setFormData({ ...formData, has_pool: checked as boolean })}
+                      />
+                      <Label htmlFor="has_pool" className="flex items-center gap-1 cursor-pointer">
+                        <Waves className="h-3 w-3" />
+                        Has Pool/Spa
+                      </Label>
+                    </div>
+
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="has_garage"
+                        checked={formData.has_garage}
+                        onCheckedChange={(checked) => setFormData({ ...formData, has_garage: checked as boolean })}
+                      />
+                      <Label htmlFor="has_garage" className="flex items-center gap-1 cursor-pointer">
+                        <Car className="h-3 w-3" />
+                        Has Garage
+                      </Label>
+                    </div>
+
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="has_pets"
+                        checked={formData.has_pets}
+                        onCheckedChange={(checked) => setFormData({ ...formData, has_pets: checked as boolean })}
+                      />
+                      <Label htmlFor="has_pets" className="flex items-center gap-1 cursor-pointer">
+                        <Dog className="h-3 w-3" />
+                        Has Pets
+                      </Label>
+                    </div>
+                  </div>
+
+                  {/* Pet details - conditional */}
+                  {formData.has_pets && (
+                    <div>
+                      <Label>Pet Details (type, areas they stay in)</Label>
+                      <Input
+                        value={formData.pet_details}
+                        onChange={(e) => setFormData({ ...formData, pet_details: e.target.value })}
+                        placeholder="e.g., 2 dogs, stay in living room and backyard"
+                      />
+                    </div>
+                  )}
+                </div>
+
+                <Separator />
+
+                {/* Furniture & Items - NEW SECTION */}
+                <div className="space-y-4">
+                  <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                    <Sofa className="h-4 w-4" />
+                    Furniture & Items
+                  </h3>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <div>
+                      <Label>Sofas/Couches</Label>
+                      <Input
+                        type="number"
+                        min="0"
+                        max="10"
+                        value={formData.sofas}
+                        onChange={(e) => setFormData({ ...formData, sofas: e.target.value })}
+                      />
+                    </div>
+
+                    <div>
+                      <Label>Dining Chairs</Label>
+                      <Input
+                        type="number"
+                        min="0"
+                        max="20"
+                        value={formData.dining_chairs}
+                        onChange={(e) => setFormData({ ...formData, dining_chairs: e.target.value })}
+                      />
+                    </div>
+
+                    <div>
+                      <Label>Beds</Label>
+                      <Input
+                        type="number"
+                        min="0"
+                        max="10"
+                        value={formData.beds}
+                        onChange={(e) => setFormData({ ...formData, beds: e.target.value })}
+                      />
+                    </div>
+
+                    <div>
+                      <Label>Rugs/Carpets</Label>
+                      <Input
+                        type="number"
+                        min="0"
+                        max="10"
+                        value={formData.rugs}
+                        onChange={(e) => setFormData({ ...formData, rugs: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <Separator />
+
+                {/* Estimated Cleaning Time - PROMINENT DISPLAY */}
+                <Card className="bg-primary/5 border-primary/20">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                          <Clock className="h-5 w-5 text-primary" />
+                        </div>
+                        <div>
+                          <p className="text-sm text-muted-foreground">Estimated Cleaning Time</p>
+                          <p className="text-2xl font-bold text-primary">
+                            {estimatedTime.hours > 0 && `${estimatedTime.hours}h `}
+                            {estimatedTime.minutes > 0 && `${estimatedTime.minutes}m`}
+                            {estimatedTime.hours === 0 && estimatedTime.minutes === 0 && "1h"}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="text-right text-sm text-muted-foreground">
+                        <p>Base: 1hr</p>
+                        <p>+30m/bedroom, +20m/bathroom</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Separator />
+
+                {/* Location & Geofence */}
+                <div className="space-y-4">
+                  <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                    <MapPin className="h-4 w-4" />
+                    Location & Geofence
+                  </h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label>Geofence Radius (meters)</Label>
+                      <Input
+                        type="number"
+                        value={formData.geofence_radius_meters}
+                        onChange={(e) => setFormData({ ...formData, geofence_radius_meters: e.target.value })}
+                        placeholder="100"
+                      />
+                    </div>
+
+                    <div className="flex items-end">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={getCurrentLocation}
+                        disabled={gettingLocation}
+                        className="w-full"
+                      >
+                        <Navigation className="h-4 w-4 mr-2" />
+                        {gettingLocation ? "Getting..." : "Use Current Location"}
+                      </Button>
+                    </div>
+
+                    <div>
+                      <Label>Latitude</Label>
+                      <Input
+                        type="number"
+                        step="any"
+                        value={formData.location_lat}
+                        onChange={(e) => setFormData({ ...formData, location_lat: e.target.value })}
+                        placeholder="-33.8688"
+                      />
+                    </div>
+
+                    <div>
+                      <Label>Longitude</Label>
+                      <Input
+                        type="number"
+                        step="any"
+                        value={formData.location_lng}
+                        onChange={(e) => setFormData({ ...formData, location_lng: e.target.value })}
+                        placeholder="151.2093"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <Separator />
+
+                {/* Additional Info */}
+                <div className="space-y-4">
+                  <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                    <FileText className="h-4 w-4" />
+                    Additional Information
+                  </h3>
 
                   <div>
-                    <Label>Client</Label>
-                    <Select
-                      value={formData.client_id}
-                      onValueChange={(v) => setFormData({ ...formData, client_id: v })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select client" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {clients.map((client) => (
-                          <SelectItem key={client.id} value={client.id}>
-                            {client.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div>
-                    <Label>Property Type</Label>
-                    <Select
-                      value={formData.property_type}
-                      onValueChange={(v) => setFormData({ ...formData, property_type: v })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="residential">Residential</SelectItem>
-                        <SelectItem value="commercial">Commercial</SelectItem>
-                        <SelectItem value="airbnb">Airbnb</SelectItem>
-                        <SelectItem value="medical">Medical</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div>
-                    <Label>Size (sqm)</Label>
-                    <Input
-                      type="number"
-                      value={formData.size_sqm}
-                      onChange={(e) => setFormData({ ...formData, size_sqm: e.target.value })}
-                      placeholder="e.g., 150"
-                    />
-                  </div>
-
-                  <div>
-                    <Label>Geofence Radius (meters)</Label>
-                    <Input
-                      type="number"
-                      value={formData.geofence_radius_meters}
-                      onChange={(e) => setFormData({ ...formData, geofence_radius_meters: e.target.value })}
-                      placeholder="100"
-                    />
-                  </div>
-
-                  <div>
-                    <Label>Latitude</Label>
-                    <Input
-                      type="number"
-                      step="any"
-                      value={formData.location_lat}
-                      onChange={(e) => setFormData({ ...formData, location_lat: e.target.value })}
-                      placeholder="-33.8688"
-                    />
-                  </div>
-
-                  <div>
-                    <Label>Longitude</Label>
-                    <Input
-                      type="number"
-                      step="any"
-                      value={formData.location_lng}
-                      onChange={(e) => setFormData({ ...formData, location_lng: e.target.value })}
-                      placeholder="151.2093"
-                    />
-                  </div>
-
-                  <div className="col-span-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={getCurrentLocation}
-                      disabled={gettingLocation}
-                      className="w-full"
-                    >
-                      <Navigation className="h-4 w-4 mr-2" />
-                      {gettingLocation ? "Getting location..." : "Use Current Location"}
-                    </Button>
-                  </div>
-
-                  <div className="col-span-2">
                     <Label>Default Checklist Template</Label>
                     <Select
                       value={formData.default_checklist_template_id}
@@ -590,7 +1010,7 @@ export default function PropertiesPage() {
                     </Select>
                   </div>
 
-                  <div className="col-span-2">
+                  <div>
                     <Label>Access Codes</Label>
                     <Textarea
                       value={formData.access_codes}
@@ -600,13 +1020,13 @@ export default function PropertiesPage() {
                     />
                   </div>
 
-                  <div className="col-span-2">
+                  <div>
                     <Label>Special Instructions</Label>
                     <Textarea
                       value={formData.special_instructions}
                       onChange={(e) => setFormData({ ...formData, special_instructions: e.target.value })}
                       placeholder="Any special cleaning requirements, areas to avoid, etc."
-                      rows={4}
+                      rows={3}
                     />
                   </div>
                 </div>
@@ -670,6 +1090,28 @@ export default function PropertiesPage() {
                       </Badge>
                     </div>
 
+                    {/* Property quick stats */}
+                    <div className="flex items-center gap-3 text-sm text-muted-foreground mb-2">
+                      {property.bedrooms !== undefined && property.bedrooms > 0 && (
+                        <span className="flex items-center gap-1">
+                          <Bed className="h-3 w-3" />
+                          {property.bedrooms}
+                        </span>
+                      )}
+                      {property.bathrooms !== undefined && property.bathrooms > 0 && (
+                        <span className="flex items-center gap-1">
+                          <Bath className="h-3 w-3" />
+                          {property.bathrooms}
+                        </span>
+                      )}
+                      {property.estimated_hours && (
+                        <span className="flex items-center gap-1 text-primary font-medium">
+                          <Clock className="h-3 w-3" />
+                          {property.estimated_hours}h
+                        </span>
+                      )}
+                    </div>
+
                     {property.clients && (
                       <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
                         <Building2 className="h-4 w-4" />
@@ -683,11 +1125,6 @@ export default function PropertiesPage() {
                         GPS: ✓
                       </div>
                     )}
-
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Navigation className="h-4 w-4" />
-                      {property.geofence_radius_meters}m radius
-                    </div>
 
                     <div className="flex gap-2 mt-4 pt-3 border-t border-border">
                       <Button

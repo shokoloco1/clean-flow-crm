@@ -600,51 +600,93 @@ export type Database = {
         Row: {
           access_codes: string | null
           address: string
+          bathrooms: number | null
+          bedrooms: number | null
+          beds: number | null
           client_id: string | null
           created_at: string
           default_checklist_template_id: string | null
+          dining_chairs: number | null
+          estimated_hours: number | null
+          floor_type: string | null
+          floors: number | null
           geofence_radius_meters: number
+          has_garage: boolean | null
+          has_pets: boolean | null
+          has_pool: boolean | null
           id: string
           is_active: boolean
+          living_areas: number | null
           location_lat: number | null
           location_lng: number | null
           name: string
+          pet_details: string | null
           property_type: string
+          rugs: number | null
           size_sqm: number | null
+          sofas: number | null
           special_instructions: string | null
           updated_at: string
         }
         Insert: {
           access_codes?: string | null
           address: string
+          bathrooms?: number | null
+          bedrooms?: number | null
+          beds?: number | null
           client_id?: string | null
           created_at?: string
           default_checklist_template_id?: string | null
+          dining_chairs?: number | null
+          estimated_hours?: number | null
+          floor_type?: string | null
+          floors?: number | null
           geofence_radius_meters?: number
+          has_garage?: boolean | null
+          has_pets?: boolean | null
+          has_pool?: boolean | null
           id?: string
           is_active?: boolean
+          living_areas?: number | null
           location_lat?: number | null
           location_lng?: number | null
           name: string
+          pet_details?: string | null
           property_type?: string
+          rugs?: number | null
           size_sqm?: number | null
+          sofas?: number | null
           special_instructions?: string | null
           updated_at?: string
         }
         Update: {
           access_codes?: string | null
           address?: string
+          bathrooms?: number | null
+          bedrooms?: number | null
+          beds?: number | null
           client_id?: string | null
           created_at?: string
           default_checklist_template_id?: string | null
+          dining_chairs?: number | null
+          estimated_hours?: number | null
+          floor_type?: string | null
+          floors?: number | null
           geofence_radius_meters?: number
+          has_garage?: boolean | null
+          has_pets?: boolean | null
+          has_pool?: boolean | null
           id?: string
           is_active?: boolean
+          living_areas?: number | null
           location_lat?: number | null
           location_lng?: number | null
           name?: string
+          pet_details?: string | null
           property_type?: string
+          rugs?: number | null
           size_sqm?: number | null
+          sofas?: number | null
           special_instructions?: string | null
           updated_at?: string
         }
