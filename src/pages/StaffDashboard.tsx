@@ -3,6 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { 
   LogOut,
   MapPin,
@@ -11,11 +12,48 @@ import {
   ChevronRight,
   Sparkles,
   Calendar,
-  Smile
+  Smile,
+  Home,
+  Bath,
+  Bed,
+  PawPrint,
+  Timer
 } from "lucide-react";
-import { format } from "date-fns";
+import { format, addDays } from "date-fns";
 import JobDetailView from "@/components/JobDetailView";
 import { NotificationCenter } from "@/components/NotificationCenter";
+
+interface PropertyPhotos {
+  id: string;
+  photo_url: string;
+  room_area: string | null;
+}
+
+interface Property {
+  id: string;
+  name: string;
+  address: string;
+  bedrooms: number | null;
+  bathrooms: number | null;
+  living_areas: number | null;
+  floors: number | null;
+  floor_type: string | null;
+  has_pets: boolean | null;
+  pet_details: string | null;
+  has_pool: boolean | null;
+  has_garage: boolean | null;
+  special_instructions: string | null;
+  access_codes: string | null;
+  estimated_hours: number | null;
+  google_maps_link: string | null;
+  suburb: string | null;
+  post_code: string | null;
+  state: string | null;
+  sofas: number | null;
+  beds: number | null;
+  dining_chairs: number | null;
+  rugs: number | null;
+}
 
 interface Job {
   id: string;
@@ -29,6 +67,7 @@ interface Job {
   notes: string | null;
   property_id: string | null;
   clients: { name: string } | null;
+  properties: Property | null;
 }
 
 export default function StaffDashboard() {
@@ -36,6 +75,7 @@ export default function StaffDashboard() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [loading, setLoading] = useState(true);
+  const [propertyPhotos, setPropertyPhotos] = useState<Record<string, PropertyPhotos[]>>({});
 
   useEffect(() => {
     if (user) {
@@ -66,6 +106,7 @@ export default function StaffDashboard() {
 
   const fetchMyJobs = async () => {
     const today = format(new Date(), "yyyy-MM-dd");
+    const nextWeek = format(addDays(new Date(), 7), "yyyy-MM-dd");
     
     const { data } = await supabase
       .from("jobs")
@@ -80,13 +121,61 @@ export default function StaffDashboard() {
         end_time,
         notes,
         property_id,
-        clients (name)
+        clients (name),
+        properties (
+          id,
+          name,
+          address,
+          bedrooms,
+          bathrooms,
+          living_areas,
+          floors,
+          floor_type,
+          has_pets,
+          pet_details,
+          has_pool,
+          has_garage,
+          special_instructions,
+          access_codes,
+          estimated_hours,
+          google_maps_link,
+          suburb,
+          post_code,
+          state
+        )
       `)
       .eq("assigned_staff_id", user?.id)
-      .eq("scheduled_date", today)
+      .gte("scheduled_date", today)
+      .lte("scheduled_date", nextWeek)
+      .order("scheduled_date", { ascending: true })
       .order("scheduled_time", { ascending: true });
 
-    setJobs((data as unknown as Job[]) || []);
+    const jobsData = (data as unknown as Job[]) || [];
+    setJobs(jobsData);
+    
+    // Fetch property photos for jobs with properties
+    const propertyIds = jobsData
+      .filter(j => j.property_id)
+      .map(j => j.property_id as string);
+    
+    if (propertyIds.length > 0) {
+      const { data: photos } = await supabase
+        .from("property_photos")
+        .select("id, photo_url, room_area, property_id")
+        .in("property_id", propertyIds);
+      
+      if (photos) {
+        const photosMap: Record<string, PropertyPhotos[]> = {};
+        photos.forEach((photo: any) => {
+          if (!photosMap[photo.property_id]) {
+            photosMap[photo.property_id] = [];
+          }
+          photosMap[photo.property_id].push(photo);
+        });
+        setPropertyPhotos(photosMap);
+      }
+    }
+    
     setLoading(false);
   };
 
@@ -97,7 +186,7 @@ export default function StaffDashboard() {
           bg: "bg-success/10", 
           text: "text-success", 
           border: "border-success/30",
-          label: "✅ Completado",
+          label: "✅ Completed",
           pulse: false
         };
       case "in_progress": 
@@ -105,7 +194,7 @@ export default function StaffDashboard() {
           bg: "bg-warning/10", 
           text: "text-warning", 
           border: "border-warning",
-          label: "🔄 En Progreso",
+          label: "🔄 In Progress",
           pulse: true
         };
       default: 
@@ -113,11 +202,16 @@ export default function StaffDashboard() {
           bg: "bg-muted", 
           text: "text-muted-foreground", 
           border: "border-border",
-          label: "⏳ Pendiente",
+          label: "⏳ Pending",
           pulse: false
         };
     }
   };
+
+  // Group jobs by date
+  const todayStr = format(new Date(), "yyyy-MM-dd");
+  const todayJobs = jobs.filter(j => j.scheduled_date === todayStr);
+  const upcomingJobs = jobs.filter(j => j.scheduled_date !== todayStr);
 
   if (selectedJob) {
     return (
@@ -143,7 +237,7 @@ export default function StaffDashboard() {
             </div>
             <div>
               <h1 className="text-xl font-bold text-foreground">CleanFlow</h1>
-              <p className="text-sm text-muted-foreground">Mis Trabajos</p>
+              <p className="text-sm text-muted-foreground">My Jobs</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -167,89 +261,188 @@ export default function StaffDashboard() {
             <Calendar className="h-5 w-5 text-primary" />
           </div>
           <span className="text-xl font-semibold text-foreground">
-            {format(new Date(), "EEEE, d 'de' MMMM")}
+            {format(new Date(), "EEEE, MMMM d")}
           </span>
         </div>
 
         {loading ? (
           <div className="flex flex-col items-center justify-center py-16">
             <div className="h-12 w-12 rounded-full border-4 border-primary border-t-transparent animate-spin mb-4" />
-            <p className="text-muted-foreground">Cargando tus trabajos...</p>
+            <p className="text-muted-foreground">Loading your jobs...</p>
           </div>
-        ) : jobs.length === 0 ? (
+        ) : todayJobs.length === 0 && upcomingJobs.length === 0 ? (
           /* Empty State - Friendly message */
           <Card className="border-border bg-card">
             <CardContent className="flex flex-col items-center justify-center py-16 text-center px-6">
               <div className="h-20 w-20 rounded-full bg-success/10 flex items-center justify-center mb-6">
                 <Smile className="h-10 w-10 text-success" />
               </div>
-              <h3 className="text-2xl font-bold text-foreground mb-3">🎉 ¡Día libre!</h3>
+              <h3 className="text-2xl font-bold text-foreground mb-3">🎉 Day Off!</h3>
               <p className="text-muted-foreground text-lg">
-                No tienes trabajos programados para hoy. ¡Disfruta tu día!
+                No jobs scheduled. Enjoy your day!
               </p>
             </CardContent>
           </Card>
         ) : (
-          <div className="space-y-4">
-            {/* Jobs Count */}
-            <p className="text-sm text-muted-foreground px-2">
-              📋 {jobs.length} trabajo{jobs.length > 1 ? "s" : ""} para hoy
-            </p>
-            
-            {jobs.map((job) => {
-              const statusConfig = getStatusConfig(job.status);
-              
-              return (
-                <Card 
-                  key={job.id}
-                  className={`
-                    border-2 shadow-sm transition-all cursor-pointer active:scale-[0.98]
-                    ${statusConfig.border}
-                    ${statusConfig.pulse ? "animate-pulse" : ""}
-                  `}
-                  onClick={() => setSelectedJob(job)}
-                >
-                  <CardContent className="p-5">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex-1 min-w-0">
-                        {/* Client Name */}
-                        <h3 className="font-bold text-foreground text-xl mb-1 truncate">
-                          {job.clients?.name || "Unknown Client"}
-                        </h3>
-                        
-                        {/* Status Badge */}
-                        <div className="mb-3">
-                          <span className={`
-                            inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium
-                            ${statusConfig.bg} ${statusConfig.text}
-                          `}>
-                            {job.status === "completed" && <CheckCircle2 className="h-3.5 w-3.5" />}
-                            {job.status === "in_progress" && <Clock className="h-3.5 w-3.5" />}
-                            {statusConfig.label}
-                          </span>
+          <div className="space-y-6">
+            {/* Today's Jobs */}
+            {todayJobs.length > 0 && (
+              <div className="space-y-4">
+                <p className="text-sm font-medium text-muted-foreground px-2">
+                  📋 {todayJobs.length} job{todayJobs.length > 1 ? "s" : ""} for today
+                </p>
+                
+                {todayJobs.map((job) => {
+                  const statusConfig = getStatusConfig(job.status);
+                  const photos = job.property_id ? propertyPhotos[job.property_id] || [] : [];
+                  
+                  return (
+                    <Card 
+                      key={job.id}
+                      className={`
+                        border-2 shadow-sm transition-all cursor-pointer active:scale-[0.98]
+                        ${statusConfig.border}
+                        ${statusConfig.pulse ? "animate-pulse" : ""}
+                      `}
+                      onClick={() => setSelectedJob(job)}
+                    >
+                      <CardContent className="p-5">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex-1 min-w-0">
+                            {/* Client Name */}
+                            <h3 className="font-bold text-foreground text-xl mb-1 truncate">
+                              {job.clients?.name || "Unknown Client"}
+                            </h3>
+                            
+                            {/* Status Badge */}
+                            <div className="mb-3">
+                              <span className={`
+                                inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium
+                                ${statusConfig.bg} ${statusConfig.text}
+                              `}>
+                                {job.status === "completed" && <CheckCircle2 className="h-3.5 w-3.5" />}
+                                {job.status === "in_progress" && <Clock className="h-3.5 w-3.5" />}
+                                {statusConfig.label}
+                              </span>
+                            </div>
+                            
+                            {/* Property Quick Info */}
+                            {job.properties && (
+                              <div className="flex flex-wrap gap-3 text-sm text-muted-foreground mb-3 bg-muted/50 p-2 rounded-lg">
+                                {(job.properties.bedrooms ?? 0) > 0 && (
+                                  <span className="flex items-center gap-1">
+                                    <Bed className="h-4 w-4" />
+                                    {job.properties.bedrooms} bed
+                                  </span>
+                                )}
+                                {(job.properties.bathrooms ?? 0) > 0 && (
+                                  <span className="flex items-center gap-1">
+                                    <Bath className="h-4 w-4" />
+                                    {job.properties.bathrooms} bath
+                                  </span>
+                                )}
+                                {job.properties.has_pets && (
+                                  <span className="flex items-center gap-1 text-warning">
+                                    <PawPrint className="h-4 w-4" />
+                                    Pets
+                                  </span>
+                                )}
+                                {job.properties.estimated_hours && (
+                                  <span className="flex items-center gap-1">
+                                    <Timer className="h-4 w-4" />
+                                    ~{job.properties.estimated_hours}h
+                                  </span>
+                                )}
+                              </div>
+                            )}
+                            
+                            {/* Property Photo Preview */}
+                            {photos.length > 0 && (
+                              <div className="flex gap-1 mb-3">
+                                {photos.slice(0, 3).map((photo) => (
+                                  <div key={photo.id} className="w-14 h-14 rounded-md overflow-hidden bg-muted">
+                                    <img src={photo.photo_url} className="w-full h-full object-cover" alt="" />
+                                  </div>
+                                ))}
+                                {photos.length > 3 && (
+                                  <div className="w-14 h-14 rounded-md bg-muted flex items-center justify-center text-sm text-muted-foreground">
+                                    +{photos.length - 3}
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                            
+                            {/* Location */}
+                            <div className="flex items-start gap-2 text-muted-foreground mb-2">
+                              <MapPin className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                              <span className="text-base line-clamp-2">{job.location}</span>
+                            </div>
+                            
+                            {/* Time */}
+                            <div className="flex items-center gap-2 text-muted-foreground">
+                              <Clock className="h-5 w-5 flex-shrink-0" />
+                              <span className="text-base font-medium">{job.scheduled_time}</span>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center justify-center h-12 w-12 rounded-full bg-muted/50">
+                            <ChevronRight className="h-6 w-6 text-muted-foreground" />
+                          </div>
                         </div>
-                        
-                        {/* Location */}
-                        <div className="flex items-start gap-2 text-muted-foreground mb-2">
-                          <MapPin className="h-5 w-5 flex-shrink-0 mt-0.5" />
-                          <span className="text-base line-clamp-2">{job.location}</span>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Upcoming Jobs */}
+            {upcomingJobs.length > 0 && (
+              <div className="space-y-4">
+                <p className="text-sm font-medium text-muted-foreground px-2">
+                  📅 Upcoming ({upcomingJobs.length})
+                </p>
+                
+                {upcomingJobs.map((job) => {
+                  const statusConfig = getStatusConfig(job.status);
+                  
+                  return (
+                    <Card 
+                      key={job.id}
+                      className="border shadow-sm transition-all cursor-pointer active:scale-[0.98] opacity-80"
+                      onClick={() => setSelectedJob(job)}
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <Badge variant="outline" className="text-xs">
+                                {format(new Date(job.scheduled_date), "EEE, MMM d")}
+                              </Badge>
+                              <span className="text-sm text-muted-foreground">{job.scheduled_time}</span>
+                            </div>
+                            <h3 className="font-semibold text-foreground truncate">
+                              {job.clients?.name || "Unknown Client"}
+                            </h3>
+                            {job.properties && (
+                              <div className="flex gap-2 text-xs text-muted-foreground mt-1">
+                                {(job.properties.bedrooms ?? 0) > 0 && (
+                                  <span>{job.properties.bedrooms} bed</span>
+                                )}
+                                {(job.properties.bathrooms ?? 0) > 0 && (
+                                  <span>{job.properties.bathrooms} bath</span>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                          <ChevronRight className="h-5 w-5 text-muted-foreground" />
                         </div>
-                        
-                        {/* Time */}
-                        <div className="flex items-center gap-2 text-muted-foreground">
-                          <Clock className="h-5 w-5 flex-shrink-0" />
-                          <span className="text-base font-medium">{job.scheduled_time}</span>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center justify-center h-12 w-12 rounded-full bg-muted/50">
-                        <ChevronRight className="h-6 w-6 text-muted-foreground" />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            )}
           </div>
         )}
       </main>
