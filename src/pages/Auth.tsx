@@ -89,21 +89,29 @@ export default function Auth() {
   };
 
   useEffect(() => {
+    // If we have a user and role, redirect immediately
     if (!loading && user && role) {
       navigate(role === "admin" ? "/admin" : "/staff", { replace: true });
       return;
     }
 
-    // If user is logged in but has no role, try one-time bootstrap (first user becomes admin)
+    // If user is logged in but role is not loaded yet, try bootstrap only once
+    // The bootstrap-role function will either:
+    // 1. Make this user admin (first user)
+    // 2. Return 403 if roles already initialized (which is fine - they already have a role assigned)
     if (!loading && user && !role && session && !bootstrapTried) {
       setBootstrapTried(true);
       supabase.functions
         .invoke("bootstrap-role")
         .then(async ({ error }) => {
-          if (error) return;
+          // Whether bootstrap succeeded or not, refresh role
+          // User might already have a role from handle_new_user trigger
           await refreshRole();
         })
-        .catch(() => undefined);
+        .catch(async () => {
+          // On error, still try to refresh role
+          await refreshRole();
+        });
     }
   }, [user, role, loading, navigate, session, bootstrapTried, refreshRole]);
 
