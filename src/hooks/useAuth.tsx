@@ -22,53 +22,105 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [role, setRole] = useState<AppRole>(null);
   const [loading, setLoading] = useState(true);
-  const [roleLoading, setRoleLoading] = useState(false);
+  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
 
-  const fetchUserRole = async (userId: string) => {
-    setRoleLoading(true);
+  const fetchUserRole = async (userId: string): Promise<AppRole> => {
     try {
       const { data, error } = await supabase.rpc("get_user_role", { _user_id: userId });
-      if (error) return null;
+      if (error) {
+        console.error("Error fetching user role:", error);
+        return null;
+      }
       return (data as AppRole) || null;
-    } finally {
-      setRoleLoading(false);
+    } catch (err) {
+      console.error("Exception fetching user role:", err);
+      return null;
     }
   };
 
   useEffect(() => {
-    // Set up auth state listener FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        if (session?.user) {
-          // Fetch role before setting loading to false
-          const userRole = await fetchUserRole(session.user.id);
+    let mounted = true;
+
+    const initializeAuth = async () => {
+      // Get existing session first
+      const { data: { session: existingSession } } = await supabase.auth.getSession();
+      
+      if (!mounted) return;
+
+      if (existingSession?.user) {
+        setSession(existingSession);
+        setUser(existingSession.user);
+        // Fetch role BEFORE setting loading to false
+        const userRole = await fetchUserRole(existingSession.user.id);
+        if (mounted) {
           setRole(userRole);
-        } else {
-          setRole(null);
+          setLoading(false);
+          setInitialLoadComplete(true);
         }
+      } else {
+        setSession(null);
+        setUser(null);
+        setRole(null);
         setLoading(false);
+        setInitialLoadComplete(true);
+      }
+    };
+
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, newSession) => {
+        if (!mounted) return;
+
+        // For sign in events, update state and fetch role
+        if (event === "SIGNED_IN" && newSession?.user) {
+          setSession(newSession);
+          setUser(newSession.user);
+          
+          // Fetch role for the new session
+          const userRole = await fetchUserRole(newSession.user.id);
+          if (mounted) {
+            setRole(userRole);
+            setLoading(false);
+          }
+        } 
+        // For sign out, clear all state
+        else if (event === "SIGNED_OUT") {
+          setSession(null);
+          setUser(null);
+          setRole(null);
+          setLoading(false);
+        }
+        // For token refresh, just update session but keep role
+        else if (event === "TOKEN_REFRESHED" && newSession) {
+          setSession(newSession);
+          setUser(newSession.user);
+        }
+        // For initial session (on page load), this is handled by initializeAuth
+        else if (event === "INITIAL_SESSION") {
+          // Already handled by initializeAuth above
+          if (!initialLoadComplete && !newSession) {
+            setLoading(false);
+            setInitialLoadComplete(true);
+          }
+        }
       }
     );
 
-    // THEN check for existing session
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        const userRole = await fetchUserRole(session.user.id);
-        setRole(userRole);
-      }
-      setLoading(false);
-    });
+    initializeAuth();
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signIn = async (email: string, password: string) => {
+    setLoading(true);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) {
+      setLoading(false);
+    }
+    // On success, the onAuthStateChange handler will update state
     return { error };
   };
 
