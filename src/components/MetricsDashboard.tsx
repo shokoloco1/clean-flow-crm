@@ -22,7 +22,7 @@ import {
 } from 'recharts';
 import { TrendingUp, Users, Clock, AlertTriangle, CheckCircle, BarChart3, Loader2 } from 'lucide-react';
 import { format, subDays, startOfDay, eachDayOfInterval, parseISO } from 'date-fns';
-import { es } from 'date-fns/locale';
+import { t } from '@/lib/i18n';
 
 interface JobsPerDay {
   date: string;
@@ -160,7 +160,7 @@ export function MetricsDashboard() {
         const dayStr = format(day, 'yyyy-MM-dd');
         const dayJobs = jobs?.filter(j => j.scheduled_date === dayStr) || [];
         return {
-          date: format(day, 'dd MMM', { locale: es }),
+          date: format(day, 'dd MMM'),
           completed: dayJobs.filter(j => j.status === 'completed').length,
           pending: dayJobs.filter(j => j.status === 'pending').length,
           inProgress: dayJobs.filter(j => j.status === 'in_progress').length,
@@ -203,10 +203,10 @@ export function MetricsDashboard() {
 
       // Calculate alert distribution
       const alertTypes: Record<string, { count: number; label: string }> = {
-        'late_arrival': { count: 0, label: 'Llegadas Tarde' },
-        'early_departure': { count: 0, label: 'Salidas Tempranas' },
-        'geofence_violation': { count: 0, label: 'Fuera de Zona' },
-        'no_show': { count: 0, label: 'No Presentados' }
+        'late_arrival': { count: 0, label: t('lateArrival') },
+        'early_departure': { count: 0, label: t('earlyCheckout') },
+        'geofence_violation': { count: 0, label: t('geofenceViolation') },
+        'no_show': { count: 0, label: t('noShow') }
       };
 
       alerts?.forEach(alert => {

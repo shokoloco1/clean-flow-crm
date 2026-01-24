@@ -26,7 +26,7 @@ export default function PrivacyPage() {
         
         <div className="prose prose-lg dark:prose-invert max-w-none space-y-6 text-muted-foreground">
           <p className="text-sm text-muted-foreground">
-            Última actualización: {new Date().toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })}
+            Last updated: {new Date().toLocaleDateString('en-AU', { year: 'numeric', month: 'long', day: 'numeric' })}
           </p>
 
           <section className="space-y-4">

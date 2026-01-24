@@ -23,7 +23,7 @@ import {
   AlertCircle
 } from "lucide-react";
 import { format, parseISO } from "date-fns";
-import { es } from "date-fns/locale";
+import { t } from "@/lib/i18n";
 
 interface JobPhoto {
   id: string;
@@ -389,7 +389,7 @@ export default function ClientPortal() {
                     <p className="text-sm text-muted-foreground">Fecha</p>
                     <p className="font-medium flex items-center gap-2">
                       <Calendar className="h-4 w-4 text-primary" />
-                      {format(parseISO(selectedJob.scheduled_date), "EEEE, d 'de' MMMM yyyy", { locale: es })}
+                      {format(parseISO(selectedJob.scheduled_date), "EEEE, d MMMM yyyy")}
                     </p>
                   </div>
                   <div className="space-y-1">
@@ -582,7 +582,7 @@ function JobList({ jobs, onViewJob, getStatusConfig, emptyMessage = "No hay trab
                   <div className="flex items-center gap-4 text-sm text-muted-foreground">
                     <span className="flex items-center gap-1">
                       <Calendar className="h-3.5 w-3.5" />
-                      {format(parseISO(job.scheduled_date), "d MMM yyyy", { locale: es })}
+                      {format(parseISO(job.scheduled_date), "d MMM yyyy")}
                     </span>
                     <span className="flex items-center gap-1">
                       <Clock className="h-3.5 w-3.5" />
