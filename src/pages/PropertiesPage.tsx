@@ -35,7 +35,10 @@ import {
   Home,
   Briefcase,
   Plane,
-  Stethoscope,
+  MoreHorizontal,
+  Link2,
+  Copy,
+  Check,
   Camera,
   Bed,
   Bath,
@@ -100,10 +103,9 @@ interface PropertyPhoto {
 }
 
 const propertyTypeConfig = {
-  residential: { icon: Home, label: "Residential", color: "bg-blue-500/10 text-blue-600" },
-  commercial: { icon: Briefcase, label: "Commercial", color: "bg-purple-500/10 text-purple-600" },
+  commercial: { icon: Briefcase, label: "Comercial", color: "bg-purple-500/10 text-purple-600" },
   airbnb: { icon: Plane, label: "Airbnb", color: "bg-orange-500/10 text-orange-600" },
-  medical: { icon: Stethoscope, label: "Medical", color: "bg-green-500/10 text-green-600" },
+  other: { icon: MoreHorizontal, label: "Otro", color: "bg-muted text-muted-foreground" },
 };
 
 const floorTypeOptions = [
@@ -124,18 +126,19 @@ export default function PropertiesPage() {
   const [editingProperty, setEditingProperty] = useState<Property | null>(null);
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [propertyPhotos, setPropertyPhotos] = useState<PropertyPhoto[]>([]);
-  const [gettingLocation, setGettingLocation] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
 
   const [formData, setFormData] = useState({
     name: "",
     address: "",
-    location_lat: "",
-    location_lng: "",
+    suburb: "",
+    post_code: "",
+    state: "",
+    google_maps_link: "",
     size_sqm: "",
-    property_type: "residential",
+    property_type: "commercial",
     special_instructions: "",
     access_codes: "",
-    geofence_radius_meters: "100",
     client_id: "",
     default_checklist_template_id: "",
     // New property details
@@ -198,13 +201,14 @@ export default function PropertiesPage() {
     setFormData({
       name: "",
       address: "",
-      location_lat: "",
-      location_lng: "",
+      suburb: "",
+      post_code: "",
+      state: "",
+      google_maps_link: "",
       size_sqm: "",
-      property_type: "residential",
+      property_type: "commercial",
       special_instructions: "",
       access_codes: "",
-      geofence_radius_meters: "100",
       client_id: "",
       default_checklist_template_id: "",
       bedrooms: "0",
@@ -229,13 +233,14 @@ export default function PropertiesPage() {
     setFormData({
       name: property.name,
       address: property.address,
-      location_lat: property.location_lat?.toString() || "",
-      location_lng: property.location_lng?.toString() || "",
+      suburb: (property as any).suburb || "",
+      post_code: (property as any).post_code || "",
+      state: (property as any).state || "",
+      google_maps_link: (property as any).google_maps_link || "",
       size_sqm: property.size_sqm?.toString() || "",
       property_type: property.property_type,
       special_instructions: property.special_instructions || "",
       access_codes: property.access_codes || "",
-      geofence_radius_meters: property.geofence_radius_meters.toString(),
       client_id: property.client_id || "",
       default_checklist_template_id: property.default_checklist_template_id || "",
       bedrooms: property.bedrooms?.toString() || "0",
@@ -255,29 +260,13 @@ export default function PropertiesPage() {
     setIsDialogOpen(true);
   };
 
-  const getCurrentLocation = () => {
-    if (!navigator.geolocation) {
-      toast.error("Geolocation is not supported by your browser");
-      return;
+  const handleCopyGoogleMapsLink = async () => {
+    if (formData.google_maps_link) {
+      await navigator.clipboard.writeText(formData.google_maps_link);
+      setCopiedLink(true);
+      toast.success("Link copiado!");
+      setTimeout(() => setCopiedLink(false), 2000);
     }
-
-    setGettingLocation(true);
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setFormData({
-          ...formData,
-          location_lat: position.coords.latitude.toString(),
-          location_lng: position.coords.longitude.toString(),
-        });
-        setGettingLocation(false);
-        toast.success("Location captured!");
-      },
-      (error) => {
-        setGettingLocation(false);
-        toast.error("Failed to get location: " + error.message);
-      },
-      { enableHighAccuracy: true }
-    );
   };
 
   const handleSubmit = async () => {
@@ -289,13 +278,14 @@ export default function PropertiesPage() {
     const propertyData = {
       name: formData.name,
       address: formData.address,
-      location_lat: formData.location_lat ? parseFloat(formData.location_lat) : null,
-      location_lng: formData.location_lng ? parseFloat(formData.location_lng) : null,
+      suburb: formData.suburb || null,
+      post_code: formData.post_code || null,
+      state: formData.state || null,
+      google_maps_link: formData.google_maps_link || null,
       size_sqm: formData.size_sqm ? parseFloat(formData.size_sqm) : null,
       property_type: formData.property_type,
       special_instructions: formData.special_instructions || null,
       access_codes: formData.access_codes || null,
-      geofence_radius_meters: parseInt(formData.geofence_radius_meters) || 100,
       client_id: formData.client_id || null,
       default_checklist_template_id: formData.default_checklist_template_id || null,
       // New fields
@@ -383,7 +373,7 @@ export default function PropertiesPage() {
   };
 
   const getTypeConfig = (type: string) => {
-    return propertyTypeConfig[type as keyof typeof propertyTypeConfig] || propertyTypeConfig.residential;
+    return propertyTypeConfig[type as keyof typeof propertyTypeConfig] || propertyTypeConfig.other;
   };
 
   if (selectedProperty) {
@@ -676,7 +666,7 @@ export default function PropertiesPage() {
                     </div>
 
                     <div>
-                      <Label>Property Type</Label>
+                      <Label>Tipo de Propiedad</Label>
                       <Select
                         value={formData.property_type}
                         onValueChange={(v) => setFormData({ ...formData, property_type: v })}
@@ -685,16 +675,55 @@ export default function PropertiesPage() {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="residential">Residential</SelectItem>
-                          <SelectItem value="commercial">Commercial</SelectItem>
+                          <SelectItem value="commercial">Comercial</SelectItem>
                           <SelectItem value="airbnb">Airbnb</SelectItem>
-                          <SelectItem value="medical">Medical</SelectItem>
+                          <SelectItem value="other">Otro</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  {/* Address Details */}
+                  <div className="grid grid-cols-3 gap-4 mt-4">
+                    <div>
+                      <Label>Suburb</Label>
+                      <Input
+                        value={formData.suburb}
+                        onChange={(e) => setFormData({ ...formData, suburb: e.target.value })}
+                        placeholder="e.g., Bondi"
+                      />
+                    </div>
+                    <div>
+                      <Label>Post Code</Label>
+                      <Input
+                        value={formData.post_code}
+                        onChange={(e) => setFormData({ ...formData, post_code: e.target.value })}
+                        placeholder="e.g., 2026"
+                      />
+                    </div>
+                    <div>
+                      <Label>State</Label>
+                      <Select
+                        value={formData.state}
+                        onValueChange={(v) => setFormData({ ...formData, state: v })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="NSW">NSW</SelectItem>
+                          <SelectItem value="VIC">VIC</SelectItem>
+                          <SelectItem value="QLD">QLD</SelectItem>
+                          <SelectItem value="WA">WA</SelectItem>
+                          <SelectItem value="SA">SA</SelectItem>
+                          <SelectItem value="TAS">TAS</SelectItem>
+                          <SelectItem value="NT">NT</SelectItem>
+                          <SelectItem value="ACT">ACT</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
                   </div>
                 </div>
-
                 <Separator />
 
                 {/* Property Details - NEW SECTION */}
@@ -928,57 +957,40 @@ export default function PropertiesPage() {
 
                 <Separator />
 
-                {/* Location & Geofence */}
+                {/* Google Maps Link */}
                 <div className="space-y-4">
                   <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                    <MapPin className="h-4 w-4" />
-                    Location & Geofence
+                    <Link2 className="h-4 w-4" />
+                    Ubicación (Google Maps)
                   </h3>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label>Geofence Radius (meters)</Label>
+                  <div className="flex gap-2">
+                    <div className="flex-1">
+                      <Label>Link de Google Maps</Label>
                       <Input
-                        type="number"
-                        value={formData.geofence_radius_meters}
-                        onChange={(e) => setFormData({ ...formData, geofence_radius_meters: e.target.value })}
-                        placeholder="100"
+                        value={formData.google_maps_link}
+                        onChange={(e) => setFormData({ ...formData, google_maps_link: e.target.value })}
+                        placeholder="Pega aquí el link de Google Maps..."
                       />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Copia el link desde Google Maps o WhatsApp
+                      </p>
                     </div>
-
-                    <div className="flex items-end">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={getCurrentLocation}
-                        disabled={gettingLocation}
-                        className="w-full"
-                      >
-                        <Navigation className="h-4 w-4 mr-2" />
-                        {gettingLocation ? "Getting..." : "Use Current Location"}
-                      </Button>
-                    </div>
-
-                    <div>
-                      <Label>Latitude</Label>
-                      <Input
-                        type="number"
-                        step="any"
-                        value={formData.location_lat}
-                        onChange={(e) => setFormData({ ...formData, location_lat: e.target.value })}
-                        placeholder="-33.8688"
-                      />
-                    </div>
-
-                    <div>
-                      <Label>Longitude</Label>
-                      <Input
-                        type="number"
-                        step="any"
-                        value={formData.location_lng}
-                        onChange={(e) => setFormData({ ...formData, location_lng: e.target.value })}
-                        placeholder="151.2093"
-                      />
-                    </div>
+                    {formData.google_maps_link && (
+                      <div className="flex items-end">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={handleCopyGoogleMapsLink}
+                          className="h-10"
+                        >
+                          {copiedLink ? (
+                            <Check className="h-4 w-4 text-primary" />
+                          ) : (
+                            <Copy className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </div>
 

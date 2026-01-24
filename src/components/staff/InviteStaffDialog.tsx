@@ -95,7 +95,10 @@ export function InviteStaffDialog({ open, onOpenChange }: InviteStaffDialogProps
       // Generate a temporary password for the new staff member
       const tempPassword = Math.random().toString(36).slice(-12) + "A1!";
 
-      // 1. Create the user in auth
+      // Store current session before creating user
+      const { data: currentSession } = await supabase.auth.getSession();
+      
+      // 1. Create the user in auth using admin signup (won't affect current session)
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
         password: tempPassword,
@@ -106,7 +109,15 @@ export function InviteStaffDialog({ open, onOpenChange }: InviteStaffDialogProps
         }
       });
 
-      if (authError) throw authError;
+      if (authError) {
+        // Check if user already exists
+        if (authError.message?.toLowerCase().includes("already registered") || 
+            authError.message?.toLowerCase().includes("already exists")) {
+          throw new Error("This email is already registered");
+        }
+        throw authError;
+      }
+      
       if (!authData.user) throw new Error("Could not create user");
 
       const userId = authData.user.id;
@@ -128,7 +139,10 @@ export function InviteStaffDialog({ open, onOpenChange }: InviteStaffDialogProps
           is_active: true
         });
 
-      if (profileError) throw profileError;
+      if (profileError) {
+        console.error("Profile creation error:", profileError);
+        throw new Error("Could not create profile: " + profileError.message);
+      }
 
       // 3. Assign the staff role
       const { error: roleError } = await supabase
@@ -138,7 +152,10 @@ export function InviteStaffDialog({ open, onOpenChange }: InviteStaffDialogProps
           role: "staff"
         });
 
-      if (roleError) throw roleError;
+      if (roleError) {
+        console.error("Role assignment error:", roleError);
+        throw new Error("Could not assign role: " + roleError.message);
+      }
 
       // 4. Create default availability (Mon-Fri 8am-5pm)
       const availabilityRecords = [1, 2, 3, 4, 5].map(day => ({
@@ -156,6 +173,14 @@ export function InviteStaffDialog({ open, onOpenChange }: InviteStaffDialogProps
       );
 
       await supabase.from("staff_availability").insert(availabilityRecords);
+
+      // Restore original session if it was changed
+      if (currentSession?.session) {
+        await supabase.auth.setSession({
+          access_token: currentSession.session.access_token,
+          refresh_token: currentSession.session.refresh_token
+        });
+      }
 
       return { email: formData.email, tempPassword };
     },
