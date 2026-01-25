@@ -97,7 +97,7 @@ export function CSVReports() {
     const propertyMap = new Map<string, { name: string; address: string | null }>();
     propertiesResult.data?.forEach(p => propertyMap.set(p.id, { name: p.name, address: p.address }));
 
-    const headers = ['ID', 'Fecha', 'Hora Programada', 'Ubicación', 'Propiedad', 'Staff Asignado', 'Estado', 'Hora Inicio', 'Hora Fin', 'Duración (min)', 'Calidad', 'GPS Validado', 'Notas'];
+    const headers = ['ID', 'Date', 'Scheduled Time', 'Location', 'Property', 'Assigned Staff', 'Status', 'Start Time', 'End Time', 'Duration (min)', 'Quality', 'GPS Validated', 'Notes'];
     
     const rows = jobs?.map(job => {
       const property = propertyMap.get(job.property_id || '');
@@ -117,7 +117,7 @@ export function CSVReports() {
         job.end_time ? format(new Date(job.end_time), 'HH:mm') : '',
         duration,
         job.quality_score || '',
-        job.geofence_validated ? 'Sí' : 'No',
+        job.geofence_validated ? 'Yes' : 'No',
         (job.notes || '').replace(/"/g, '""')
       ].map(val => `"${val}"`).join(',');
     }) || [];
@@ -189,7 +189,7 @@ export function CSVReports() {
       };
     }) || [];
 
-    const headers = ['Nombre', 'Email', 'Teléfono', 'Fecha Contratación', 'Total Trabajos', 'Completados', 'Pendientes', 'En Progreso', 'Calidad Promedio', 'Horas Trabajadas', 'Llegadas Tarde', 'Salidas Tempranas', 'Issues GPS', 'Total Alertas'];
+    const headers = ['Name', 'Email', 'Phone', 'Hire Date', 'Total Jobs', 'Completed', 'Pending', 'In Progress', 'Avg Quality', 'Hours Worked', 'Late Arrivals', 'Early Departures', 'GPS Issues', 'Total Alerts'];
     
     const rows = staffStats.map(staff => [
       staff.full_name,
@@ -248,13 +248,13 @@ export function CSVReports() {
     profiles?.forEach(p => staffMap.set(p.user_id, p.full_name));
 
     const alertTypeLabels: Record<string, string> = {
-      'late_arrival': 'Llegada Tarde',
-      'early_departure': 'Salida Temprana',
-      'geofence_violation': 'Fuera de Geofence',
-      'no_show': 'No Presentado'
+      'late_arrival': 'Late Arrival',
+      'early_departure': 'Early Departure',
+      'geofence_violation': 'Geofence Violation',
+      'no_show': 'No Show'
     };
 
-    const headers = ['ID', 'Fecha/Hora', 'Tipo', 'Staff', 'Ubicación', 'Fecha Trabajo', 'Mensaje', 'Resuelto', 'Fecha Resolución'];
+    const headers = ['ID', 'Date/Time', 'Type', 'Staff', 'Location', 'Job Date', 'Message', 'Resolved', 'Resolution Date'];
     
     const rows = alerts?.map(alert => {
       const job = jobMap.get(alert.job_id);
@@ -268,7 +268,7 @@ export function CSVReports() {
         job?.location || '',
         job?.scheduled_date || '',
         (alert.message || '').replace(/"/g, '""'),
-        alert.is_resolved ? 'Sí' : 'No',
+        alert.is_resolved ? 'Yes' : 'No',
         alert.resolved_at ? format(new Date(alert.resolved_at), 'yyyy-MM-dd HH:mm') : ''
       ].map(val => `"${val}"`).join(',');
     }) || [];
@@ -285,32 +285,32 @@ export function CSVReports() {
       switch (reportType) {
         case 'jobs':
           csvData = await generateJobsReport();
-          filename = `trabajos_${dateRange.startDate}_${dateRange.endDate}.csv`;
+          filename = `jobs_${dateRange.startDate}_${dateRange.endDate}.csv`;
           break;
         case 'staff':
           csvData = await generateStaffReport();
-          filename = `rendimiento_staff_${dateRange.startDate}_${dateRange.endDate}.csv`;
+          filename = `staff_performance_${dateRange.startDate}_${dateRange.endDate}.csv`;
           break;
         case 'alerts':
           csvData = await generateAlertsReport();
-          filename = `alertas_${dateRange.startDate}_${dateRange.endDate}.csv`;
+          filename = `alerts_${dateRange.startDate}_${dateRange.endDate}.csv`;
           break;
       }
 
       downloadCSV(csvData, filename);
-      toast.success('Reporte generado exitosamente');
+      toast.success('Report generated successfully');
     } catch (error) {
       console.error('Error generating report:', error);
-      toast.error('Error al generar el reporte');
+      toast.error('Error generating report');
     } finally {
       setIsGenerating(false);
     }
   };
 
   const reportOptions = [
-    { value: 'jobs', label: 'Historial de Trabajos', icon: Briefcase, description: 'Todos los trabajos con fechas, estados, duración y staff' },
-    { value: 'staff', label: 'Rendimiento de Staff', icon: Users, description: 'Estadísticas por empleado: completados, puntualidad, issues' },
-    { value: 'alerts', label: 'Alertas Generadas', icon: AlertTriangle, description: 'Historial de alertas: llegadas tarde, salidas tempranas, GPS' }
+    { value: 'jobs', label: 'Job History', icon: Briefcase, description: 'All jobs with dates, status, duration and staff' },
+    { value: 'staff', label: 'Staff Performance', icon: Users, description: 'Stats per employee: completed, punctuality, issues' },
+    { value: 'alerts', label: 'Generated Alerts', icon: AlertTriangle, description: 'Alert history: late arrivals, early departures, GPS' }
   ];
 
   return (
@@ -318,16 +318,16 @@ export function CSVReports() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <FileSpreadsheet className="h-5 w-5" />
-          Exportar Reportes CSV
+          Export CSV Reports
         </CardTitle>
         <CardDescription>
-          Genera reportes detallados para análisis y registros
+          Generate detailed reports for analysis and records
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Report Type Selection */}
         <div className="space-y-3">
-          <Label>Tipo de Reporte</Label>
+          <Label>Report Type</Label>
           <div className="grid gap-3 md:grid-cols-3">
             {reportOptions.map(option => (
               <button
@@ -351,21 +351,21 @@ export function CSVReports() {
 
         {/* Date Range */}
         <div className="space-y-3">
-          <Label>Rango de Fechas</Label>
+          <Label>Date Range</Label>
           <div className="flex flex-wrap gap-2">
             <Button variant="outline" size="sm" onClick={() => setPresetRange('week')}>
-              Última Semana
+              Last Week
             </Button>
             <Button variant="outline" size="sm" onClick={() => setPresetRange('month')}>
-              Último Mes
+              Last Month
             </Button>
             <Button variant="outline" size="sm" onClick={() => setPresetRange('quarter')}>
-              Últimos 3 Meses
+              Last 3 Months
             </Button>
           </div>
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="startDate">Desde</Label>
+              <Label htmlFor="startDate">From</Label>
               <Input
                 id="startDate"
                 type="date"
@@ -374,7 +374,7 @@ export function CSVReports() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="endDate">Hasta</Label>
+              <Label htmlFor="endDate">To</Label>
               <Input
                 id="endDate"
                 type="date"
@@ -395,12 +395,12 @@ export function CSVReports() {
           {isGenerating ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Generando...
+              Generating...
             </>
           ) : (
             <>
               <Download className="mr-2 h-4 w-4" />
-              Descargar Reporte CSV
+              Download CSV Report
             </>
           )}
         </Button>

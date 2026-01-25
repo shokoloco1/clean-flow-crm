@@ -4,9 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Home, ArrowLeft, Search, MapPin, HelpCircle } from "lucide-react";
 
 const SUGGESTED_PAGES = [
-  { path: "/admin", label: "Panel de Administración", icon: Home },
-  { path: "/staff", label: "Panel de Staff", icon: MapPin },
-  { path: "/portal", label: "Portal de Clientes", icon: Search },
+  { path: "/admin", label: "Admin Dashboard", icon: Home },
+  { path: "/staff", label: "Staff Dashboard", icon: MapPin },
+  { path: "/portal", label: "Client Portal", icon: Search },
 ];
 
 const NotFound = () => {
@@ -34,10 +34,10 @@ const NotFound = () => {
         {/* Message */}
         <div className="space-y-2">
           <h1 className="text-2xl font-bold text-foreground">
-            Página no encontrada
+            Page not found
           </h1>
           <p className="text-muted-foreground">
-            Lo sentimos, la página <code className="px-2 py-1 rounded bg-muted text-sm">{location.pathname}</code> no existe o ha sido movida.
+            Sorry, the page <code className="px-2 py-1 rounded bg-muted text-sm">{location.pathname}</code> does not exist or has been moved.
           </p>
         </div>
 
@@ -46,13 +46,13 @@ const NotFound = () => {
           <Button asChild variant="default">
             <Link to="/">
               <Home className="h-4 w-4 mr-2" />
-              Ir al Inicio
+              Go to Home
             </Link>
           </Button>
           <Button asChild variant="outline" onClick={() => window.history.back()}>
             <button onClick={() => window.history.back()}>
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Volver Atrás
+              Go Back
             </button>
           </Button>
         </div>
@@ -60,7 +60,7 @@ const NotFound = () => {
         {/* Suggested pages */}
         <div className="pt-6 border-t border-border">
           <p className="text-sm text-muted-foreground mb-4">
-            ¿Quizás buscabas una de estas páginas?
+            Perhaps you were looking for one of these pages?
           </p>
           <div className="grid gap-2">
             {SUGGESTED_PAGES.map((page) => (
