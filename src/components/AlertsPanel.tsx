@@ -73,7 +73,7 @@ export default function AlertsPanel() {
         jobs (
           location,
           scheduled_time,
-          profiles:assigned_staff_id (full_name)
+          assigned_staff_id
         )
       `)
       .eq("is_resolved", false)
@@ -81,7 +81,33 @@ export default function AlertsPanel() {
       .limit(20);
 
     if (!error && data) {
-      setAlerts(data as unknown as JobAlert[]);
+      // Fetch staff names separately
+      const staffIds = [...new Set(
+        data
+          .map((a: any) => a.jobs?.assigned_staff_id)
+          .filter(Boolean)
+      )];
+      
+      let staffMap: Record<string, string> = {};
+      if (staffIds.length > 0) {
+        const { data: staffData } = await supabase
+          .from("profiles")
+          .select("user_id, full_name")
+          .in("user_id", staffIds);
+        staffMap = Object.fromEntries((staffData || []).map(s => [s.user_id, s.full_name]));
+      }
+
+      const alertsWithStaff = data.map((alert: any) => ({
+        ...alert,
+        jobs: alert.jobs ? {
+          ...alert.jobs,
+          profiles: alert.jobs.assigned_staff_id 
+            ? { full_name: staffMap[alert.jobs.assigned_staff_id] || 'Unknown' } 
+            : null
+        } : undefined
+      }));
+
+      setAlerts(alertsWithStaff as JobAlert[]);
     }
     setLoading(false);
   };
