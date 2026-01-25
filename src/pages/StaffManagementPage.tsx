@@ -336,17 +336,17 @@ export default function StaffManagementPage() {
                 <Users className="h-5 w-5 text-primary" />
               </div>
               <div className="hidden sm:block">
-                <h1 className="text-lg font-bold">Gestión de Empleados</h1>
-                <p className="text-xs text-muted-foreground">Administra tu equipo de trabajo</p>
+                <h1 className="text-lg font-bold">Staff Management</h1>
+                <p className="text-xs text-muted-foreground">Manage your team members</p>
               </div>
-              <h1 className="sm:hidden text-lg font-bold">Empleados</h1>
+              <h1 className="sm:hidden text-lg font-bold">Staff</h1>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <Button onClick={() => setIsInviteDialogOpen(true)} size="sm" className="gap-2">
               <Plus className="h-4 w-4" />
-              <span className="hidden sm:inline">Agregar Empleado</span>
-              <span className="sm:hidden">Agregar</span>
+              <span className="hidden sm:inline">Add Employee</span>
+              <span className="sm:hidden">Add</span>
             </Button>
           </div>
         </div>
@@ -362,7 +362,7 @@ export default function StaffManagementPage() {
                   <Users className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-xs sm:text-sm text-muted-foreground truncate">Total Empleados</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground truncate">Total Staff</p>
                   <p className="text-xl sm:text-2xl font-bold">{totalStaff}</p>
                 </div>
               </div>
@@ -376,7 +376,7 @@ export default function StaffManagementPage() {
                   <UserCheck className="h-4 w-4 sm:h-5 sm:w-5 text-green-500" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-xs sm:text-sm text-muted-foreground truncate">Activos</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground truncate">Active</p>
                   <p className="text-xl sm:text-2xl font-bold">{activeStaff}</p>
                 </div>
               </div>
@@ -390,7 +390,7 @@ export default function StaffManagementPage() {
                   <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-xs sm:text-sm text-muted-foreground truncate">Trabajos</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground truncate">Jobs</p>
                   <p className="text-xl sm:text-2xl font-bold">{totalJobsCompleted}</p>
                 </div>
               </div>
@@ -404,7 +404,7 @@ export default function StaffManagementPage() {
                   <Star className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-500" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-xs sm:text-sm text-muted-foreground truncate">Calif. Promedio</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground truncate">Avg Rating</p>
                   <p className="text-xl sm:text-2xl font-bold">{avgRating ? avgRating.toFixed(1) : "-"}</p>
                 </div>
               </div>
@@ -419,7 +419,7 @@ export default function StaffManagementPage() {
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Buscar por nombre o email..."
+                  placeholder="Search by name or email..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-9"
@@ -432,7 +432,7 @@ export default function StaffManagementPage() {
                   onClick={() => setStatusFilter("all")}
                   className="flex-1 sm:flex-none"
                 >
-                  Todos
+                  All
                 </Button>
                 <Button 
                   variant={statusFilter === "active" ? "default" : "outline"} 
@@ -441,7 +441,7 @@ export default function StaffManagementPage() {
                   className="flex-1 sm:flex-none gap-1"
                 >
                   <UserCheck className="h-3 w-3" />
-                  Activos
+                  Active
                 </Button>
                 <Button 
                   variant={statusFilter === "inactive" ? "default" : "outline"} 
@@ -450,7 +450,7 @@ export default function StaffManagementPage() {
                   className="flex-1 sm:flex-none gap-1"
                 >
                   <UserX className="h-3 w-3" />
-                  Inactivos
+                  Inactive
                 </Button>
               </div>
             </div>
@@ -462,9 +462,9 @@ export default function StaffManagementPage() {
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle>Miembros del Equipo</CardTitle>
+                <CardTitle>Team Members</CardTitle>
                 <CardDescription>
-                  {filteredStaffList?.length || 0} empleado{filteredStaffList?.length !== 1 ? 's' : ''} encontrado{filteredStaffList?.length !== 1 ? 's' : ''}
+                  {filteredStaffList?.length || 0} employee{filteredStaffList?.length !== 1 ? 's' : ''} found
                 </CardDescription>
               </div>
             </div>
@@ -472,23 +472,23 @@ export default function StaffManagementPage() {
           <CardContent>
             {isLoading ? (
               <div className="flex items-center justify-center py-12">
-                <div className="animate-pulse text-muted-foreground">Cargando empleados...</div>
+                <div className="animate-pulse text-muted-foreground">Loading employees...</div>
               </div>
             ) : filteredStaffList?.length === 0 ? (
               <div className="text-center py-12">
                 <Users className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
                 <h3 className="font-semibold text-lg mb-2">
-                  {staffList?.length === 0 ? "No hay empleados registrados" : "No se encontraron resultados"}
+                  {staffList?.length === 0 ? "No employees registered" : "No results found"}
                 </h3>
                 <p className="text-muted-foreground mb-4">
                   {staffList?.length === 0 
-                    ? "Agrega tu primer empleado para comenzar a gestionar tu equipo"
-                    : "Intenta con otros términos de búsqueda o filtros"}
+                    ? "Add your first employee to start managing your team"
+                    : "Try different search terms or filters"}
                 </p>
                 {staffList?.length === 0 && (
                   <Button onClick={() => setIsInviteDialogOpen(true)} className="gap-2">
                     <Plus className="h-4 w-4" />
-                    Agregar Primer Empleado
+                    Add First Employee
                   </Button>
                 )}
               </div>
@@ -515,7 +515,7 @@ export default function StaffManagementPage() {
                               variant={staff.is_active ? "default" : "secondary"}
                               className="shrink-0"
                             >
-                              {staff.is_active ? "Activo" : "Inactivo"}
+                              {staff.is_active ? "Active" : "Inactive"}
                             </Badge>
                           </div>
                           <div className="flex items-center gap-3 text-xs sm:text-sm text-muted-foreground mt-1 flex-wrap">
@@ -551,15 +551,15 @@ export default function StaffManagementPage() {
                       <div className="flex items-center justify-between sm:justify-end gap-4 sm:gap-6 pl-13 sm:pl-0">
                         <div className="flex items-center gap-4 sm:gap-6 text-xs sm:text-sm">
                           <div className="text-center">
-                            <p className="text-muted-foreground">Trabajos</p>
+                            <p className="text-muted-foreground">Jobs</p>
                             <p className="font-semibold">{metrics.jobs_completed}</p>
                           </div>
                           <div className="text-center hidden sm:block">
-                            <p className="text-muted-foreground">Horas</p>
+                            <p className="text-muted-foreground">Hours</p>
                             <p className="font-semibold">{metrics.total_hours.toFixed(0)}</p>
                           </div>
                           <div className="text-center">
-                            <p className="text-muted-foreground">Calif.</p>
+                            <p className="text-muted-foreground">Rating</p>
                             <p className="font-semibold flex items-center justify-center gap-1">
                               {metrics.avg_quality_score ? (
                                 <>
@@ -618,15 +618,15 @@ export default function StaffManagementPage() {
                   <TabsList className="grid w-full grid-cols-3 mb-6">
                     <TabsTrigger value="profile" className="text-xs sm:text-sm">
                       <User className="h-4 w-4 mr-1 sm:mr-2" />
-                      <span className="hidden sm:inline">Perfil</span>
+                      <span className="hidden sm:inline">Profile</span>
                     </TabsTrigger>
                     <TabsTrigger value="availability" className="text-xs sm:text-sm">
                       <Clock className="h-4 w-4 mr-1 sm:mr-2" />
-                      <span className="hidden sm:inline">Horario</span>
+                      <span className="hidden sm:inline">Schedule</span>
                     </TabsTrigger>
                     <TabsTrigger value="metrics" className="text-xs sm:text-sm">
                       <TrendingUp className="h-4 w-4 mr-1 sm:mr-2" />
-                      <span className="hidden sm:inline">Métricas</span>
+                      <span className="hidden sm:inline">Metrics</span>
                     </TabsTrigger>
                   </TabsList>
 
@@ -643,9 +643,9 @@ export default function StaffManagementPage() {
                               <UserX className="h-5 w-5 text-orange-500" />
                             )}
                             <div>
-                              <p className="font-medium">Estado del Empleado</p>
+                              <p className="font-medium">Employee Status</p>
                               <p className="text-sm text-muted-foreground">
-                                {editForm.is_active ? "Puede recibir trabajos" : "No recibe trabajos"}
+                                {editForm.is_active ? "Can receive jobs" : "Cannot receive jobs"}
                               </p>
                             </div>
                           </div>
@@ -661,11 +661,11 @@ export default function StaffManagementPage() {
                     <div className="space-y-4">
                       <h4 className="font-semibold flex items-center gap-2">
                         <User className="h-4 w-4" />
-                        Información Básica
+                        Basic Information
                       </h4>
                       
                       <div className="space-y-2">
-                        <Label>Nombre Completo</Label>
+                        <Label>Full Name</Label>
                         <Input
                           value={editForm.full_name || ""}
                           onChange={(e) => setEditForm({ ...editForm, full_name: e.target.value })}
@@ -673,17 +673,17 @@ export default function StaffManagementPage() {
                       </div>
 
                       <div className="space-y-2">
-                        <Label>Teléfono</Label>
+                        <Label>Phone</Label>
                         <Input
                           value={editForm.phone || ""}
                           onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
-                          placeholder="+52 123 456 7890"
+                          placeholder="+61 4XX XXX XXX"
                         />
                       </div>
 
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <Label>Fecha de Contratación</Label>
+                          <Label>Hire Date</Label>
                           <Input
                             type="date"
                             value={editForm.hire_date || ""}
@@ -691,7 +691,7 @@ export default function StaffManagementPage() {
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label>Tarifa por Hora</Label>
+                          <Label>Hourly Rate (AUD)</Label>
                           <div className="relative">
                             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
                             <Input
@@ -712,23 +712,23 @@ export default function StaffManagementPage() {
                     <div className="space-y-4">
                       <h4 className="font-semibold flex items-center gap-2">
                         <AlertCircle className="h-4 w-4 text-orange-500" />
-                        Contacto de Emergencia
+                        Emergency Contact
                       </h4>
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <Label>Nombre</Label>
+                          <Label>Name</Label>
                           <Input
                             value={editForm.emergency_contact_name || ""}
                             onChange={(e) => setEditForm({ ...editForm, emergency_contact_name: e.target.value })}
-                            placeholder="Nombre del contacto"
+                            placeholder="Contact name"
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label>Teléfono</Label>
+                          <Label>Phone</Label>
                           <Input
                             value={editForm.emergency_contact_phone || ""}
                             onChange={(e) => setEditForm({ ...editForm, emergency_contact_phone: e.target.value })}
-                            placeholder="Número de teléfono"
+                            placeholder="Phone number"
                           />
                         </div>
                       </div>
@@ -740,7 +740,7 @@ export default function StaffManagementPage() {
                     <div className="space-y-4">
                       <h4 className="font-semibold flex items-center gap-2">
                         <Briefcase className="h-4 w-4" />
-                        Habilidades
+                        Skills
                       </h4>
                       <div className="flex flex-wrap gap-2">
                         {SKILL_OPTIONS.map((skill) => (

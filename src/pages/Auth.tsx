@@ -68,7 +68,7 @@ export default function Auth() {
     e.preventDefault();
     
     if (!resetEmail) {
-      toast.error("Por favor ingresa tu email");
+      toast.error("Please enter your email");
       return;
     }
     
@@ -79,10 +79,10 @@ export default function Auth() {
     });
     
     if (error) {
-      toast.error(error.message || "Error al enviar el email");
+      toast.error(error.message || "Failed to send email");
     } else {
       setResetSent(true);
-      toast.success("Email enviado. Revisa tu bandeja de entrada.");
+      toast.success("Email sent. Check your inbox.");
     }
     
     setIsSubmitting(false);
@@ -134,7 +134,7 @@ export default function Auth() {
     // Check rate limiting first
     const isBlocked = await checkRateLimit(loginEmail);
     if (isBlocked) {
-      toast.error(`Demasiados intentos fallidos. Intenta de nuevo en ${rateLimitState.remainingMinutes} minutos.`);
+      toast.error(`Too many failed attempts. Please try again in ${rateLimitState.remainingMinutes} minutes.`);
       return;
     }
     
@@ -274,8 +274,8 @@ export default function Auth() {
         <Card className="border-border shadow-xl">
           <CardHeader className="pb-2 text-center">
             <CardTitle className="text-xl">👋 {t("welcome")}</CardTitle>
-            <CardDescription>
-              Inicia sesión o crea tu cuenta gratis
+          <CardDescription>
+              {t("signInToAccount")}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -294,9 +294,9 @@ export default function Auth() {
                         <div className="h-16 w-16 rounded-full bg-success/10 flex items-center justify-center mx-auto">
                           <CheckCircle className="h-8 w-8 text-success" />
                         </div>
-                        <h3 className="font-semibold text-foreground">¡Email enviado!</h3>
+                        <h3 className="font-semibold text-foreground">Email sent!</h3>
                         <p className="text-sm text-muted-foreground">
-                          Revisa tu bandeja de entrada en <strong>{resetEmail}</strong> y sigue las instrucciones.
+                          Check your inbox at <strong>{resetEmail}</strong> and follow the instructions.
                         </p>
                         <Button 
                           variant="outline" 
@@ -307,15 +307,15 @@ export default function Auth() {
                             setResetEmail("");
                           }}
                         >
-                          Volver al login
+                          Back to sign in
                         </Button>
                       </div>
                     ) : (
                       <form onSubmit={handlePasswordReset} className="space-y-4">
                         <div className="text-center mb-4">
-                          <h3 className="font-semibold text-foreground">¿Olvidaste tu contraseña?</h3>
+                          <h3 className="font-semibold text-foreground">Forgot your password?</h3>
                           <p className="text-sm text-muted-foreground">
-                            Ingresa tu email y te enviaremos un enlace para restablecerla.
+                            Enter your email and we'll send you a reset link.
                           </p>
                         </div>
                         <div className="space-y-2">
@@ -323,7 +323,7 @@ export default function Auth() {
                           <Input
                             id="reset-email"
                             type="email"
-                            placeholder="tu@ejemplo.com"
+                            placeholder="you@example.com"
                             value={resetEmail}
                             onChange={(e) => setResetEmail(e.target.value)}
                             required
@@ -334,7 +334,7 @@ export default function Auth() {
                           className="w-full"
                           disabled={isSubmitting}
                         >
-                          {isSubmitting ? "Enviando..." : "Enviar enlace"}
+                          {isSubmitting ? "Sending..." : "Send reset link"}
                         </Button>
                         <Button 
                           type="button"
@@ -342,7 +342,7 @@ export default function Auth() {
                           className="w-full"
                           onClick={() => setShowResetForm(false)}
                         >
-                          Volver al login
+                          Back to sign in
                         </Button>
                       </form>
                     )}
@@ -354,7 +354,7 @@ export default function Auth() {
                       <Alert variant="destructive" className="mb-4">
                         <Lock className="h-4 w-4" />
                         <AlertDescription>
-                          Cuenta bloqueada temporalmente. Intenta de nuevo en {rateLimitState.remainingMinutes} minutos.
+                          Account temporarily blocked. Please try again in {rateLimitState.remainingMinutes} minutes.
                         </AlertDescription>
                       </Alert>
                     )}
@@ -363,7 +363,7 @@ export default function Auth() {
                       <Alert variant="default" className="mb-4 border-warning/50 bg-warning/10">
                         <AlertTriangle className="h-4 w-4 text-warning" />
                         <AlertDescription className="text-warning-foreground">
-                          {5 - rateLimitState.failedAttempts} intentos restantes antes del bloqueo.
+                          {5 - rateLimitState.failedAttempts} attempts remaining before lockout.
                         </AlertDescription>
                       </Alert>
                     )}
@@ -374,7 +374,7 @@ export default function Auth() {
                         <Input
                           id="login-email"
                           type="email"
-                          placeholder="tu@ejemplo.com"
+                          placeholder="you@example.com"
                           value={loginEmail}
                           onChange={(e) => {
                             setLoginEmail(e.target.value);
@@ -390,13 +390,13 @@ export default function Auth() {
                       </div>
                       <div className="space-y-2">
                         <div className="flex items-center justify-between">
-                          <Label htmlFor="login-password">Contraseña</Label>
+                          <Label htmlFor="login-password">{t("password")}</Label>
                           <button
                             type="button"
                             onClick={() => setShowResetForm(true)}
                             className="text-xs text-primary hover:underline"
                           >
-                            ¿Olvidaste tu contraseña?
+                            Forgot password?
                           </button>
                         </div>
                         <div className="relative">
@@ -431,7 +431,7 @@ export default function Auth() {
                         className="w-full h-12 text-base" 
                         disabled={isSubmitting || rateLimitState.isBlocked}
                       >
-                        {isSubmitting ? t("signingIn") : "🚀 Entrar"}
+                        {isSubmitting ? t("signingIn") : t("login")}
                       </Button>
                     </form>
                   </>
@@ -445,7 +445,7 @@ export default function Auth() {
                     <Input
                       id="signup-name"
                       type="text"
-                      placeholder="Juan Pérez"
+                      placeholder="John Smith"
                       value={signupName}
                       onChange={(e) => {
                         setSignupName(e.target.value);
@@ -463,7 +463,7 @@ export default function Auth() {
                     <Input
                       id="signup-email"
                       type="email"
-                      placeholder="tu@ejemplo.com"
+                          placeholder="you@example.com"
                       value={signupEmail}
                       onChange={(e) => {
                         setSignupEmail(e.target.value);
@@ -477,7 +477,7 @@ export default function Auth() {
                     )}
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="signup-password">Contraseña</Label>
+                    <Label htmlFor="signup-password">{t("password")}</Label>
                     <div className="relative">
                       <Input
                         id="signup-password"
@@ -531,7 +531,7 @@ export default function Auth() {
                     className="w-full h-12 text-base" 
                     disabled={isSubmitting || validatePassword(signupPassword).strength === "weak"}
                   >
-                    {isSubmitting ? t("creatingAccount") : "✨ Crear mi cuenta gratis"}
+                    {isSubmitting ? t("creatingAccount") : t("signup")}
                   </Button>
                 </form>
               </TabsContent>
