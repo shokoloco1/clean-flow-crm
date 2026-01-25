@@ -84,7 +84,7 @@ export default function InvoicesPage() {
       .order("created_at", { ascending: false });
 
     if (error) {
-      toast.error("Error al cargar facturas");
+      toast.error("Error loading invoices");
     } else {
       setInvoices(data as Invoice[]);
     }
@@ -94,14 +94,14 @@ export default function InvoicesPage() {
   const getStatusConfig = (status: string) => {
     switch (status) {
       case "paid":
-        return { label: "Pagada", className: "bg-success/10 text-success border-success/30" };
+        return { label: "Paid", className: "bg-success/10 text-success border-success/30" };
       case "sent":
-        return { label: "Enviada", className: "bg-primary/10 text-primary border-primary/30" };
+        return { label: "Sent", className: "bg-primary/10 text-primary border-primary/30" };
       case "overdue":
-        return { label: "Vencida", className: "bg-destructive/10 text-destructive border-destructive/30" };
+        return { label: "Overdue", className: "bg-destructive/10 text-destructive border-destructive/30" };
       case "draft":
       default:
-        return { label: "Borrador", className: "bg-muted text-muted-foreground border-border" };
+        return { label: "Draft", className: "bg-muted text-muted-foreground border-border" };
     }
   };
 
@@ -134,13 +134,13 @@ export default function InvoicesPage() {
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <div>
-              <h1 className="text-xl font-bold text-foreground">Facturación</h1>
-              <p className="text-sm text-muted-foreground">Gestiona tus facturas</p>
+              <h1 className="text-xl font-bold text-foreground">Invoicing</h1>
+              <p className="text-sm text-muted-foreground">Manage your invoices</p>
             </div>
           </div>
           <Button onClick={() => setIsCreateOpen(true)}>
             <Plus className="h-4 w-4 mr-2" />
-            Nueva Factura
+            New Invoice
           </Button>
         </div>
       </header>
@@ -155,7 +155,7 @@ export default function InvoicesPage() {
                   <FileText className="h-6 w-6 text-primary" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Total Facturas</p>
+                  <p className="text-sm text-muted-foreground">Total Invoices</p>
                   <p className="text-2xl font-bold">{stats.total}</p>
                 </div>
               </div>
@@ -168,7 +168,7 @@ export default function InvoicesPage() {
                   <Clock className="h-6 w-6 text-warning" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Pendientes</p>
+                  <p className="text-sm text-muted-foreground">Pending</p>
                   <p className="text-2xl font-bold">{stats.draft + stats.sent}</p>
                 </div>
               </div>
@@ -181,7 +181,7 @@ export default function InvoicesPage() {
                   <CheckCircle className="h-6 w-6 text-success" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Pagadas</p>
+                  <p className="text-sm text-muted-foreground">Paid</p>
                   <p className="text-2xl font-bold">{stats.paid}</p>
                 </div>
               </div>
@@ -194,7 +194,7 @@ export default function InvoicesPage() {
                   <DollarSign className="h-6 w-6 text-primary" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Total Facturado</p>
+                  <p className="text-sm text-muted-foreground">Total Invoiced</p>
                   <p className="text-2xl font-bold">${stats.totalAmount.toFixed(2)}</p>
                 </div>
               </div>
@@ -209,7 +209,7 @@ export default function InvoicesPage() {
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Buscar por número o cliente..."
+                  placeholder="Search by number or client..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-9"
@@ -217,14 +217,14 @@ export default function InvoicesPage() {
               </div>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger className="w-full md:w-48">
-                  <SelectValue placeholder="Filtrar por estado" />
+                  <SelectValue placeholder="Filter by status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Todos los estados</SelectItem>
-                  <SelectItem value="draft">Borrador</SelectItem>
-                  <SelectItem value="sent">Enviada</SelectItem>
-                  <SelectItem value="paid">Pagada</SelectItem>
-                  <SelectItem value="overdue">Vencida</SelectItem>
+                  <SelectItem value="all">All statuses</SelectItem>
+                  <SelectItem value="draft">Draft</SelectItem>
+                  <SelectItem value="sent">Sent</SelectItem>
+                  <SelectItem value="paid">Paid</SelectItem>
+                  <SelectItem value="overdue">Overdue</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -234,7 +234,7 @@ export default function InvoicesPage() {
         {/* Invoices Table */}
         <Card>
           <CardHeader>
-            <CardTitle>Listado de Facturas</CardTitle>
+            <CardTitle>Invoice List</CardTitle>
           </CardHeader>
           <CardContent>
             {loading ? (
@@ -244,27 +244,27 @@ export default function InvoicesPage() {
             ) : filteredInvoices.length === 0 ? (
               <div className="text-center py-12">
                 <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground">No hay facturas</p>
+                <p className="text-muted-foreground">No invoices</p>
                 <Button
                   variant="outline"
                   className="mt-4"
                   onClick={() => setIsCreateOpen(true)}
                 >
                   <Plus className="h-4 w-4 mr-2" />
-                  Crear primera factura
+                  Create first invoice
                 </Button>
               </div>
             ) : (
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Número</TableHead>
-                    <TableHead>Cliente</TableHead>
-                    <TableHead>Fecha</TableHead>
-                    <TableHead>Vencimiento</TableHead>
+                    <TableHead>Number</TableHead>
+                    <TableHead>Client</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Due Date</TableHead>
                     <TableHead>Total</TableHead>
-                    <TableHead>Estado</TableHead>
-                    <TableHead className="text-right">Acciones</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>

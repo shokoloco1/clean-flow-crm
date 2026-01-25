@@ -164,7 +164,7 @@ export function CreateInvoiceDialog({
 
         items.push({
           id: `job-${jobId}`,
-          description: `Limpieza - ${job.location} (${format(new Date(job.scheduled_date), "dd/MM/yyyy")})`,
+          description: `Cleaning - ${job.location} (${format(new Date(job.scheduled_date), "dd/MM/yyyy")})`,
           quantity: hours,
           unit_price: hourlyRate,
           total,
@@ -221,11 +221,11 @@ export function CreateInvoiceDialog({
 
   const handleSubmit = async () => {
     if (!selectedClientId) {
-      toast.error("Selecciona un cliente");
+      toast.error("Please select a client");
       return;
     }
     if (lineItems.length === 0) {
-      toast.error("Agrega al menos un ítem");
+      toast.error("Please add at least one item");
       return;
     }
 
@@ -267,13 +267,13 @@ export function CreateInvoiceDialog({
 
       if (itemsError) throw itemsError;
 
-      toast.success("Factura creada exitosamente");
+      toast.success("Invoice created successfully");
       onOpenChange(false);
       onCreated();
       resetForm();
     } catch (error) {
       console.error(error);
-      toast.error("Error al crear la factura");
+      toast.error("Error creating invoice");
     }
 
     setLoading(false);
@@ -293,12 +293,12 @@ export function CreateInvoiceDialog({
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <div className="flex items-center justify-between">
-            <DialogTitle>Nueva Factura</DialogTitle>
+            <DialogTitle>New Invoice</DialogTitle>
             <PriceListReference 
               trigger={
                 <Button variant="outline" size="sm" type="button">
                   <FileText className="h-4 w-4 mr-2" />
-                  Ver Precios
+                  View Prices
                 </Button>
               }
             />
@@ -309,10 +309,10 @@ export function CreateInvoiceDialog({
           {/* Client Selection */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Cliente *</Label>
+              <Label>Client *</Label>
               <Select value={selectedClientId} onValueChange={setSelectedClientId}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar cliente" />
+                  <SelectValue placeholder="Select client" />
                 </SelectTrigger>
                 <SelectContent>
                   {clients.map((client) => (
@@ -324,7 +324,7 @@ export function CreateInvoiceDialog({
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Fecha de Vencimiento</Label>
+              <Label>Due Date</Label>
               <Input
                 type="date"
                 value={dueDate}
@@ -336,7 +336,7 @@ export function CreateInvoiceDialog({
           {/* Completed Jobs Selection */}
           {selectedClientId && completedJobs.length > 0 && (
             <div className="space-y-2">
-              <Label>Trabajos Completados (selecciona para agregar)</Label>
+              <Label>Completed Jobs (select to add)</Label>
               <Card>
                 <CardContent className="p-3 max-h-48 overflow-y-auto space-y-2">
                   {completedJobs.map((job) => {
@@ -369,17 +369,17 @@ export function CreateInvoiceDialog({
           {/* Line Items */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label>Ítems de Factura</Label>
+              <Label>Invoice Items</Label>
               <Button variant="outline" size="sm" onClick={addManualLineItem}>
                 <Plus className="h-4 w-4 mr-1" />
-                Agregar Ítem
+                Add Item
               </Button>
             </div>
             <Card>
               <CardContent className="p-3 space-y-3">
                 {lineItems.length === 0 ? (
                   <p className="text-sm text-muted-foreground text-center py-4">
-                    Selecciona trabajos o agrega ítems manualmente
+                    Select jobs or add items manually
                   </p>
                 ) : (
                   lineItems.map((item) => (
@@ -389,7 +389,7 @@ export function CreateInvoiceDialog({
                     >
                       <div className="col-span-5">
                         <Input
-                          placeholder="Descripción"
+                          placeholder="Description"
                           value={item.description}
                           onChange={(e) =>
                             updateLineItem(item.id, "description", e.target.value)
@@ -399,7 +399,7 @@ export function CreateInvoiceDialog({
                       <div className="col-span-2">
                         <Input
                           type="number"
-                          placeholder="Cant."
+                          placeholder="Qty"
                           value={item.quantity}
                           onChange={(e) =>
                             updateLineItem(item.id, "quantity", Number(e.target.value))
@@ -410,7 +410,7 @@ export function CreateInvoiceDialog({
                       <div className="col-span-2">
                         <Input
                           type="number"
-                          placeholder="Precio"
+                          placeholder="Price"
                           value={item.unit_price}
                           onChange={(e) =>
                             updateLineItem(item.id, "unit_price", Number(e.target.value))
@@ -440,9 +440,9 @@ export function CreateInvoiceDialog({
           {/* Tax and Totals */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Notas</Label>
+              <Label>Notes</Label>
               <Textarea
-                placeholder="Notas adicionales..."
+                placeholder="Additional notes..."
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 rows={3}
@@ -450,7 +450,7 @@ export function CreateInvoiceDialog({
             </div>
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <Label>Impuesto (%)</Label>
+                <Label>Tax (%)</Label>
                 <Input
                   type="number"
                   className="w-24 text-right"
@@ -467,7 +467,7 @@ export function CreateInvoiceDialog({
                   <span>${subtotal.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Impuesto ({taxRate}%)</span>
+                  <span className="text-muted-foreground">Tax ({taxRate}%)</span>
                   <span>${taxAmount.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-lg font-bold">
@@ -481,11 +481,11 @@ export function CreateInvoiceDialog({
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancelar
+            Cancel
           </Button>
           <Button onClick={handleSubmit} disabled={loading}>
             {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-            Crear Factura
+            Create Invoice
           </Button>
         </DialogFooter>
       </DialogContent>

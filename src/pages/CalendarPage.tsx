@@ -23,7 +23,6 @@ import {
 } from "@/components/ui/select";
 import { ArrowLeft, Sparkles, LogOut, Calendar, Plus, Clock, MapPin, User } from "lucide-react";
 import { format, parseISO } from "date-fns";
-import { es } from "date-fns/locale";
 import { toast } from "sonner";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
@@ -405,7 +404,6 @@ export default function CalendarPage() {
                   select={handleDateSelect}
                   eventDrop={handleEventDrop}
                   height="auto"
-                  locale={es}
                   buttonText={{
                     today: "Today",
                     month: "Month",
@@ -551,7 +549,7 @@ export default function CalendarPage() {
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Clock className="h-4 w-4" />
                 <span>
-                  {format(parseISO(selectedJob.scheduled_date), "EEEE, MMMM d, yyyy", { locale: es })} at {selectedJob.scheduled_time}
+                  {format(parseISO(selectedJob.scheduled_date), "EEEE, MMMM d, yyyy")} at {selectedJob.scheduled_time}
                 </span>
               </div>
 

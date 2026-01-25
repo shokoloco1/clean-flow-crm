@@ -317,10 +317,10 @@ export function InvoiceDetailDialog({
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>{t("notes")}</TableHead>
-                    <TableHead className="text-center">{t("all")}</TableHead>
-                    <TableHead className="text-right">{t("subtotal")}</TableHead>
-                    <TableHead className="text-right">{t("total")}</TableHead>
+                    <TableHead>Description</TableHead>
+                    <TableHead className="text-center">Qty</TableHead>
+                    <TableHead className="text-right">Unit Price</TableHead>
+                    <TableHead className="text-right">Total</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>

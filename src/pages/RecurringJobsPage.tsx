@@ -79,20 +79,20 @@ interface Staff {
 }
 
 const DAYS_OF_WEEK = [
-  { value: 0, label: "Dom" },
-  { value: 1, label: "Lun" },
-  { value: 2, label: "Mar" },
-  { value: 3, label: "Mié" },
-  { value: 4, label: "Jue" },
-  { value: 5, label: "Vie" },
-  { value: 6, label: "Sáb" },
+  { value: 0, label: "Sun" },
+  { value: 1, label: "Mon" },
+  { value: 2, label: "Tue" },
+  { value: 3, label: "Wed" },
+  { value: 4, label: "Thu" },
+  { value: 5, label: "Fri" },
+  { value: 6, label: "Sat" },
 ];
 
 const FREQUENCY_OPTIONS = [
-  { value: "daily", label: "Diario" },
-  { value: "weekly", label: "Semanal" },
-  { value: "biweekly", label: "Quincenal" },
-  { value: "monthly", label: "Mensual" },
+  { value: "daily", label: "Daily" },
+  { value: "weekly", label: "Weekly" },
+  { value: "biweekly", label: "Biweekly" },
+  { value: "monthly", label: "Monthly" },
 ];
 
 export default function RecurringJobsPage() {
@@ -149,7 +149,7 @@ export default function RecurringJobsPage() {
     const staffMap = Object.fromEntries((staffData || []).map(s => [s.user_id, s.full_name]));
     const schedulesWithStaff = (schedulesRes.data || []).map((schedule: any) => ({
       ...schedule,
-      profiles: schedule.assigned_staff_id ? { full_name: staffMap[schedule.assigned_staff_id] || 'Sin asignar' } : null
+      profiles: schedule.assigned_staff_id ? { full_name: staffMap[schedule.assigned_staff_id] || 'Unassigned' } : null
     }));
 
     setSchedules(schedulesWithStaff as RecurringSchedule[]);
@@ -192,12 +192,12 @@ export default function RecurringJobsPage() {
 
   const handleSubmit = async () => {
     if (!formData.location || !formData.assigned_staff_id) {
-      toast.error("Ubicación y empleado son requeridos");
+      toast.error("Location and staff member are required");
       return;
     }
 
     if ((formData.frequency === "weekly" || formData.frequency === "biweekly") && formData.days_of_week.length === 0) {
-      toast.error("Selecciona al menos un día de la semana");
+      toast.error("Please select at least one day of the week");
       return;
     }
 
@@ -220,18 +220,18 @@ export default function RecurringJobsPage() {
         .eq("id", editingSchedule.id);
 
       if (error) {
-        toast.error("Error al actualizar programación");
+        toast.error("Error updating schedule");
         return;
       }
-      toast.success("Programación actualizada");
+      toast.success("Schedule updated");
     } else {
       const { error } = await supabase.from("recurring_schedules").insert(scheduleData);
 
       if (error) {
-        toast.error("Error al crear programación");
+        toast.error("Error creating schedule");
         return;
       }
-      toast.success("Programación creada");
+      toast.success("Schedule created");
     }
 
     setIsDialogOpen(false);
@@ -240,16 +240,16 @@ export default function RecurringJobsPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("¿Eliminar esta programación recurrente?")) return;
+    if (!confirm("Delete this recurring schedule?")) return;
 
     const { error } = await supabase.from("recurring_schedules").delete().eq("id", id);
 
     if (error) {
-      toast.error("Error al eliminar");
+      toast.error("Error deleting schedule");
       return;
     }
 
-    toast.success("Programación eliminada");
+    toast.success("Schedule deleted");
     fetchData();
   };
 
@@ -260,11 +260,11 @@ export default function RecurringJobsPage() {
       .eq("id", schedule.id);
 
     if (error) {
-      toast.error("Error al actualizar estado");
+      toast.error("Error updating status");
       return;
     }
 
-    toast.success(schedule.is_active ? "Programación pausada" : "Programación activada");
+    toast.success(schedule.is_active ? "Schedule paused" : "Schedule activated");
     fetchData();
   };
 
@@ -275,10 +275,10 @@ export default function RecurringJobsPage() {
 
       if (error) throw error;
 
-      toast.success(`${data.jobsCreated} trabajo(s) generado(s)`);
+      toast.success(`${data.jobsCreated} job(s) generated`);
       fetchData();
     } catch (error: any) {
-      toast.error("Error al generar trabajos: " + error.message);
+      toast.error("Error generating jobs: " + error.message);
     }
     setGenerating(false);
   };
@@ -310,19 +310,19 @@ export default function RecurringJobsPage() {
                 <Repeat className="h-5 w-5 text-primary-foreground" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-foreground">Trabajos Recurrentes</h1>
-                <p className="text-sm text-muted-foreground">{schedules.length} programaciones</p>
+              <h1 className="text-xl font-bold text-foreground">Recurring Jobs</h1>
+                <p className="text-sm text-muted-foreground">{schedules.length} schedules</p>
               </div>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <Button variant="outline" onClick={handleGenerateNow} disabled={generating}>
               <RefreshCw className={`h-4 w-4 mr-2 ${generating ? "animate-spin" : ""}`} />
-              Generar Ahora
+              Generate Now
             </Button>
             <Button onClick={() => { resetForm(); setIsDialogOpen(true); }}>
               <Plus className="h-4 w-4 mr-2" />
-              Nueva Programación
+              New Schedule
             </Button>
           </div>
         </div>
@@ -337,13 +337,13 @@ export default function RecurringJobsPage() {
           <Card className="border-border">
             <CardContent className="flex flex-col items-center justify-center py-16 text-center">
               <Repeat className="h-12 w-12 text-muted-foreground mb-4" />
-              <h3 className="text-lg font-semibold text-foreground mb-2">No hay programaciones</h3>
+              <h3 className="text-lg font-semibold text-foreground mb-2">No schedules</h3>
               <p className="text-muted-foreground mb-4">
-                Crea trabajos recurrentes para automatizar la asignación
+                Create recurring jobs to automate assignment
               </p>
               <Button onClick={() => { resetForm(); setIsDialogOpen(true); }}>
                 <Plus className="h-4 w-4 mr-2" />
-                Crear Primera Programación
+                Create First Schedule
               </Button>
             </CardContent>
           </Card>
@@ -356,10 +356,10 @@ export default function RecurringJobsPage() {
                     <div className="flex-1 space-y-3">
                       <div className="flex items-center gap-3">
                         <h3 className="font-semibold text-foreground text-lg">
-                          {schedule.clients?.name || "Sin cliente"}
+                          {schedule.clients?.name || "No client"}
                         </h3>
                         <Badge variant={schedule.is_active ? "default" : "secondary"}>
-                          {schedule.is_active ? "Activo" : "Pausado"}
+                          {schedule.is_active ? "Active" : "Paused"}
                         </Badge>
                         <Badge variant="outline">{getFrequencyLabel(schedule.frequency)}</Badge>
                       </div>
@@ -375,27 +375,27 @@ export default function RecurringJobsPage() {
                         </div>
                         <div className="flex items-center gap-2 text-muted-foreground">
                           <User className="h-4 w-4" />
-                          <span>{schedule.profiles?.full_name || "Sin asignar"}</span>
+                          <span>{schedule.profiles?.full_name || "Unassigned"}</span>
                         </div>
                       </div>
 
                       {(schedule.frequency === "weekly" || schedule.frequency === "biweekly") && (
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                           <Calendar className="h-4 w-4" />
-                          <span>Días: {getDaysLabel(schedule.days_of_week)}</span>
+                          <span>Days: {getDaysLabel(schedule.days_of_week)}</span>
                         </div>
                       )}
 
                       {schedule.frequency === "monthly" && schedule.day_of_month && (
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                           <Calendar className="h-4 w-4" />
-                          <span>Día del mes: {schedule.day_of_month}</span>
+                          <span>Day of month: {schedule.day_of_month}</span>
                         </div>
                       )}
 
                       {schedule.last_generated_date && (
                         <p className="text-xs text-muted-foreground">
-                          Última generación: {format(new Date(schedule.last_generated_date), "dd/MM/yyyy")}
+                          Last generated: {format(new Date(schedule.last_generated_date), "dd/MM/yyyy")}
                         </p>
                       )}
                     </div>
@@ -425,13 +425,13 @@ export default function RecurringJobsPage() {
         <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
-              {editingSchedule ? "Editar Programación" : "Nueva Programación Recurrente"}
+              {editingSchedule ? "Edit Schedule" : "New Recurring Schedule"}
             </DialogTitle>
           </DialogHeader>
 
           <div className="space-y-4 mt-4">
             <div>
-              <Label>Cliente</Label>
+              <Label>Client</Label>
               <Select
                 value={formData.client_id}
                 onValueChange={(v) => {
@@ -445,7 +445,7 @@ export default function RecurringJobsPage() {
                 }}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar cliente" />
+                  <SelectValue placeholder="Select client" />
                 </SelectTrigger>
                 <SelectContent>
                   {clients.map((client) => (
@@ -458,7 +458,7 @@ export default function RecurringJobsPage() {
             </div>
 
             <div>
-              <Label>Propiedad</Label>
+              <Label>Property</Label>
               <Select
                 value={formData.property_id}
                 onValueChange={(v) => {
@@ -471,7 +471,7 @@ export default function RecurringJobsPage() {
                 }}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar propiedad" />
+                  <SelectValue placeholder="Select property" />
                 </SelectTrigger>
                 <SelectContent>
                   {filteredProperties.map((property) => (
@@ -484,22 +484,22 @@ export default function RecurringJobsPage() {
             </div>
 
             <div>
-              <Label>Ubicación *</Label>
+              <Label>Location *</Label>
               <Input
                 value={formData.location}
                 onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                placeholder="Dirección del trabajo"
+                placeholder="Job address"
               />
             </div>
 
             <div>
-              <Label>Empleado Asignado *</Label>
+              <Label>Assigned Staff *</Label>
               <Select
                 value={formData.assigned_staff_id}
                 onValueChange={(v) => setFormData({ ...formData, assigned_staff_id: v })}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar empleado" />
+                  <SelectValue placeholder="Select staff member" />
                 </SelectTrigger>
                 <SelectContent>
                   {staffList.map((staff) => (
@@ -512,7 +512,7 @@ export default function RecurringJobsPage() {
             </div>
 
             <div>
-              <Label>Hora Programada</Label>
+              <Label>Scheduled Time</Label>
               <Input
                 type="time"
                 value={formData.scheduled_time}
@@ -521,7 +521,7 @@ export default function RecurringJobsPage() {
             </div>
 
             <div>
-              <Label>Frecuencia</Label>
+              <Label>Frequency</Label>
               <Select
                 value={formData.frequency}
                 onValueChange={(v: "daily" | "weekly" | "biweekly" | "monthly") =>
@@ -543,7 +543,7 @@ export default function RecurringJobsPage() {
 
             {(formData.frequency === "weekly" || formData.frequency === "biweekly") && (
               <div>
-                <Label>Días de la Semana</Label>
+                <Label>Days of Week</Label>
                 <div className="flex flex-wrap gap-2 mt-2">
                   {DAYS_OF_WEEK.map((day) => (
                     <label
@@ -580,7 +580,7 @@ export default function RecurringJobsPage() {
 
             {formData.frequency === "monthly" && (
               <div>
-                <Label>Día del Mes</Label>
+                <Label>Day of Month</Label>
                 <Select
                   value={formData.day_of_month.toString()}
                   onValueChange={(v) => setFormData({ ...formData, day_of_month: parseInt(v) })}
@@ -591,7 +591,7 @@ export default function RecurringJobsPage() {
                   <SelectContent>
                     {Array.from({ length: 28 }, (_, i) => i + 1).map((day) => (
                       <SelectItem key={day} value={day.toString()}>
-                        Día {day}
+                        Day {day}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -600,11 +600,11 @@ export default function RecurringJobsPage() {
             )}
 
             <div>
-              <Label>Notas</Label>
+              <Label>Notes</Label>
               <Textarea
                 value={formData.notes}
                 onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                placeholder="Instrucciones especiales"
+                placeholder="Special instructions"
                 rows={3}
               />
             </div>
@@ -612,10 +612,10 @@ export default function RecurringJobsPage() {
 
           <DialogFooter>
             <Button variant="outline" onClick={() => { setIsDialogOpen(false); resetForm(); }}>
-              Cancelar
+              Cancel
             </Button>
             <Button onClick={handleSubmit}>
-              {editingSchedule ? "Guardar Cambios" : "Crear Programación"}
+              {editingSchedule ? "Save Changes" : "Create Schedule"}
             </Button>
           </DialogFooter>
         </DialogContent>
