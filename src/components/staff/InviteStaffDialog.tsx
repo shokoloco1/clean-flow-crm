@@ -86,108 +86,33 @@ export function InviteStaffDialog({ open, onOpenChange }: InviteStaffDialogProps
 
   const createStaffMutation = useMutation({
     mutationFn: async () => {
-      // Generate a temporary password for the new staff member
-      const tempPassword = Math.random().toString(36).slice(-12) + "A1!";
-
-      // Store current session before creating user
-      const { data: currentSession } = await supabase.auth.getSession();
-      
-      // 1. Create the user in auth
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: formData.email,
-        password: tempPassword,
-        options: {
-          data: {
-            full_name: formData.fullName
-          }
+      const { data, error } = await supabase.functions.invoke('invite-staff', {
+        body: {
+          email: formData.email,
+          fullName: formData.fullName,
+          phone: formData.phone || null,
+          hourlyRate: formData.hourlyRate || null,
+          certifications: formData.certifications
         }
       });
-
-      if (authError) {
-        // Check if user already exists
-        if (authError.message?.toLowerCase().includes("already registered") || 
-            authError.message?.toLowerCase().includes("already exists")) {
-          throw new Error("This email is already registered");
-        }
-        throw authError;
-      }
       
-      if (!authData.user) throw new Error("Could not create user");
-
-      const userId = authData.user.id;
-
-      // 2. Create the profile
-      const { error: profileError } = await supabase
-        .from("profiles")
-        .insert({
-          user_id: userId,
-          email: formData.email,
-          full_name: formData.fullName,
-          phone: formData.phone || null,
-          hourly_rate: formData.hourlyRate ? parseFloat(formData.hourlyRate) : null,
-          skills: [],
-          certifications: formData.certifications,
-          hire_date: new Date().toISOString().split('T')[0],
-          is_active: true
-        });
-
-      if (profileError) {
-        console.error("Profile creation error:", profileError);
-        throw new Error("Could not create profile: " + profileError.message);
-      }
-
-      // 3. Assign the staff role
-      const { error: roleError } = await supabase
-        .from("user_roles")
-        .insert({
-          user_id: userId,
-          role: "staff"
-        });
-
-      if (roleError) {
-        console.error("Role assignment error:", roleError);
-        throw new Error("Could not assign role: " + roleError.message);
-      }
-
-      // 4. Create default availability (Mon-Fri 8am-5pm)
-      const availabilityRecords = [1, 2, 3, 4, 5].map(day => ({
-        user_id: userId,
-        day_of_week: day,
-        start_time: "08:00",
-        end_time: "17:00",
-        is_available: true
-      }));
-
-      // Add weekend as unavailable
-      availabilityRecords.push(
-        { user_id: userId, day_of_week: 0, start_time: "08:00", end_time: "17:00", is_available: false },
-        { user_id: userId, day_of_week: 6, start_time: "08:00", end_time: "17:00", is_available: false }
-      );
-
-      await supabase.from("staff_availability").insert(availabilityRecords);
-
-      // Restore original session if it was changed
-      if (currentSession?.session) {
-        await supabase.auth.setSession({
-          access_token: currentSession.session.access_token,
-          refresh_token: currentSession.session.refresh_token
-        });
-      }
-
-      return { email: formData.email, tempPassword };
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      return data;
     },
     onSuccess: () => {
-      toast.success(`${formData.fullName} has been added successfully!`);
+      toast.success(`Invitation sent to ${formData.email}`, {
+        description: "They will receive an email to set up their account"
+      });
       queryClient.invalidateQueries({ queryKey: ["staff-list"] });
       handleClose();
     },
     onError: (error: any) => {
-      console.error("Error creating staff:", error);
-      
+      console.error("Error inviting staff:", error);
       if (error.message?.includes("already registered")) {
         setErrors({ email: "This email is already registered" });
       } else {
-        toast.error(error.message || "An unexpected error occurred");
+        toast.error(error.message || "Failed to send invitation");
       }
     }
   });
@@ -360,12 +285,12 @@ export function InviteStaffDialog({ open, onOpenChange }: InviteStaffDialogProps
             {createStaffMutation.isPending ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Adding...
+                Sending Invite...
               </>
             ) : (
               <>
-                <UserPlus className="h-4 w-4 mr-2" />
-                Add Employee
+                <Mail className="h-4 w-4 mr-2" />
+                Send Invitation
               </>
             )}
           </Button>
