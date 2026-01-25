@@ -79,12 +79,6 @@ export function useSubscription() {
 
     const priceId = isAnnual ? PRICE_IDS[plan].annual : PRICE_IDS[plan].monthly;
 
-    // IMPORTANT: Most browsers block window.open() if it happens AFTER an async await.
-    // To keep the user experience reliable, we open a blank window synchronously,
-    // then navigate it once we receive the Stripe Checkout URL.
-    // If popups are blocked, we fall back to redirecting in the same tab.
-    const checkoutWindow = window.open("about:blank", "_blank");
-
     const { data, error } = await supabase.functions.invoke("create-checkout", {
       body: { priceId },
       headers: {
@@ -92,22 +86,11 @@ export function useSubscription() {
       },
     });
 
-    if (error) {
-      // Close the placeholder tab/window if we created one
-      try {
-        checkoutWindow?.close();
-      } catch {
-        // ignore
-      }
-      throw error;
-    }
+    if (error) throw error;
 
+    // Use same-tab redirect for maximum browser compatibility (Brave, etc.)
     if (data?.url) {
-      if (checkoutWindow) {
-        checkoutWindow.location.href = data.url;
-      } else {
-        window.location.assign(data.url);
-      }
+      window.location.href = data.url;
     }
     
     return data;
@@ -125,8 +108,10 @@ export function useSubscription() {
     });
 
     if (error) throw error;
+    
+    // Use same-tab redirect for maximum browser compatibility (Brave, etc.)
     if (data?.url) {
-      window.open(data.url, "_blank");
+      window.location.href = data.url;
     }
     
     return data;
