@@ -413,6 +413,13 @@ export type Database = {
             referencedRelation: "properties"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "jobs_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties_staff_view"
+            referencedColumns: ["id"]
+          },
         ]
       }
       login_attempts: {
@@ -785,6 +792,13 @@ export type Database = {
             referencedRelation: "properties"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "property_photos_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties_staff_view"
+            referencedColumns: ["id"]
+          },
         ]
       }
       push_subscriptions: {
@@ -887,6 +901,13 @@ export type Database = {
             referencedRelation: "properties"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "recurring_schedules_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties_staff_view"
+            referencedColumns: ["id"]
+          },
         ]
       }
       staff_availability: {
@@ -969,7 +990,156 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      profiles_public: {
+        Row: {
+          certifications: Json | null
+          created_at: string | null
+          email: string | null
+          full_name: string | null
+          hire_date: string | null
+          id: string | null
+          is_active: boolean | null
+          phone: string | null
+          skills: Json | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          certifications?: Json | null
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          hire_date?: string | null
+          id?: string | null
+          is_active?: boolean | null
+          phone?: string | null
+          skills?: Json | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          certifications?: Json | null
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          hire_date?: string | null
+          id?: string | null
+          is_active?: boolean | null
+          phone?: string | null
+          skills?: Json | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      properties_staff_view: {
+        Row: {
+          address: string | null
+          bathrooms: number | null
+          bedrooms: number | null
+          beds: number | null
+          client_id: string | null
+          created_at: string | null
+          default_checklist_template_id: string | null
+          dining_chairs: number | null
+          estimated_hours: number | null
+          floor_type: string | null
+          floors: number | null
+          google_maps_link: string | null
+          has_garage: boolean | null
+          has_pets: boolean | null
+          has_pool: boolean | null
+          id: string | null
+          is_active: boolean | null
+          living_areas: number | null
+          name: string | null
+          pet_details: string | null
+          post_code: string | null
+          property_type: string | null
+          rugs: number | null
+          sofas: number | null
+          special_instructions: string | null
+          state: string | null
+          suburb: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          address?: string | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          beds?: number | null
+          client_id?: string | null
+          created_at?: string | null
+          default_checklist_template_id?: string | null
+          dining_chairs?: number | null
+          estimated_hours?: number | null
+          floor_type?: string | null
+          floors?: number | null
+          google_maps_link?: string | null
+          has_garage?: boolean | null
+          has_pets?: boolean | null
+          has_pool?: boolean | null
+          id?: string | null
+          is_active?: boolean | null
+          living_areas?: number | null
+          name?: string | null
+          pet_details?: string | null
+          post_code?: string | null
+          property_type?: string | null
+          rugs?: number | null
+          sofas?: number | null
+          special_instructions?: string | null
+          state?: string | null
+          suburb?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          address?: string | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          beds?: number | null
+          client_id?: string | null
+          created_at?: string | null
+          default_checklist_template_id?: string | null
+          dining_chairs?: number | null
+          estimated_hours?: number | null
+          floor_type?: string | null
+          floors?: number | null
+          google_maps_link?: string | null
+          has_garage?: boolean | null
+          has_pets?: boolean | null
+          has_pool?: boolean | null
+          id?: string | null
+          is_active?: boolean | null
+          living_areas?: number | null
+          name?: string | null
+          pet_details?: string | null
+          post_code?: string | null
+          property_type?: string | null
+          rugs?: number | null
+          sofas?: number | null
+          special_instructions?: string | null
+          state?: string | null
+          suburb?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "properties_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "properties_default_checklist_template_id_fkey"
+            columns: ["default_checklist_template_id"]
+            isOneToOne: false
+            referencedRelation: "checklist_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       check_login_rate_limit: {
@@ -1086,6 +1256,10 @@ export type Database = {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      is_staff_assigned_to_client: {
+        Args: { _client_id: string; _user_id: string }
         Returns: boolean
       }
       is_staff_assigned_to_property: {
