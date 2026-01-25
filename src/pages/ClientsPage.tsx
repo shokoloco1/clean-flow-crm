@@ -264,13 +264,15 @@ export default function ClientsPage() {
                 <ArrowLeft className="h-5 w-5" />
               </Button>
             </Link>
-            <div className="h-10 w-10 rounded-lg bg-primary flex items-center justify-center">
-              <Sparkles className="h-5 w-5 text-primary-foreground" />
-            </div>
-            <div>
-              <h1 className="text-xl font-bold text-foreground">CleanFlow</h1>
-              <p className="text-sm text-muted-foreground">Gestión de Clientes</p>
-            </div>
+            <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+              <div className="h-10 w-10 rounded-lg bg-primary flex items-center justify-center">
+                <Sparkles className="h-5 w-5 text-primary-foreground" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-foreground">CleanFlow</h1>
+                <p className="text-sm text-muted-foreground">Gestión de Clientes</p>
+              </div>
+            </Link>
           </div>
           <Button variant="outline" size="sm" onClick={signOut}>
             <LogOut className="h-4 w-4 mr-2" />

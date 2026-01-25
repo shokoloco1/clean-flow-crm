@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useRateLimit } from "@/hooks/useRateLimit";
 import { supabase } from "@/integrations/supabase/client";
@@ -262,11 +262,11 @@ export default function Auth() {
       <div className="w-full max-w-md space-y-6">
         {/* Logo and branding */}
         <div className="text-center space-y-3">
-          <div className="flex items-center justify-center gap-2">
+          <Link to="/" className="flex items-center justify-center gap-2 hover:opacity-80 transition-opacity">
             <div className="h-14 w-14 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
               <Sparkles className="h-8 w-8 text-primary-foreground" />
             </div>
-          </div>
+          </Link>
           <h1 className="text-3xl font-bold text-foreground">{t("appName")}</h1>
           <p className="text-muted-foreground">{t("professionalCleaningManagement")}</p>
         </div>

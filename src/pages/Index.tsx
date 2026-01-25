@@ -66,12 +66,12 @@ export default function Index() {
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-sm border-b border-border">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2">
+          <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
             <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
               <Sparkles className="h-5 w-5 text-primary-foreground" />
             </div>
             <span className="font-bold text-lg text-foreground">{t("appName")}</span>
-          </div>
+          </Link>
           <div className="flex items-center gap-2">
             <LanguageSwitcher />
             <Button 
@@ -105,11 +105,11 @@ export default function Index() {
         <div className="relative container mx-auto px-4 py-12 md:py-20">
           <div className="max-w-4xl mx-auto text-center">
             {/* Logo */}
-            <div className="flex items-center justify-center gap-3 mb-6">
+            <Link to="/" className="flex items-center justify-center gap-3 mb-6 hover:opacity-80 transition-opacity">
               <div className="h-16 w-16 md:h-20 md:w-20 rounded-2xl bg-primary flex items-center justify-center shadow-lg shadow-primary/30">
                 <Sparkles className="h-8 w-8 md:h-10 md:w-10 text-primary-foreground" />
               </div>
-            </div>
+            </Link>
             
             <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-foreground mb-4 leading-tight">
               {t("heroTitle").split("stress").map((part, i) => 
@@ -298,10 +298,10 @@ export default function Index() {
       {/* Footer */}
       <footer className="py-8 border-t border-border">
         <div className="container mx-auto px-4 text-center">
-          <div className="flex items-center justify-center gap-2 mb-4">
+          <Link to="/" className="flex items-center justify-center gap-2 mb-4 hover:opacity-80 transition-opacity">
             <Sparkles className="h-5 w-5 text-primary" />
             <span className="font-bold text-foreground">{t("appName")}</span>
-          </div>
+          </Link>
           <p className="text-sm text-muted-foreground mb-4">
             {t("streamlineOperations")}
           </p>

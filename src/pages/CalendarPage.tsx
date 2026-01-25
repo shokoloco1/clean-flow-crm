@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -336,7 +336,7 @@ export default function CalendarPage() {
             <Button variant="ghost" size="icon" onClick={() => navigate("/admin")}>
               <ArrowLeft className="h-5 w-5" />
             </Button>
-            <div className="flex items-center gap-3">
+            <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
               <div className="h-10 w-10 rounded-lg bg-primary flex items-center justify-center">
                 <Sparkles className="h-5 w-5 text-primary-foreground" />
               </div>
@@ -344,7 +344,7 @@ export default function CalendarPage() {
                 <h1 className="text-xl font-bold text-foreground">Calendar</h1>
                 <p className="text-sm text-muted-foreground">Job Scheduling</p>
               </div>
-            </div>
+            </Link>
           </div>
           <div className="flex items-center gap-2">
             <Button onClick={() => { resetForm(); setIsCreateOpen(true); }}>

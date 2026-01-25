@@ -1,4 +1,5 @@
 import { useEffect, useState, lazy, Suspense } from "react";
+import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -251,7 +252,7 @@ export default function AdminDashboard() {
       {/* Header */}
       <header className="bg-card border-b border-border sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+          <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
             <div className="h-10 w-10 rounded-lg bg-primary flex items-center justify-center shadow-md shadow-primary/20">
               <Sparkles className="h-5 w-5 text-primary-foreground" />
             </div>
@@ -259,7 +260,7 @@ export default function AdminDashboard() {
               <h1 className="text-xl font-bold text-foreground">CleanFlow</h1>
               <p className="text-sm text-muted-foreground">Panel de Control</p>
             </div>
-          </div>
+          </Link>
           <div className="flex items-center gap-2">
             <GlobalSearch />
             <NotificationCenter />
