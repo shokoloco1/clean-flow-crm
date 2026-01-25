@@ -50,7 +50,7 @@ serve(async (req) => {
       logStep("Existing customer found", { customerId });
     }
 
-    const origin = req.headers.get("origin") || "https://id-preview--9a20ce15-fcf2-4e44-826b-e65d9a7d919f.lovable.app";
+    const origin = req.headers.get("origin") || Deno.env.get("APP_URL") || "https://cleanflow.com.au";
 
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
