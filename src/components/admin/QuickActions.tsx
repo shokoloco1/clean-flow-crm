@@ -79,8 +79,6 @@ export function QuickActions({ onNewJobClick }: QuickActionsProps) {
       title: t("newJob"),
       subtitle: t("scheduleClean"),
       onClick: onNewJobClick,
-      iconBg: "bg-primary/10",
-      iconColor: "text-primary",
       badge: counts.pendingJobs > 0 ? counts.pendingJobs : undefined,
       badgeClassName: "bg-warning text-warning-foreground",
     },
@@ -89,8 +87,6 @@ export function QuickActions({ onNewJobClick }: QuickActionsProps) {
       title: t("properties"),
       subtitle: t("manageLocations"),
       onClick: () => navigate("/admin/properties"),
-      iconBg: "bg-secondary/10",
-      iconColor: "text-secondary-foreground",
       badge: counts.properties,
     },
     {
@@ -98,8 +94,6 @@ export function QuickActions({ onNewJobClick }: QuickActionsProps) {
       title: t("clients"),
       subtitle: t("manageClients"),
       onClick: () => navigate("/admin/clients"),
-      iconBg: "bg-primary/10",
-      iconColor: "text-primary",
       badge: counts.clients,
     },
     {
@@ -107,16 +101,12 @@ export function QuickActions({ onNewJobClick }: QuickActionsProps) {
       title: t("checklists"),
       subtitle: t("manageTemplates"),
       onClick: () => navigate("/admin/checklists"),
-      iconBg: "bg-secondary/10",
-      iconColor: "text-secondary-foreground",
     },
     {
       icon: Users,
       title: t("staff"),
       subtitle: t("manageTeam"),
       onClick: () => navigate("/admin/staff"),
-      iconBg: "bg-primary/10",
-      iconColor: "text-primary",
       badge: counts.staff,
     },
     {
@@ -124,42 +114,32 @@ export function QuickActions({ onNewJobClick }: QuickActionsProps) {
       title: t("calendar"),
       subtitle: t("viewSchedule"),
       onClick: () => navigate("/admin/calendar"),
-      iconBg: "bg-primary/10",
-      iconColor: "text-primary",
     },
     {
       icon: Repeat,
       title: t("recurring"),
       subtitle: t("autoSchedule"),
       onClick: () => navigate("/admin/recurring"),
-      iconBg: "bg-secondary/10",
-      iconColor: "text-secondary-foreground",
       badge: counts.recurring,
     },
     {
       icon: FileText,
-      title: "Facturación",
-      subtitle: "Generar facturas",
+      title: t("invoices"),
+      subtitle: t("generateInvoices"),
       onClick: () => navigate("/admin/invoices"),
-      iconBg: "bg-primary/10",
-      iconColor: "text-primary",
       badge: counts.invoices > 0 ? counts.invoices : undefined,
     },
     {
       icon: DollarSign,
-      title: "Precios",
-      subtitle: "Lista de precios",
+      title: t("pricing"),
+      subtitle: t("priceList"),
       onClick: () => navigate("/admin/price-lists"),
-      iconBg: "bg-secondary/10",
-      iconColor: "text-secondary-foreground",
     },
     {
       icon: Settings,
       title: t("settings"),
       subtitle: t("systemConfig"),
       onClick: () => navigate("/admin/settings"),
-      iconBg: "bg-secondary/10",
-      iconColor: "text-secondary-foreground",
     },
   ];
 
@@ -179,8 +159,8 @@ export function QuickActions({ onNewJobClick }: QuickActionsProps) {
                 {action.badge > 99 ? "99+" : action.badge}
               </span>
             )}
-            <div className={`h-10 w-10 md:h-12 md:w-12 rounded-xl ${action.iconBg} flex items-center justify-center`}>
-              <action.icon className={`h-5 w-5 md:h-6 md:w-6 ${action.iconColor}`} />
+            <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-primary/10 flex items-center justify-center">
+              <action.icon className="h-5 w-5 md:h-6 md:w-6 text-primary" />
             </div>
             <div>
               <h3 className="font-semibold text-foreground text-xs md:text-sm">{action.title}</h3>

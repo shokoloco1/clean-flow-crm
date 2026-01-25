@@ -99,6 +99,8 @@ const translations = {
     viewSchedule: "View schedule",
     autoSchedule: "Auto-schedule",
     systemConfig: "System settings",
+    generateInvoices: "Generate invoices",
+    priceList: "Price list",
     
     // Jobs
     jobDetails: "Job Details",
@@ -490,6 +492,8 @@ const translations = {
     viewSchedule: "Ver agenda",
     autoSchedule: "Auto-programar",
     systemConfig: "Configuración sistema",
+    generateInvoices: "Generar facturas",
+    priceList: "Lista de precios",
     
     // Jobs
     jobDetails: "Detalles del Trabajo",
