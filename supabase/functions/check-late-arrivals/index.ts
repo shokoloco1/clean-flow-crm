@@ -82,13 +82,7 @@ serve(async (req) => {
     // Get all pending jobs scheduled for today that should have started by now
     const { data: pendingJobs, error: jobsError } = await supabase
       .from('jobs')
-      .select(`
-        id,
-        scheduled_time,
-        location,
-        assigned_staff_id,
-        profiles:assigned_staff_id (full_name)
-      `)
+      .select(`id, scheduled_time, location, assigned_staff_id`)
       .eq('scheduled_date', today)
       .eq('status', 'pending')
       .lte('scheduled_time', currentTime);
@@ -99,6 +93,17 @@ serve(async (req) => {
     }
 
     console.log(`[check-late-arrivals] Found ${pendingJobs?.length || 0} pending jobs that should have started`);
+
+    // Fetch staff names separately
+    const staffIds = [...new Set((pendingJobs || []).map(j => j.assigned_staff_id).filter(Boolean))];
+    let staffMap: Record<string, string> = {};
+    if (staffIds.length > 0) {
+      const { data: staffData } = await supabase
+        .from('profiles')
+        .select('user_id, full_name')
+        .in('user_id', staffIds);
+      staffMap = Object.fromEntries((staffData || []).map(s => [s.user_id, s.full_name]));
+    }
 
     const alertsCreated: string[] = [];
 
@@ -123,8 +128,7 @@ serve(async (req) => {
       const hasLateAlert = existingAlerts?.some(a => a.alert_type === 'late_arrival');
       const hasNoShowAlert = existingAlerts?.some(a => a.alert_type === 'no_show');
 
-      const profileData = job.profiles as unknown as { full_name: string } | null;
-      const staffName = profileData?.full_name || 'Staff desconocido';
+      const staffName = job.assigned_staff_id ? staffMap[job.assigned_staff_id] || 'Staff desconocido' : 'Staff desconocido';
 
       // No-show: > 30 minutes late
       if (diffMinutes >= 30 && !hasNoShowAlert) {

@@ -131,8 +131,7 @@ export default function RecurringJobsPage() {
         .select(`
           *,
           clients (name),
-          properties (name),
-          profiles:assigned_staff_id (full_name)
+          properties (name)
         `)
         .order("created_at", { ascending: false }),
       supabase.from("clients").select("id, name, address").order("name"),
@@ -144,9 +143,16 @@ export default function RecurringJobsPage() {
     const { data: staffData } = await supabase
       .from("profiles")
       .select("user_id, full_name")
-      .in("user_id", staffIds);
+      .in("user_id", staffIds.length > 0 ? staffIds : ['']);
 
-    setSchedules((schedulesRes.data as unknown as RecurringSchedule[]) || []);
+    // Map staff names to schedules
+    const staffMap = Object.fromEntries((staffData || []).map(s => [s.user_id, s.full_name]));
+    const schedulesWithStaff = (schedulesRes.data || []).map((schedule: any) => ({
+      ...schedule,
+      profiles: schedule.assigned_staff_id ? { full_name: staffMap[schedule.assigned_staff_id] || 'Sin asignar' } : null
+    }));
+
+    setSchedules(schedulesWithStaff as RecurringSchedule[]);
     setClients((clientsRes.data as Client[]) || []);
     setProperties((propertiesRes.data as Property[]) || []);
     setStaffList((staffData as Staff[]) || []);
