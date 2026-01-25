@@ -75,103 +75,109 @@ export default function AdminDashboard() {
   }, []);
 
   const fetchData = async () => {
-    const today = format(new Date(), "yyyy-MM-dd");
-    
-    // Batch all independent queries in parallel
-    const [jobsRes, todayCountRes, completedCountRes, staffCountRes, recentJobsRes] = await Promise.all([
-      supabase
-        .from("jobs")
-        .select(`
-          id, location, scheduled_date, scheduled_time, status,
-          start_time, end_time, notes, created_at, assigned_staff_id,
-          clients (name)
-        `)
-        .gte("scheduled_date", today)
-        .order("scheduled_date", { ascending: true })
-        .order("scheduled_time", { ascending: true })
-        .limit(20),
-      supabase
-        .from("jobs")
-        .select("*", { count: "exact", head: true })
-        .eq("scheduled_date", today),
-      supabase
-        .from("jobs")
-        .select("*", { count: "exact", head: true })
-        .eq("scheduled_date", today)
-        .eq("status", "completed"),
-      supabase
-        .from("user_roles")
-        .select("*", { count: "exact", head: true })
-        .eq("role", "staff"),
-      supabase
-        .from("jobs")
-        .select(`id, status, start_time, end_time, assigned_staff_id, clients (name)`)
-        .eq("scheduled_date", today)
-        .or("status.eq.in_progress,status.eq.completed")
-        .order("updated_at", { ascending: false })
-        .limit(10)
-    ]);
-
-    // Collect all staff IDs and fetch profiles in one query
-    const allStaffIds = new Set<string>();
-    jobsRes.data?.forEach((j: any) => j.assigned_staff_id && allStaffIds.add(j.assigned_staff_id));
-    recentJobsRes.data?.forEach((j: any) => j.assigned_staff_id && allStaffIds.add(j.assigned_staff_id));
-    
-    let staffMap: Record<string, string> = {};
-    if (allStaffIds.size > 0) {
-      const { data: staffData } = await supabase
-        .from("profiles")
-        .select("user_id, full_name")
-        .in("user_id", Array.from(allStaffIds));
-      staffMap = Object.fromEntries((staffData || []).map(s => [s.user_id, s.full_name]));
-    }
-
-    // Map staff names to jobs
-    const jobsWithStaff = (jobsRes.data || []).map((job: any) => ({
-      ...job,
-      profiles: job.assigned_staff_id ? { full_name: staffMap[job.assigned_staff_id] || 'Unknown' } : null
-    }));
-
-    const activityItems: ActivityItem[] = [];
-    recentJobsRes.data?.forEach((job: any) => {
-      const clientName = job.clients?.name || 'Unknown';
-      const staffName = job.assigned_staff_id ? staffMap[job.assigned_staff_id] || 'Unknown' : 'Unknown';
+    try {
+      const today = format(new Date(), "yyyy-MM-dd");
       
-      if (job.status === 'completed' && job.end_time) {
-        activityItems.push({
-          id: `${job.id}-completed`,
-          type: 'completed',
-          jobId: job.id,
-          clientName,
-          staffName,
-          time: format(new Date(job.end_time), 'h:mm a')
-        });
-      }
-      if (job.start_time) {
-        activityItems.push({
-          id: `${job.id}-started`,
-          type: 'started',
-          jobId: job.id,
-          clientName,
-          staffName,
-          time: format(new Date(job.start_time), 'h:mm a')
-        });
-      }
-    });
+      // Batch all independent queries in parallel
+      const [jobsRes, todayCountRes, completedCountRes, staffCountRes, recentJobsRes] = await Promise.all([
+        supabase
+          .from("jobs")
+          .select(`
+            id, location, scheduled_date, scheduled_time, status,
+            start_time, end_time, notes, created_at, assigned_staff_id,
+            clients (name)
+          `)
+          .gte("scheduled_date", today)
+          .order("scheduled_date", { ascending: true })
+          .order("scheduled_time", { ascending: true })
+          .limit(20),
+        supabase
+          .from("jobs")
+          .select("*", { count: "exact", head: true })
+          .eq("scheduled_date", today),
+        supabase
+          .from("jobs")
+          .select("*", { count: "exact", head: true })
+          .eq("scheduled_date", today)
+          .eq("status", "completed"),
+        supabase
+          .from("user_roles")
+          .select("*", { count: "exact", head: true })
+          .eq("role", "staff"),
+        supabase
+          .from("jobs")
+          .select(`id, status, start_time, end_time, assigned_staff_id, clients (name)`)
+          .eq("scheduled_date", today)
+          .or("status.eq.in_progress,status.eq.completed")
+          .order("updated_at", { ascending: false })
+          .limit(10)
+      ]);
 
-    const todayTotal = todayCountRes.count || 0;
-    const completedTotal = completedCountRes.count || 0;
-    const rate = todayTotal > 0 ? Math.round((completedTotal / todayTotal) * 100) : 0;
+      // Collect all staff IDs and fetch profiles in one query
+      const allStaffIds = new Set<string>();
+      jobsRes.data?.forEach((j: any) => j.assigned_staff_id && allStaffIds.add(j.assigned_staff_id));
+      recentJobsRes.data?.forEach((j: any) => j.assigned_staff_id && allStaffIds.add(j.assigned_staff_id));
+      
+      let staffMap: Record<string, string> = {};
+      if (allStaffIds.size > 0) {
+        const { data: staffData } = await supabase
+          .from("profiles")
+          .select("user_id, full_name")
+          .in("user_id", Array.from(allStaffIds));
+        staffMap = Object.fromEntries((staffData || []).map(s => [s.user_id, s.full_name]));
+      }
 
-    setJobs(jobsWithStaff as Job[]);
-    setStats({
-      todayJobs: todayTotal,
-      activeStaff: staffCountRes.count || 0,
-      completedToday: completedTotal,
-      completionRate: rate
-    });
-    setActivities(activityItems.slice(0, 5));
-    setLoading(false);
+      // Map staff names to jobs
+      const jobsWithStaff = (jobsRes.data || []).map((job: any) => ({
+        ...job,
+        profiles: job.assigned_staff_id ? { full_name: staffMap[job.assigned_staff_id] || 'Unknown' } : null
+      }));
+
+      const activityItems: ActivityItem[] = [];
+      recentJobsRes.data?.forEach((job: any) => {
+        const clientName = job.clients?.name || 'Unknown';
+        const staffName = job.assigned_staff_id ? staffMap[job.assigned_staff_id] || 'Unknown' : 'Unknown';
+        
+        if (job.status === 'completed' && job.end_time) {
+          activityItems.push({
+            id: `${job.id}-completed`,
+            type: 'completed',
+            jobId: job.id,
+            clientName,
+            staffName,
+            time: format(new Date(job.end_time), 'h:mm a')
+          });
+        }
+        if (job.start_time) {
+          activityItems.push({
+            id: `${job.id}-started`,
+            type: 'started',
+            jobId: job.id,
+            clientName,
+            staffName,
+            time: format(new Date(job.start_time), 'h:mm a')
+          });
+        }
+      });
+
+      const todayTotal = todayCountRes.count || 0;
+      const completedTotal = completedCountRes.count || 0;
+      const rate = todayTotal > 0 ? Math.round((completedTotal / todayTotal) * 100) : 0;
+
+      setJobs(jobsWithStaff as Job[]);
+      setStats({
+        todayJobs: todayTotal,
+        activeStaff: staffCountRes.count || 0,
+        completedToday: completedTotal,
+        completionRate: rate
+      });
+      setActivities(activityItems.slice(0, 5));
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      toast.error('Error loading data');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const fetchClientsAndStaff = async () => {
