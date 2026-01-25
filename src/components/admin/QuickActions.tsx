@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
-import { Plus, Home, ClipboardList, Users, Calendar, UserCircle, Repeat, Settings, FileText, DollarSign } from "lucide-react";
+import { Plus, Home, Users, Calendar, UserCircle, Repeat, Settings, FileText, DollarSign } from "lucide-react";
 import { t } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -95,12 +95,6 @@ export function QuickActions({ onNewJobClick }: QuickActionsProps) {
       subtitle: t("manageClients"),
       onClick: () => navigate("/admin/clients"),
       badge: counts.clients,
-    },
-    {
-      icon: ClipboardList,
-      title: t("checklists"),
-      subtitle: t("manageTemplates"),
-      onClick: () => navigate("/admin/checklists"),
     },
     {
       icon: Users,

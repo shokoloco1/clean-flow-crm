@@ -17,7 +17,7 @@ import Auth from "./pages/Auth";
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 const StaffDashboard = lazy(() => import("./pages/StaffDashboard"));
 const PropertiesPage = lazy(() => import("./pages/PropertiesPage"));
-const ChecklistTemplatesPage = lazy(() => import("./pages/ChecklistTemplatesPage"));
+
 const StaffManagementPage = lazy(() => import("./pages/StaffManagementPage"));
 const CalendarPage = lazy(() => import("./pages/CalendarPage"));
 const ClientsPage = lazy(() => import("./pages/ClientsPage"));
@@ -75,14 +75,6 @@ const App = () => (
                       element={
                         <ProtectedRoute allowedRoles={["admin"]}>
                           <PropertiesPage />
-                        </ProtectedRoute>
-                      } 
-                    />
-                    <Route 
-                      path="/admin/checklists" 
-                      element={
-                        <ProtectedRoute allowedRoles={["admin"]}>
-                          <ChecklistTemplatesPage />
                         </ProtectedRoute>
                       } 
                     />
