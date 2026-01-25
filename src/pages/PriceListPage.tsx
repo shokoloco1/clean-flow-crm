@@ -26,7 +26,7 @@ import { ArrowLeft, Plus, FileText, FileSpreadsheet, Download, Eye, Trash2, Load
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
 import { format } from "date-fns";
-import { es } from "date-fns/locale";
+import { enAU } from "date-fns/locale";
 import { UploadPriceListDialog } from "@/components/price-lists/UploadPriceListDialog";
 import { PriceListViewer } from "@/components/price-lists/PriceListViewer";
 import { getSignedUrl } from "@/lib/signedUrls";
@@ -63,7 +63,7 @@ export default function PriceListPage() {
     } catch (error: any) {
       toast({
         title: "Error",
-        description: "No se pudieron cargar las listas de precios",
+        description: "Could not load price lists",
         variant: "destructive",
       });
     } finally {
@@ -90,13 +90,13 @@ export default function PriceListPage() {
       );
 
       toast({
-        title: "Actualizado",
-        description: `Lista de precios ${!currentState ? "activada" : "desactivada"}`,
+        title: "Updated",
+        description: `Price list ${!currentState ? "activated" : "deactivated"}`,
       });
     } catch (error: any) {
       toast({
         title: "Error",
-        description: "No se pudo actualizar el estado",
+        description: "Could not update status",
         variant: "destructive",
       });
     } finally {
@@ -128,13 +128,13 @@ export default function PriceListPage() {
 
       setPriceLists(prev => prev.filter(pl => pl.id !== deletingId));
       toast({
-        title: "Eliminado",
-        description: "Lista de precios eliminada correctamente",
+        title: "Deleted",
+        description: "Price list deleted successfully",
       });
     } catch (error: any) {
       toast({
         title: "Error",
-        description: "No se pudo eliminar la lista de precios",
+        description: "Could not delete price list",
         variant: "destructive",
       });
     } finally {
@@ -161,7 +161,7 @@ export default function PriceListPage() {
     } catch (error) {
       toast({
         title: "Error",
-        description: "No se pudo descargar el archivo",
+        description: "Could not download file",
         variant: "destructive",
       });
     }
@@ -203,23 +203,23 @@ export default function PriceListPage() {
             </Button>
             <div>
               <h1 className="text-2xl font-bold text-foreground">
-                Listas de Precios
+                Price Lists
               </h1>
               <p className="text-sm text-muted-foreground">
-                Gestiona los archivos de precios de tus servicios
+                Manage your service pricing files
               </p>
             </div>
           </div>
           <Button onClick={() => setIsUploadOpen(true)}>
             <Plus className="h-4 w-4 mr-2" />
-            Subir Lista
+            Upload Price List
           </Button>
         </div>
 
         {/* Main Content */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Archivos de Precios</CardTitle>
+            <CardTitle className="text-lg">Pricing Files</CardTitle>
           </CardHeader>
           <CardContent>
             {loading ? (
@@ -230,26 +230,26 @@ export default function PriceListPage() {
               <div className="text-center py-12">
                 <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                 <h3 className="text-lg font-medium text-foreground mb-2">
-                  No hay listas de precios
+                  No price lists yet
                 </h3>
                 <p className="text-sm text-muted-foreground mb-4">
-                  Sube tu primera lista de precios en PDF o Excel
+                  Upload your first price list in PDF or Excel
                 </p>
                 <Button onClick={() => setIsUploadOpen(true)}>
                   <Plus className="h-4 w-4 mr-2" />
-                  Subir Lista
+                  Upload Price List
                 </Button>
               </div>
             ) : (
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Nombre</TableHead>
-                    <TableHead>Descripción</TableHead>
-                    <TableHead>Tipo</TableHead>
-                    <TableHead>Fecha</TableHead>
-                    <TableHead>Estado</TableHead>
-                    <TableHead className="text-right">Acciones</TableHead>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Description</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -267,7 +267,7 @@ export default function PriceListPage() {
                       <TableCell>{getFileTypeBadge(priceList.file_type)}</TableCell>
                       <TableCell className="text-muted-foreground">
                         {format(new Date(priceList.created_at), "d MMM yyyy", {
-                          locale: es,
+                          locale: enAU,
                         })}
                       </TableCell>
                       <TableCell>
@@ -285,7 +285,7 @@ export default function PriceListPage() {
                             variant="ghost"
                             size="icon"
                             onClick={() => setViewingPriceList(priceList)}
-                            title="Ver"
+                            title="View"
                           >
                             <Eye className="h-4 w-4" />
                           </Button>
@@ -293,7 +293,7 @@ export default function PriceListPage() {
                             variant="ghost"
                             size="icon"
                             onClick={() => handleDownload(priceList)}
-                            title="Descargar"
+                            title="Download"
                           >
                             <Download className="h-4 w-4" />
                           </Button>
@@ -301,7 +301,7 @@ export default function PriceListPage() {
                             variant="ghost"
                             size="icon"
                             onClick={() => setDeletingId(priceList.id)}
-                            title="Eliminar"
+                            title="Delete"
                             className="text-destructive hover:text-destructive"
                           >
                             <Trash2 className="h-4 w-4" />
@@ -334,18 +334,18 @@ export default function PriceListPage() {
       <AlertDialog open={!!deletingId} onOpenChange={() => setDeletingId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>¿Eliminar lista de precios?</AlertDialogTitle>
+            <AlertDialogTitle>Delete price list?</AlertDialogTitle>
             <AlertDialogDescription>
-              Esta acción no se puede deshacer. El archivo será eliminado permanentemente.
+              This action cannot be undone. The file will be permanently deleted.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              Eliminar
+              Delete
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

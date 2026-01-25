@@ -53,7 +53,7 @@ export function PriceListViewer({ priceList, onClose }: PriceListViewerProps) {
     } catch (error) {
       toast({
         title: "Error",
-        description: "No se pudo cargar el archivo",
+        description: "Could not load file",
         variant: "destructive",
       });
     } finally {
@@ -104,7 +104,7 @@ export function PriceListViewer({ priceList, onClose }: PriceListViewerProps) {
               {priceList?.file_type.toUpperCase()}
             </Badge>
             <Badge variant={priceList?.is_active ? "default" : "secondary"}>
-              {priceList?.is_active ? "Activo" : "Inactivo"}
+              {priceList?.is_active ? "Active" : "Inactive"}
             </Badge>
           </div>
         </SheetHeader>
@@ -124,20 +124,20 @@ export function PriceListViewer({ priceList, onClose }: PriceListViewerProps) {
             <div className="flex flex-col items-center justify-center h-full text-center p-8">
               {getFileIcon()}
               <h3 className="text-lg font-medium mt-4">
-                Vista previa no disponible
+                Preview not available
               </h3>
               <p className="text-sm text-muted-foreground mt-2 max-w-sm">
-                Los archivos de Excel y CSV no se pueden previsualizar. 
-                Descarga el archivo para ver su contenido.
+                Excel and CSV files cannot be previewed. 
+                Download the file to view its contents.
               </p>
               <div className="flex gap-2 mt-6">
                 <Button variant="outline" onClick={handleOpenExternal}>
                   <ExternalLink className="h-4 w-4 mr-2" />
-                  Abrir
+                  Open
                 </Button>
                 <Button onClick={handleDownload}>
                   <Download className="h-4 w-4 mr-2" />
-                  Descargar
+                  Download
                 </Button>
               </div>
             </div>
@@ -148,11 +148,11 @@ export function PriceListViewer({ priceList, onClose }: PriceListViewerProps) {
           <div className="flex-shrink-0 pt-4 flex gap-2 justify-end">
             <Button variant="outline" onClick={handleOpenExternal}>
               <ExternalLink className="h-4 w-4 mr-2" />
-              Abrir en nueva pestaña
+              Open in new tab
             </Button>
             <Button onClick={handleDownload}>
               <Download className="h-4 w-4 mr-2" />
-              Descargar
+              Download
             </Button>
           </div>
         )}

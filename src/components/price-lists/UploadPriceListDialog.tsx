@@ -53,8 +53,8 @@ export function UploadPriceListDialog({
 
     if (!Object.keys(ACCEPTED_TYPES).includes(selectedFile.type)) {
       toast({
-        title: "Tipo de archivo no válido",
-        description: "Solo se permiten archivos PDF, Excel (.xlsx, .xls) o CSV",
+        title: "Invalid file type",
+        description: "Only PDF, Excel (.xlsx, .xls) or CSV files are allowed",
         variant: "destructive",
       });
       return;
@@ -69,8 +69,8 @@ export function UploadPriceListDialog({
   const handleUpload = async () => {
     if (!file || !name.trim()) {
       toast({
-        title: "Campos requeridos",
-        description: "Selecciona un archivo y proporciona un nombre",
+        title: "Required fields",
+        description: "Select a file and provide a name",
         variant: "destructive",
       });
       return;
@@ -115,8 +115,8 @@ export function UploadPriceListDialog({
       setProgress(100);
 
       toast({
-        title: "Subido correctamente",
-        description: "La lista de precios se ha guardado",
+        title: "Uploaded successfully",
+        description: "The price list has been saved",
       });
 
       resetForm();
@@ -125,8 +125,8 @@ export function UploadPriceListDialog({
     } catch (error: any) {
       console.error("Upload error:", error);
       toast({
-        title: "Error al subir",
-        description: error.message || "No se pudo subir el archivo",
+        title: "Upload error",
+        description: error.message || "Could not upload file",
         variant: "destructive",
       });
     } finally {
@@ -149,13 +149,13 @@ export function UploadPriceListDialog({
     }}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Subir Lista de Precios</DialogTitle>
+          <DialogTitle>Upload Price List</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
           {/* File Upload Area */}
           <div>
-            <Label>Archivo</Label>
+            <Label>File</Label>
             <input
               ref={fileInputRef}
               type="file"
@@ -170,10 +170,10 @@ export function UploadPriceListDialog({
               >
                 <Upload className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
                 <p className="text-sm font-medium text-foreground">
-                  Haz clic para seleccionar un archivo
+                  Click to select a file
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">
-                  PDF, Excel (.xlsx, .xls) o CSV
+                  PDF, Excel (.xlsx, .xls) or CSV
                 </p>
               </div>
             ) : (
@@ -199,12 +199,12 @@ export function UploadPriceListDialog({
 
           {/* Name Field */}
           <div>
-            <Label htmlFor="name">Nombre *</Label>
+            <Label htmlFor="name">Name *</Label>
             <Input
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Ej: Lista de precios 2024"
+              placeholder="E.g., Price list 2024"
               className="mt-1"
               disabled={uploading}
             />
@@ -212,12 +212,12 @@ export function UploadPriceListDialog({
 
           {/* Description Field */}
           <div>
-            <Label htmlFor="description">Descripción (opcional)</Label>
+            <Label htmlFor="description">Description (optional)</Label>
             <Textarea
               id="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Descripción de la lista de precios..."
+              placeholder="Description of the price list..."
               className="mt-1 resize-none"
               rows={3}
               disabled={uploading}
@@ -229,7 +229,7 @@ export function UploadPriceListDialog({
             <div className="space-y-2">
               <Progress value={progress} />
               <p className="text-xs text-muted-foreground text-center">
-                Subiendo archivo...
+                Uploading file...
               </p>
             </div>
           )}
@@ -241,18 +241,18 @@ export function UploadPriceListDialog({
             onClick={() => onOpenChange(false)}
             disabled={uploading}
           >
-            Cancelar
+            Cancel
           </Button>
           <Button onClick={handleUpload} disabled={uploading || !file}>
             {uploading ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Subiendo...
+                Uploading...
               </>
             ) : (
               <>
                 <Upload className="h-4 w-4 mr-2" />
-                Subir
+                Upload
               </>
             )}
           </Button>
