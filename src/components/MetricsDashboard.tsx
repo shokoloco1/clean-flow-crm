@@ -282,18 +282,18 @@ export function MetricsDashboard() {
         <div>
           <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
             <BarChart3 className="h-6 w-6" />
-            Métricas y KPIs
+            Metrics & KPIs
           </h2>
-          <p className="text-muted-foreground">Análisis de rendimiento del equipo</p>
+          <p className="text-muted-foreground">Team performance analysis</p>
         </div>
         <Select value={period} onValueChange={(v) => setPeriod(v as '7' | '30' | '90')}>
           <SelectTrigger className="w-[180px]">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="7">Últimos 7 días</SelectItem>
-            <SelectItem value="30">Últimos 30 días</SelectItem>
-            <SelectItem value="90">Últimos 90 días</SelectItem>
+            <SelectItem value="7">Last 7 days</SelectItem>
+            <SelectItem value="30">Last 30 days</SelectItem>
+            <SelectItem value="90">Last 90 days</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -301,30 +301,30 @@ export function MetricsDashboard() {
       {/* KPI Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <KPICard
-          title="Total Trabajos"
+          title="Total Jobs"
           value={kpis.totalJobs}
-          subtitle={`${kpis.completedJobs} completados`}
+          subtitle={`${kpis.completedJobs} completed`}
           icon={CheckCircle}
           trend="neutral"
         />
         <KPICard
-          title="Tasa Completado"
+          title="Completion Rate"
           value={`${Math.round(kpis.completionRate)}%`}
-          subtitle="de trabajos finalizados"
+          subtitle="of jobs finished"
           icon={TrendingUp}
           trend={kpis.completionRate >= 80 ? 'up' : 'down'}
         />
         <KPICard
-          title="Duración Promedio"
+          title="Average Duration"
           value={`${kpis.avgDuration} min`}
-          subtitle="por trabajo"
+          subtitle="per job"
           icon={Clock}
           trend="neutral"
         />
         <KPICard
-          title="Puntualidad"
+          title="Punctuality"
           value={`${kpis.onTimeRate}%`}
-          subtitle={`${kpis.totalAlerts} alertas totales`}
+          subtitle={`${kpis.totalAlerts} total alerts`}
           icon={AlertTriangle}
           trend={kpis.onTimeRate >= 85 ? 'up' : 'down'}
         />
@@ -333,17 +333,17 @@ export function MetricsDashboard() {
       {/* Charts */}
       <Tabs defaultValue="trends" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="trends">Tendencias</TabsTrigger>
-          <TabsTrigger value="staff">Rendimiento Staff</TabsTrigger>
-          <TabsTrigger value="alerts">Alertas</TabsTrigger>
+          <TabsTrigger value="trends">Trends</TabsTrigger>
+          <TabsTrigger value="staff">Staff Performance</TabsTrigger>
+          <TabsTrigger value="alerts">Alerts</TabsTrigger>
         </TabsList>
 
         {/* Trends Tab */}
         <TabsContent value="trends" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Trabajos por Día</CardTitle>
-              <CardDescription>Distribución de trabajos completados, pendientes y en progreso</CardDescription>
+              <CardTitle>Jobs Per Day</CardTitle>
+              <CardDescription>Distribution of completed, pending and in-progress jobs</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="h-[300px]">
@@ -372,7 +372,7 @@ export function MetricsDashboard() {
                     <Area 
                       type="monotone" 
                       dataKey="completed" 
-                      name="Completados"
+                      name="Completed"
                       stackId="1"
                       stroke="hsl(var(--success))" 
                       fill="hsl(var(--success))"
@@ -381,7 +381,7 @@ export function MetricsDashboard() {
                     <Area 
                       type="monotone" 
                       dataKey="inProgress" 
-                      name="En Progreso"
+                      name="In Progress"
                       stackId="1"
                       stroke="hsl(var(--warning))" 
                       fill="hsl(var(--warning))"
@@ -390,7 +390,7 @@ export function MetricsDashboard() {
                     <Area 
                       type="monotone" 
                       dataKey="pending" 
-                      name="Pendientes"
+                      name="Pending"
                       stackId="1"
                       stroke="hsl(var(--muted-foreground))" 
                       fill="hsl(var(--muted))"
@@ -404,8 +404,8 @@ export function MetricsDashboard() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Tendencia de Completados</CardTitle>
-              <CardDescription>Evolución de trabajos completados en el período</CardDescription>
+              <CardTitle>Completion Trend</CardTitle>
+              <CardDescription>Completed jobs over the selected period</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="h-[250px]">
@@ -433,7 +433,7 @@ export function MetricsDashboard() {
                     <Line 
                       type="monotone" 
                       dataKey="completed" 
-                      name="Completados"
+                      name="Completed"
                       stroke="hsl(var(--primary))" 
                       strokeWidth={2}
                       dot={{ fill: 'hsl(var(--primary))', strokeWidth: 2 }}
@@ -459,8 +459,8 @@ export function MetricsDashboard() {
           <div className="grid md:grid-cols-2 gap-4">
             <Card>
               <CardHeader>
-                <CardTitle>Trabajos Completados por Staff</CardTitle>
-                <CardDescription>Ranking de productividad del equipo</CardDescription>
+                <CardTitle>Jobs Completed by Staff</CardTitle>
+                <CardDescription>Team productivity ranking</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="h-[300px]">
@@ -484,15 +484,15 @@ export function MetricsDashboard() {
                         />
                         <Bar 
                           dataKey="completed" 
-                          name="Completados"
-                          fill="hsl(var(--primary))" 
+                          name="Completed"
+                          fill="hsl(var(--primary))"
                           radius={[0, 4, 4, 0]}
                         />
                       </BarChart>
                     </ResponsiveContainer>
                   ) : (
                     <div className="flex items-center justify-center h-full text-muted-foreground">
-                      No hay datos de staff disponibles
+                      No staff data available
                     </div>
                   )}
                 </div>
@@ -501,8 +501,8 @@ export function MetricsDashboard() {
 
             <Card>
               <CardHeader>
-                <CardTitle>Calidad Promedio por Staff</CardTitle>
-                <CardDescription>Puntuación de calidad de trabajo</CardDescription>
+                <CardTitle>Average Quality by Staff</CardTitle>
+                <CardDescription>Work quality score</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="h-[300px]">
@@ -526,15 +526,15 @@ export function MetricsDashboard() {
                         />
                         <Bar 
                           dataKey="avgQuality" 
-                          name="Calidad (%)"
-                          fill="hsl(var(--success))" 
+                          name="Quality (%)"
+                          fill="hsl(var(--success))"
                           radius={[0, 4, 4, 0]}
                         />
                       </BarChart>
                     </ResponsiveContainer>
                   ) : (
                     <div className="flex items-center justify-center h-full text-muted-foreground">
-                      No hay datos de calidad disponibles
+                      No quality data available
                     </div>
                   )}
                 </div>
@@ -545,8 +545,8 @@ export function MetricsDashboard() {
           {/* Staff Details Table */}
           <Card>
             <CardHeader>
-              <CardTitle>Detalle por Empleado</CardTitle>
-              <CardDescription>Métricas completas de rendimiento</CardDescription>
+              <CardTitle>Employee Details</CardTitle>
+              <CardDescription>Complete performance metrics</CardDescription>
             </CardHeader>
             <CardContent>
               {staffPerformance.length > 0 ? (
@@ -554,11 +554,11 @@ export function MetricsDashboard() {
                   <table className="w-full">
                     <thead>
                       <tr className="border-b border-border">
-                        <th className="text-left py-3 px-4 font-medium text-muted-foreground">Empleado</th>
-                        <th className="text-center py-3 px-4 font-medium text-muted-foreground">Completados</th>
-                        <th className="text-center py-3 px-4 font-medium text-muted-foreground">Duración Prom.</th>
-                        <th className="text-center py-3 px-4 font-medium text-muted-foreground">Calidad</th>
-                        <th className="text-center py-3 px-4 font-medium text-muted-foreground">Alertas</th>
+                        <th className="text-left py-3 px-4 font-medium text-muted-foreground">Employee</th>
+                        <th className="text-center py-3 px-4 font-medium text-muted-foreground">Completed</th>
+                        <th className="text-center py-3 px-4 font-medium text-muted-foreground">Avg Duration</th>
+                        <th className="text-center py-3 px-4 font-medium text-muted-foreground">Quality</th>
+                        <th className="text-center py-3 px-4 font-medium text-muted-foreground">Alerts</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -592,7 +592,7 @@ export function MetricsDashboard() {
                 </div>
               ) : (
                 <div className="text-center py-8 text-muted-foreground">
-                  No hay datos de staff disponibles para el período seleccionado
+                  No staff data available for the selected period
                 </div>
               )}
             </CardContent>
@@ -604,8 +604,8 @@ export function MetricsDashboard() {
           <div className="grid md:grid-cols-2 gap-4">
             <Card>
               <CardHeader>
-                <CardTitle>Distribución de Alertas</CardTitle>
-                <CardDescription>Tipos de incidencias reportadas</CardDescription>
+                <CardTitle>Alert Distribution</CardTitle>
+                <CardDescription>Types of incidents reported</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="h-[300px]">
@@ -641,7 +641,7 @@ export function MetricsDashboard() {
                     <div className="flex items-center justify-center h-full text-muted-foreground">
                       <div className="text-center">
                         <CheckCircle className="h-12 w-12 mx-auto mb-2 text-success" />
-                        <p>¡Sin alertas en este período!</p>
+                        <p>No alerts in this period!</p>
                       </div>
                     </div>
                   )}
@@ -651,14 +651,14 @@ export function MetricsDashboard() {
 
             <Card>
               <CardHeader>
-                <CardTitle>Resumen de Alertas</CardTitle>
-                <CardDescription>Estado de resolución</CardDescription>
+                <CardTitle>Alert Summary</CardTitle>
+                <CardDescription>Resolution status</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-6">
                   <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
                     <div>
-                      <p className="text-sm text-muted-foreground">Total Alertas</p>
+                      <p className="text-sm text-muted-foreground">Total Alerts</p>
                       <p className="text-3xl font-bold">{kpis.totalAlerts}</p>
                     </div>
                     <AlertTriangle className="h-10 w-10 text-warning" />
@@ -666,18 +666,18 @@ export function MetricsDashboard() {
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="p-4 bg-success/10 rounded-lg">
-                      <p className="text-sm text-success">Resueltas</p>
+                      <p className="text-sm text-success">Resolved</p>
                       <p className="text-2xl font-bold text-success">{kpis.resolvedAlerts}</p>
                     </div>
                     <div className="p-4 bg-destructive/10 rounded-lg">
-                      <p className="text-sm text-destructive">Pendientes</p>
+                      <p className="text-sm text-destructive">Pending</p>
                       <p className="text-2xl font-bold text-destructive">{kpis.totalAlerts - kpis.resolvedAlerts}</p>
                     </div>
                   </div>
 
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Tasa de Resolución</span>
+                      <span className="text-muted-foreground">Resolution Rate</span>
                       <span className="font-medium">
                         {kpis.totalAlerts > 0 
                           ? `${Math.round((kpis.resolvedAlerts / kpis.totalAlerts) * 100)}%`
