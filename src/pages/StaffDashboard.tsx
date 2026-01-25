@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -231,7 +232,7 @@ export default function StaffDashboard() {
       {/* Mobile Header */}
       <header className="bg-card border-b border-border sticky top-0 z-10 px-4 py-4 safe-area-inset-top">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
+          <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
             <div className="h-12 w-12 rounded-xl bg-primary flex items-center justify-center shadow-sm">
               <Sparkles className="h-6 w-6 text-primary-foreground" />
             </div>
@@ -239,7 +240,7 @@ export default function StaffDashboard() {
               <h1 className="text-xl font-bold text-foreground">CleanFlow</h1>
               <p className="text-sm text-muted-foreground">My Jobs</p>
             </div>
-          </div>
+          </Link>
           <div className="flex items-center gap-2">
             <NotificationCenter />
             <Button 

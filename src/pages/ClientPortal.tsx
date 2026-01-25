@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -154,14 +154,16 @@ export default function ClientPortal() {
       <div className="min-h-screen bg-background flex flex-col">
         {/* Header */}
         <header className="bg-card border-b border-border">
-          <div className="container mx-auto px-4 py-4 flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg bg-primary flex items-center justify-center">
-              <Sparkles className="h-5 w-5 text-primary-foreground" />
-            </div>
-            <div>
-              <h1 className="text-xl font-bold text-foreground">CleanFlow</h1>
-              <p className="text-sm text-muted-foreground">Portal de Clientes</p>
-            </div>
+          <div className="container mx-auto px-4 py-4">
+            <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity w-fit">
+              <div className="h-10 w-10 rounded-lg bg-primary flex items-center justify-center">
+                <Sparkles className="h-5 w-5 text-primary-foreground" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-foreground">CleanFlow</h1>
+                <p className="text-sm text-muted-foreground">Portal de Clientes</p>
+              </div>
+            </Link>
           </div>
         </header>
 
