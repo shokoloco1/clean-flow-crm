@@ -96,22 +96,19 @@ export default function Auth() {
     }
 
     // If user is logged in but role is not loaded yet, try bootstrap only once
-    // The bootstrap-role function will either:
-    // 1. Make this user admin (first user)
-    // 2. Return 403 if roles already initialized (which is fine - they already have a role assigned)
     if (!loading && user && !role && session && !bootstrapTried) {
       setBootstrapTried(true);
-      supabase.functions
-        .invoke("bootstrap-role")
-        .then(async ({ error }) => {
-          // Whether bootstrap succeeded or not, refresh role
-          // User might already have a role from handle_new_user trigger
+      // Use setTimeout to not block rendering
+      const timer = setTimeout(async () => {
+        try {
+          await supabase.functions.invoke("bootstrap-role");
+        } catch {
+          // Ignore errors - user might already have a role
+        } finally {
           await refreshRole();
-        })
-        .catch(async () => {
-          // On error, still try to refresh role
-          await refreshRole();
-        });
+        }
+      }, 100);
+      return () => clearTimeout(timer);
     }
   }, [user, role, loading, navigate, session, bootstrapTried, refreshRole]);
 

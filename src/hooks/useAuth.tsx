@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, useCallback, useMemo, ReactNode } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -17,52 +17,63 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Cache role to avoid refetching
+let cachedRole: AppRole = null;
+let cachedUserId: string | null = null;
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [role, setRole] = useState<AppRole>(null);
   const [loading, setLoading] = useState(true);
-  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
 
-  const fetchUserRole = async (userId: string): Promise<AppRole> => {
+  const fetchUserRole = useCallback(async (userId: string): Promise<AppRole> => {
+    // Return cached role if same user
+    if (cachedUserId === userId && cachedRole !== null) {
+      return cachedRole;
+    }
+    
     try {
       const { data, error } = await supabase.rpc("get_user_role", { _user_id: userId });
       if (error) {
         console.error("Error fetching user role:", error);
         return null;
       }
-      return (data as AppRole) || null;
+      // Cache the result
+      cachedRole = (data as AppRole) || null;
+      cachedUserId = userId;
+      return cachedRole;
     } catch (err) {
       console.error("Exception fetching user role:", err);
       return null;
     }
-  };
+  }, []);
 
   useEffect(() => {
     let mounted = true;
 
     const initializeAuth = async () => {
-      // Get existing session first
-      const { data: { session: existingSession } } = await supabase.auth.getSession();
-      
-      if (!mounted) return;
+      try {
+        const { data: { session: existingSession } } = await supabase.auth.getSession();
+        
+        if (!mounted) return;
 
-      if (existingSession?.user) {
-        setSession(existingSession);
-        setUser(existingSession.user);
-        // Fetch role BEFORE setting loading to false
-        const userRole = await fetchUserRole(existingSession.user.id);
-        if (mounted) {
-          setRole(userRole);
-          setLoading(false);
-          setInitialLoadComplete(true);
+        if (existingSession?.user) {
+          setSession(existingSession);
+          setUser(existingSession.user);
+          const userRole = await fetchUserRole(existingSession.user.id);
+          if (mounted) {
+            setRole(userRole);
+          }
+        } else {
+          setSession(null);
+          setUser(null);
+          setRole(null);
         }
-      } else {
-        setSession(null);
-        setUser(null);
-        setRole(null);
-        setLoading(false);
-        setInitialLoadComplete(true);
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
       }
     };
 
@@ -71,37 +82,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       async (event, newSession) => {
         if (!mounted) return;
 
-        // For sign in events, update state and fetch role
         if (event === "SIGNED_IN" && newSession?.user) {
           setSession(newSession);
           setUser(newSession.user);
-          
-          // Fetch role for the new session
           const userRole = await fetchUserRole(newSession.user.id);
           if (mounted) {
             setRole(userRole);
             setLoading(false);
           }
-        } 
-        // For sign out, clear all state
-        else if (event === "SIGNED_OUT") {
+        } else if (event === "SIGNED_OUT") {
+          // Clear cache on sign out
+          cachedRole = null;
+          cachedUserId = null;
           setSession(null);
           setUser(null);
           setRole(null);
           setLoading(false);
-        }
-        // For token refresh, just update session but keep role
-        else if (event === "TOKEN_REFRESHED" && newSession) {
+        } else if (event === "TOKEN_REFRESHED" && newSession) {
           setSession(newSession);
           setUser(newSession.user);
-        }
-        // For initial session (on page load), this is handled by initializeAuth
-        else if (event === "INITIAL_SESSION") {
-          // Already handled by initializeAuth above
-          if (!initialLoadComplete && !newSession) {
-            setLoading(false);
-            setInitialLoadComplete(true);
-          }
         }
       }
     );
@@ -112,21 +111,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, []);
+  }, [fetchUserRole]);
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = useCallback(async (email: string, password: string) => {
     setLoading(true);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
       setLoading(false);
     }
-    // On success, the onAuthStateChange handler will update state
     return { error };
-  };
+  }, []);
 
-  // Role is now assigned server-side via database trigger (default: staff)
-  // Admin promotion requires an existing admin to use promote_user_to_admin()
-  const signUp = async (email: string, password: string, fullName: string, _role?: AppRole) => {
+  const signUp = useCallback(async (email: string, password: string, fullName: string, _role?: AppRole) => {
     const redirectUrl = `${window.location.origin}/`;
     
     const { error } = await supabase.auth.signUp({
@@ -138,23 +134,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     });
 
-    // Role is automatically assigned as 'staff' by handle_new_user trigger
     return { error };
-  };
+  }, []);
 
-  const signOut = async () => {
+  const signOut = useCallback(async () => {
+    cachedRole = null;
+    cachedUserId = null;
     await supabase.auth.signOut();
     setRole(null);
-  };
+  }, []);
 
-  const refreshRole = async () => {
+  const refreshRole = useCallback(async () => {
     if (!user) return;
+    // Clear cache to force refresh
+    cachedRole = null;
+    cachedUserId = null;
     const nextRole = await fetchUserRole(user.id);
     setRole(nextRole);
-  };
+  }, [user, fetchUserRole]);
+
+  const value = useMemo(() => ({
+    user,
+    session,
+    role,
+    loading,
+    signIn,
+    signUp,
+    signOut,
+    refreshRole
+  }), [user, session, role, loading, signIn, signUp, signOut, refreshRole]);
 
   return (
-    <AuthContext.Provider value={{ user, session, role, loading, signIn, signUp, signOut, refreshRole }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );

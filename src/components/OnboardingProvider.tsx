@@ -117,17 +117,21 @@ interface OnboardingProviderProps {
 export function OnboardingProvider({ children }: OnboardingProviderProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
-  const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(true);
+  // Check localStorage synchronously on init to avoid flash
+  const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem(ONBOARDING_KEY) === 'true';
+    }
+    return true;
+  });
 
   useEffect(() => {
-    const completed = localStorage.getItem(ONBOARDING_KEY);
-    if (!completed) {
-      setHasCompletedOnboarding(false);
-      // Delay showing onboarding to let page load
-      const timer = setTimeout(() => setIsOpen(true), 1000);
+    // Only show onboarding after a delay if not completed and not already open
+    if (!hasCompletedOnboarding && !isOpen) {
+      const timer = setTimeout(() => setIsOpen(true), 1500);
       return () => clearTimeout(timer);
     }
-  }, []);
+  }, [hasCompletedOnboarding, isOpen]);
 
   const completeOnboarding = () => {
     localStorage.setItem(ONBOARDING_KEY, "true");
