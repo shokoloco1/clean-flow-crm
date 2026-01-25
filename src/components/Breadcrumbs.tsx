@@ -12,7 +12,6 @@ const ROUTE_LABELS: Record<string, string> = {
   admin: t("adminPanel"),
   staff: t("staffPanel"),
   properties: t("properties"),
-  checklists: t("checklists"),
   clients: t("clients"),
   calendar: t("calendar"),
   recurring: t("recurring"),
