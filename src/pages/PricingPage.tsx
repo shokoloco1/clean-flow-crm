@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { Check, Sparkles, Building2, Users, CreditCard, Shield, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,17 +14,19 @@ const PricingPage = () => {
   const [isAnnual, setIsAnnual] = useState(false);
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { subscribed, plan: currentPlan, createCheckout } = useSubscription();
 
   // Show message if checkout was canceled
   if (searchParams.get("checkout") === "canceled") {
-    toast.info("Checkout cancelado", { id: "checkout-canceled" });
+    toast.info("Checkout cancelled", { id: "checkout-canceled" });
   }
 
   const handleSubscribe = async (planKey: keyof typeof PRICE_IDS) => {
     if (!user) {
-      toast.error("Debes iniciar sesión para suscribirte");
+      toast.info("Please sign in to start your free trial");
+      navigate("/signup");
       return;
     }
 
@@ -32,7 +34,7 @@ const PricingPage = () => {
     try {
       await createCheckout(planKey, isAnnual);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Error al iniciar checkout");
+      toast.error(error instanceof Error ? error.message : "Error starting checkout");
     } finally {
       setLoadingPlan(null);
     }
@@ -253,9 +255,9 @@ const PricingPage = () => {
                   </ul>
                 </CardContent>
                 <CardFooter className="pt-4">
-                  {currentPlan === plan.planKey ? (
+                {currentPlan === plan.planKey ? (
                     <Badge className="w-full justify-center py-2" variant="secondary">
-                      Tu plan actual
+                      Your Current Plan
                     </Badge>
                   ) : (
                     <Button
