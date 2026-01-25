@@ -36,8 +36,8 @@ const translations = {
     
     // App
     appName: "CleanFlow",
-    appTagline: "Manage your cleaning business effortlessly",
-    appDescription: "The complete CRM and job management platform for commercial cleaning businesses",
+    appTagline: "Manage your cleaning business without the stress",
+    appDescription: "100% specialised in cleaning. No features you don't need. No complications you don't want.",
     adminDashboard: "Admin Dashboard",
     staffDashboard: "Staff Dashboard",
     
@@ -159,11 +159,11 @@ const translations = {
     startingJob: "Starting...",
     completingJob: "Completing...",
     jobStarted: "Job started",
-    jobStartedWithLocation: "Job started with location verified!",
-    jobCompleted: "Job completed! Great work!",
-    errorStartingJob: "Error starting job",
-    errorCompletingJob: "Error completing job",
-    uploadPhotoFirst: "Upload at least one photo before completing",
+    jobStartedWithLocation: "Job started - location verified",
+    jobCompleted: "Job completed",
+    errorStartingJob: "Couldn't start job. Please try again.",
+    errorCompletingJob: "Couldn't complete job. Please try again.",
+    uploadPhotoFirst: "Please upload at least one photo to complete",
     openMaps: "Open in Maps",
     downloadPDF: "Download PDF",
     generatingPDF: "Generating PDF...",
@@ -292,11 +292,11 @@ const translations = {
     
     // Hero/Landing
     heroTitle: "Manage your cleaning business without the stress",
-    heroSubtitle: "The easiest tool to organise jobs, clients and employees. Start free!",
-    benefit1: "Save up to 5 hours per week",
-    benefit2: "Improve client communication",
-    benefit3: "Increase team productivity",
-    benefit4: "Reduce errors and missed jobs",
+    heroSubtitle: "100% specialised in cleaning. No features you don't need. No complications you don't want.",
+    benefit1: "Setup in 3 clicks",
+    benefit2: "Australian owned",
+    benefit3: "Bilingual (EN/ES)",
+    benefit4: "Mobile-first design",
     startFreeTrial: "Start Free Trial",
     alreadyHaveAccount: "Already have an account",
     setupInMinutes: "Setup in less than 2 minutes",
@@ -329,19 +329,19 @@ const translations = {
     backToHome: "Back to Home",
     tryThese: "Maybe you were looking for one of these?",
     
-    // Errors
+    // Errors - Professional, friendly tone (from brand manual)
     error: "Error",
-    somethingWentWrong: "Something went wrong",
+    somethingWentWrong: "Something went wrong. Please try again.",
     tryAgain: "Try again",
-    failedToLoad: "Failed to load",
-    failedToSave: "Failed to save",
-    failedToUpload: "Failed to upload",
+    failedToLoad: "Couldn't load data",
+    failedToSave: "Couldn't save changes",
+    failedToUpload: "Couldn't upload file",
     
-    // Form validation
-    required: "Required",
-    invalidEmail: "Invalid email",
-    passwordTooShort: "Password too short",
-    pleaseCorrectErrors: "Please correct the form errors",
+    // Form validation - Friendly, helpful tone
+    required: "This field is required",
+    invalidEmail: "Please enter a valid email address",
+    passwordTooShort: "Password needs to be longer",
+    pleaseCorrectErrors: "Please check the highlighted fields",
     
     // Invoicing
     invoicing: "Invoicing",
@@ -363,11 +363,11 @@ const translations = {
     abnNumber: "ABN Number",
     businessName: "Business Name",
     
-    // Success messages
-    success: "Success",
-    clientCreated: "Client created successfully",
-    clientUpdated: "Client updated successfully",
-    invoiceCreated: "Invoice created successfully",
+    // Success messages - Clean, professional (brand manual)
+    success: "Done",
+    clientCreated: "Client created",
+    clientUpdated: "Client updated",
+    invoiceCreated: "Invoice created",
     
     // Settings
     companySettings: "Company Settings",
@@ -429,8 +429,8 @@ const translations = {
     
     // App
     appName: "CleanFlow",
-    appTagline: "Gestiona tu negocio de limpieza",
-    appDescription: "La plataforma integral de CRM y gestión de trabajos para empresas de limpieza comercial",
+    appTagline: "Gestiona tu negocio de limpieza sin estrés",
+    appDescription: "100% especializado en limpieza. Sin funciones que no necesitas. Sin complicaciones que no quieres.",
     adminDashboard: "Panel de Administración",
     staffDashboard: "Panel de Personal",
     
@@ -552,11 +552,11 @@ const translations = {
     startingJob: "Iniciando...",
     completingJob: "Completando...",
     jobStarted: "Trabajo iniciado",
-    jobStartedWithLocation: "¡Trabajo iniciado con ubicación verificada!",
-    jobCompleted: "¡Trabajo completado! Excelente trabajo!",
-    errorStartingJob: "Error al iniciar trabajo",
-    errorCompletingJob: "Error al completar trabajo",
-    uploadPhotoFirst: "Sube al menos una foto antes de completar",
+    jobStartedWithLocation: "Trabajo iniciado - ubicación verificada",
+    jobCompleted: "Trabajo completado",
+    errorStartingJob: "No se pudo iniciar. Inténtalo de nuevo.",
+    errorCompletingJob: "No se pudo completar. Inténtalo de nuevo.",
+    uploadPhotoFirst: "Sube al menos una foto para completar",
     openMaps: "Abrir en Mapas",
     downloadPDF: "Descargar PDF",
     generatingPDF: "Generando PDF...",
@@ -685,11 +685,11 @@ const translations = {
     
     // Hero/Landing
     heroTitle: "Gestiona tu negocio de limpieza sin estrés",
-    heroSubtitle: "La herramienta más fácil para organizar trabajos, clientes y empleados. ¡Empieza gratis!",
-    benefit1: "Ahorra hasta 5 horas a la semana",
-    benefit2: "Mejora la comunicación con clientes",
-    benefit3: "Aumenta la productividad del equipo",
-    benefit4: "Reduce errores y olvidos",
+    heroSubtitle: "100% especializado en limpieza. Sin funciones que no necesitas. Sin complicaciones que no quieres.",
+    benefit1: "Config. en 3 clics",
+    benefit2: "Empresa australiana",
+    benefit3: "Bilingüe (EN/ES)",
+    benefit4: "Diseño mobile-first",
     startFreeTrial: "Empezar Gratis",
     alreadyHaveAccount: "Ya tengo cuenta",
     setupInMinutes: "Configuración en menos de 2 minutos",
@@ -722,19 +722,19 @@ const translations = {
     backToHome: "Volver al Inicio",
     tryThese: "¿Quizás buscabas una de estas?",
     
-    // Errors
+    // Errors - Professional tone (from brand manual)
     error: "Error",
-    somethingWentWrong: "Algo salió mal",
+    somethingWentWrong: "Algo salió mal. Inténtalo de nuevo.",
     tryAgain: "Intentar de nuevo",
-    failedToLoad: "Error al cargar",
-    failedToSave: "Error al guardar",
-    failedToUpload: "Error al subir",
+    failedToLoad: "No se pudo cargar",
+    failedToSave: "No se pudo guardar",
+    failedToUpload: "No se pudo subir",
     
-    // Form validation
-    required: "Requerido",
-    invalidEmail: "Email inválido",
-    passwordTooShort: "Contraseña muy corta",
-    pleaseCorrectErrors: "Por favor corrige los errores del formulario",
+    // Form validation - Friendly tone
+    required: "Campo requerido",
+    invalidEmail: "Ingresa un email válido",
+    passwordTooShort: "La contraseña es muy corta",
+    pleaseCorrectErrors: "Por favor revisa los campos marcados",
     
     // Invoicing
     invoicing: "Facturación",
@@ -757,11 +757,11 @@ const translations = {
     abnNumber: "Número de ABN",
     businessName: "Nombre de Empresa",
     
-    // Success messages
-    success: "Éxito",
-    clientCreated: "Cliente creado exitosamente",
-    clientUpdated: "Cliente actualizado exitosamente",
-    invoiceCreated: "Factura creada exitosamente",
+    // Success messages - Clean, professional (brand manual)
+    success: "Listo",
+    clientCreated: "Cliente creado",
+    clientUpdated: "Cliente actualizado",
+    invoiceCreated: "Factura creada",
     
     // Settings
     companySettings: "Configuración de Empresa",
