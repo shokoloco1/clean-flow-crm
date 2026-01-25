@@ -65,9 +65,7 @@ interface Property {
   geofence_radius_meters: number;
   is_active: boolean;
   client_id: string | null;
-  default_checklist_template_id: string | null;
   clients: { name: string } | null;
-  checklist_templates: { name: string } | null;
   bedrooms?: number;
   bathrooms?: number;
   living_areas?: number;
@@ -89,11 +87,6 @@ interface Client {
   name: string;
 }
 
-interface ChecklistTemplate {
-  id: string;
-  name: string;
-  template_type: string;
-}
 
 interface PropertyPhoto {
   id: string;
@@ -120,7 +113,6 @@ export default function PropertiesPage() {
   const navigate = useNavigate();
   const [properties, setProperties] = useState<Property[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
-  const [templates, setTemplates] = useState<ChecklistTemplate[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProperty, setEditingProperty] = useState<Property | null>(null);
@@ -140,7 +132,6 @@ export default function PropertiesPage() {
     special_instructions: "",
     access_codes: "",
     client_id: "",
-    default_checklist_template_id: "",
     // New property details
     bedrooms: "0",
     bathrooms: "0",
@@ -178,22 +169,19 @@ export default function PropertiesPage() {
   }, []);
 
   const fetchData = async () => {
-    const [propertiesRes, clientsRes, templatesRes] = await Promise.all([
+    const [propertiesRes, clientsRes] = await Promise.all([
       supabase
         .from("properties")
         .select(`
           *,
-          clients (name),
-          checklist_templates (name)
+          clients (name)
         `)
         .order("created_at", { ascending: false }),
       supabase.from("clients").select("id, name").order("name"),
-      supabase.from("checklist_templates").select("id, name, template_type").order("name"),
     ]);
 
     setProperties((propertiesRes.data as unknown as Property[]) || []);
     setClients((clientsRes.data as Client[]) || []);
-    setTemplates((templatesRes.data as ChecklistTemplate[]) || []);
     setLoading(false);
   };
 
@@ -208,10 +196,9 @@ export default function PropertiesPage() {
       size_sqm: "",
       property_type: "commercial",
       special_instructions: "",
-      access_codes: "",
-      client_id: "",
-      default_checklist_template_id: "",
-      bedrooms: "0",
+    access_codes: "",
+    client_id: "",
+    bedrooms: "0",
       bathrooms: "0",
       living_areas: "0",
       floors: "1",
@@ -242,7 +229,6 @@ export default function PropertiesPage() {
       special_instructions: property.special_instructions || "",
       access_codes: property.access_codes || "",
       client_id: property.client_id || "",
-      default_checklist_template_id: property.default_checklist_template_id || "",
       bedrooms: property.bedrooms?.toString() || "0",
       bathrooms: property.bathrooms?.toString() || "0",
       living_areas: property.living_areas?.toString() || "0",
@@ -287,7 +273,6 @@ export default function PropertiesPage() {
       special_instructions: formData.special_instructions || null,
       access_codes: formData.access_codes || null,
       client_id: formData.client_id || null,
-      default_checklist_template_id: formData.default_checklist_template_id || null,
       // New fields
       bedrooms: parseInt(formData.bedrooms) || 0,
       bathrooms: parseInt(formData.bathrooms) || 0,
@@ -1002,25 +987,6 @@ export default function PropertiesPage() {
                     <FileText className="h-4 w-4" />
                     Additional Information
                   </h3>
-
-                  <div>
-                    <Label>Default Checklist Template</Label>
-                    <Select
-                      value={formData.default_checklist_template_id}
-                      onValueChange={(v) => setFormData({ ...formData, default_checklist_template_id: v })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select template" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {templates.map((template) => (
-                          <SelectItem key={template.id} value={template.id}>
-                            {template.name} ({template.template_type})
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
 
                   <div>
                     <Label>Access Codes</Label>
