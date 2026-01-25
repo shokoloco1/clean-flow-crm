@@ -98,7 +98,7 @@ export function PDFReports() {
     propertiesResult.data?.forEach(p => propertyMap.set(p.id, p.name));
 
     const doc = new jsPDF();
-    const startY = createPDFHeader(doc, 'Reporte de Trabajos', dateRange);
+    const startY = createPDFHeader(doc, 'Jobs Report', dateRange);
 
     // Summary stats
     const completed = jobs?.filter(j => j.status === 'completed').length || 0;
@@ -108,16 +108,16 @@ export function PDFReports() {
 
     doc.setFontSize(12);
     doc.setTextColor(40, 40, 40);
-    doc.text('Resumen', 14, startY);
+    doc.text('Summary', 14, startY);
     
     doc.setFontSize(10);
-    doc.text(`Total: ${jobs?.length || 0} | Completados: ${completed} | Pendientes: ${pending} | En Progreso: ${inProgress} | Cancelados: ${cancelled}`, 14, startY + 7);
+    doc.text(`Total: ${jobs?.length || 0} | Completed: ${completed} | Pending: ${pending} | In Progress: ${inProgress} | Cancelled: ${cancelled}`, 14, startY + 7);
 
     const statusLabels: Record<string, string> = {
-      'completed': 'Completado',
-      'pending': 'Pendiente',
-      'in_progress': 'En Progreso',
-      'cancelled': 'Cancelado'
+      'completed': 'Completed',
+      'pending': 'Pending',
+      'in_progress': 'In Progress',
+      'cancelled': 'Cancelled'
     };
 
     // Table
@@ -130,7 +130,7 @@ export function PDFReports() {
         format(new Date(job.scheduled_date), 'dd/MM/yy'),
         job.scheduled_time.slice(0, 5),
         propertyMap.get(job.property_id || '') || job.location.slice(0, 20),
-        staffMap.get(job.assigned_staff_id || '') || 'Sin asignar',
+        staffMap.get(job.assigned_staff_id || '') || 'Unassigned',
         statusLabels[job.status] || job.status,
         typeof duration === 'number' ? `${duration}m` : duration,
         job.quality_score ? `${job.quality_score}%` : '-'
@@ -139,7 +139,7 @@ export function PDFReports() {
 
     autoTable(doc, {
       startY: startY + 14,
-      head: [['Fecha', 'Hora', 'Ubicación', 'Staff', 'Estado', 'Duración', 'Calidad']],
+      head: [['Date', 'Time', 'Location', 'Staff', 'Status', 'Duration', 'Quality']],
       body: tableData,
       styles: { fontSize: 8, cellPadding: 2 },
       headStyles: { fillColor: [59, 130, 246], textColor: 255 },
@@ -207,7 +207,7 @@ export function PDFReports() {
     }) || [];
 
     const doc = new jsPDF();
-    const startY = createPDFHeader(doc, 'Reporte de Rendimiento de Staff', dateRange);
+    const startY = createPDFHeader(doc, 'Staff Performance Report', dateRange);
 
     const tableData = staffStats.map(s => [
       s.name,
@@ -220,7 +220,7 @@ export function PDFReports() {
 
     autoTable(doc, {
       startY,
-      head: [['Staff', 'Total Trabajos', 'Completados', 'Calidad Prom.', 'Horas', 'Alertas']],
+      head: [['Staff', 'Total Jobs', 'Completed', 'Avg Quality', 'Hours', 'Alerts']],
       body: tableData,
       styles: { fontSize: 9, cellPadding: 3 },
       headStyles: { fillColor: [59, 130, 246], textColor: 255 },
@@ -255,14 +255,14 @@ export function PDFReports() {
     const staffMap = new Map(profiles?.map(p => [p.user_id, p.full_name]) || []);
 
     const alertTypeLabels: Record<string, string> = {
-      'late_arrival': 'Llegada Tarde',
-      'early_departure': 'Salida Temprana',
-      'geofence_violation': 'Fuera de Geofence',
-      'no_show': 'No Presentado'
+      'late_arrival': 'Late Arrival',
+      'early_departure': 'Early Departure',
+      'geofence_violation': 'Geofence Violation',
+      'no_show': 'No Show'
     };
 
     const doc = new jsPDF();
-    const startY = createPDFHeader(doc, 'Reporte de Alertas', dateRange);
+    const startY = createPDFHeader(doc, 'Alerts Report', dateRange);
 
     // Summary by type
     const alertsByType = alerts?.reduce((acc, a) => {
@@ -271,7 +271,7 @@ export function PDFReports() {
     }, {} as Record<string, number>) || {};
 
     doc.setFontSize(11);
-    doc.text('Resumen por Tipo:', 14, startY);
+    doc.text('Summary by Type:', 14, startY);
     doc.setFontSize(9);
     let summaryY = startY + 6;
     Object.entries(alertsByType).forEach(([type, count]) => {
@@ -287,13 +287,13 @@ export function PDFReports() {
         alertTypeLabels[alert.alert_type] || alert.alert_type,
         staffName || '-',
         job?.location?.slice(0, 25) || '-',
-        alert.is_resolved ? 'Sí' : 'No'
+        alert.is_resolved ? 'Yes' : 'No'
       ];
     }) || [];
 
     autoTable(doc, {
       startY: summaryY + 5,
-      head: [['Fecha/Hora', 'Tipo', 'Staff', 'Ubicación', 'Resuelto']],
+      head: [['Date/Time', 'Type', 'Staff', 'Location', 'Resolved']],
       body: tableData,
       styles: { fontSize: 8, cellPadding: 2 },
       headStyles: { fillColor: [239, 68, 68], textColor: 255 },
@@ -333,7 +333,7 @@ export function PDFReports() {
     const propertyMap = new Map(propertiesResult.data?.map(p => [p.id, p]) || []);
 
     const doc = new jsPDF();
-    const startY = createPDFHeader(doc, 'Reporte Detallado de Trabajos Completados', dateRange);
+    const startY = createPDFHeader(doc, 'Completed Jobs Detailed Report', dateRange);
 
     let currentY = startY;
 
@@ -344,7 +344,7 @@ export function PDFReports() {
       }
 
       const property = propertyMap.get(job.property_id || '');
-      const staffName = staffMap.get(job.assigned_staff_id || '') || 'Sin asignar';
+      const staffName = staffMap.get(job.assigned_staff_id || '') || 'Unassigned';
       const jobPhotos = photosResult.data?.filter(p => p.job_id === job.id) || [];
       const jobChecklist = checklistResult.data?.filter(c => c.job_id === job.id) || [];
       
@@ -362,25 +362,25 @@ export function PDFReports() {
 
       // Job details
       doc.setFontSize(9);
-      doc.text(`Fecha: ${format(new Date(job.scheduled_date), 'dd/MM/yyyy')} | Hora: ${job.scheduled_time.slice(0, 5)}`, 14, currentY);
+      doc.text(`Date: ${format(new Date(job.scheduled_date), 'dd/MM/yyyy')} | Time: ${job.scheduled_time.slice(0, 5)}`, 14, currentY);
       currentY += 5;
-      doc.text(`Staff: ${staffName} | Duración: ${duration ? `${duration} min` : 'N/A'} | Calidad: ${job.quality_score || 'N/A'}%`, 14, currentY);
+      doc.text(`Staff: ${staffName} | Duration: ${duration ? `${duration} min` : 'N/A'} | Quality: ${job.quality_score || 'N/A'}%`, 14, currentY);
       currentY += 5;
-      doc.text(`GPS Validado: ${job.geofence_validated ? 'Sí' : 'No'}`, 14, currentY);
+      doc.text(`GPS Validated: ${job.geofence_validated ? 'Yes' : 'No'}`, 14, currentY);
       currentY += 5;
 
       // Checklist summary
       if (jobChecklist.length > 0) {
         const completed = jobChecklist.filter(c => c.status === 'completed').length;
         const issues = jobChecklist.filter(c => c.status === 'issue').length;
-        doc.text(`Checklist: ${completed}/${jobChecklist.length} completados, ${issues} issues`, 14, currentY);
+        doc.text(`Checklist: ${completed}/${jobChecklist.length} completed, ${issues} issues`, 14, currentY);
         currentY += 5;
       }
 
       // Photos count
       const beforePhotos = jobPhotos.filter(p => p.photo_type === 'before').length;
       const afterPhotos = jobPhotos.filter(p => p.photo_type === 'after').length;
-      doc.text(`Fotos: ${beforePhotos} antes, ${afterPhotos} después`, 14, currentY);
+      doc.text(`Photos: ${beforePhotos} before, ${afterPhotos} after`, 14, currentY);
       currentY += 10;
     });
 
@@ -396,39 +396,39 @@ export function PDFReports() {
       switch (reportType) {
         case 'jobs':
           doc = await generateJobsPDF();
-          filename = `trabajos_${dateRange.startDate}_${dateRange.endDate}.pdf`;
+          filename = `jobs_${dateRange.startDate}_${dateRange.endDate}.pdf`;
           break;
         case 'staff':
           doc = await generateStaffPDF();
-          filename = `rendimiento_staff_${dateRange.startDate}_${dateRange.endDate}.pdf`;
+          filename = `staff_performance_${dateRange.startDate}_${dateRange.endDate}.pdf`;
           break;
         case 'alerts':
           doc = await generateAlertsPDF();
-          filename = `alertas_${dateRange.startDate}_${dateRange.endDate}.pdf`;
+          filename = `alerts_${dateRange.startDate}_${dateRange.endDate}.pdf`;
           break;
         case 'job-detail':
           doc = await generateJobDetailPDF();
-          filename = `detalle_trabajos_${dateRange.startDate}_${dateRange.endDate}.pdf`;
+          filename = `job_details_${dateRange.startDate}_${dateRange.endDate}.pdf`;
           break;
         default:
-          throw new Error('Tipo de reporte no válido');
+          throw new Error('Invalid report type');
       }
 
       doc.save(filename);
-      toast.success('Reporte PDF generado exitosamente');
+      toast.success('PDF report generated successfully');
     } catch (error) {
       console.error('Error generating PDF:', error);
-      toast.error('Error al generar el reporte PDF');
+      toast.error('Error generating PDF report');
     } finally {
       setIsGenerating(false);
     }
   };
 
   const reportOptions = [
-    { value: 'jobs', label: 'Historial de Trabajos', icon: Briefcase, description: 'Resumen de todos los trabajos con estados y duración' },
-    { value: 'staff', label: 'Rendimiento de Staff', icon: Users, description: 'Estadísticas y métricas por empleado' },
-    { value: 'alerts', label: 'Alertas Generadas', icon: AlertTriangle, description: 'Historial de alertas por tipo y estado' },
-    { value: 'job-detail', label: 'Detalle de Trabajos', icon: ClipboardCheck, description: 'Reporte completo con checklist y fotos' }
+    { value: 'jobs', label: 'Job History', icon: Briefcase, description: 'Summary of all jobs with status and duration' },
+    { value: 'staff', label: 'Staff Performance', icon: Users, description: 'Statistics and metrics per employee' },
+    { value: 'alerts', label: 'Generated Alerts', icon: AlertTriangle, description: 'Alert history by type and status' },
+    { value: 'job-detail', label: 'Job Details', icon: ClipboardCheck, description: 'Complete report with checklist and photos' }
   ];
 
   return (
@@ -436,16 +436,16 @@ export function PDFReports() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <FileText className="h-5 w-5" />
-          Reportes PDF
+          PDF Reports
         </CardTitle>
         <CardDescription>
-          Genera reportes profesionales en formato PDF
+          Generate professional reports in PDF format
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Report Type Selection */}
         <div className="space-y-3">
-          <Label>Tipo de Reporte</Label>
+          <Label>Report Type</Label>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {reportOptions.map(option => (
               <button
@@ -469,21 +469,21 @@ export function PDFReports() {
 
         {/* Date Range */}
         <div className="space-y-3">
-          <Label>Rango de Fechas</Label>
+          <Label>Date Range</Label>
           <div className="flex flex-wrap gap-2">
             <Button variant="outline" size="sm" onClick={() => setPresetRange('week')}>
-              Última Semana
+              Last Week
             </Button>
             <Button variant="outline" size="sm" onClick={() => setPresetRange('month')}>
-              Último Mes
+              Last Month
             </Button>
             <Button variant="outline" size="sm" onClick={() => setPresetRange('quarter')}>
-              Últimos 3 Meses
+              Last 3 Months
             </Button>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="pdfStartDate">Desde</Label>
+              <Label htmlFor="pdfStartDate">From</Label>
               <Input
                 id="pdfStartDate"
                 type="date"
@@ -492,7 +492,7 @@ export function PDFReports() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="pdfEndDate">Hasta</Label>
+              <Label htmlFor="pdfEndDate">To</Label>
               <Input
                 id="pdfEndDate"
                 type="date"
@@ -513,12 +513,12 @@ export function PDFReports() {
           {isGenerating ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Generando PDF...
+              Generating PDF...
             </>
           ) : (
             <>
               <Download className="mr-2 h-4 w-4" />
-              Descargar Reporte PDF
+              Download PDF Report
             </>
           )}
         </Button>
