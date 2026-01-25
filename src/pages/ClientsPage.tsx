@@ -29,8 +29,7 @@ interface Client {
   name: string;
   email: string | null;
   phone: string | null;
-  address: string | null;
-  access_codes: string | null;
+  abn: string | null;
   notes: string | null;
   portal_token: string | null;
   created_at: string;
@@ -60,8 +59,7 @@ const emptyClient: Omit<Client, 'id' | 'created_at' | 'updated_at' | 'portal_tok
   name: '',
   email: '',
   phone: '',
-  address: '',
-  access_codes: '',
+  abn: '',
   notes: ''
 };
 
@@ -144,19 +142,18 @@ export default function ClientsPage() {
         name: data.name,
         email: data.email || null,
         phone: data.phone || null,
-        address: data.address || null,
-        access_codes: data.access_codes || null,
+        abn: data.abn || null,
         notes: data.notes || null
       });
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clients'] });
-      toast.success('Cliente creado exitosamente');
+      toast.success('Client created successfully');
       setIsCreateOpen(false);
       setFormData(emptyClient);
     },
-    onError: () => toast.error('Error al crear cliente')
+    onError: () => toast.error('Error creating client')
   });
 
   // Update client mutation
@@ -168,8 +165,7 @@ export default function ClientsPage() {
           name: data.name,
           email: data.email || null,
           phone: data.phone || null,
-          address: data.address || null,
-          access_codes: data.access_codes || null,
+          abn: data.abn || null,
           notes: data.notes || null
         })
         .eq('id', id);
@@ -177,14 +173,14 @@ export default function ClientsPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clients'] });
-      toast.success('Cliente actualizado');
+      toast.success('Client updated');
       setEditingClient(null);
       setFormData(emptyClient);
       if (selectedClient && editingClient?.id === selectedClient.id) {
         setSelectedClient(null);
       }
     },
-    onError: () => toast.error('Error al actualizar cliente')
+    onError: () => toast.error('Error updating client')
   });
 
   // Delete client mutation
@@ -195,25 +191,25 @@ export default function ClientsPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clients'] });
-      toast.success('Cliente eliminado');
+      toast.success('Client deleted');
       setIsDeleteDialogOpen(false);
       setClientToDelete(null);
       if (selectedClient && clientToDelete?.id === selectedClient.id) {
         setSelectedClient(null);
       }
     },
-    onError: () => toast.error('Error al eliminar cliente. Puede tener trabajos asociados.')
+    onError: () => toast.error('Error deleting client. It may have associated jobs.')
   });
 
   const filteredClients = clients.filter(client =>
     client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     client.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    client.address?.toLowerCase().includes(searchTerm.toLowerCase())
+    client.abn?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleSubmit = () => {
     if (!formData.name.trim()) {
-      toast.error('El nombre es requerido');
+      toast.error('Name is required');
       return;
     }
     if (editingClient) {
@@ -229,8 +225,7 @@ export default function ClientsPage() {
       name: client.name,
       email: client.email || '',
       phone: client.phone || '',
-      address: client.address || '',
-      access_codes: client.access_codes || '',
+      abn: client.abn || '',
       notes: client.notes || ''
     });
     setIsCreateOpen(true);
@@ -250,7 +245,7 @@ export default function ClientsPage() {
   const globalStats = {
     totalClients: clients.length,
     activeClients: clients.filter(c => c.email || c.phone).length,
-    withAddress: clients.filter(c => c.address).length
+    withABN: clients.filter(c => c.abn).length
   };
 
   return (
@@ -270,13 +265,13 @@ export default function ClientsPage() {
               </div>
               <div>
                 <h1 className="text-xl font-bold text-foreground">CleanFlow</h1>
-                <p className="text-sm text-muted-foreground">Gestión de Clientes</p>
+                <p className="text-sm text-muted-foreground">Client Management</p>
               </div>
             </Link>
           </div>
           <Button variant="outline" size="sm" onClick={signOut}>
             <LogOut className="h-4 w-4 mr-2" />
-            Cerrar Sesión
+            Sign Out
           </Button>
         </div>
       </header>
@@ -291,7 +286,7 @@ export default function ClientsPage() {
                   <Users className="h-6 w-6 text-primary" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Total Clientes</p>
+                  <p className="text-sm text-muted-foreground">Total Clients</p>
                   <p className="text-2xl font-bold">{globalStats.totalClients}</p>
                 </div>
               </div>
@@ -300,11 +295,11 @@ export default function ClientsPage() {
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center gap-4">
-                <div className="h-12 w-12 rounded-lg bg-green-500/10 flex items-center justify-center">
-                  <CheckCircle2 className="h-6 w-6 text-green-500" />
+                <div className="h-12 w-12 rounded-lg bg-secondary flex items-center justify-center">
+                  <CheckCircle2 className="h-6 w-6 text-secondary-foreground" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Con Contacto</p>
+                  <p className="text-sm text-muted-foreground">With Contact</p>
                   <p className="text-2xl font-bold">{globalStats.activeClients}</p>
                 </div>
               </div>
@@ -313,12 +308,12 @@ export default function ClientsPage() {
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center gap-4">
-                <div className="h-12 w-12 rounded-lg bg-blue-500/10 flex items-center justify-center">
-                  <Building2 className="h-6 w-6 text-blue-500" />
+                <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <FileText className="h-6 w-6 text-primary" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Con Dirección</p>
-                  <p className="text-2xl font-bold">{globalStats.withAddress}</p>
+                  <p className="text-sm text-muted-foreground">With ABN</p>
+                  <p className="text-2xl font-bold">{globalStats.withABN}</p>
                 </div>
               </div>
             </CardContent>
@@ -330,7 +325,7 @@ export default function ClientsPage() {
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Buscar clientes..."
+              placeholder="Search clients..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
@@ -388,43 +383,34 @@ export default function ClientsPage() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="address">Dirección</Label>
+                  <Label htmlFor="abn">ABN / Client ID</Label>
                   <Input
-                    id="address"
-                    value={formData.address || ''}
-                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                    placeholder="Dirección completa"
+                    id="abn"
+                    value={formData.abn || ''}
+                    onChange={(e) => setFormData({ ...formData, abn: e.target.value })}
+                    placeholder="e.g. 51 824 753 556"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="access_codes">Códigos de Acceso</Label>
-                  <Input
-                    id="access_codes"
-                    value={formData.access_codes || ''}
-                    onChange={(e) => setFormData({ ...formData, access_codes: e.target.value })}
-                    placeholder="Códigos de entrada, alarmas, etc."
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="notes">Notas</Label>
+                  <Label htmlFor="notes">Notes</Label>
                   <Textarea
                     id="notes"
                     value={formData.notes || ''}
                     onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                    placeholder="Notas adicionales sobre el cliente"
+                    placeholder="Additional notes about the client"
                     rows={3}
                   />
                 </div>
               </div>
               <DialogFooter>
                 <Button variant="outline" onClick={() => setIsCreateOpen(false)}>
-                  Cancelar
+                  Cancel
                 </Button>
                 <Button 
                   onClick={handleSubmit} 
                   disabled={createMutation.isPending || updateMutation.isPending}
                 >
-                  {editingClient ? 'Actualizar' : 'Crear'}
+                  {editingClient ? 'Update' : 'Create'}
                 </Button>
               </DialogFooter>
             </DialogContent>
@@ -624,24 +610,18 @@ export default function ClientsPage() {
                             <span>{selectedClient.phone}</span>
                           </div>
                         )}
-                        {selectedClient.address && (
+                        {selectedClient.abn && (
                           <div className="flex items-center gap-3">
-                            <MapPin className="h-4 w-4 text-muted-foreground" />
-                            <span>{selectedClient.address}</span>
-                          </div>
-                        )}
-                        {selectedClient.access_codes && (
-                          <div className="flex items-start gap-3">
-                            <FileText className="h-4 w-4 text-muted-foreground mt-0.5" />
+                            <FileText className="h-4 w-4 text-muted-foreground" />
                             <div>
-                              <p className="text-sm text-muted-foreground">Códigos de Acceso</p>
-                              <p>{selectedClient.access_codes}</p>
+                              <p className="text-xs text-muted-foreground">ABN / ID</p>
+                              <span>{selectedClient.abn}</span>
                             </div>
                           </div>
                         )}
                         {selectedClient.notes && (
                           <div className="pt-4 border-t">
-                            <p className="text-sm text-muted-foreground mb-2">Notas</p>
+                            <p className="text-sm text-muted-foreground mb-2">Notes</p>
                             <p className="text-sm">{selectedClient.notes}</p>
                           </div>
                         )}
@@ -708,10 +688,10 @@ export default function ClientsPage() {
                       <Card>
                         <CardContent className="pt-6">
                           <div className="flex items-center gap-3">
-                            <CheckCircle2 className="h-8 w-8 text-green-500" />
+                            <CheckCircle2 className="h-8 w-8 text-primary" />
                             <div>
                               <p className="text-2xl font-bold">{clientStats.completedJobs}</p>
-                              <p className="text-sm text-muted-foreground">Completados</p>
+                              <p className="text-sm text-muted-foreground">Completed</p>
                             </div>
                           </div>
                         </CardContent>
@@ -719,10 +699,10 @@ export default function ClientsPage() {
                       <Card>
                         <CardContent className="pt-6">
                           <div className="flex items-center gap-3">
-                            <Clock className="h-8 w-8 text-yellow-500" />
+                            <Clock className="h-8 w-8 text-muted-foreground" />
                             <div>
                               <p className="text-2xl font-bold">{clientStats.pendingJobs}</p>
-                              <p className="text-sm text-muted-foreground">Pendientes</p>
+                              <p className="text-sm text-muted-foreground">Pending</p>
                             </div>
                           </div>
                         </CardContent>
@@ -730,10 +710,10 @@ export default function ClientsPage() {
                       <Card>
                         <CardContent className="pt-6">
                           <div className="flex items-center gap-3">
-                            <TrendingUp className="h-8 w-8 text-blue-500" />
+                            <TrendingUp className="h-8 w-8 text-primary" />
                             <div>
                               <p className="text-2xl font-bold">{clientStats.completionRate}%</p>
-                              <p className="text-sm text-muted-foreground">Tasa Completado</p>
+                              <p className="text-sm text-muted-foreground">Completion Rate</p>
                             </div>
                           </div>
                         </CardContent>
