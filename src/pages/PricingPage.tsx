@@ -25,8 +25,8 @@ const PricingPage = () => {
 
   const handleSubscribe = async (planKey: keyof typeof PRICE_IDS) => {
     if (!user) {
-      toast.info("Please sign in to start your free trial");
-      navigate("/signup");
+      // Redirect to signup with plan info so checkout continues after registration
+      navigate(`/signup?plan=${planKey}&billing=${isAnnual ? 'annual' : 'monthly'}`);
       return;
     }
 

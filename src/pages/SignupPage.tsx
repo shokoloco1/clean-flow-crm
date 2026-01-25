@@ -1,13 +1,14 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Eye, EyeOff, Building2, ArrowRight, Check } from "lucide-react";
+import { Eye, EyeOff, Building2, ArrowRight, Check, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import {
   Form,
   FormControl,
@@ -19,6 +20,7 @@ import {
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { PasswordStrengthIndicator } from "@/components/PasswordStrengthIndicator";
+import { PRICE_IDS } from "@/hooks/useSubscription";
 
 // Australian ABN validation regex (11 digits)
 const abnRegex = /^(\d{2}\s?\d{3}\s?\d{3}\s?\d{3}|\d{11})$/;
@@ -59,10 +61,22 @@ const signupSchema = z.object({
 
 type SignupFormData = z.infer<typeof signupSchema>;
 
+const PLAN_NAMES: Record<string, { name: string; price: { monthly: number; annual: number } }> = {
+  starter: { name: "Starter", price: { monthly: 89, annual: 74 } },
+  professional: { name: "Professional", price: { monthly: 149, annual: 124 } },
+  business: { name: "Business", price: { monthly: 249, annual: 207 } },
+};
+
 const SignupPage = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isRedirectingToCheckout, setIsRedirectingToCheckout] = useState(false);
+
+  // Get plan from URL if coming from pricing page
+  const selectedPlan = searchParams.get("plan") as keyof typeof PRICE_IDS | null;
+  const billingCycle = searchParams.get("billing") === "annual" ? "annual" : "monthly";
 
   const form = useForm<SignupFormData>({
     resolver: zodResolver(signupSchema),
@@ -87,6 +101,7 @@ const SignupPage = () => {
         email: data.email,
         password: data.password,
         options: {
+          emailRedirectTo: `${window.location.origin}/admin`,
           data: {
             full_name: data.ownerName,
             business_name: data.businessName,
@@ -100,11 +115,47 @@ const SignupPage = () => {
         throw authError;
       }
 
-      if (authData.user) {
+      if (authData.user && authData.session) {
         toast.success("Account created successfully!", {
-          description: "Welcome to CleanFlow! Let's set up your business.",
+          description: selectedPlan 
+            ? "Redirecting you to complete your subscription..." 
+            : "Welcome to CleanFlow! Let's set up your business.",
         });
-        navigate("/admin");
+
+        // If a plan was selected, redirect to Stripe checkout
+        if (selectedPlan && PRICE_IDS[selectedPlan]) {
+          setIsRedirectingToCheckout(true);
+          try {
+            const priceId = billingCycle === "annual" 
+              ? PRICE_IDS[selectedPlan].annual 
+              : PRICE_IDS[selectedPlan].monthly;
+
+            const { data: checkoutData, error: checkoutError } = await supabase.functions.invoke("create-checkout", {
+              body: { priceId },
+              headers: {
+                Authorization: `Bearer ${authData.session.access_token}`,
+              },
+            });
+
+            if (checkoutError) throw checkoutError;
+            
+            if (checkoutData?.url) {
+              window.location.href = checkoutData.url;
+              return;
+            }
+          } catch (checkoutErr) {
+            console.error("Checkout error:", checkoutErr);
+            toast.error("Could not start checkout. Please try again from Settings.");
+            navigate("/admin");
+          }
+        } else {
+          navigate("/admin");
+        }
+      } else if (authData.user && !authData.session) {
+        // Email confirmation required
+        toast.success("Account created!", {
+          description: "Please check your email to confirm your account.",
+        });
       }
     } catch (error: any) {
       toast.error("Failed to create account", {
@@ -112,6 +163,7 @@ const SignupPage = () => {
       });
     } finally {
       setIsLoading(false);
+      setIsRedirectingToCheckout(false);
     }
   };
 
@@ -139,6 +191,30 @@ const SignupPage = () => {
               <CardDescription>
                 Create your account and start managing your cleaning business
               </CardDescription>
+              {selectedPlan && PLAN_NAMES[selectedPlan] && (
+                <div className="mt-4 p-3 bg-primary/10 rounded-lg border border-primary/20">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Badge variant="secondary" className="mb-1">Selected Plan</Badge>
+                      <p className="font-semibold text-lg">{PLAN_NAMES[selectedPlan].name}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-2xl font-bold">
+                        ${billingCycle === "annual" 
+                          ? PLAN_NAMES[selectedPlan].price.annual 
+                          : PLAN_NAMES[selectedPlan].price.monthly}
+                        <span className="text-sm font-normal text-muted-foreground">/mo</span>
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {billingCycle === "annual" ? "Billed annually" : "Billed monthly"}
+                      </p>
+                    </div>
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    5-day free trial • No charge today
+                  </p>
+                </div>
+              )}
             </CardHeader>
             <CardContent className="px-0">
               <Form {...form}>
@@ -311,13 +387,21 @@ const SignupPage = () => {
                     type="submit"
                     className="w-full"
                     size="lg"
-                    disabled={isLoading}
+                    disabled={isLoading || isRedirectingToCheckout}
                   >
-                    {isLoading ? (
-                      "Creating account..."
+                    {isRedirectingToCheckout ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Redirecting to checkout...
+                      </>
+                    ) : isLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Creating account...
+                      </>
                     ) : (
                       <>
-                        Start Free Trial
+                        {selectedPlan ? "Create Account & Continue" : "Start Free Trial"}
                         <ArrowRight className="ml-2 h-4 w-4" />
                       </>
                     )}
