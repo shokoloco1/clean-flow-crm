@@ -108,9 +108,11 @@ export function InviteStaffDialog({ open, onOpenChange }: InviteStaffDialogProps
       handleClose();
     },
     onError: (error: any) => {
-      console.error("Error inviting staff:", error);
       if (error.message?.includes("already registered")) {
-        setErrors({ email: "This email is already registered" });
+        setErrors({ email: "This email is already registered. Please use a different email address." });
+        toast.error("Email already exists", {
+          description: "This person already has an account. Try a different email."
+        });
       } else {
         toast.error(error.message || "Failed to send invitation");
       }
