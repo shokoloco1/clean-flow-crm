@@ -97,60 +97,60 @@ export default function InstallPage() {
   const features = [
     {
       icon: WifiOff,
-      title: "Funciona Offline",
-      description: "Accede a tus datos incluso sin conexión a internet"
+      title: "Works Offline",
+      description: "Access your data even without internet connection"
     },
     {
       icon: Zap,
-      title: "Carga Instantánea",
-      description: "La app se carga rápidamente desde tu dispositivo"
+      title: "Instant Loading",
+      description: "The app loads quickly from your device"
     },
     {
       icon: Bell,
-      title: "Notificaciones",
-      description: "Recibe alertas de nuevos trabajos y actualizaciones"
+      title: "Notifications",
+      description: "Receive alerts for new jobs and updates"
     },
     {
       icon: Shield,
-      title: "Seguro",
-      description: "Tus datos están protegidos y encriptados"
+      title: "Secure",
+      description: "Your data is protected and encrypted"
     }
   ];
 
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-card border-b border-border sticky top-0 z-10">
+      <header className="bg-card border-b border-border sticky top-0 z-10 safe-area-inset-top">
         <div className="container mx-auto px-4 py-4 flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
+          <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="h-12 w-12">
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg bg-primary flex items-center justify-center">
-              <Sparkles className="h-5 w-5 text-primary-foreground" />
+            <div className="h-12 w-12 rounded-xl bg-primary flex items-center justify-center">
+              <Sparkles className="h-6 w-6 text-primary-foreground" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-foreground">Instalar App</h1>
-              <p className="text-sm text-muted-foreground">CleanFlow PWA</p>
+              <h1 className="text-xl font-bold text-foreground">Install App</h1>
+              <p className="text-sm text-muted-foreground">CleanFlow Mobile</p>
             </div>
           </div>
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8 max-w-2xl">
+      <main className="container mx-auto px-4 py-8 max-w-2xl pb-24">
         {/* Online Status */}
-        <div className={`flex items-center gap-2 mb-6 px-4 py-2 rounded-lg ${
+        <div className={`flex items-center gap-2 mb-6 px-4 py-3 rounded-xl ${
           isOnline ? "bg-success/10 text-success" : "bg-warning/10 text-warning"
         }`}>
           {isOnline ? (
             <>
-              <Wifi className="h-4 w-4" />
-              <span className="text-sm font-medium">Conectado</span>
+              <Wifi className="h-5 w-5" />
+              <span className="font-medium">Connected</span>
             </>
           ) : (
             <>
-              <WifiOff className="h-4 w-4" />
-              <span className="text-sm font-medium">Sin conexión - Modo offline activo</span>
+              <WifiOff className="h-5 w-5" />
+              <span className="font-medium">Offline - Offline mode active</span>
             </>
           )}
         </div>
@@ -160,17 +160,17 @@ export default function InstallPage() {
           <Card className="mb-8 border-success/30 bg-success/5">
             <CardContent className="pt-6">
               <div className="flex flex-col items-center text-center py-8">
-                <div className="h-16 w-16 rounded-full bg-success/20 flex items-center justify-center mb-4">
-                  <CheckCircle2 className="h-8 w-8 text-success" />
+                <div className="h-20 w-20 rounded-full bg-success/20 flex items-center justify-center mb-4">
+                  <CheckCircle2 className="h-10 w-10 text-success" />
                 </div>
                 <h2 className="text-2xl font-bold text-foreground mb-2">
-                  ¡Ya estás usando la app!
+                  You're already using the app!
                 </h2>
-                <p className="text-muted-foreground mb-6">
-                  CleanFlow está instalado y funcionando como aplicación nativa.
+                <p className="text-muted-foreground mb-6 text-lg">
+                  CleanFlow is installed and running as a native app.
                 </p>
-                <Button onClick={() => navigate("/")}>
-                  Ir al Inicio
+                <Button onClick={() => navigate("/")} size="lg" className="h-14 px-8">
+                  Go to Home
                 </Button>
               </div>
             </CardContent>
@@ -179,14 +179,14 @@ export default function InstallPage() {
           <Card className="mb-8 border-success/30 bg-success/5">
             <CardContent className="pt-6">
               <div className="flex flex-col items-center text-center py-8">
-                <div className="h-16 w-16 rounded-full bg-success/20 flex items-center justify-center mb-4">
-                  <CheckCircle2 className="h-8 w-8 text-success" />
+                <div className="h-20 w-20 rounded-full bg-success/20 flex items-center justify-center mb-4">
+                  <CheckCircle2 className="h-10 w-10 text-success" />
                 </div>
                 <h2 className="text-2xl font-bold text-foreground mb-2">
-                  ¡App Instalada!
+                  App Installed!
                 </h2>
-                <p className="text-muted-foreground">
-                  Busca CleanFlow en tu pantalla de inicio para usarla.
+                <p className="text-muted-foreground text-lg">
+                  Find CleanFlow on your home screen to use it.
                 </p>
               </div>
             </CardContent>
@@ -196,80 +196,80 @@ export default function InstallPage() {
             {/* Install Card */}
             <Card className="mb-8">
               <CardHeader className="text-center">
-                <div className="h-20 w-20 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                  <Smartphone className="h-10 w-10 text-primary" />
+                <div className="h-24 w-24 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                  <Smartphone className="h-12 w-12 text-primary" />
                 </div>
-                <CardTitle className="text-2xl">Instala CleanFlow</CardTitle>
-                <CardDescription>
-                  Accede rápidamente desde tu pantalla de inicio
+                <CardTitle className="text-2xl">Install CleanFlow</CardTitle>
+                <CardDescription className="text-base">
+                  Quick access from your home screen
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 {deferredPrompt ? (
-                  <Button onClick={handleInstall} className="w-full h-12" size="lg">
-                    <Download className="h-5 w-5 mr-2" />
-                    Instalar Ahora
+                  <Button onClick={handleInstall} className="w-full h-14" size="lg">
+                    <Download className="h-6 w-6 mr-2" />
+                    Install Now
                   </Button>
                 ) : isIOS ? (
                   <div className="space-y-4">
-                    <p className="text-center text-muted-foreground">
-                      Para instalar en iPhone/iPad:
+                    <p className="text-center text-muted-foreground text-lg">
+                      To install on iPhone/iPad:
                     </p>
-                    <div className="bg-muted rounded-lg p-4 space-y-3">
-                      <div className="flex items-center gap-3">
-                        <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                          <span className="text-primary font-bold">1</span>
+                    <div className="bg-muted rounded-xl p-5 space-y-4">
+                      <div className="flex items-center gap-4">
+                        <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                          <span className="text-primary font-bold text-lg">1</span>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <span>Toca el botón</span>
-                          <Share className="h-5 w-5 text-primary" />
-                          <span>Compartir</span>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                          <span className="text-primary font-bold">2</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span>Selecciona</span>
-                          <Plus className="h-5 w-5 text-primary" />
-                          <span>"Añadir a Inicio"</span>
+                        <div className="flex items-center gap-2 text-lg">
+                          <span>Tap</span>
+                          <Share className="h-6 w-6 text-primary" />
+                          <span className="font-medium">Share</span>
                         </div>
                       </div>
-                      <div className="flex items-center gap-3">
-                        <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                          <span className="text-primary font-bold">3</span>
+                      <div className="flex items-center gap-4">
+                        <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                          <span className="text-primary font-bold text-lg">2</span>
                         </div>
-                        <span>Confirma tocando "Añadir"</span>
+                        <div className="flex items-center gap-2 text-lg">
+                          <span>Select</span>
+                          <Plus className="h-6 w-6 text-primary" />
+                          <span className="font-medium">"Add to Home Screen"</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                          <span className="text-primary font-bold text-lg">3</span>
+                        </div>
+                        <span className="text-lg">Confirm by tapping "Add"</span>
                       </div>
                     </div>
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    <p className="text-center text-muted-foreground">
-                      Para instalar en Android:
+                    <p className="text-center text-muted-foreground text-lg">
+                      To install on Android:
                     </p>
-                    <div className="bg-muted rounded-lg p-4 space-y-3">
-                      <div className="flex items-center gap-3">
-                        <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                          <span className="text-primary font-bold">1</span>
+                    <div className="bg-muted rounded-xl p-5 space-y-4">
+                      <div className="flex items-center gap-4">
+                        <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                          <span className="text-primary font-bold text-lg">1</span>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <span>Toca el menú</span>
-                          <MoreVertical className="h-5 w-5 text-primary" />
+                        <div className="flex items-center gap-2 text-lg">
+                          <span>Tap the menu</span>
+                          <MoreVertical className="h-6 w-6 text-primary" />
                         </div>
                       </div>
-                      <div className="flex items-center gap-3">
-                        <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                          <span className="text-primary font-bold">2</span>
+                      <div className="flex items-center gap-4">
+                        <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                          <span className="text-primary font-bold text-lg">2</span>
                         </div>
-                        <span>Selecciona "Instalar aplicación"</span>
+                        <span className="text-lg">Select "Install app"</span>
                       </div>
-                      <div className="flex items-center gap-3">
-                        <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                          <span className="text-primary font-bold">3</span>
+                      <div className="flex items-center gap-4">
+                        <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                          <span className="text-primary font-bold text-lg">3</span>
                         </div>
-                        <span>Confirma la instalación</span>
+                        <span className="text-lg">Confirm installation</span>
                       </div>
                     </div>
                   </div>
@@ -280,17 +280,17 @@ export default function InstallPage() {
         )}
 
         {/* Features */}
-        <h3 className="text-lg font-semibold text-foreground mb-4">Ventajas de la App</h3>
+        <h3 className="text-lg font-semibold text-foreground mb-4">App Benefits</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {features.map((feature, index) => (
             <Card key={index}>
               <CardContent className="pt-6">
                 <div className="flex items-start gap-4">
-                  <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                    <feature.icon className="h-5 w-5 text-primary" />
+                  <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                    <feature.icon className="h-6 w-6 text-primary" />
                   </div>
                   <div>
-                    <h4 className="font-medium text-foreground">{feature.title}</h4>
+                    <h4 className="font-semibold text-foreground">{feature.title}</h4>
                     <p className="text-sm text-muted-foreground">{feature.description}</p>
                   </div>
                 </div>
@@ -301,9 +301,9 @@ export default function InstallPage() {
 
         {/* Back Button */}
         <div className="mt-8 text-center">
-          <Button variant="outline" onClick={() => navigate("/")}>
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Volver al Inicio
+          <Button variant="outline" onClick={() => navigate("/")} size="lg" className="h-14 px-8">
+            <ArrowLeft className="h-5 w-5 mr-2" />
+            Back to Home
           </Button>
         </div>
       </main>
