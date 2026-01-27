@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,6 +18,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Loader2 } from "lucide-react";
+import { useCleaningServices, CleaningService } from "@/hooks/useCleaningServices";
 
 export interface Client {
   id: string;
@@ -50,24 +52,6 @@ interface CreateJobDialogProps {
   onSubmit: () => void;
 }
 
-// Cleaning services for Australian market
-const CLEANING_SERVICES = [
-  { id: 'general', label: 'General Cleaning', description: 'Standard house cleaning' },
-  { id: 'deep', label: 'Deep Cleaning', description: 'Thorough top-to-bottom cleaning' },
-  { id: 'end_of_lease', label: 'End of Lease Cleaning', description: 'Bond back guarantee cleaning' },
-  { id: 'move_in', label: 'Move In/Out Cleaning', description: 'Pre or post move cleaning' },
-  { id: 'airbnb', label: 'Airbnb Turnover', description: 'Quick turnaround for short-term rentals' },
-  { id: 'spring', label: 'Spring Cleaning', description: 'Seasonal deep clean' },
-  { id: 'carpet', label: 'Carpet Cleaning', description: 'Steam or dry carpet cleaning' },
-  { id: 'windows', label: 'Window Cleaning', description: 'Interior and exterior windows' },
-  { id: 'oven', label: 'Oven Cleaning', description: 'Professional oven degreasing' },
-  { id: 'bathroom', label: 'Bathroom Deep Clean', description: 'Tile, grout, and fixtures' },
-  { id: 'kitchen', label: 'Kitchen Deep Clean', description: 'Appliances, cabinets, surfaces' },
-  { id: 'office', label: 'Office Cleaning', description: 'Commercial workspace cleaning' },
-  { id: 'post_construction', label: 'Post Construction', description: 'Builder clean services' },
-  { id: 'upholstery', label: 'Upholstery Cleaning', description: 'Sofas, chairs, mattresses' },
-];
-
 export function CreateJobDialog({
   isOpen,
   onOpenChange,
@@ -78,6 +62,7 @@ export function CreateJobDialog({
   onSubmit
 }: CreateJobDialogProps) {
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
+  const { services, loading: loadingServices } = useCleaningServices();
 
   const handleClientChange = (clientId: string) => {
     const client = clients.find(c => c.id === clientId);
@@ -97,7 +82,7 @@ export function CreateJobDialog({
     
     // Update checklist with selected service labels
     const serviceLabels = newServices
-      .map(id => CLEANING_SERVICES.find(s => s.id === id)?.label)
+      .map(id => services.find(s => s.id === id)?.label)
       .filter(Boolean)
       .join('\n');
     
@@ -208,37 +193,50 @@ export function CreateJobDialog({
           <div className="space-y-3">
             <Label className="text-base font-medium">Services *</Label>
             <p className="text-xs text-muted-foreground">Select the cleaning services for this job</p>
-            <ScrollArea className="h-[200px] rounded-md border p-3">
-              <div className="space-y-3">
-                {CLEANING_SERVICES.map(service => (
-                  <div 
-                    key={service.id} 
-                    className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
-                      selectedServices.includes(service.id) 
-                        ? 'bg-primary/10 border-primary' 
-                        : 'hover:bg-muted/50'
-                    }`}
-                    onClick={() => handleServiceToggle(service.id)}
-                  >
-                    <Checkbox 
-                      id={service.id}
-                      checked={selectedServices.includes(service.id)}
-                      onCheckedChange={() => handleServiceToggle(service.id)}
-                      className="mt-0.5"
-                    />
-                    <div className="flex-1">
-                      <label 
-                        htmlFor={service.id} 
-                        className="font-medium text-sm cursor-pointer"
-                      >
-                        {service.label}
-                      </label>
-                      <p className="text-xs text-muted-foreground">{service.description}</p>
-                    </div>
-                  </div>
-                ))}
+            
+            {loadingServices ? (
+              <div className="flex items-center justify-center py-8 border rounded-md">
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
               </div>
-            </ScrollArea>
+            ) : services.length === 0 ? (
+              <div className="text-center py-8 border rounded-md text-muted-foreground">
+                <p>No services configured.</p>
+                <p className="text-sm">Add services in Settings → Cleaning Services</p>
+              </div>
+            ) : (
+              <ScrollArea className="h-[200px] rounded-md border p-3">
+                <div className="space-y-3">
+                  {services.map(service => (
+                    <div 
+                      key={service.id} 
+                      className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
+                        selectedServices.includes(service.id) 
+                          ? 'bg-primary/10 border-primary' 
+                          : 'hover:bg-muted/50'
+                      }`}
+                      onClick={() => handleServiceToggle(service.id)}
+                    >
+                      <Checkbox 
+                        id={service.id}
+                        checked={selectedServices.includes(service.id)}
+                        onCheckedChange={() => handleServiceToggle(service.id)}
+                        className="mt-0.5"
+                      />
+                      <div className="flex-1">
+                        <label 
+                          htmlFor={service.id} 
+                          className="font-medium text-sm cursor-pointer"
+                        >
+                          {service.label}
+                        </label>
+                        <p className="text-xs text-muted-foreground">{service.description}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            )}
+            
             {selectedServices.length > 0 && (
               <p className="text-xs text-primary font-medium">
                 ✓ {selectedServices.length} service{selectedServices.length !== 1 ? 's' : ''} selected

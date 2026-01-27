@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Settings, Building, MapPin, Clock, Save, Loader2 } from "lucide-react";
+import { CleaningServicesManager, CleaningService } from "@/components/settings/CleaningServicesManager";
 
 interface SystemSettings {
   company_name: string;
@@ -15,16 +16,23 @@ interface SystemSettings {
   default_geofence_radius: number;
   working_hours: { start: string; end: string };
   working_days: number[];
+  cleaning_services: CleaningService[];
 }
 
 const DAYS_OF_WEEK = [
-  { value: 0, label: "Domingo" },
-  { value: 1, label: "Lunes" },
-  { value: 2, label: "Martes" },
-  { value: 3, label: "Miércoles" },
-  { value: 4, label: "Jueves" },
-  { value: 5, label: "Viernes" },
-  { value: 6, label: "Sábado" },
+  { value: 0, label: "Sunday" },
+  { value: 1, label: "Monday" },
+  { value: 2, label: "Tuesday" },
+  { value: 3, label: "Wednesday" },
+  { value: 4, label: "Thursday" },
+  { value: 5, label: "Friday" },
+  { value: 6, label: "Saturday" },
+];
+
+const DEFAULT_SERVICES: CleaningService[] = [
+  { id: 'general', label: 'General Cleaning', description: 'Standard house cleaning' },
+  { id: 'deep', label: 'Deep Cleaning', description: 'Thorough top-to-bottom cleaning' },
+  { id: 'end_of_lease', label: 'End of Lease Cleaning', description: 'Bond back guarantee cleaning' },
 ];
 
 export default function SettingsPage() {
@@ -33,11 +41,12 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [settings, setSettings] = useState<SystemSettings>({
-    company_name: "CleanTrack Pro",
+    company_name: "CleanFlow",
     company_logo: "",
     default_geofence_radius: 100,
     working_hours: { start: "08:00", end: "18:00" },
     working_days: [1, 2, 3, 4, 5],
+    cleaning_services: DEFAULT_SERVICES,
   });
 
   useEffect(() => {
@@ -64,6 +73,10 @@ export default function SettingsPage() {
             newSettings[key] = item.value as { start: string; end: string };
           } else if (key === "working_days") {
             newSettings[key] = item.value as number[];
+          } else if (key === "cleaning_services") {
+            if (Array.isArray(item.value)) {
+              newSettings[key] = item.value as unknown as CleaningService[];
+            }
           }
         });
         
@@ -72,7 +85,7 @@ export default function SettingsPage() {
     } catch (error) {
       toast({
         title: "Error",
-        description: "No se pudieron cargar las configuraciones",
+        description: "Could not load settings",
         variant: "destructive",
       });
     } finally {
@@ -83,31 +96,39 @@ export default function SettingsPage() {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const updates = [
+      const updates: { key: string; value: unknown }[] = [
         { key: "company_name", value: settings.company_name },
         { key: "company_logo", value: settings.company_logo },
         { key: "default_geofence_radius", value: settings.default_geofence_radius },
         { key: "working_hours", value: settings.working_hours },
         { key: "working_days", value: settings.working_days },
+        { key: "cleaning_services", value: settings.cleaning_services },
       ];
 
       for (const update of updates) {
-        const { error } = await supabase
+        // Try update first
+        const { data: updateData, error: updateError } = await supabase
           .from("system_settings")
-          .update({ value: update.value })
-          .eq("key", update.key);
+          .update({ value: update.value as never })
+          .eq("key", update.key)
+          .select();
 
-        if (error) throw error;
+        // If no rows updated, insert new record
+        if (!updateError && (!updateData || updateData.length === 0)) {
+          await supabase
+            .from("system_settings")
+            .insert([{ key: update.key, value: update.value as never }]);
+        }
       }
 
       toast({
-        title: "Configuración guardada",
-        description: "Los cambios se han guardado correctamente",
+        title: "Settings saved",
+        description: "Your changes have been saved successfully",
       });
     } catch (error) {
       toast({
         title: "Error",
-        description: "No se pudieron guardar las configuraciones",
+        description: "Could not save settings",
         variant: "destructive",
       });
     } finally {
@@ -134,14 +155,14 @@ export default function SettingsPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-card">
+      <header className="border-b border-border bg-card sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4 flex items-center gap-4">
           <Button variant="ghost" size="icon" onClick={() => navigate("/admin")}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div className="flex items-center gap-2">
             <Settings className="h-6 w-6 text-primary" />
-            <h1 className="text-xl font-bold text-foreground">Configuración del Sistema</h1>
+            <h1 className="text-xl font-bold text-foreground">System Settings</h1>
           </div>
         </div>
       </header>
@@ -153,37 +174,37 @@ export default function SettingsPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Building className="h-5 w-5 text-primary" />
-                Información de la Empresa
+                Company Information
               </CardTitle>
               <CardDescription>
-                Personaliza el nombre y logo de tu empresa
+                Customize your company name and logo
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="company_name">Nombre de la Empresa</Label>
+                <Label htmlFor="company_name">Company Name</Label>
                 <Input
                   id="company_name"
                   value={settings.company_name}
                   onChange={(e) =>
                     setSettings((prev) => ({ ...prev, company_name: e.target.value }))
                   }
-                  placeholder="Nombre de tu empresa"
+                  placeholder="Your company name"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="company_logo">URL del Logo</Label>
+                <Label htmlFor="company_logo">Logo URL</Label>
                 <Input
                   id="company_logo"
                   value={settings.company_logo}
                   onChange={(e) =>
                     setSettings((prev) => ({ ...prev, company_logo: e.target.value }))
                   }
-                  placeholder="https://ejemplo.com/logo.png"
+                  placeholder="https://example.com/logo.png"
                 />
                 {settings.company_logo && (
                   <div className="mt-2 p-4 border border-border rounded-lg bg-muted/50">
-                    <p className="text-sm text-muted-foreground mb-2">Vista previa:</p>
+                    <p className="text-sm text-muted-foreground mb-2">Preview:</p>
                     <img
                       src={settings.company_logo}
                       alt="Logo preview"
@@ -198,20 +219,28 @@ export default function SettingsPage() {
             </CardContent>
           </Card>
 
+          {/* Cleaning Services */}
+          <CleaningServicesManager
+            services={settings.cleaning_services}
+            onServicesChange={(services) => 
+              setSettings(prev => ({ ...prev, cleaning_services: services }))
+            }
+          />
+
           {/* Geofence Settings */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <MapPin className="h-5 w-5 text-primary" />
-                Configuración de Geofence
+                Geofence Settings
               </CardTitle>
               <CardDescription>
-                Ajusta el radio de geofence por defecto para las propiedades
+                Set the default geofence radius for properties
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="geofence_radius">Radio por Defecto (metros)</Label>
+                <Label htmlFor="geofence_radius">Default Radius (meters)</Label>
                 <div className="flex items-center gap-4">
                   <Input
                     id="geofence_radius"
@@ -228,12 +257,12 @@ export default function SettingsPage() {
                     className="w-32"
                   />
                   <span className="text-sm text-muted-foreground">
-                    Rango: 10 - 1000 metros
+                    Range: 10 - 1000 meters
                   </span>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  Este valor se usará como radio por defecto al crear nuevas propiedades.
-                  El personal debe estar dentro de este radio para hacer check-in/check-out.
+                  This value will be used as the default radius when creating new properties.
+                  Staff must be within this radius to check-in/check-out.
                 </p>
               </div>
             </CardContent>
@@ -244,16 +273,16 @@ export default function SettingsPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Clock className="h-5 w-5 text-primary" />
-                Horario Laboral
+                Working Hours
               </CardTitle>
               <CardDescription>
-                Configura los horarios y días de trabajo
+                Configure business hours and working days
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="start_time">Hora de Inicio</Label>
+                  <Label htmlFor="start_time">Start Time</Label>
                   <Input
                     id="start_time"
                     type="time"
@@ -267,7 +296,7 @@ export default function SettingsPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="end_time">Hora de Fin</Label>
+                  <Label htmlFor="end_time">End Time</Label>
                   <Input
                     id="end_time"
                     type="time"
@@ -283,7 +312,7 @@ export default function SettingsPage() {
               </div>
 
               <div className="space-y-3">
-                <Label>Días Laborales</Label>
+                <Label>Working Days</Label>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   {DAYS_OF_WEEK.map((day) => (
                     <div
@@ -315,12 +344,12 @@ export default function SettingsPage() {
               {saving ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Guardando...
+                  Saving...
                 </>
               ) : (
                 <>
                   <Save className="mr-2 h-4 w-4" />
-                  Guardar Cambios
+                  Save Changes
                 </>
               )}
             </Button>
