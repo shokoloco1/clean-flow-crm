@@ -1,4 +1,4 @@
-import { useEffect, useState, lazy, Suspense } from "react";
+import { useEffect, useState, lazy, Suspense, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,6 +11,8 @@ import { NotificationCenter } from "@/components/NotificationCenter";
 import { GlobalSearch } from "@/components/GlobalSearch";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { useOnboarding } from "@/components/OnboardingProvider";
+import { useFetchWithRetry } from "@/hooks/useFetchWithRetry";
+import { DashboardErrorState } from "@/components/admin/DashboardErrorState";
 import {
   StatsCards,
   QuickActions,
@@ -32,13 +34,15 @@ const MetricsDashboard = lazy(() => import("@/components/MetricsDashboard").then
 const PDFReports = lazy(() => import("@/components/PDFReports").then(m => ({ default: m.PDFReports })));
 const CSVReports = lazy(() => import("@/components/CSVReports").then(m => ({ default: m.CSVReports })));
 
+interface DashboardData {
+  jobs: Job[];
+  stats: Stats;
+  activities: ActivityItem[];
+}
+
 export default function AdminDashboard() {
   const { signOut } = useAuth();
   const { showOnboarding } = useOnboarding();
-  const [jobs, setJobs] = useState<Job[]>([]);
-  const [stats, setStats] = useState<Stats>({ todayJobs: 0, activeStaff: 0, completedToday: 0, completionRate: 0 });
-  const [activities, setActivities] = useState<ActivityItem[]>([]);
-  const [loading, setLoading] = useState(true);
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [jobPhotos, setJobPhotos] = useState<JobPhoto[]>([]);
   
@@ -56,8 +60,134 @@ export default function AdminDashboard() {
     checklist: ''
   });
 
+  // Fetch function wrapped in useCallback for stability
+  const fetchDashboardData = useCallback(async (): Promise<DashboardData> => {
+    const today = format(new Date(), "yyyy-MM-dd");
+    
+    // Batch all independent queries in parallel
+    const [jobsRes, todayCountRes, completedCountRes, staffCountRes, recentJobsRes] = await Promise.all([
+      supabase
+        .from("jobs")
+        .select(`
+          id, location, scheduled_date, scheduled_time, status,
+          start_time, end_time, notes, created_at, assigned_staff_id,
+          clients (name)
+        `)
+        .gte("scheduled_date", today)
+        .order("scheduled_date", { ascending: true })
+        .order("scheduled_time", { ascending: true })
+        .limit(20),
+      supabase
+        .from("jobs")
+        .select("*", { count: "exact", head: true })
+        .eq("scheduled_date", today),
+      supabase
+        .from("jobs")
+        .select("*", { count: "exact", head: true })
+        .eq("scheduled_date", today)
+        .eq("status", "completed"),
+      supabase
+        .from("user_roles")
+        .select("*", { count: "exact", head: true })
+        .eq("role", "staff"),
+      supabase
+        .from("jobs")
+        .select(`id, status, start_time, end_time, assigned_staff_id, clients (name)`)
+        .eq("scheduled_date", today)
+        .or("status.eq.in_progress,status.eq.completed")
+        .order("updated_at", { ascending: false })
+        .limit(10)
+    ]);
+
+    // Check for errors in critical queries
+    if (jobsRes.error) throw new Error(jobsRes.error.message);
+
+    // Collect all staff IDs and fetch profiles in one query
+    const allStaffIds = new Set<string>();
+    jobsRes.data?.forEach((j: any) => j.assigned_staff_id && allStaffIds.add(j.assigned_staff_id));
+    recentJobsRes.data?.forEach((j: any) => j.assigned_staff_id && allStaffIds.add(j.assigned_staff_id));
+    
+    let staffMap: Record<string, string> = {};
+    if (allStaffIds.size > 0) {
+      const { data: staffData } = await supabase
+        .from("profiles")
+        .select("user_id, full_name")
+        .in("user_id", Array.from(allStaffIds));
+      staffMap = Object.fromEntries((staffData || []).map(s => [s.user_id, s.full_name]));
+    }
+
+    // Map staff names to jobs
+    const jobsWithStaff = (jobsRes.data || []).map((job: any) => ({
+      ...job,
+      profiles: job.assigned_staff_id ? { full_name: staffMap[job.assigned_staff_id] || 'Unknown' } : null
+    }));
+
+    const activityItems: ActivityItem[] = [];
+    recentJobsRes.data?.forEach((job: any) => {
+      const clientName = job.clients?.name || 'Unknown';
+      const staffName = job.assigned_staff_id ? staffMap[job.assigned_staff_id] || 'Unknown' : 'Unknown';
+      
+      if (job.status === 'completed' && job.end_time) {
+        activityItems.push({
+          id: `${job.id}-completed`,
+          type: 'completed',
+          jobId: job.id,
+          clientName,
+          staffName,
+          time: format(new Date(job.end_time), 'h:mm a')
+        });
+      }
+      if (job.start_time) {
+        activityItems.push({
+          id: `${job.id}-started`,
+          type: 'started',
+          jobId: job.id,
+          clientName,
+          staffName,
+          time: format(new Date(job.start_time), 'h:mm a')
+        });
+      }
+    });
+
+    const todayTotal = todayCountRes.count || 0;
+    const completedTotal = completedCountRes.count || 0;
+    const rate = todayTotal > 0 ? Math.round((completedTotal / todayTotal) * 100) : 0;
+
+    return {
+      jobs: jobsWithStaff as Job[],
+      stats: {
+        todayJobs: todayTotal,
+        activeStaff: staffCountRes.count || 0,
+        completedToday: completedTotal,
+        completionRate: rate
+      },
+      activities: activityItems.slice(0, 5)
+    };
+  }, []);
+
+  // Use the robust fetch hook with timeout, retry, and cache
+  const { 
+    data: dashboardData, 
+    loading, 
+    error, 
+    isFromCache,
+    retryCount,
+    execute: refreshData,
+    retry 
+  } = useFetchWithRetry<DashboardData>(fetchDashboardData, {
+    cacheKey: 'admin-dashboard-data',
+    timeout: 5000,
+    maxRetries: 2,
+    retryDelay: 1000,
+  });
+
+  // Extract data from the hook
+  const jobs = dashboardData?.jobs || [];
+  const stats = dashboardData?.stats || { todayJobs: 0, activeStaff: 0, completedToday: 0, completionRate: 0 };
+  const activities = dashboardData?.activities || [];
+
   useEffect(() => {
-    fetchData();
+    refreshData();
     fetchClientsAndStaff();
     
     const channel = supabase
@@ -65,120 +195,14 @@ export default function AdminDashboard() {
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'jobs' },
-        () => fetchData()
+        () => refreshData()
       )
       .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
     };
-  }, []);
-
-  const fetchData = async () => {
-    try {
-      const today = format(new Date(), "yyyy-MM-dd");
-      
-      // Batch all independent queries in parallel
-      const [jobsRes, todayCountRes, completedCountRes, staffCountRes, recentJobsRes] = await Promise.all([
-        supabase
-          .from("jobs")
-          .select(`
-            id, location, scheduled_date, scheduled_time, status,
-            start_time, end_time, notes, created_at, assigned_staff_id,
-            clients (name)
-          `)
-          .gte("scheduled_date", today)
-          .order("scheduled_date", { ascending: true })
-          .order("scheduled_time", { ascending: true })
-          .limit(20),
-        supabase
-          .from("jobs")
-          .select("*", { count: "exact", head: true })
-          .eq("scheduled_date", today),
-        supabase
-          .from("jobs")
-          .select("*", { count: "exact", head: true })
-          .eq("scheduled_date", today)
-          .eq("status", "completed"),
-        supabase
-          .from("user_roles")
-          .select("*", { count: "exact", head: true })
-          .eq("role", "staff"),
-        supabase
-          .from("jobs")
-          .select(`id, status, start_time, end_time, assigned_staff_id, clients (name)`)
-          .eq("scheduled_date", today)
-          .or("status.eq.in_progress,status.eq.completed")
-          .order("updated_at", { ascending: false })
-          .limit(10)
-      ]);
-
-      // Collect all staff IDs and fetch profiles in one query
-      const allStaffIds = new Set<string>();
-      jobsRes.data?.forEach((j: any) => j.assigned_staff_id && allStaffIds.add(j.assigned_staff_id));
-      recentJobsRes.data?.forEach((j: any) => j.assigned_staff_id && allStaffIds.add(j.assigned_staff_id));
-      
-      let staffMap: Record<string, string> = {};
-      if (allStaffIds.size > 0) {
-        const { data: staffData } = await supabase
-          .from("profiles")
-          .select("user_id, full_name")
-          .in("user_id", Array.from(allStaffIds));
-        staffMap = Object.fromEntries((staffData || []).map(s => [s.user_id, s.full_name]));
-      }
-
-      // Map staff names to jobs
-      const jobsWithStaff = (jobsRes.data || []).map((job: any) => ({
-        ...job,
-        profiles: job.assigned_staff_id ? { full_name: staffMap[job.assigned_staff_id] || 'Unknown' } : null
-      }));
-
-      const activityItems: ActivityItem[] = [];
-      recentJobsRes.data?.forEach((job: any) => {
-        const clientName = job.clients?.name || 'Unknown';
-        const staffName = job.assigned_staff_id ? staffMap[job.assigned_staff_id] || 'Unknown' : 'Unknown';
-        
-        if (job.status === 'completed' && job.end_time) {
-          activityItems.push({
-            id: `${job.id}-completed`,
-            type: 'completed',
-            jobId: job.id,
-            clientName,
-            staffName,
-            time: format(new Date(job.end_time), 'h:mm a')
-          });
-        }
-        if (job.start_time) {
-          activityItems.push({
-            id: `${job.id}-started`,
-            type: 'started',
-            jobId: job.id,
-            clientName,
-            staffName,
-            time: format(new Date(job.start_time), 'h:mm a')
-          });
-        }
-      });
-
-      const todayTotal = todayCountRes.count || 0;
-      const completedTotal = completedCountRes.count || 0;
-      const rate = todayTotal > 0 ? Math.round((completedTotal / todayTotal) * 100) : 0;
-
-      setJobs(jobsWithStaff as Job[]);
-      setStats({
-        todayJobs: todayTotal,
-        activeStaff: staffCountRes.count || 0,
-        completedToday: completedTotal,
-        completionRate: rate
-      });
-      setActivities(activityItems.slice(0, 5));
-    } catch (error) {
-      console.error('Error fetching data:', error);
-      toast.error('Error loading data');
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [refreshData]);
 
   const fetchClientsAndStaff = async () => {
     const { data: clientsData } = await supabase
@@ -237,7 +261,7 @@ export default function AdminDashboard() {
         notes: '',
         checklist: ''
       });
-      fetchData();
+      refreshData();
     }
   };
 
@@ -286,6 +310,17 @@ export default function AdminDashboard() {
 
       <main className="container mx-auto px-4 py-4 md:py-8">
         <Breadcrumbs />
+        
+        {/* Error State */}
+        {error && (
+          <DashboardErrorState 
+            error={error} 
+            isFromCache={isFromCache}
+            retryCount={retryCount}
+            onRetry={retry}
+          />
+        )}
+        
         {/* Stats Cards */}
         <StatsCards stats={stats} />
 
