@@ -1,11 +1,13 @@
 import { useMemo } from "react";
-import { Clock, MapPin, User, ChevronRight } from "lucide-react";
+import { Clock, MapPin, User, ChevronRight, Copy } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { useJobStatusChange } from "@/hooks/useJobStatusChange";
+import { useDuplicateJob } from "@/hooks/useDuplicateJob";
 import { QuickStatusChip } from "./QuickStatusButton";
 import type { Job } from "./JobsList";
 
@@ -52,12 +54,16 @@ function JobCard({
   job, 
   onViewJob,
   updatingJobId,
-  onAdvanceStatus
+  onAdvanceStatus,
+  onDuplicate,
+  isDuplicating
 }: { 
   job: Job; 
   onViewJob: (job: Job) => void;
   updatingJobId: string | null;
   onAdvanceStatus: (jobId: string, status: string) => void;
+  onDuplicate: (jobId: string) => void;
+  isDuplicating: boolean;
 }) {
   return (
     <button
@@ -90,14 +96,27 @@ function JobCard({
         )}
       </div>
 
-      <div className="flex items-center justify-between mt-3">
-        {!job.assigned_staff_id ? (
-          <Badge variant="destructive" className="text-[10px]">
-            Unassigned
-          </Badge>
-        ) : (
-          <div />
-        )}
+      <div className="flex items-center justify-between mt-3 gap-2">
+        <div className="flex items-center gap-1">
+          {!job.assigned_staff_id && (
+            <Badge variant="destructive" className="text-[10px]">
+              Unassigned
+            </Badge>
+          )}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDuplicate(job.id);
+            }}
+            disabled={isDuplicating}
+            title="Duplicate job for tomorrow"
+          >
+            <Copy className="h-3.5 w-3.5" />
+          </Button>
+        </div>
         
         <QuickStatusChip
           currentStatus={job.status}
@@ -114,13 +133,17 @@ function KanbanColumnComponent({
   jobs, 
   onViewJob,
   updatingJobId,
-  onAdvanceStatus
+  onAdvanceStatus,
+  onDuplicate,
+  isDuplicating
 }: { 
   column: KanbanColumn; 
   jobs: Job[];
   onViewJob: (job: Job) => void;
   updatingJobId: string | null;
   onAdvanceStatus: (jobId: string, status: string) => void;
+  onDuplicate: (jobId: string) => void;
+  isDuplicating: boolean;
 }) {
   return (
     <div className="flex-shrink-0 w-72 md:w-80">
@@ -147,6 +170,8 @@ function KanbanColumnComponent({
                 onViewJob={onViewJob}
                 updatingJobId={updatingJobId}
                 onAdvanceStatus={onAdvanceStatus}
+                onDuplicate={onDuplicate}
+                isDuplicating={isDuplicating}
               />
             ))
           )}
@@ -158,6 +183,7 @@ function KanbanColumnComponent({
 
 export function TodayKanban({ jobs, loading, onViewJob, onJobsChange }: TodayKanbanProps) {
   const { updatingJobId, advanceStatus } = useJobStatusChange(onJobsChange);
+  const { duplicateJob, isDuplicating } = useDuplicateJob(onJobsChange);
   const today = format(new Date(), "yyyy-MM-dd");
   
   const todayJobs = useMemo(() => 
@@ -176,6 +202,10 @@ export function TodayKanban({ jobs, loading, onViewJob, onJobsChange }: TodayKan
 
   const handleAdvanceStatus = (jobId: string, status: string) => {
     advanceStatus(jobId, status);
+  };
+
+  const handleDuplicate = (jobId: string) => {
+    duplicateJob({ jobId, daysOffset: 1 });
   };
 
   if (loading) {
@@ -214,6 +244,8 @@ export function TodayKanban({ jobs, loading, onViewJob, onJobsChange }: TodayKan
                 onViewJob={onViewJob}
                 updatingJobId={updatingJobId}
                 onAdvanceStatus={handleAdvanceStatus}
+                onDuplicate={handleDuplicate}
+                isDuplicating={isDuplicating}
               />
             ))}
           </div>
