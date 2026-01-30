@@ -202,10 +202,10 @@ export function MetricsDashboard() {
 
       // Calculate alert distribution
       const alertTypes: Record<string, { count: number; label: string }> = {
-        'late_arrival': { count: 0, label: t('lateArrival') },
-        'early_departure': { count: 0, label: t('earlyCheckout') },
-        'geofence_violation': { count: 0, label: t('geofenceViolation') },
-        'no_show': { count: 0, label: t('noShow') }
+        'late_arrival': { count: 0, label: 'Late Arrival' },
+        'early_departure': { count: 0, label: 'Early Checkout' },
+        'geofence_violation': { count: 0, label: 'Geofence Violation' },
+        'no_show': { count: 0, label: 'No Show' }
       };
 
       alerts?.forEach(alert => {
