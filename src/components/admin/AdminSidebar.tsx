@@ -8,6 +8,7 @@ import {
   Settings,
   Sparkles,
   LogOut,
+  BarChart3,
 } from "lucide-react";
 import {
   Sidebar,
@@ -32,6 +33,7 @@ const navItems = [
   { title: "Clients", url: "/admin/clients", icon: Users },
   { title: "Staff", url: "/admin/staff", icon: UserCog },
   { title: "Invoices", url: "/admin/invoices", icon: FileText },
+  { title: "Reports", url: "/admin/reports", icon: BarChart3 },
   { title: "Settings", url: "/admin/settings", icon: Settings },
 ];
 

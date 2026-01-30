@@ -24,6 +24,7 @@ const RecurringJobsPage = lazy(() => import("./pages/RecurringJobsPage"));
 const SettingsPage = lazy(() => import("./pages/SettingsPage"));
 const InvoicesPage = lazy(() => import("./pages/InvoicesPage"));
 const PriceListPage = lazy(() => import("./pages/PriceListPage"));
+const ReportsPage = lazy(() => import("./pages/ReportsPage"));
 const InstallPage = lazy(() => import("./pages/InstallPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const PricingPage = lazy(() => import("./pages/PricingPage"));
@@ -137,6 +138,14 @@ const App = () => (
                     element={
                       <ProtectedRoute allowedRoles={["admin"]}>
                         <PriceListPage />
+                      </ProtectedRoute>
+                    } 
+                  />
+                  <Route 
+                    path="/admin/reports" 
+                    element={
+                      <ProtectedRoute allowedRoles={["admin"]}>
+                        <ReportsPage />
                       </ProtectedRoute>
                     } 
                   />
