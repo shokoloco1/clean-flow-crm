@@ -13,7 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   MapPin, Clock, Image as ImageIcon, FileText, Loader2, History,
   Phone, MessageSquare, User, CheckCircle, Circle,
-  Receipt, Mail
+  Receipt, Mail, Send
 } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
@@ -21,6 +21,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { generateSingleJobPDF } from "@/lib/pdfUtils";
 import { JobTimeline } from "@/components/JobTimeline";
 import { cn } from "@/lib/utils";
+import { useQuickInvoice } from "@/hooks/useQuickInvoice";
+import { useInvoiceEmail } from "@/hooks/useInvoiceEmail";
+import { formatAUD } from "@/lib/australian";
 import type { Job } from "./JobsList";
 
 export interface JobPhoto {
@@ -82,11 +85,16 @@ export function JobDetailDialog({ job, photos, onClose }: JobDetailDialogProps) 
   const [checklistItems, setChecklistItems] = useState<{ completed_at: string | null; task_name: string }[]>([]);
   const [alerts, setAlerts] = useState<{ created_at: string; message: string; is_resolved: boolean }[]>([]);
   const [clientInfo, setClientInfo] = useState<ClientInfo | null>(null);
+  const [generatedInvoice, setGeneratedInvoice] = useState<{ id: string; total: number } | null>(null);
+
+  const { generateInvoiceFromJob, isGenerating: isGeneratingInvoice } = useQuickInvoice();
+  const { sendInvoiceEmail, isSending: isSendingEmail } = useInvoiceEmail();
 
   useEffect(() => {
     if (job) {
       fetchTimelineData();
       fetchClientInfo();
+      setGeneratedInvoice(null);
     }
   }, [job]);
 
@@ -142,10 +150,28 @@ export function JobDetailDialog({ job, photos, onClose }: JobDetailDialogProps) 
     }
   };
 
-  const handleCreateInvoice = () => {
+  const handleCreateInvoice = async () => {
+    if (!job) return;
+    
+    const result = await generateInvoiceFromJob(job.id);
+    if (result) {
+      setGeneratedInvoice({ id: result.invoiceId, total: result.total });
+    }
+  };
+
+  const handleSendInvoice = async () => {
+    if (!generatedInvoice) return;
+    
+    const success = await sendInvoiceEmail(generatedInvoice.id);
+    if (success) {
+      toast.success("Invoice sent to client!");
+    }
+  };
+
+  const handleViewInvoice = () => {
+    if (!generatedInvoice) return;
     onClose();
-    // Navigate to invoices - client ID will be fetched from the job
-    navigate(`/admin/invoices?create=true&jobId=${job?.id}${clientInfo?.id ? `&clientId=${clientInfo.id}` : ''}`);
+    navigate(`/admin/invoices?view=${generatedInvoice.id}`);
   };
 
   const handleDownloadPDF = async () => {
@@ -448,10 +474,9 @@ export function JobDetailDialog({ job, photos, onClose }: JobDetailDialogProps) 
 
         {/* Actions */}
         <Separator className="my-4" />
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Button 
             variant="outline" 
-            className="flex-1"
             onClick={handleDownloadPDF}
             disabled={isGeneratingPDF}
           >
@@ -468,14 +493,56 @@ export function JobDetailDialog({ job, photos, onClose }: JobDetailDialogProps) 
             )}
           </Button>
           
-          {job.status === "completed" && (
+          {job.status === "completed" && !generatedInvoice && (
             <Button 
-              className="flex-1"
               onClick={handleCreateInvoice}
+              disabled={isGeneratingInvoice}
             >
-              <Receipt className="h-4 w-4 mr-2" />
-              Create Invoice
+              {isGeneratingInvoice ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Creating...
+                </>
+              ) : (
+                <>
+                  <Receipt className="h-4 w-4 mr-2" />
+                  Generate Invoice
+                </>
+              )}
             </Button>
+          )}
+
+          {generatedInvoice && (
+            <div className="flex gap-2 items-center">
+              <Badge variant="secondary" className="h-9 px-3">
+                Invoice: {formatAUD(generatedInvoice.total)}
+              </Badge>
+              <Button 
+                variant="outline"
+                onClick={handleViewInvoice}
+              >
+                View
+              </Button>
+              {clientInfo?.email && (
+                <Button 
+                  onClick={handleSendInvoice}
+                  disabled={isSendingEmail}
+                  className="bg-primary"
+                >
+                  {isSendingEmail ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Sending...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="h-4 w-4 mr-2" />
+                      Send to Client
+                    </>
+                  )}
+                </Button>
+              )}
+            </div>
           )}
         </div>
       </DialogContent>
