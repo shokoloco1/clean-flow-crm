@@ -6,13 +6,20 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Settings, Building, MapPin, Clock, Save, Loader2 } from "lucide-react";
+import { ArrowLeft, Settings, Building, MapPin, Clock, Save, Loader2, Receipt } from "lucide-react";
 import { CleaningServicesManager, CleaningService } from "@/components/settings/CleaningServicesManager";
+import { formatABN, validateABN } from "@/lib/australian";
 
 interface SystemSettings {
   company_name: string;
   company_logo: string;
+  business_abn: string;
+  business_address: string;
+  business_phone: string;
+  business_email: string;
+  gst_registered: boolean;
   default_geofence_radius: number;
   working_hours: { start: string; end: string };
   working_days: number[];
@@ -40,9 +47,15 @@ export default function SettingsPage() {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [abnError, setAbnError] = useState<string | null>(null);
   const [settings, setSettings] = useState<SystemSettings>({
     company_name: "CleanFlow",
     company_logo: "",
+    business_abn: "",
+    business_address: "",
+    business_phone: "",
+    business_email: "",
+    gst_registered: true,
     default_geofence_radius: 100,
     working_hours: { start: "08:00", end: "18:00" },
     working_days: [1, 2, 3, 4, 5],
@@ -93,12 +106,45 @@ export default function SettingsPage() {
     }
   };
 
+  const handleABNChange = (value: string) => {
+    // Remove non-digits
+    const cleanValue = value.replace(/\D/g, '').slice(0, 11);
+    setSettings(prev => ({ ...prev, business_abn: cleanValue }));
+    
+    if (cleanValue.length === 11) {
+      if (!validateABN(cleanValue)) {
+        setAbnError("Invalid ABN - check the number");
+      } else {
+        setAbnError(null);
+      }
+    } else if (cleanValue.length > 0) {
+      setAbnError("ABN must be 11 digits");
+    } else {
+      setAbnError(null);
+    }
+  };
+
   const handleSave = async () => {
+    // Validate ABN before saving
+    if (settings.business_abn && !validateABN(settings.business_abn)) {
+      toast({
+        title: "Invalid ABN",
+        description: "Please enter a valid 11-digit Australian Business Number",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setSaving(true);
     try {
       const updates: { key: string; value: unknown }[] = [
         { key: "company_name", value: settings.company_name },
         { key: "company_logo", value: settings.company_logo },
+        { key: "business_abn", value: settings.business_abn },
+        { key: "business_address", value: settings.business_address },
+        { key: "business_phone", value: settings.business_phone },
+        { key: "business_email", value: settings.business_email },
+        { key: "gst_registered", value: settings.gst_registered },
         { key: "default_geofence_radius", value: settings.default_geofence_radius },
         { key: "working_hours", value: settings.working_hours },
         { key: "working_days", value: settings.working_days },
@@ -215,6 +261,93 @@ export default function SettingsPage() {
                     />
                   </div>
                 )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Tax & GST Settings */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Receipt className="h-5 w-5 text-primary" />
+                Tax & GST Settings
+              </CardTitle>
+              <CardDescription>
+                Configure your Australian Business Number and GST registration.
+                Required for businesses with annual turnover &gt; $75,000 AUD.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="business_abn">ABN (Australian Business Number)</Label>
+                <Input
+                  id="business_abn"
+                  value={settings.business_abn ? formatABN(settings.business_abn) : ""}
+                  onChange={(e) => handleABNChange(e.target.value)}
+                  placeholder="XX XXX XXX XXX"
+                  maxLength={14}
+                  className={abnError ? "border-destructive" : ""}
+                />
+                {abnError && (
+                  <p className="text-sm text-destructive">{abnError}</p>
+                )}
+                <p className="text-xs text-muted-foreground">
+                  Your ABN will appear on all tax invoices
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="business_address">Business Address</Label>
+                <Input
+                  id="business_address"
+                  value={settings.business_address}
+                  onChange={(e) =>
+                    setSettings((prev) => ({ ...prev, business_address: e.target.value }))
+                  }
+                  placeholder="123 Main St, Sydney NSW 2000"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="business_phone">Business Phone</Label>
+                  <Input
+                    id="business_phone"
+                    value={settings.business_phone}
+                    onChange={(e) =>
+                      setSettings((prev) => ({ ...prev, business_phone: e.target.value }))
+                    }
+                    placeholder="0400 000 000"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="business_email">Business Email</Label>
+                  <Input
+                    id="business_email"
+                    type="email"
+                    value={settings.business_email}
+                    onChange={(e) =>
+                      setSettings((prev) => ({ ...prev, business_email: e.target.value }))
+                    }
+                    placeholder="accounts@example.com.au"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
+                <div>
+                  <Label htmlFor="gst_registered" className="font-medium">GST Registered</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Enable to add 10% GST to all invoices
+                  </p>
+                </div>
+                <Switch
+                  id="gst_registered"
+                  checked={settings.gst_registered}
+                  onCheckedChange={(checked) =>
+                    setSettings((prev) => ({ ...prev, gst_registered: checked }))
+                  }
+                />
               </div>
             </CardContent>
           </Card>
