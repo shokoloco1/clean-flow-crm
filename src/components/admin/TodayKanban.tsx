@@ -5,12 +5,15 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
+import { useJobStatusChange } from "@/hooks/useJobStatusChange";
+import { QuickStatusChip } from "./QuickStatusButton";
 import type { Job } from "./JobsList";
 
 interface TodayKanbanProps {
   jobs: Job[];
   loading: boolean;
   onViewJob: (job: Job) => void;
+  onJobsChange?: () => void;
 }
 
 type KanbanColumn = {
@@ -25,7 +28,7 @@ const columns: KanbanColumn[] = [
   { 
     id: "scheduled", 
     title: "Scheduled", 
-    status: ["scheduled"], 
+    status: ["scheduled", "pending"], 
     color: "text-blue-600",
     bgColor: "bg-blue-50 dark:bg-blue-950/30"
   },
@@ -45,13 +48,17 @@ const columns: KanbanColumn[] = [
   },
 ];
 
-function JobCard({ job, onViewJob }: { job: Job; onViewJob: (job: Job) => void }) {
-  const statusColors: Record<string, string> = {
-    scheduled: "bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300",
-    in_progress: "bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300",
-    completed: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300",
-  };
-
+function JobCard({ 
+  job, 
+  onViewJob,
+  updatingJobId,
+  onAdvanceStatus
+}: { 
+  job: Job; 
+  onViewJob: (job: Job) => void;
+  updatingJobId: string | null;
+  onAdvanceStatus: (jobId: string, status: string) => void;
+}) {
   return (
     <button
       onClick={() => onViewJob(job)}
@@ -83,11 +90,21 @@ function JobCard({ job, onViewJob }: { job: Job; onViewJob: (job: Job) => void }
         )}
       </div>
 
-      {!job.assigned_staff_id && (
-        <Badge variant="destructive" className="mt-2 text-[10px]">
-          Unassigned
-        </Badge>
-      )}
+      <div className="flex items-center justify-between mt-3">
+        {!job.assigned_staff_id ? (
+          <Badge variant="destructive" className="text-[10px]">
+            Unassigned
+          </Badge>
+        ) : (
+          <div />
+        )}
+        
+        <QuickStatusChip
+          currentStatus={job.status}
+          isUpdating={updatingJobId === job.id}
+          onAdvance={() => onAdvanceStatus(job.id, job.status)}
+        />
+      </div>
     </button>
   );
 }
@@ -95,11 +112,15 @@ function JobCard({ job, onViewJob }: { job: Job; onViewJob: (job: Job) => void }
 function KanbanColumnComponent({ 
   column, 
   jobs, 
-  onViewJob 
+  onViewJob,
+  updatingJobId,
+  onAdvanceStatus
 }: { 
   column: KanbanColumn; 
   jobs: Job[];
   onViewJob: (job: Job) => void;
+  updatingJobId: string | null;
+  onAdvanceStatus: (jobId: string, status: string) => void;
 }) {
   return (
     <div className="flex-shrink-0 w-72 md:w-80">
@@ -120,7 +141,13 @@ function KanbanColumnComponent({
             </p>
           ) : (
             jobs.map((job) => (
-              <JobCard key={job.id} job={job} onViewJob={onViewJob} />
+              <JobCard 
+                key={job.id} 
+                job={job} 
+                onViewJob={onViewJob}
+                updatingJobId={updatingJobId}
+                onAdvanceStatus={onAdvanceStatus}
+              />
             ))
           )}
         </div>
@@ -129,7 +156,8 @@ function KanbanColumnComponent({
   );
 }
 
-export function TodayKanban({ jobs, loading, onViewJob }: TodayKanbanProps) {
+export function TodayKanban({ jobs, loading, onViewJob, onJobsChange }: TodayKanbanProps) {
+  const { updatingJobId, advanceStatus } = useJobStatusChange(onJobsChange);
   const today = format(new Date(), "yyyy-MM-dd");
   
   const todayJobs = useMemo(() => 
@@ -145,6 +173,10 @@ export function TodayKanban({ jobs, loading, onViewJob }: TodayKanbanProps) {
       return acc;
     }, {} as Record<string, Job[]>);
   }, [todayJobs]);
+
+  const handleAdvanceStatus = (jobId: string, status: string) => {
+    advanceStatus(jobId, status);
+  };
 
   if (loading) {
     return (
@@ -180,6 +212,8 @@ export function TodayKanban({ jobs, loading, onViewJob }: TodayKanbanProps) {
                 column={column}
                 jobs={jobsByColumn[column.id] || []}
                 onViewJob={onViewJob}
+                updatingJobId={updatingJobId}
+                onAdvanceStatus={handleAdvanceStatus}
               />
             ))}
           </div>

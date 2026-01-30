@@ -2,6 +2,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ClipboardList, Eye, RefreshCw, AlertTriangle, Loader2 } from "lucide-react";
 import { format } from "date-fns";
+import { useJobStatusChange } from "@/hooks/useJobStatusChange";
+import { QuickStatusButton } from "./QuickStatusButton";
 
 export interface Job {
   id: string;
@@ -25,6 +27,7 @@ interface JobsListProps {
   isRetrying?: boolean;
   onViewJob: (job: Job) => void;
   onRetry?: () => void;
+  onJobsChange?: () => void;
 }
 
 function getStatusColor(status: string) {
@@ -36,7 +39,9 @@ function getStatusColor(status: string) {
   }
 }
 
-export function JobsList({ jobs, loading, error, isRetrying, onViewJob, onRetry }: JobsListProps) {
+export function JobsList({ jobs, loading, error, isRetrying, onViewJob, onRetry, onJobsChange }: JobsListProps) {
+  const { updatingJobId, advanceStatus } = useJobStatusChange(onJobsChange);
+  
   // Show error state when there's an error and no data
   const showError = error && jobs.length === 0;
   
@@ -101,9 +106,16 @@ export function JobsList({ jobs, loading, error, isRetrying, onViewJob, onRetry 
                     {job.profiles?.full_name && ` • ${job.profiles.full_name}`}
                   </p>
                 </div>
-                <Button variant="ghost" size="icon">
-                  <Eye className="h-4 w-4" />
-                </Button>
+                <div className="flex items-center gap-2">
+                  <QuickStatusButton
+                    currentStatus={job.status}
+                    isUpdating={updatingJobId === job.id}
+                    onAdvance={() => advanceStatus(job.id, job.status)}
+                  />
+                  <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); onViewJob(job); }}>
+                    <Eye className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             ))}
           </div>

@@ -14,15 +14,17 @@ import {
   Sparkles,
   Calendar,
   Smile,
-  Home,
   Bath,
   Bed,
   PawPrint,
-  Timer
+  Timer,
+  Play,
+  Loader2
 } from "lucide-react";
 import { format, addDays } from "date-fns";
 import JobDetailView from "@/components/JobDetailView";
 import { NotificationCenter } from "@/components/NotificationCenter";
+import { useJobStatusChange } from "@/hooks/useJobStatusChange";
 
 interface PropertyPhotos {
   id: string;
@@ -77,6 +79,7 @@ export default function StaffDashboard() {
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [loading, setLoading] = useState(true);
   const [propertyPhotos, setPropertyPhotos] = useState<Record<string, PropertyPhotos[]>>({});
+  const { updatingJobId, advanceStatus } = useJobStatusChange(() => fetchMyJobs());
 
   useEffect(() => {
     if (user) {
@@ -296,6 +299,7 @@ export default function StaffDashboard() {
                 {todayJobs.map((job) => {
                   const statusConfig = getStatusConfig(job.status);
                   const photos = job.property_id ? propertyPhotos[job.property_id] || [] : [];
+                  const isUpdating = updatingJobId === job.id;
                   
                   return (
                     <Card 
@@ -303,7 +307,6 @@ export default function StaffDashboard() {
                       className={`
                         border-2 shadow-sm transition-all cursor-pointer active:scale-[0.98]
                         ${statusConfig.border}
-                        ${statusConfig.pulse ? "animate-pulse" : ""}
                       `}
                       onClick={() => setSelectedJob(job)}
                     >
@@ -386,8 +389,38 @@ export default function StaffDashboard() {
                             </div>
                           </div>
                           
-                          <div className="flex items-center justify-center h-12 w-12 rounded-full bg-muted/50">
-                            <ChevronRight className="h-6 w-6 text-muted-foreground" />
+                          <div className="flex flex-col items-center gap-2">
+                            {/* Quick Status Button */}
+                            {job.status !== "completed" && job.status !== "cancelled" && (
+                              <Button
+                                size="lg"
+                                className={`
+                                  h-14 w-14 rounded-full shadow-lg
+                                  ${job.status === "in_progress" 
+                                    ? "bg-green-500 hover:bg-green-600" 
+                                    : "bg-blue-500 hover:bg-blue-600"
+                                  }
+                                `}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  advanceStatus(job.id, job.status);
+                                }}
+                                disabled={isUpdating}
+                              >
+                                {isUpdating ? (
+                                  <Loader2 className="h-6 w-6 animate-spin text-white" />
+                                ) : job.status === "in_progress" ? (
+                                  <CheckCircle2 className="h-6 w-6 text-white" />
+                                ) : (
+                                  <Play className="h-6 w-6 text-white" />
+                                )}
+                              </Button>
+                            )}
+                            {job.status === "completed" && (
+                              <div className="h-12 w-12 rounded-full bg-green-500/20 flex items-center justify-center">
+                                <CheckCircle2 className="h-6 w-6 text-green-500" />
+                              </div>
+                            )}
                           </div>
                         </div>
                       </CardContent>
