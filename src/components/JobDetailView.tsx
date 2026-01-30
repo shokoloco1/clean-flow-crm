@@ -31,6 +31,7 @@ import {
 import { format } from "date-fns";
 import { toast } from "sonner";
 import AdvancedChecklist from "@/components/AdvancedChecklist";
+import { BeforeAfterPhotos } from "@/components/staff/BeforeAfterPhotos";
 
 interface Property {
   id: string;
@@ -98,9 +99,7 @@ export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewPr
   const [property, setProperty] = useState<Property | null>(job.properties || null);
   const [propertyPhotos, setPropertyPhotos] = useState<PropertyPhoto[]>([]);
   const [photos, setPhotos] = useState<JobPhoto[]>([]);
-  const [isUploading, setIsUploading] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
-  const [photoType, setPhotoType] = useState<'before' | 'after'>('before');
   const [accessCode, setAccessCode] = useState<string | null>(null);
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
 
@@ -255,52 +254,7 @@ export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewPr
     setIsUpdating(false);
   };
 
-  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
-
-    setIsUploading(true);
-    
-    for (const file of Array.from(files)) {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${currentJob.id}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-      
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('job-evidence')
-        .upload(fileName, file, {
-          cacheControl: '3600',
-          upsert: false
-        });
-
-      if (uploadError) {
-        console.error('Upload error:', uploadError);
-        toast.error(`Failed to upload ${file.name}`);
-        continue;
-      }
-
-      const { data: urlData } = supabase.storage
-        .from('job-evidence')
-        .getPublicUrl(uploadData.path);
-
-      const { error: dbError } = await supabase
-        .from('job_photos')
-        .insert({
-          job_id: currentJob.id,
-          photo_url: urlData.publicUrl,
-          photo_type: photoType
-        });
-
-      if (dbError) {
-        console.error('DB error:', dbError);
-        toast.error(`Failed to save photo record`);
-      }
-    }
-    
-    await fetchPhotos();
-    toast.success(`${files.length} photo(s) uploaded!`);
-    setIsUploading(false);
-    e.target.value = '';
-  };
+  // Removed old handlePhotoUpload - now handled by BeforeAfterPhotos component
 
   const openInMaps = () => {
     if (property?.google_maps_link) {
@@ -312,8 +266,6 @@ export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewPr
   };
 
   const checklist = Array.isArray(currentJob.checklist) ? currentJob.checklist : [];
-  const beforePhotos = photos.filter(p => p.photo_type === 'before');
-  const afterPhotos = photos.filter(p => p.photo_type === 'after');
 
   const calculateDuration = () => {
     if (!currentJob.start_time) return null;
@@ -595,91 +547,14 @@ export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewPr
           />
         )}
 
-        {/* Photos Section */}
+        {/* Before/After Photos - Simplified */}
         {currentJob.status !== "pending" && (
-          <Card className="border-border shadow-sm">
-            <CardContent className="p-5 space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Camera className="h-5 w-5 text-primary" />
-                  <span className="font-semibold text-foreground">Job Photos</span>
-                </div>
-                <Badge variant="outline">{photos.length} uploaded</Badge>
-              </div>
-
-              {/* Photo Type Toggle */}
-              <div className="flex gap-2">
-                <Button
-                  variant={photoType === 'before' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setPhotoType('before')}
-                >
-                  Before ({beforePhotos.length})
-                </Button>
-                <Button
-                  variant={photoType === 'after' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setPhotoType('after')}
-                >
-                  After ({afterPhotos.length})
-                </Button>
-              </div>
-
-              {/* Photo Grid */}
-              {photos.length > 0 && (
-                <div className="grid grid-cols-3 gap-2">
-                  {(photoType === 'before' ? beforePhotos : afterPhotos).map((photo) => (
-                    <div 
-                      key={photo.id} 
-                      className="aspect-square rounded-lg overflow-hidden bg-muted cursor-pointer"
-                      onClick={() => setSelectedPhoto(photo.photo_url)}
-                    >
-                      <img 
-                        src={photo.photo_url} 
-                        alt={`${photo.photo_type} photo`}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* Upload Button */}
-              {currentJob.status === "in_progress" && (
-                <label className="block">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    capture="environment"
-                    onChange={handlePhotoUpload}
-                    className="hidden"
-                    disabled={isUploading}
-                  />
-                  <Button 
-                    className="w-full h-14" 
-                    variant="outline"
-                    disabled={isUploading}
-                    asChild
-                  >
-                    <span>
-                      {isUploading ? (
-                        <>
-                          <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-                          Uploading...
-                        </>
-                      ) : (
-                        <>
-                          <Camera className="h-5 w-5 mr-2" />
-                          📸 Take {photoType.toUpperCase()} Photo
-                        </>
-                      )}
-                    </span>
-                  </Button>
-                </label>
-              )}
-            </CardContent>
-          </Card>
+          <BeforeAfterPhotos
+            jobId={currentJob.id}
+            photos={photos}
+            jobStatus={currentJob.status}
+            onPhotosUpdated={fetchPhotos}
+          />
         )}
 
         {/* Action Buttons - Fixed at bottom */}
