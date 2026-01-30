@@ -43,6 +43,7 @@ import { toast } from "sonner";
 import { CreateInvoiceDialog } from "@/components/invoices/CreateInvoiceDialog";
 import { InvoiceDetailDialog } from "@/components/invoices/InvoiceDetailDialog";
 import { XeroExport } from "@/components/invoices/XeroExport";
+import { InvoiceStatusActions } from "@/components/invoices/InvoiceStatusActions";
 
 interface Invoice {
   id: string;
@@ -57,7 +58,7 @@ interface Invoice {
   total: number;
   notes: string | null;
   created_at: string;
-  clients?: { name: string } | null;
+  clients?: { name: string; email?: string | null } | null;
 }
 
 export default function InvoicesPage() {
@@ -79,7 +80,7 @@ export default function InvoicesPage() {
       .from("invoices")
       .select(`
         *,
-        clients (name)
+        clients (name, email)
       `)
       .order("created_at", { ascending: false });
 
@@ -289,9 +290,12 @@ export default function InvoicesPage() {
                           ${Number(invoice.total).toFixed(2)}
                         </TableCell>
                         <TableCell>
-                          <Badge variant="outline" className={statusConfig.className}>
-                            {statusConfig.label}
-                          </Badge>
+                          <InvoiceStatusActions
+                            invoiceId={invoice.id}
+                            currentStatus={invoice.status}
+                            clientEmail={invoice.clients?.email}
+                            onStatusChange={fetchInvoices}
+                          />
                         </TableCell>
                         <TableCell className="text-right">
                           <Button
