@@ -1,9 +1,10 @@
 import { AdminLayout } from "@/components/admin";
 import { MetricsDashboard } from "@/components/MetricsDashboard";
+import { BusinessMetricsDashboard } from "@/components/BusinessMetricsDashboard";
 import { PDFReports } from "@/components/PDFReports";
 import { CSVReports } from "@/components/CSVReports";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BarChart3, FileText, FileSpreadsheet } from "lucide-react";
+import { BarChart3, FileText, FileSpreadsheet, TrendingUp } from "lucide-react";
 
 export default function ReportsPage() {
   return (
@@ -16,11 +17,15 @@ export default function ReportsPage() {
           </p>
         </div>
 
-        <Tabs defaultValue="metrics" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-3 max-w-md">
+        <Tabs defaultValue="business" className="space-y-4">
+          <TabsList className="grid w-full grid-cols-4 max-w-lg">
+            <TabsTrigger value="business" className="gap-2">
+              <TrendingUp className="h-4 w-4" />
+              <span className="hidden sm:inline">Business</span>
+            </TabsTrigger>
             <TabsTrigger value="metrics" className="gap-2">
               <BarChart3 className="h-4 w-4" />
-              <span className="hidden sm:inline">Metrics</span>
+              <span className="hidden sm:inline">Operations</span>
             </TabsTrigger>
             <TabsTrigger value="pdf" className="gap-2">
               <FileText className="h-4 w-4" />
@@ -31,6 +36,10 @@ export default function ReportsPage() {
               <span className="hidden sm:inline">CSV</span>
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="business">
+            <BusinessMetricsDashboard />
+          </TabsContent>
 
           <TabsContent value="metrics">
             <MetricsDashboard />
