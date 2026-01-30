@@ -2,6 +2,7 @@ import { ReactNode } from "react";
 import { SidebarProvider, SidebarTrigger, SidebarInset } from "@/components/ui/sidebar";
 import { AdminSidebar } from "./AdminSidebar";
 import { MobileBottomNav } from "./MobileBottomNav";
+import { KeyboardShortcutsHelp } from "./KeyboardShortcutsHelp";
 import { NotificationCenter } from "@/components/NotificationCenter";
 import { GlobalSearch } from "@/components/GlobalSearch";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
@@ -43,6 +44,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
               </div>
               <div className="flex items-center gap-2">
                 <GlobalSearch />
+                <KeyboardShortcutsHelp />
                 <NotificationCenter />
               </div>
             </div>

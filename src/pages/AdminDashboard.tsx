@@ -1,8 +1,11 @@
 import { useEffect, useState, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { useFetchWithRetry } from "@/hooks/useFetchWithRetry";
+import { useAdminShortcuts } from "@/hooks/useKeyboardShortcuts";
+import { useDuplicateJob } from "@/hooks/useDuplicateJob";
 import { DashboardErrorState } from "@/components/admin/DashboardErrorState";
 import {
   TodayKanban,
@@ -26,6 +29,7 @@ interface DashboardData {
 }
 
 export default function AdminDashboard() {
+  const navigate = useNavigate();
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [jobPhotos, setJobPhotos] = useState<JobPhoto[]>([]);
   
@@ -41,6 +45,15 @@ export default function AdminDashboard() {
     scheduled_time: '09:00',
     notes: '',
     checklist: ''
+  });
+
+  // Keyboard shortcuts for power users
+  useAdminShortcuts({
+    onNewJob: () => setIsCreateOpen(true),
+    onNavigateJobs: () => navigate('/admin/calendar'),
+    onNavigateClients: () => navigate('/admin/clients'),
+    onNavigateStaff: () => navigate('/admin/staff'),
+    enabled: !isCreateOpen && !selectedJob, // Disable when dialogs open
   });
 
   // Fetch function wrapped in useCallback for stability
@@ -124,6 +137,9 @@ export default function AdminDashboard() {
   // Extract data from the hook
   const jobs = dashboardData?.jobs || [];
   const stats = dashboardData?.stats || { todayJobs: 0, activeStaff: 0, completedToday: 0, completionRate: 0 };
+
+  // Duplicate job hook (must be after refreshData is defined)
+  const { duplicateJob, isDuplicating } = useDuplicateJob(refreshData);
 
   useEffect(() => {
     refreshData();
