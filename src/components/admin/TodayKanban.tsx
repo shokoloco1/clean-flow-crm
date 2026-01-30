@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { Clock, MapPin, User, ChevronRight, Copy } from "lucide-react";
+import { Clock, MapPin, User, ChevronRight, Copy, Receipt } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { useJobStatusChange } from "@/hooks/useJobStatusChange";
 import { useDuplicateJob } from "@/hooks/useDuplicateJob";
+import { useQuickInvoice } from "@/hooks/useQuickInvoice";
 import { QuickStatusChip } from "./QuickStatusButton";
 import type { Job } from "./JobsList";
 
@@ -56,7 +57,9 @@ function JobCard({
   updatingJobId,
   onAdvanceStatus,
   onDuplicate,
-  isDuplicating
+  isDuplicating,
+  onGenerateInvoice,
+  isGeneratingInvoice,
 }: { 
   job: Job; 
   onViewJob: (job: Job) => void;
@@ -64,6 +67,8 @@ function JobCard({
   onAdvanceStatus: (jobId: string, status: string) => void;
   onDuplicate: (jobId: string) => void;
   isDuplicating: boolean;
+  onGenerateInvoice: (jobId: string) => void;
+  isGeneratingInvoice: boolean;
 }) {
   return (
     <button
@@ -116,6 +121,21 @@ function JobCard({
           >
             <Copy className="h-3.5 w-3.5" />
           </Button>
+          {job.status === "completed" && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-primary"
+              onClick={(e) => {
+                e.stopPropagation();
+                onGenerateInvoice(job.id);
+              }}
+              disabled={isGeneratingInvoice}
+              title="Generate Invoice"
+            >
+              <Receipt className="h-3.5 w-3.5" />
+            </Button>
+          )}
         </div>
         
         <QuickStatusChip
@@ -135,7 +155,9 @@ function KanbanColumnComponent({
   updatingJobId,
   onAdvanceStatus,
   onDuplicate,
-  isDuplicating
+  isDuplicating,
+  onGenerateInvoice,
+  isGeneratingInvoice,
 }: { 
   column: KanbanColumn; 
   jobs: Job[];
@@ -144,6 +166,8 @@ function KanbanColumnComponent({
   onAdvanceStatus: (jobId: string, status: string) => void;
   onDuplicate: (jobId: string) => void;
   isDuplicating: boolean;
+  onGenerateInvoice: (jobId: string) => void;
+  isGeneratingInvoice: boolean;
 }) {
   return (
     <div className="flex-shrink-0 w-72 md:w-80">
@@ -172,6 +196,8 @@ function KanbanColumnComponent({
                 onAdvanceStatus={onAdvanceStatus}
                 onDuplicate={onDuplicate}
                 isDuplicating={isDuplicating}
+                onGenerateInvoice={onGenerateInvoice}
+                isGeneratingInvoice={isGeneratingInvoice}
               />
             ))
           )}
@@ -184,6 +210,7 @@ function KanbanColumnComponent({
 export function TodayKanban({ jobs, loading, onViewJob, onJobsChange }: TodayKanbanProps) {
   const { updatingJobId, advanceStatus } = useJobStatusChange(onJobsChange);
   const { duplicateJob, isDuplicating } = useDuplicateJob(onJobsChange);
+  const { generateInvoiceFromJob, isGenerating: isGeneratingInvoice } = useQuickInvoice();
   const today = format(new Date(), "yyyy-MM-dd");
   
   const todayJobs = useMemo(() => 
@@ -206,6 +233,10 @@ export function TodayKanban({ jobs, loading, onViewJob, onJobsChange }: TodayKan
 
   const handleDuplicate = (jobId: string) => {
     duplicateJob({ jobId, daysOffset: 1 });
+  };
+
+  const handleGenerateInvoice = async (jobId: string) => {
+    await generateInvoiceFromJob(jobId);
   };
 
   if (loading) {
@@ -246,6 +277,8 @@ export function TodayKanban({ jobs, loading, onViewJob, onJobsChange }: TodayKan
                 onAdvanceStatus={handleAdvanceStatus}
                 onDuplicate={handleDuplicate}
                 isDuplicating={isDuplicating}
+                onGenerateInvoice={handleGenerateInvoice}
+                isGeneratingInvoice={isGeneratingInvoice}
               />
             ))}
           </div>
