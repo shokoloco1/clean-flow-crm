@@ -4,8 +4,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Sparkles, Shield, Users, ClipboardCheck, Camera, MapPin, Building2, ArrowRight, CheckCircle, Star, Zap, Lock } from "lucide-react";
-import { t } from "@/lib/i18n";
-import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 export default function Index() {
   const navigate = useNavigate();
@@ -24,41 +22,41 @@ export default function Index() {
   const features = [
     {
       icon: ClipboardCheck,
-      title: t("jobManagement"),
-      description: t("jobManagementDesc"),
+      title: "Job Management",
+      description: "Schedule and track jobs easily",
       color: "text-primary"
     },
     {
       icon: Camera,
-      title: t("proofOfWork"),
-      description: t("proofOfWorkDesc"),
+      title: "Proof of Work",
+      description: "Capture before & after photos for accountability",
       color: "text-success"
     },
     {
       icon: MapPin,
-      title: t("locationTracking"),
-      description: t("locationTrackingDesc"),
+      title: "Location Tracking",
+      description: "One-tap navigation to job site",
       color: "text-warning"
     },
     {
       icon: Users,
-      title: t("teamCoordination"),
-      description: t("teamCoordinationDesc"),
+      title: "Team Coordination",
+      description: "Assign jobs and monitor staff performance",
       color: "text-secondary"
     }
   ];
 
   const benefits = [
-    t("benefit1"),
-    t("benefit2"),
-    t("benefit3"),
-    t("benefit4")
+    "Setup in 3 clicks",
+    "Australian owned",
+    "GST & ABN ready",
+    "Mobile-first design"
   ];
 
   const stats = [
-    { value: "500+", label: t("jobsCompleted") },
-    { value: "50+", label: t("happyBusinesses") },
-    { value: "4.9★", label: t("averageRating") }
+    { value: "500+", label: "Jobs Completed" },
+    { value: "50+", label: "Happy Businesses" },
+    { value: "4.9★", label: "Average Rating" }
   ];
 
   return (
@@ -70,29 +68,28 @@ export default function Index() {
             <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
               <Sparkles className="h-5 w-5 text-primary-foreground" />
             </div>
-            <span className="font-bold text-lg text-foreground">{t("appName")}</span>
+            <span className="font-bold text-lg text-foreground">CleanFlow</span>
           </Link>
           <div className="flex items-center gap-2">
-            <LanguageSwitcher />
             <Button 
               variant="ghost" 
               size="sm"
               onClick={() => navigate("/pricing")}
             >
-              {t("pricing")}
+              Pricing
             </Button>
             <Button 
               variant="ghost" 
               size="sm"
               onClick={() => navigate("/auth")}
             >
-              {t("login")}
+              Sign In
             </Button>
             <Button 
               size="sm"
               onClick={() => navigate("/auth")}
             >
-              {t("startFreeTrial")}
+              Start Free Trial
             </Button>
           </div>
         </div>
@@ -112,15 +109,11 @@ export default function Index() {
             </Link>
             
             <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-foreground mb-4 leading-tight">
-              {t("heroTitle").split("stress").map((part, i) => 
-                i === 0 ? (
-                  <span key={i}>{part}<span className="text-primary">stress</span></span>
-                ) : part
-              )}
+              Manage your cleaning business without the <span className="text-primary">stress</span>
             </h1>
             
             <p className="text-lg md:text-xl text-muted-foreground mb-6 max-w-2xl mx-auto">
-              {t("heroSubtitle")}
+              100% specialised in cleaning. No features you don't need. No complications you don't want.
             </p>
 
             {/* Benefits list */}
@@ -140,7 +133,7 @@ export default function Index() {
                 className="h-14 px-8 text-lg shadow-lg shadow-primary/30 hover:shadow-primary/50 transition-all group"
                 onClick={() => navigate("/auth")}
               >
-                {t("startFreeTrial")}
+                Start Free Trial
                 <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
               </Button>
               <Button 
@@ -149,7 +142,7 @@ export default function Index() {
                 className="h-14 px-8 text-lg"
                 onClick={() => navigate("/auth")}
               >
-                {t("alreadyHaveAccount")}
+                Already have an account
               </Button>
             </div>
 
@@ -157,12 +150,12 @@ export default function Index() {
             <div className="flex items-center justify-center gap-4 text-muted-foreground text-sm flex-wrap">
               <div className="flex items-center gap-1">
                 <Zap className="h-4 w-4 text-warning" />
-                <span>{t("setupInMinutes")}</span>
+                <span>Setup in less than 2 minutes</span>
               </div>
               <span className="hidden sm:inline">•</span>
               <div className="flex items-center gap-1">
                 <Star className="h-4 w-4 text-warning" />
-                <span>{t("noCreditCard")}</span>
+                <span>No credit card required</span>
               </div>
             </div>
           </div>
@@ -172,7 +165,7 @@ export default function Index() {
       {/* Social Proof Stats */}
       <section className="py-8 bg-muted/30 border-y border-border">
         <div className="container mx-auto px-4">
-          <p className="text-center text-muted-foreground mb-6">{t("trustedBy")}</p>
+          <p className="text-center text-muted-foreground mb-6">Trusted by cleaning businesses across Australia</p>
           <div className="flex flex-wrap justify-center gap-8 md:gap-16">
             {stats.map((stat, index) => (
               <div key={index} className="text-center">
@@ -188,10 +181,10 @@ export default function Index() {
       <section className="py-12 md:py-16 bg-card">
         <div className="container mx-auto px-4">
           <h2 className="text-2xl md:text-3xl font-bold text-center text-foreground mb-4">
-            {t("everythingYouNeed")}
+            Everything You Need for Your Business
           </h2>
           <p className="text-center text-muted-foreground mb-10 max-w-xl mx-auto">
-            {t("appDescription")}
+            100% specialised in cleaning. No features you don't need. No complications you don't want.
           </p>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
@@ -217,7 +210,7 @@ export default function Index() {
       <section className="py-12 md:py-16">
         <div className="container mx-auto px-4">
           <h2 className="text-2xl md:text-3xl font-bold text-center text-foreground mb-10">
-            {t("everythingYouNeed")}
+            Everything You Need for Your Business
           </h2>
           
           <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
@@ -225,23 +218,23 @@ export default function Index() {
               <div className="h-14 w-14 rounded-xl bg-primary flex items-center justify-center mb-6 shadow-md">
                 <Shield className="h-7 w-7 text-primary-foreground" />
               </div>
-              <h3 className="text-xl font-bold text-foreground mb-3">👔 {t("forOwners")}</h3>
+              <h3 className="text-xl font-bold text-foreground mb-3">👔 For Business Owners</h3>
               <ul className="space-y-3 text-muted-foreground">
                 <li className="flex items-start gap-2">
                   <CheckCircle className="h-5 w-5 text-success mt-0.5 shrink-0" />
-                  <span>{t("dashboardAnalytics")}</span>
+                  <span>Full dashboard with analytics</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <CheckCircle className="h-5 w-5 text-success mt-0.5 shrink-0" />
-                  <span>{t("createScheduleJobs")}</span>
+                  <span>Create and schedule jobs</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <CheckCircle className="h-5 w-5 text-success mt-0.5 shrink-0" />
-                  <span>{t("manageClientsStaff")}</span>
+                  <span>Manage clients and staff</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <CheckCircle className="h-5 w-5 text-success mt-0.5 shrink-0" />
-                  <span>{t("trackJobCompletion")}</span>
+                  <span>Real-time job tracking</span>
                 </li>
               </ul>
             </Card>
@@ -250,23 +243,23 @@ export default function Index() {
               <div className="h-14 w-14 rounded-xl bg-secondary flex items-center justify-center mb-6 shadow-md">
                 <Users className="h-7 w-7 text-secondary-foreground" />
               </div>
-              <h3 className="text-xl font-bold text-foreground mb-3">🧹 {t("forStaff")}</h3>
+              <h3 className="text-xl font-bold text-foreground mb-3">🧹 For Cleaning Staff</h3>
               <ul className="space-y-3 text-muted-foreground">
                 <li className="flex items-start gap-2">
                   <CheckCircle className="h-5 w-5 text-success mt-0.5 shrink-0" />
-                  <span>{t("mobileFirst")}</span>
+                  <span>Mobile-first interface</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <CheckCircle className="h-5 w-5 text-success mt-0.5 shrink-0" />
-                  <span>{t("viewDailyJobs")}</span>
+                  <span>View assigned jobs for the day</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <CheckCircle className="h-5 w-5 text-success mt-0.5 shrink-0" />
-                  <span>{t("oneTapNav")}</span>
+                  <span>One-tap navigation to sites</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <CheckCircle className="h-5 w-5 text-success mt-0.5 shrink-0" />
-                  <span>{t("uploadBeforeAfter")}</span>
+                  <span>Upload before/after photos</span>
                 </li>
               </ul>
             </Card>
@@ -280,15 +273,15 @@ export default function Index() {
           <div className="flex flex-wrap justify-center gap-6 md:gap-12">
             <div className="flex items-center gap-2 text-muted-foreground">
               <span className="text-2xl">🇦🇺</span>
-              <span className="font-medium">{t("australianOwned")}</span>
+              <span className="font-medium">Australian Owned</span>
             </div>
             <div className="flex items-center gap-2 text-muted-foreground">
               <Lock className="h-5 w-5 text-success" />
-              <span className="font-medium">{t("securePayments")}</span>
+              <span className="font-medium">Secure Payments</span>
             </div>
             <div className="flex items-center gap-2 text-muted-foreground">
               <span className="text-xl">📱</span>
-              <span className="font-medium">{t("mobileApps")}</span>
+              <span className="font-medium">iOS & Android</span>
             </div>
           </div>
         </div>
@@ -300,22 +293,22 @@ export default function Index() {
         <div className="container mx-auto px-4 text-center">
           <Link to="/" className="flex items-center justify-center gap-2 mb-4 hover:opacity-80 transition-opacity">
             <Sparkles className="h-5 w-5 text-primary" />
-            <span className="font-bold text-foreground">{t("appName")}</span>
+            <span className="font-bold text-foreground">CleanFlow</span>
           </Link>
           <p className="text-sm text-muted-foreground mb-4">
-            {t("streamlineOperations")}
+            Streamline your cleaning business operations
           </p>
           <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground">
             <Link to="/terms" className="hover:text-foreground transition-colors">
-              {t("termsOfService")}
+              Terms of Service
             </Link>
             <span>•</span>
             <Link to="/privacy" className="hover:text-foreground transition-colors">
-              {t("privacyPolicy")}
+              Privacy Policy
             </Link>
           </div>
           <p className="text-xs text-muted-foreground mt-4">
-            © {new Date().getFullYear()} CleanFlow. {t("allRightsReserved")}
+            © {new Date().getFullYear()} CleanFlow. All rights reserved.
           </p>
         </div>
       </footer>

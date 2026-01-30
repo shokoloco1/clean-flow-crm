@@ -12,7 +12,6 @@ import { Separator } from '@/components/ui/separator';
 import { useNotifications, Notification } from '@/hooks/useNotifications';
 import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
-import { t } from '@/lib/i18n';
 
 const getNotificationIcon = (type: string) => {
   switch (type) {
@@ -89,7 +88,7 @@ function NotificationItem({ notification, onMarkAsRead, onDelete }: Notification
               size="icon"
               className="h-7 w-7"
               onClick={() => onMarkAsRead(notification.id)}
-              title={t("complete")}
+              title="Mark as read"
             >
               <Check className="h-3.5 w-3.5" />
             </Button>
@@ -99,7 +98,7 @@ function NotificationItem({ notification, onMarkAsRead, onDelete }: Notification
             size="icon"
             className="h-7 w-7 text-muted-foreground hover:text-destructive"
             onClick={() => onDelete(notification.id)}
-            title={t("delete")}
+            title="Delete"
           >
             <Trash2 className="h-3.5 w-3.5" />
           </Button>
@@ -138,7 +137,7 @@ export function NotificationCenter() {
       </PopoverTrigger>
       <PopoverContent className="w-80 p-0" align="end">
         <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-          <h3 className="font-semibold text-sm">{t("activeAlerts")}</h3>
+          <h3 className="font-semibold text-sm">Notifications</h3>
           <div className="flex items-center gap-1">
             {unreadCount > 0 && (
               <Button
@@ -148,7 +147,7 @@ export function NotificationCenter() {
                 onClick={markAllAsRead}
               >
                 <CheckCheck className="h-3.5 w-3.5 mr-1" />
-                {t("complete")}
+                Mark all read
               </Button>
             )}
           </div>
@@ -162,7 +161,7 @@ export function NotificationCenter() {
           ) : notifications.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-muted-foreground py-8">
               <Bell className="h-10 w-10 mb-2 opacity-50" />
-              <p className="text-sm">{t("noActiveAlerts")}</p>
+              <p className="text-sm">No notifications</p>
             </div>
           ) : (
             <div>
@@ -189,7 +188,7 @@ export function NotificationCenter() {
                 onClick={clearAll}
               >
                 <Trash2 className="h-3.5 w-3.5 mr-1" />
-                {t("delete")} {t("all")}
+                Clear all
               </Button>
             </div>
           </>

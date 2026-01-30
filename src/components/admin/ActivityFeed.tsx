@@ -1,6 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Activity, CheckCircle, Clock } from "lucide-react";
-import { t } from "@/lib/i18n";
 
 export interface ActivityItem {
   id: string;
@@ -21,13 +20,13 @@ export function ActivityFeed({ activities }: ActivityFeedProps) {
       <CardHeader>
         <div className="flex items-center gap-2">
           <Activity className="h-5 w-5 text-primary" />
-          <CardTitle>{t("liveFeed")}</CardTitle>
+          <CardTitle>Live Feed</CardTitle>
         </div>
       </CardHeader>
       <CardContent>
         {activities.length === 0 ? (
           <p className="text-muted-foreground text-sm text-center py-4">
-            {t("noActivityYet")}
+            No activity yet today
           </p>
         ) : (
           <div className="space-y-4">
@@ -45,7 +44,7 @@ export function ActivityFeed({ activities }: ActivityFeedProps) {
                 <div className="flex-1 min-w-0">
                   <p className="text-sm text-foreground">
                     <span className="font-medium">{activity.staffName}</span>
-                    {' '}{activity.type === 'completed' ? t("completedWork") : t("startedWork")}{' '}
+                    {' '}{activity.type === 'completed' ? 'completed' : 'started'}{' '}
                     <span className="font-medium">{activity.clientName}</span>
                   </p>
                   <p className="text-xs text-muted-foreground">{activity.time}</p>

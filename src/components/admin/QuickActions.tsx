@@ -3,7 +3,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
 import { Plus, Home, Users, Calendar, UserCircle, Repeat, Settings, FileText, DollarSign } from "lucide-react";
-import { t } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
 
 interface QuickActionsProps {
@@ -76,63 +75,63 @@ export function QuickActions({ onNewJobClick }: QuickActionsProps) {
   const actions = [
     {
       icon: Plus,
-      title: t("newJob"),
-      subtitle: t("scheduleClean"),
+      title: "New Job",
+      subtitle: "Schedule cleaning",
       onClick: onNewJobClick,
       badge: counts.pendingJobs > 0 ? counts.pendingJobs : undefined,
       badgeClassName: "bg-warning text-warning-foreground",
     },
     {
       icon: Home,
-      title: t("properties"),
-      subtitle: t("manageLocations"),
+      title: "Properties",
+      subtitle: "Manage locations",
       onClick: () => navigate("/admin/properties"),
       badge: counts.properties,
     },
     {
       icon: UserCircle,
-      title: t("clients"),
-      subtitle: t("manageClients"),
+      title: "Clients",
+      subtitle: "Manage clients",
       onClick: () => navigate("/admin/clients"),
       badge: counts.clients,
     },
     {
       icon: Users,
-      title: t("staff"),
-      subtitle: t("manageTeam"),
+      title: "Staff",
+      subtitle: "Manage team",
       onClick: () => navigate("/admin/staff"),
       badge: counts.staff,
     },
     {
       icon: Calendar,
-      title: t("calendar"),
-      subtitle: t("viewSchedule"),
+      title: "Calendar",
+      subtitle: "View schedule",
       onClick: () => navigate("/admin/calendar"),
     },
     {
       icon: Repeat,
-      title: t("recurring"),
-      subtitle: t("autoSchedule"),
+      title: "Recurring Jobs",
+      subtitle: "Auto-schedule",
       onClick: () => navigate("/admin/recurring"),
       badge: counts.recurring,
     },
     {
       icon: FileText,
-      title: t("invoices"),
-      subtitle: t("generateInvoices"),
+      title: "Invoices",
+      subtitle: "Generate invoices",
       onClick: () => navigate("/admin/invoices"),
       badge: counts.invoices > 0 ? counts.invoices : undefined,
     },
     {
       icon: DollarSign,
-      title: t("pricing"),
-      subtitle: t("priceList"),
+      title: "Pricing",
+      subtitle: "Price list",
       onClick: () => navigate("/admin/price-lists"),
     },
     {
       icon: Settings,
-      title: t("settings"),
-      subtitle: t("systemConfig"),
+      title: "Settings",
+      subtitle: "System settings",
       onClick: () => navigate("/admin/settings"),
     },
   ];

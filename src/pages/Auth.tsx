@@ -14,7 +14,6 @@ import { toast } from "sonner";
 import { Sparkles, Shield, Users, Eye, EyeOff, AlertTriangle, Lock, CheckCircle } from "lucide-react";
 import { signupSchema, loginSchema, validatePassword } from "@/lib/passwordSecurity";
 import { PasswordStrengthIndicator } from "@/components/PasswordStrengthIndicator";
-import { t } from "@/lib/i18n";
 
 export default function Auth() {
   const navigate = useNavigate();
@@ -116,10 +115,10 @@ export default function Auth() {
     setIsBootstrapping(true);
     const { error } = await supabase.functions.invoke("bootstrap-role");
     if (error) {
-      toast.error(t("noRoleContactAdmin"));
+      toast.error("Your account has no role assigned. Please ask an admin to assign one.");
     } else {
       await refreshRole();
-      toast.success(t("roleAdminAssigned"));
+      toast.success("Admin role assigned. Redirecting...");
     }
     setIsBootstrapping(false);
   };
@@ -157,10 +156,10 @@ export default function Auth() {
     
     if (error) {
       await recordAttempt(loginEmail, false);
-      toast.error(t("invalidCredentials"));
+      toast.error("Invalid credentials. Please check your email and password.");
     } else {
       await recordAttempt(loginEmail, true);
-      toast.success(t("welcomeBack"));
+      toast.success("Welcome back!");
     }
     
     setIsSubmitting(false);
@@ -185,7 +184,7 @@ export default function Auth() {
         errors[`signup_${field}`] = err.message;
       });
       setFormErrors(errors);
-      toast.error(t("pleaseCorrectErrors"));
+      toast.error("Please check the highlighted fields");
       return;
     }
     
@@ -195,12 +194,12 @@ export default function Auth() {
     
     if (error) {
       if (error.message?.includes("already registered")) {
-        toast.error(t("emailAlreadyRegistered"));
+        toast.error("This email is already registered. Please sign in instead.");
       } else {
-        toast.error(error.message || t("somethingWentWrong"));
+        toast.error(error.message || "Something went wrong. Please try again.");
       }
     } else {
-      toast.success(t("accountCreated"));
+      toast.success("Account created successfully!");
     }
     
     setIsSubmitting(false);
@@ -209,7 +208,7 @@ export default function Auth() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="animate-pulse text-primary">{t("loading")}</div>
+        <div className="animate-pulse text-primary">Loading...</div>
       </div>
     );
   }
@@ -225,15 +224,15 @@ export default function Auth() {
                 <Sparkles className="h-7 w-7 text-primary-foreground" />
               </div>
             </div>
-            <h1 className="text-3xl font-bold text-foreground">{t("appName")}</h1>
-            <p className="text-muted-foreground">{t("noRoleAssigned")}</p>
+            <h1 className="text-3xl font-bold text-foreground">CleanFlow</h1>
+            <p className="text-muted-foreground">Your account doesn't have a role assigned</p>
           </div>
 
           <Card className="border-border shadow-lg">
             <CardHeader>
-              <CardTitle>{t("pendingAccess")}</CardTitle>
+              <CardTitle>Access pending</CardTitle>
               <CardDescription>
-                {t("pendingAccessDescription")}
+                To access the system, an admin must assign you a role (admin or staff).
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
@@ -242,10 +241,10 @@ export default function Auth() {
                 onClick={handleBootstrapAdmin}
                 disabled={isBootstrapping}
               >
-                {isBootstrapping ? t("configuring") : t("configureAsAdmin")}
+                {isBootstrapping ? "Configuring..." : "Configure as Admin (first time only)"}
               </Button>
               <Button variant="outline" className="w-full" onClick={signOut}>
-                {t("logout")}
+                Sign Out
               </Button>
             </CardContent>
           </Card>
@@ -264,22 +263,22 @@ export default function Auth() {
               <Sparkles className="h-8 w-8 text-primary-foreground" />
             </div>
           </Link>
-          <h1 className="text-3xl font-bold text-foreground">{t("appName")}</h1>
-          <p className="text-muted-foreground">{t("professionalCleaningManagement")}</p>
+          <h1 className="text-3xl font-bold text-foreground">CleanFlow</h1>
+          <p className="text-muted-foreground">Professional cleaning management</p>
         </div>
 
         <Card className="border-border shadow-xl">
           <CardHeader className="pb-2 text-center">
-            <CardTitle className="text-xl">👋 {t("welcome")}</CardTitle>
+            <CardTitle className="text-xl">👋 Welcome</CardTitle>
           <CardDescription>
-              {t("signInToAccount")}
+              Sign in to your account or create a new one
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
               <TabsList className="grid w-full grid-cols-2 mb-6">
-                <TabsTrigger value="login">{t("login")}</TabsTrigger>
-                <TabsTrigger value="signup">{t("signup")}</TabsTrigger>
+                <TabsTrigger value="login">Sign In</TabsTrigger>
+                <TabsTrigger value="signup">Create Account</TabsTrigger>
               </TabsList>
               
               <TabsContent value="login">
@@ -387,7 +386,7 @@ export default function Auth() {
                       </div>
                       <div className="space-y-2">
                         <div className="flex items-center justify-between">
-                          <Label htmlFor="login-password">{t("password")}</Label>
+                          <Label htmlFor="login-password">Password</Label>
                           <button
                             type="button"
                             onClick={() => setShowResetForm(true)}
@@ -428,7 +427,7 @@ export default function Auth() {
                         className="w-full h-12 text-base" 
                         disabled={isSubmitting || rateLimitState.isBlocked}
                       >
-                        {isSubmitting ? t("signingIn") : t("login")}
+                        {isSubmitting ? "Signing in..." : "Sign In"}
                       </Button>
                     </form>
                   </>
@@ -438,7 +437,7 @@ export default function Auth() {
               <TabsContent value="signup">
                 <form onSubmit={handleSignup} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="signup-name">{t("fullName")}</Label>
+                    <Label htmlFor="signup-name">Full Name</Label>
                     <Input
                       id="signup-name"
                       type="text"
@@ -474,7 +473,7 @@ export default function Auth() {
                     )}
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="signup-password">{t("password")}</Label>
+                    <Label htmlFor="signup-password">Password</Label>
                     <div className="relative">
                       <Input
                         id="signup-password"
@@ -502,7 +501,7 @@ export default function Auth() {
                     )}
                   </div>
                   <div className="space-y-2">
-                    <Label>{t("accountType")}</Label>
+                    <Label>Account Type</Label>
                     <Select value={signupRole} onValueChange={(v) => setSignupRole(v as "admin" | "staff")}>
                       <SelectTrigger>
                         <SelectValue />
@@ -511,13 +510,13 @@ export default function Auth() {
                         <SelectItem value="admin">
                           <div className="flex items-center gap-2">
                             <Shield className="h-4 w-4" />
-                            <span>{t("admin")}</span>
+                            <span>Admin (Owner)</span>
                           </div>
                         </SelectItem>
                         <SelectItem value="staff">
                           <div className="flex items-center gap-2">
                             <Users className="h-4 w-4" />
-                            <span>{t("staffRole")}</span>
+                            <span>Staff (Cleaner)</span>
                           </div>
                         </SelectItem>
                       </SelectContent>
@@ -528,7 +527,7 @@ export default function Auth() {
                     className="w-full h-12 text-base" 
                     disabled={isSubmitting || validatePassword(signupPassword).strength === "weak"}
                   >
-                    {isSubmitting ? t("creatingAccount") : t("signup")}
+                    {isSubmitting ? "Creating account..." : "Create Account"}
                   </Button>
                 </form>
               </TabsContent>
@@ -537,7 +536,7 @@ export default function Auth() {
         </Card>
 
         <p className="text-center text-sm text-muted-foreground">
-          {t("appName")} — {t("appTagline")}
+          CleanFlow — Manage your cleaning business without the stress
         </p>
       </div>
     </div>

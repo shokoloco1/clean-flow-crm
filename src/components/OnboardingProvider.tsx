@@ -21,74 +21,73 @@ import {
   ArrowLeft,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { t } from "@/lib/i18n";
 
 interface OnboardingStep {
   icon: React.ElementType;
-  titleKey: string;
-  descriptionKey: string;
-  detailKeys: string[];
+  title: string;
+  description: string;
+  details: string[];
 }
 
 const ONBOARDING_STEPS: OnboardingStep[] = [
   {
     icon: Sparkles,
-    titleKey: "welcomeToCleanFlow",
-    descriptionKey: "yourProfessionalPlatform",
-    detailKeys: [
-      "onboardingDetail1",
-      "onboardingDetail2",
-      "onboardingDetail3",
+    title: "Welcome to CleanFlow!",
+    description: "Your professional cleaning management platform",
+    details: [
+      "Manage all your cleaning jobs in one place",
+      "Track your team's performance in real-time",
+      "Generate professional reports for your clients",
     ],
   },
   {
     icon: ClipboardList,
-    titleKey: "jobManagement",
-    descriptionKey: "jobManagementDesc",
-    detailKeys: [
-      "jobManagementDetail1",
-      "jobManagementDetail2",
-      "jobManagementDetail3",
+    title: "Job Management",
+    description: "Schedule and track jobs easily",
+    details: [
+      "Create jobs with custom checklists",
+      "Assign staff to each job",
+      "Real-time progress tracking",
     ],
   },
   {
     icon: Users,
-    titleKey: "clientsAndProperties",
-    descriptionKey: "clientsAndPropertiesDesc",
-    detailKeys: [
-      "clientsDetail1",
-      "clientsDetail2",
-      "clientsDetail3",
+    title: "Clients & Properties",
+    description: "Organise your client portfolio",
+    details: [
+      "Register clients with contact details",
+      "Manage multiple properties per client",
+      "Exclusive portal for clients to view their history",
     ],
   },
   {
     icon: MapPin,
-    titleKey: "geofencingControl",
-    descriptionKey: "geofencingDesc",
-    detailKeys: [
-      "geofencingDetail1",
-      "geofencingDetail2",
-      "geofencingDetail3",
+    title: "Geofencing & Control",
+    description: "Automatic location verification",
+    details: [
+      "GPS-validated check-in/check-out",
+      "Automatic alerts for late arrivals",
+      "Before and after photo evidence",
     ],
   },
   {
     icon: Calendar,
-    titleKey: "calendarRecurrence",
-    descriptionKey: "calendarDesc",
-    detailKeys: [
-      "calendarDetail1",
-      "calendarDetail2",
-      "calendarDetail3",
+    title: "Calendar & Recurrence",
+    description: "Plan ahead",
+    details: [
+      "Interactive calendar view",
+      "Automatic recurring jobs",
+      "Manage staff availability",
     ],
   },
   {
     icon: BarChart3,
-    titleKey: "reportsMetrics",
-    descriptionKey: "reportsDesc",
-    detailKeys: [
-      "reportsDetail1",
-      "reportsDetail2",
-      "reportsDetail3",
+    title: "Reports & Metrics",
+    description: "Make informed decisions",
+    details: [
+      "Dashboard with key metrics",
+      "Export reports as PDF and CSV",
+      "Performance analysis by period",
     ],
   },
 ];
@@ -174,9 +173,9 @@ export function OnboardingProvider({ children }: OnboardingProviderProps) {
                 <step.icon className="h-6 w-6 text-primary" />
               </div>
               <div>
-                <DialogTitle className="text-left">{t(step.titleKey as any)}</DialogTitle>
+                <DialogTitle className="text-left">{step.title}</DialogTitle>
                 <DialogDescription className="text-left">
-                  {t(step.descriptionKey as any)}
+                  {step.description}
                 </DialogDescription>
               </div>
             </div>
@@ -186,13 +185,13 @@ export function OnboardingProvider({ children }: OnboardingProviderProps) {
             <Progress value={progress} className="h-1" />
             
             <div className="space-y-3">
-              {step.detailKeys.map((detailKey, index) => (
+              {step.details.map((detail, index) => (
                 <div
                   key={index}
                   className="flex items-start gap-3 p-3 rounded-lg bg-muted/50"
                 >
                   <CheckCircle className="h-5 w-5 text-primary mt-0.5 shrink-0" />
-                  <p className="text-sm text-foreground">{t(detailKey as any)}</p>
+                  <p className="text-sm text-foreground">{detail}</p>
                 </div>
               ))}
             </div>
@@ -222,17 +221,17 @@ export function OnboardingProvider({ children }: OnboardingProviderProps) {
               className="flex-1"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
-              {t("previous")}
+              Previous
             </Button>
             <Button onClick={nextStep} className="flex-1">
               {isLastStep ? (
                 <>
                   <CheckCircle className="h-4 w-4 mr-2" />
-                  {t("letsStart")}
+                  Let's Start!
                 </>
               ) : (
                 <>
-                  {t("next")}
+                  Next
                   <ArrowRight className="h-4 w-4 ml-2" />
                 </>
               )}

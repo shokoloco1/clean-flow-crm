@@ -4,7 +4,6 @@ import { usePWA } from "@/hooks/usePWA";
 import { Button } from "@/components/ui/button";
 import { Download, X, Smartphone } from "lucide-react";
 import { useState, useEffect } from "react";
-import { t } from "@/lib/i18n";
 
 const PWAInstallBannerComponent: ForwardRefRenderFunction<HTMLDivElement> = (_, ref) => {
   const navigate = useNavigate();
