@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 
-interface UseFetchWithRetryOptions<T> {
+interface UseFetchWithRetryOptions {
   cacheKey: string;
   timeout?: number;
   maxRetries?: number;
@@ -13,11 +13,12 @@ interface FetchState<T> {
   error: string | null;
   isFromCache: boolean;
   retryCount: number;
+  isRetrying: boolean;
 }
 
 export function useFetchWithRetry<T>(
   fetchFn: () => Promise<T>,
-  options: UseFetchWithRetryOptions<T>
+  options: UseFetchWithRetryOptions
 ) {
   const { 
     cacheKey, 
@@ -32,10 +33,12 @@ export function useFetchWithRetry<T>(
     error: null,
     isFromCache: false,
     retryCount: 0,
+    isRetrying: false,
   });
 
   const abortControllerRef = useRef<AbortController | null>(null);
   const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isMountedRef = useRef(true);
 
   // Load cached data on mount
   useEffect(() => {
@@ -70,7 +73,7 @@ export function useFetchWithRetry<T>(
     return new Promise((resolve, reject) => {
       const timeoutId = setTimeout(() => {
         abortControllerRef.current?.abort();
-        reject(new Error('Request timeout - taking too long to respond'));
+        reject(new Error('Request timeout - server is not responding'));
       }, timeout);
 
       fetchFn()
@@ -85,7 +88,9 @@ export function useFetchWithRetry<T>(
     });
   }, [fetchFn, timeout]);
 
-  const execute = useCallback(async (isRetry = false) => {
+  const execute = useCallback(async (isRetry = false, currentRetryCount = 0) => {
+    if (!isMountedRef.current) return null;
+
     // Clear any pending retry
     if (retryTimeoutRef.current) {
       clearTimeout(retryTimeoutRef.current);
@@ -96,11 +101,15 @@ export function useFetchWithRetry<T>(
       ...prev,
       loading: true,
       error: null,
-      retryCount: isRetry ? prev.retryCount + 1 : 0,
+      isRetrying: isRetry,
+      retryCount: currentRetryCount,
     }));
 
     try {
       const result = await executeWithTimeout();
+      
+      if (!isMountedRef.current) return null;
+      
       saveToCache(result);
       setState({
         data: result,
@@ -108,49 +117,56 @@ export function useFetchWithRetry<T>(
         error: null,
         isFromCache: false,
         retryCount: 0,
+        isRetrying: false,
       });
       return result;
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      if (!isMountedRef.current) return null;
       
-      setState(prev => {
-        const newRetryCount = isRetry ? prev.retryCount : 0;
-        
-        // Auto-retry if under max retries
-        if (newRetryCount < maxRetries) {
-          retryTimeoutRef.current = setTimeout(() => {
-            execute(true);
-          }, retryDelay * (newRetryCount + 1)); // Exponential backoff
-          
-          return {
-            ...prev,
-            loading: true,
-            error: null,
-            retryCount: newRetryCount + 1,
-          };
-        }
-        
-        // Max retries reached - show error but keep cached data
-        return {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      const nextRetryCount = currentRetryCount + 1;
+      
+      // Auto-retry if under max retries
+      if (nextRetryCount <= maxRetries) {
+        setState(prev => ({
           ...prev,
-          loading: false,
-          error: errorMessage,
-          isFromCache: prev.data !== null,
-        };
-      });
+          loading: true,
+          error: null,
+          isRetrying: true,
+          retryCount: nextRetryCount,
+        }));
+        
+        retryTimeoutRef.current = setTimeout(() => {
+          execute(true, nextRetryCount);
+        }, retryDelay * nextRetryCount); // Exponential backoff
+        
+        return null;
+      }
+      
+      // Max retries reached - ALWAYS set loading to false and show error
+      setState(prev => ({
+        ...prev,
+        loading: false,
+        error: errorMessage,
+        isFromCache: prev.data !== null,
+        isRetrying: false,
+        retryCount: nextRetryCount,
+      }));
       
       return null;
     }
   }, [executeWithTimeout, saveToCache, maxRetries, retryDelay]);
 
   const retry = useCallback(() => {
-    setState(prev => ({ ...prev, retryCount: 0 }));
-    execute(false);
+    execute(false, 0);
   }, [execute]);
 
   // Cleanup on unmount
   useEffect(() => {
+    isMountedRef.current = true;
+    
     return () => {
+      isMountedRef.current = false;
       abortControllerRef.current?.abort();
       if (retryTimeoutRef.current) {
         clearTimeout(retryTimeoutRef.current);
