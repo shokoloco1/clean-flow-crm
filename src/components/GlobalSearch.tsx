@@ -4,10 +4,8 @@ import {
   CommandDialog,
   CommandEmpty,
   CommandGroup,
-  CommandInput,
   CommandItem,
   CommandList,
-  CommandSeparator,
 } from "@/components/ui/command";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -34,9 +32,14 @@ import {
   Filter,
   X,
   Loader2,
+  Phone,
+  Mail,
+  Eye,
+  ExternalLink,
 } from "lucide-react";
 import { useGlobalSearch, SearchFilters } from "@/hooks/useGlobalSearch";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const STATUS_OPTIONS = [
   { value: "pending", label: "Pending" },
@@ -122,6 +125,40 @@ export function GlobalSearch() {
     },
     [navigate, clearResults]
   );
+
+  const handleQuickAction = useCallback((e: React.MouseEvent, action: string, data: any) => {
+    e.stopPropagation();
+    
+    switch (action) {
+      case "call":
+        if (data.phone) {
+          window.open(`tel:${data.phone}`, "_self");
+          toast.success(`Calling ${data.phone}`);
+        } else {
+          toast.error("No phone number available");
+        }
+        break;
+      case "email":
+        if (data.email) {
+          window.open(`mailto:${data.email}`, "_blank");
+        } else {
+          toast.error("No email available");
+        }
+        break;
+      case "view":
+        setOpen(false);
+        setQuery("");
+        clearResults();
+        if (data.type === "job") {
+          navigate("/admin/calendar");
+        } else if (data.type === "client") {
+          navigate("/admin/clients");
+        } else if (data.type === "staff") {
+          navigate("/admin/staff");
+        }
+        break;
+    }
+  }, [navigate, clearResults]);
 
   const clearFilters = () => {
     setFilters({});
@@ -300,7 +337,7 @@ export function GlobalSearch() {
 
           {results.length > 0 && (
             <>
-              {["job", "client", "property", "staff"].map((type) => {
+          {["job", "client", "property", "staff"].map((type) => {
                 const typeResults = results.filter((r) => r.type === type);
                 if (typeResults.length === 0) return null;
 
@@ -311,7 +348,7 @@ export function GlobalSearch() {
                         key={`${result.type}-${result.id}`}
                         value={`${result.type}-${result.id}`}
                         onSelect={() => handleSelect(result)}
-                        className="cursor-pointer"
+                        className="cursor-pointer group"
                       >
                         <div className="flex items-center gap-3 w-full">
                           {getIcon(result.type)}
@@ -321,6 +358,42 @@ export function GlobalSearch() {
                               {result.subtitle}
                             </p>
                           </div>
+                          
+                          {/* Quick Actions */}
+                          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            {(result.type === "client" || result.type === "staff") && result.metadata?.phone && (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7"
+                                onClick={(e) => handleQuickAction(e, "call", { phone: result.metadata?.phone })}
+                                title="Call"
+                              >
+                                <Phone className="h-3.5 w-3.5 text-green-500" />
+                              </Button>
+                            )}
+                            {(result.type === "client" || result.type === "staff") && result.metadata?.email && (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7"
+                                onClick={(e) => handleQuickAction(e, "email", { email: result.metadata?.email })}
+                                title="Email"
+                              >
+                                <Mail className="h-3.5 w-3.5 text-blue-500" />
+                              </Button>
+                            )}
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7"
+                              onClick={(e) => handleQuickAction(e, "view", { type: result.type })}
+                              title="View"
+                            >
+                              <Eye className="h-3.5 w-3.5 text-muted-foreground" />
+                            </Button>
+                          </div>
+
                           {result.metadata?.status && (
                             <Badge
                               variant="outline"

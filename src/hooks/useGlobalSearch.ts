@@ -60,10 +60,35 @@ export function useGlobalSearch() {
         jobsQuery = jobsQuery.lte("scheduled_date", filters.dateTo);
       }
 
-      const { data: jobs } = await jobsQuery;
+      // Run all queries in parallel for faster results
+      const [jobsResult, clientsResult, propertiesResult, staffResult] = await Promise.all([
+        jobsQuery,
+        (!filters?.status && !filters?.staffId) 
+          ? supabase
+              .from("clients")
+              .select("id, name, email, phone")
+              .or(`name.ilike.${searchTerm},email.ilike.${searchTerm},phone.ilike.${searchTerm}`)
+              .limit(5)
+          : Promise.resolve({ data: null }),
+        (!filters?.status && !filters?.staffId)
+          ? supabase
+              .from("properties")
+              .select("id, name, address, clients(name)")
+              .or(`name.ilike.${searchTerm},address.ilike.${searchTerm}`)
+              .limit(5)
+          : Promise.resolve({ data: null }),
+        (!filters?.status)
+          ? supabase
+              .from("profiles")
+              .select("id, user_id, full_name, email, phone")
+              .or(`full_name.ilike.${searchTerm},email.ilike.${searchTerm}`)
+              .limit(5)
+          : Promise.resolve({ data: null })
+      ]);
 
-      if (jobs) {
-        jobs.forEach((job) => {
+      // Process jobs
+      if (jobsResult.data) {
+        jobsResult.data.forEach((job) => {
           const clientName = (job.clients as any)?.name || "Sin cliente";
           const propertyName = (job.properties as any)?.name;
           searchResults.push({
@@ -76,65 +101,49 @@ export function useGlobalSearch() {
         });
       }
 
-      // Search clients (only if no job-specific filters)
-      if (!filters?.status && !filters?.staffId) {
-        const { data: clients } = await supabase
-          .from("clients")
-          .select("id, name, email, phone")
-          .or(`name.ilike.${searchTerm},email.ilike.${searchTerm}`)
-          .limit(5);
-
-        if (clients) {
-          clients.forEach((client) => {
-            searchResults.push({
-              id: client.id,
-              type: "client",
-              title: client.name,
-              subtitle: client.email || client.phone || "Sin contacto",
-            });
+      // Process clients
+      if (clientsResult.data) {
+        clientsResult.data.forEach((client) => {
+          searchResults.push({
+            id: client.id,
+            type: "client",
+            title: client.name,
+            subtitle: client.email || client.phone || "Sin contacto",
+            metadata: { 
+              phone: client.phone || undefined,
+              email: client.email || undefined 
+            },
           });
-        }
+        });
       }
 
-      // Search properties (only if no job-specific filters)
-      if (!filters?.status && !filters?.staffId) {
-        const { data: properties } = await supabase
-          .from("properties")
-          .select("id, name, address, clients(name)")
-          .or(`name.ilike.${searchTerm},address.ilike.${searchTerm}`)
-          .limit(5);
-
-        if (properties) {
-          properties.forEach((property) => {
-            const clientName = (property.clients as any)?.name;
-            searchResults.push({
-              id: property.id,
-              type: "property",
-              title: property.name,
-              subtitle: clientName ? `${clientName} • ${property.address}` : property.address,
-            });
+      // Process properties
+      if (propertiesResult.data) {
+        propertiesResult.data.forEach((property) => {
+          const clientName = (property.clients as any)?.name;
+          searchResults.push({
+            id: property.id,
+            type: "property",
+            title: property.name,
+            subtitle: clientName ? `${clientName} • ${property.address}` : property.address,
           });
-        }
+        });
       }
 
-      // Search staff
-      if (!filters?.status) {
-        const { data: staff } = await supabase
-          .from("profiles")
-          .select("id, user_id, full_name, email")
-          .or(`full_name.ilike.${searchTerm},email.ilike.${searchTerm}`)
-          .limit(5);
-
-        if (staff) {
-          staff.forEach((member) => {
-            searchResults.push({
-              id: member.user_id,
-              type: "staff",
-              title: member.full_name,
-              subtitle: member.email,
-            });
+      // Process staff
+      if (staffResult.data) {
+        staffResult.data.forEach((member) => {
+          searchResults.push({
+            id: member.user_id,
+            type: "staff",
+            title: member.full_name,
+            subtitle: member.email,
+            metadata: {
+              phone: (member as any).phone || undefined,
+              email: member.email || undefined
+            },
           });
-        }
+        });
       }
 
       setResults(searchResults);
