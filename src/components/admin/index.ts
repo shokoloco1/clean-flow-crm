@@ -5,3 +5,6 @@ export { ActivityFeed, type ActivityItem } from './ActivityFeed';
 export { CreateJobDialog, type Client, type Staff, type NewJobData } from './CreateJobDialog';
 export { JobDetailDialog, type JobPhoto } from './JobDetailDialog';
 export { DashboardErrorState } from './DashboardErrorState';
+export { AdminLayout } from './AdminLayout';
+export { AdminSidebar } from './AdminSidebar';
+export { MobileBottomNav } from './MobileBottomNav';
