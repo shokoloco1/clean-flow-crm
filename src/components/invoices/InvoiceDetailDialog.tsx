@@ -122,9 +122,9 @@ export function InvoiceDetailDialog({
       .eq("id", invoice.id);
 
     if (error) {
-      toast.error(t("error"));
+      toast.error("Failed to update status");
     } else {
-      toast.success(t("success"));
+      toast.success("Status updated successfully");
       onUpdated();
     }
 
@@ -232,10 +232,10 @@ export function InvoiceDetailDialog({
 
       // Save
       doc.save(`${invoice.invoice_number}.pdf`);
-      toast.success(t("success"));
+      toast.success("PDF downloaded successfully");
     } catch (error) {
       console.error(error);
-      toast.error(t("error"));
+      toast.error("Failed to generate PDF");
     }
 
     setGeneratingPDF(false);
@@ -244,14 +244,14 @@ export function InvoiceDetailDialog({
   const getStatusConfig = (status: string) => {
     switch (status) {
       case "paid":
-        return { label: t("paid"), className: "bg-success/10 text-success border-success/30" };
+        return { label: "Paid", className: "bg-success/10 text-success border-success/30" };
       case "sent":
-        return { label: t("sent"), className: "bg-primary/10 text-primary border-primary/30" };
+        return { label: "Sent", className: "bg-primary/10 text-primary border-primary/30" };
       case "overdue":
-        return { label: t("overdue"), className: "bg-destructive/10 text-destructive border-destructive/30" };
+        return { label: "Overdue", className: "bg-destructive/10 text-destructive border-destructive/30" };
       case "draft":
       default:
-        return { label: t("draft"), className: "bg-muted text-muted-foreground border-border" };
+        return { label: "Draft", className: "bg-muted text-muted-foreground border-border" };
     }
   };
 
@@ -283,7 +283,7 @@ export function InvoiceDetailDialog({
             {/* Client & Dates */}
             <div className="grid grid-cols-2 gap-6">
               <div>
-                <p className="text-sm text-muted-foreground mb-1">{t("client")}</p>
+                <p className="text-sm text-muted-foreground mb-1">Client</p>
                 <div className="flex items-center gap-2">
                   <Building2 className="h-4 w-4 text-muted-foreground" />
                   <span className="font-medium">{clientDetails?.name}</span>
@@ -296,13 +296,13 @@ export function InvoiceDetailDialog({
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4 text-muted-foreground" />
                   <span className="text-sm">
-                    {t("issueDate")}: {format(parseISO(invoice.issue_date), "dd/MM/yyyy")}
+                    Issue Date: {format(parseISO(invoice.issue_date), "dd/MM/yyyy")}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4 text-muted-foreground" />
                   <span className="text-sm">
-                    {t("dueDate")}: {format(parseISO(invoice.due_date), "dd/MM/yyyy")}
+                    Due Date: {format(parseISO(invoice.due_date), "dd/MM/yyyy")}
                   </span>
                 </div>
               </div>
@@ -312,7 +312,7 @@ export function InvoiceDetailDialog({
 
             {/* Items */}
             <div>
-              <p className="text-sm font-medium mb-3">{t("details")}</p>
+              <p className="text-sm font-medium mb-3">Details</p>
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -344,18 +344,18 @@ export function InvoiceDetailDialog({
               <CardContent className="py-4">
                 <div className="space-y-2">
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">{t("subtotal")}</span>
+                    <span className="text-muted-foreground">Subtotal</span>
                     <span>{formatAUD(Number(invoice.subtotal))}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">
-                      {t("gst")}
+                      GST ({invoice.tax_rate}%)
                     </span>
                     <span>{formatAUD(Number(invoice.tax_amount))}</span>
                   </div>
                   <Separator />
                   <div className="flex justify-between text-lg font-bold">
-                    <span>{t("total")}</span>
+                    <span>Total</span>
                     <span>{formatAUD(Number(invoice.total))}</span>
                   </div>
                 </div>
@@ -365,7 +365,7 @@ export function InvoiceDetailDialog({
             {/* Notes */}
             {invoice.notes && (
               <div>
-                <p className="text-sm text-muted-foreground mb-1">{t("notes")}</p>
+                <p className="text-sm text-muted-foreground mb-1">Notes</p>
                 <p className="text-sm">{invoice.notes}</p>
               </div>
             )}
@@ -382,10 +382,10 @@ export function InvoiceDetailDialog({
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="draft">{t("draft")}</SelectItem>
-                    <SelectItem value="sent">{t("sent")}</SelectItem>
-                    <SelectItem value="paid">{t("paid")}</SelectItem>
-                    <SelectItem value="overdue">{t("overdue")}</SelectItem>
+                    <SelectItem value="draft">Draft</SelectItem>
+                    <SelectItem value="sent">Sent</SelectItem>
+                    <SelectItem value="paid">Paid</SelectItem>
+                    <SelectItem value="overdue">Overdue</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -395,7 +395,7 @@ export function InvoiceDetailDialog({
                 ) : (
                   <Download className="h-4 w-4 mr-2" />
                 )}
-                {t("downloadPDF")}
+                Download PDF
               </Button>
             </div>
           </div>

@@ -1,7 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Calendar, Users, CheckCircle, TrendingUp } from "lucide-react";
-import { t } from "@/lib/i18n";
 
 export interface Stats {
   todayJobs: number;
@@ -17,28 +16,28 @@ interface StatsCardsProps {
 export function StatsCards({ stats }: StatsCardsProps) {
   const cards = [
     {
-      title: t("todaysJobs"),
+      title: "Today's Jobs",
       value: stats.todayJobs,
       icon: Calendar,
       iconColor: "text-primary",
       tooltip: "Total jobs scheduled for today",
     },
     {
-      title: t("completedToday"),
+      title: "Completed Today",
       value: stats.completedToday,
       icon: CheckCircle,
       iconColor: "text-success",
       tooltip: "Jobs completed today",
     },
     {
-      title: t("completionRate"),
+      title: "Completion Rate",
       value: `${stats.completionRate}%`,
       icon: TrendingUp,
       iconColor: "text-primary",
       tooltip: "Percentage of jobs completed vs scheduled today",
     },
     {
-      title: t("totalStaff"),
+      title: "Total Staff",
       value: stats.activeStaff,
       icon: Users,
       iconColor: "text-primary",
