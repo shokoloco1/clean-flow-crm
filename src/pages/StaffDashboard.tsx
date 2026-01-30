@@ -4,13 +4,15 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { LogOut, Sparkles, Calendar, Smile } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { LogOut, Sparkles, Calendar, Smile, ChevronDown, Clock } from "lucide-react";
 import { format, addDays } from "date-fns";
 import JobDetailView from "@/components/JobDetailView";
 import { NotificationCenter } from "@/components/NotificationCenter";
 import { useJobStatusChange } from "@/hooks/useJobStatusChange";
 import { NextJobCard } from "@/components/staff/NextJobCard";
 import { TodayJobsList } from "@/components/staff/TodayJobsList";
+import { StaffAvailabilityCalendar } from "@/components/staff/StaffAvailabilityCalendar";
 
 interface PropertyPhotos {
   id: string;
@@ -304,39 +306,54 @@ export default function StaffDashboard() {
 
             {/* Upcoming Jobs (simplified) */}
             {upcomingJobs.length > 0 && (
-              <div className="pt-2">
-                <h3 className="text-sm font-semibold text-muted-foreground px-1 mb-2">
+              <Collapsible>
+                <CollapsibleTrigger className="flex items-center gap-2 text-sm font-semibold text-muted-foreground px-1 mb-2 hover:text-foreground transition-colors">
+                  <ChevronDown className="h-4 w-4" />
                   📅 Upcoming ({upcomingJobs.length})
-                </h3>
-                <div className="space-y-2">
-                  {upcomingJobs.slice(0, 3).map((job) => (
-                    <Card 
-                      key={job.id}
-                      className="cursor-pointer active:scale-[0.98] transition-all opacity-70"
-                      onClick={() => setSelectedJob(job)}
-                    >
-                      <CardContent className="p-3">
-                        <div className="flex items-center justify-between">
-                          <div className="flex-1 min-w-0">
-                            <p className="text-xs text-muted-foreground mb-0.5">
-                              {format(new Date(job.scheduled_date), "EEE, MMM d")} • {job.scheduled_time}
-                            </p>
-                            <p className="font-medium text-foreground truncate">
-                              {job.clients?.name || "Unknown"}
-                            </p>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <div className="space-y-2">
+                    {upcomingJobs.slice(0, 3).map((job) => (
+                      <Card 
+                        key={job.id}
+                        className="cursor-pointer active:scale-[0.98] transition-all opacity-70"
+                        onClick={() => setSelectedJob(job)}
+                      >
+                        <CardContent className="p-3">
+                          <div className="flex items-center justify-between">
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs text-muted-foreground mb-0.5">
+                                {format(new Date(job.scheduled_date), "EEE, MMM d")} • {job.scheduled_time}
+                              </p>
+                              <p className="font-medium text-foreground truncate">
+                                {job.clients?.name || "Unknown"}
+                              </p>
+                            </div>
                           </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                  {upcomingJobs.length > 3 && (
-                    <p className="text-xs text-center text-muted-foreground py-2">
-                      +{upcomingJobs.length - 3} more upcoming jobs
-                    </p>
-                  )}
-                </div>
-              </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                    {upcomingJobs.length > 3 && (
+                      <p className="text-xs text-center text-muted-foreground py-2">
+                        +{upcomingJobs.length - 3} more upcoming jobs
+                      </p>
+                    )}
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
             )}
+
+            {/* Staff Availability Calendar */}
+            <Collapsible className="pt-4">
+              <CollapsibleTrigger className="flex items-center gap-2 text-sm font-semibold text-muted-foreground px-1 mb-2 hover:text-foreground transition-colors w-full">
+                <ChevronDown className="h-4 w-4" />
+                <Clock className="h-4 w-4" />
+                My Availability
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <StaffAvailabilityCalendar compact />
+              </CollapsibleContent>
+            </Collapsible>
           </div>
         )}
       </main>

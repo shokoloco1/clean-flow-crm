@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,7 +19,8 @@ import {
 } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Loader2 } from "lucide-react";
-import { useCleaningServices, CleaningService } from "@/hooks/useCleaningServices";
+import { useCleaningServices } from "@/hooks/useCleaningServices";
+import { AvailabilityAwareStaffSelect } from "./AvailabilityAwareStaffSelect";
 
 export interface Client {
   id: string;
@@ -141,30 +142,16 @@ export function CreateJobDialog({
             />
           </div>
 
-          {/* Staff Assignment */}
+          {/* Staff Assignment - Availability Aware */}
           <div className="space-y-2">
             <Label className="text-base font-medium">Assign to *</Label>
-            <Select 
-              value={formData.assigned_staff_id} 
+            <AvailabilityAwareStaffSelect
+              date={formData.scheduled_date}
+              time={formData.scheduled_time}
+              value={formData.assigned_staff_id}
               onValueChange={(v) => onFormChange({ ...formData, assigned_staff_id: v })}
-            >
-              <SelectTrigger className="h-12">
-                <SelectValue placeholder="🧹 Select an employee" />
-              </SelectTrigger>
-              <SelectContent>
-                {staffList.length === 0 ? (
-                  <p className="p-4 text-center text-muted-foreground">
-                    No employees yet. Invite one first.
-                  </p>
-                ) : (
-                  staffList.map(staff => (
-                    <SelectItem key={staff.user_id} value={staff.user_id}>
-                      {staff.full_name}
-                    </SelectItem>
-                  ))
-                )}
-              </SelectContent>
-            </Select>
+              placeholder="🧹 Select an employee"
+            />
           </div>
 
           {/* Date & Time */}
