@@ -15,14 +15,14 @@ export default function PrivacyPage() {
           <Link to="/">
             <Button variant="ghost" size="sm">
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Volver
+              Back
             </Button>
           </Link>
         </div>
       </header>
 
       <main className="container mx-auto px-4 py-12 max-w-4xl">
-        <h1 className="text-4xl font-bold text-foreground mb-8">Política de Privacidad</h1>
+        <h1 className="text-4xl font-bold text-foreground mb-8">Privacy Policy</h1>
         
         <div className="prose prose-lg dark:prose-invert max-w-none space-y-6 text-muted-foreground">
           <p className="text-sm text-muted-foreground">
@@ -30,120 +30,120 @@ export default function PrivacyPage() {
           </p>
 
           <section className="space-y-4">
-            <h2 className="text-2xl font-semibold text-foreground">1. Información que Recopilamos</h2>
+            <h2 className="text-2xl font-semibold text-foreground">1. Information We Collect</h2>
             <p>
-              Recopilamos información que usted nos proporciona directamente, incluyendo:
+              We collect information that you provide to us directly, including:
             </p>
             <ul className="list-disc pl-6 space-y-2">
-              <li><strong>Información de cuenta:</strong> nombre, correo electrónico, teléfono, contraseña</li>
-              <li><strong>Información de negocio:</strong> nombre de empresa, dirección, datos fiscales</li>
-              <li><strong>Datos de clientes:</strong> información de contacto de sus clientes</li>
-              <li><strong>Datos de ubicación:</strong> GPS para verificación de check-in/check-out</li>
-              <li><strong>Fotos:</strong> evidencia de trabajos realizados</li>
+              <li><strong>Account information:</strong> name, email, phone, password</li>
+              <li><strong>Business information:</strong> company name, address, tax details</li>
+              <li><strong>Client data:</strong> contact information for your clients</li>
+              <li><strong>Location data:</strong> GPS for check-in/check-out verification</li>
+              <li><strong>Photos:</strong> evidence of completed work</li>
             </ul>
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-2xl font-semibold text-foreground">2. Uso de la Información</h2>
-            <p>Utilizamos la información recopilada para:</p>
+            <h2 className="text-2xl font-semibold text-foreground">2. Use of Information</h2>
+            <p>We use the information collected to:</p>
             <ul className="list-disc pl-6 space-y-2">
-              <li>Proporcionar, mantener y mejorar el Servicio</li>
-              <li>Procesar transacciones y enviar notificaciones relacionadas</li>
-              <li>Responder a comentarios, preguntas y solicitudes</li>
-              <li>Enviar información técnica, actualizaciones y alertas de seguridad</li>
-              <li>Monitorear y analizar tendencias de uso</li>
-              <li>Detectar, investigar y prevenir actividades fraudulentas</li>
+              <li>Provide, maintain and improve the Service</li>
+              <li>Process transactions and send related notifications</li>
+              <li>Respond to comments, questions and requests</li>
+              <li>Send technical information, updates and security alerts</li>
+              <li>Monitor and analyse usage trends</li>
+              <li>Detect, investigate and prevent fraudulent activities</li>
             </ul>
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-2xl font-semibold text-foreground">3. Compartir Información</h2>
+            <h2 className="text-2xl font-semibold text-foreground">3. Sharing Information</h2>
             <p>
-              No vendemos ni alquilamos su información personal a terceros. Podemos compartir información con:
+              We do not sell or rent your personal information to third parties. We may share information with:
             </p>
             <ul className="list-disc pl-6 space-y-2">
-              <li><strong>Proveedores de servicios:</strong> que nos ayudan a operar el Servicio</li>
-              <li><strong>Cumplimiento legal:</strong> cuando sea requerido por ley</li>
-              <li><strong>Protección de derechos:</strong> para proteger nuestros derechos y seguridad</li>
-              <li><strong>Con su consentimiento:</strong> para cualquier otro propósito con su permiso</li>
+              <li><strong>Service providers:</strong> who help us operate the Service</li>
+              <li><strong>Legal compliance:</strong> when required by law</li>
+              <li><strong>Rights protection:</strong> to protect our rights and safety</li>
+              <li><strong>With your consent:</strong> for any other purpose with your permission</li>
             </ul>
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-2xl font-semibold text-foreground">4. Seguridad de Datos</h2>
+            <h2 className="text-2xl font-semibold text-foreground">4. Data Security</h2>
             <p>
-              Implementamos medidas de seguridad técnicas y organizativas para proteger su información:
+              We implement technical and organisational security measures to protect your information:
             </p>
             <ul className="list-disc pl-6 space-y-2">
-              <li>Encriptación de datos en tránsito y en reposo</li>
-              <li>Control de acceso basado en roles</li>
-              <li>Auditorías de seguridad regulares</li>
-              <li>Almacenamiento seguro en servidores protegidos</li>
-              <li>Protección contra acceso no autorizado</li>
+              <li>Encryption of data in transit and at rest</li>
+              <li>Role-based access control</li>
+              <li>Regular security audits</li>
+              <li>Secure storage on protected servers</li>
+              <li>Protection against unauthorised access</li>
             </ul>
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-2xl font-semibold text-foreground">5. Retención de Datos</h2>
+            <h2 className="text-2xl font-semibold text-foreground">5. Data Retention</h2>
             <p>
-              Conservamos su información mientras su cuenta esté activa o según sea necesario para 
-              proporcionarle servicios. También conservamos y usamos información según sea necesario 
-              para cumplir con obligaciones legales, resolver disputas y hacer cumplir nuestros acuerdos.
+              We retain your information while your account is active or as necessary to 
+              provide you with services. We also retain and use information as necessary 
+              to comply with legal obligations, resolve disputes and enforce our agreements.
             </p>
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-2xl font-semibold text-foreground">6. Sus Derechos</h2>
-            <p>Usted tiene derecho a:</p>
+            <h2 className="text-2xl font-semibold text-foreground">6. Your Rights</h2>
+            <p>You have the right to:</p>
             <ul className="list-disc pl-6 space-y-2">
-              <li><strong>Acceso:</strong> solicitar una copia de sus datos personales</li>
-              <li><strong>Rectificación:</strong> corregir datos inexactos o incompletos</li>
-              <li><strong>Eliminación:</strong> solicitar la eliminación de sus datos</li>
-              <li><strong>Portabilidad:</strong> recibir sus datos en formato estructurado</li>
-              <li><strong>Oposición:</strong> oponerse al procesamiento de sus datos</li>
+              <li><strong>Access:</strong> request a copy of your personal data</li>
+              <li><strong>Rectification:</strong> correct inaccurate or incomplete data</li>
+              <li><strong>Deletion:</strong> request deletion of your data</li>
+              <li><strong>Portability:</strong> receive your data in a structured format</li>
+              <li><strong>Objection:</strong> object to processing of your data</li>
             </ul>
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-2xl font-semibold text-foreground">7. Cookies y Tecnologías Similares</h2>
+            <h2 className="text-2xl font-semibold text-foreground">7. Cookies and Similar Technologies</h2>
             <p>
-              Utilizamos cookies y tecnologías similares para mantener su sesión activa, 
-              recordar sus preferencias y mejorar su experiencia. Puede configurar su navegador 
-              para rechazar cookies, pero esto puede afectar la funcionalidad del Servicio.
+              We use cookies and similar technologies to maintain your session, 
+              remember your preferences and improve your experience. You can configure your browser 
+              to reject cookies, but this may affect the functionality of the Service.
             </p>
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-2xl font-semibold text-foreground">8. Datos de Ubicación</h2>
+            <h2 className="text-2xl font-semibold text-foreground">8. Location Data</h2>
             <p>
-              Recopilamos datos de ubicación GPS cuando el personal realiza check-in/check-out en trabajos. 
-              Esta información se utiliza para verificar la presencia en el lugar de trabajo y se comparte 
-              únicamente con los administradores de su organización.
+              We collect GPS location data when staff perform check-in/check-out on jobs. 
+              This information is used to verify presence at the workplace and is shared 
+              only with the administrators of your organisation.
             </p>
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-2xl font-semibold text-foreground">9. Menores de Edad</h2>
+            <h2 className="text-2xl font-semibold text-foreground">9. Minors</h2>
             <p>
-              El Servicio no está dirigido a menores de 18 años. No recopilamos intencionalmente 
-              información de menores. Si descubrimos que hemos recopilado información de un menor, 
-              tomaremos medidas para eliminarla.
+              The Service is not directed to persons under 18 years of age. We do not intentionally 
+              collect information from minors. If we discover that we have collected information from a minor, 
+              we will take steps to delete it.
             </p>
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-2xl font-semibold text-foreground">10. Cambios a esta Política</h2>
+            <h2 className="text-2xl font-semibold text-foreground">10. Changes to this Policy</h2>
             <p>
-              Podemos actualizar esta Política de Privacidad periódicamente. Le notificaremos sobre 
-              cambios significativos publicando la nueva política en esta página y, si es apropiado, 
-              enviándole un aviso por correo electrónico.
+              We may update this Privacy Policy periodically. We will notify you of 
+              significant changes by posting the new policy on this page and, if appropriate, 
+              sending you a notice by email.
             </p>
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-2xl font-semibold text-foreground">11. Contacto</h2>
+            <h2 className="text-2xl font-semibold text-foreground">11. Contact</h2>
             <p>
-              Si tiene preguntas sobre esta Política de Privacidad, puede contactarnos en: 
+              If you have questions about this Privacy Policy, you can contact us at: 
               <a href="mailto:privacy@cleanflow.app" className="text-primary hover:underline ml-1">
                 privacy@cleanflow.app
               </a>
@@ -156,11 +156,11 @@ export default function PrivacyPage() {
       <footer className="border-t py-8 mt-12">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
           <div className="flex items-center justify-center gap-4">
-            <Link to="/terms" className="hover:text-foreground">Términos de Servicio</Link>
+            <Link to="/terms" className="hover:text-foreground">Terms of Service</Link>
             <span>•</span>
-            <Link to="/privacy" className="hover:text-foreground">Política de Privacidad</Link>
+            <Link to="/privacy" className="hover:text-foreground">Privacy Policy</Link>
           </div>
-          <p className="mt-4">© {new Date().getFullYear()} CleanFlow. Todos los derechos reservados.</p>
+          <p className="mt-4">© {new Date().getFullYear()} CleanFlow. All rights reserved.</p>
         </div>
       </footer>
     </div>

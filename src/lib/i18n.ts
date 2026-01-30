@@ -1,5 +1,5 @@
 // i18n system with English as default language for Australian market
-// Supports English (default) and Spanish for Latino workforce
+// English-only for Australian market
 
 type TranslationKey = keyof typeof translations.en;
 
@@ -295,7 +295,7 @@ const translations = {
     heroSubtitle: "100% specialised in cleaning. No features you don't need. No complications you don't want.",
     benefit1: "Setup in 3 clicks",
     benefit2: "Australian owned",
-    benefit3: "Bilingual (EN/ES)",
+    benefit3: "GST & ABN ready",
     benefit4: "Mobile-first design",
     startFreeTrial: "Start Free Trial",
     alreadyHaveAccount: "Already have an account",

@@ -39,10 +39,10 @@ import { useGlobalSearch, SearchFilters } from "@/hooks/useGlobalSearch";
 import { supabase } from "@/integrations/supabase/client";
 
 const STATUS_OPTIONS = [
-  { value: "pending", label: "Pendiente" },
-  { value: "in_progress", label: "En Progreso" },
-  { value: "completed", label: "Completado" },
-  { value: "cancelled", label: "Cancelado" },
+  { value: "pending", label: "Pending" },
+  { value: "in_progress", label: "In Progress" },
+  { value: "completed", label: "Completed" },
+  { value: "cancelled", label: "Cancelled" },
 ];
 
 const STATUS_COLORS: Record<string, string> = {
@@ -147,11 +147,11 @@ export function GlobalSearch() {
   const getTypeLabel = (type: string) => {
     switch (type) {
       case "job":
-        return "Trabajo";
+        return "Job";
       case "client":
-        return "Cliente";
+        return "Client";
       case "property":
-        return "Propiedad";
+        return "Property";
       case "staff":
         return "Staff";
       default:
@@ -167,7 +167,7 @@ export function GlobalSearch() {
         onClick={() => setOpen(true)}
       >
         <Search className="h-4 w-4 xl:mr-2" />
-        <span className="hidden xl:inline-flex">Buscar...</span>
+        <span className="hidden xl:inline-flex">Search...</span>
         <kbd className="pointer-events-none absolute right-1.5 top-1.5 hidden h-6 select-none items-center gap-1 rounded border border-border bg-muted px-1.5 font-mono text-xs font-medium opacity-100 xl:flex">
           <span className="text-xs">⌘</span>K
         </kbd>
@@ -177,7 +177,7 @@ export function GlobalSearch() {
         <div className="flex items-center border-b border-border px-3">
           <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
           <input
-            placeholder="Buscar trabajos, clientes, propiedades..."
+            placeholder="Search jobs, clients, properties..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             className="flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
@@ -201,17 +201,17 @@ export function GlobalSearch() {
             <PopoverContent className="w-80" align="end">
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <h4 className="font-medium">Filtros</h4>
+                  <h4 className="font-medium">Filters</h4>
                   {hasActiveFilters && (
                     <Button variant="ghost" size="sm" onClick={clearFilters}>
                       <X className="h-3 w-3 mr-1" />
-                      Limpiar
+                      Clear
                     </Button>
                   )}
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Estado del trabajo</Label>
+                  <Label>Job Status</Label>
                   <Select
                     value={filters.status || ""}
                     onValueChange={(value) =>
@@ -222,10 +222,10 @@ export function GlobalSearch() {
                     }
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Todos los estados" />
+                      <SelectValue placeholder="All statuses" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Todos</SelectItem>
+                      <SelectItem value="">All</SelectItem>
                       {STATUS_OPTIONS.map((status) => (
                         <SelectItem key={status.value} value={status.value}>
                           {status.label}
@@ -236,7 +236,7 @@ export function GlobalSearch() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Staff asignado</Label>
+                  <Label>Assigned Staff</Label>
                   <Select
                     value={filters.staffId || ""}
                     onValueChange={(value) =>
@@ -247,10 +247,10 @@ export function GlobalSearch() {
                     }
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Todo el staff" />
+                      <SelectValue placeholder="All staff" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Todos</SelectItem>
+                      <SelectItem value="">All</SelectItem>
                       {staffList.map((staff) => (
                         <SelectItem key={staff.user_id} value={staff.user_id}>
                           {staff.full_name}
@@ -262,7 +262,7 @@ export function GlobalSearch() {
 
                 <div className="grid grid-cols-2 gap-2">
                   <div className="space-y-2">
-                    <Label>Desde</Label>
+                    <Label>From</Label>
                     <Input
                       type="date"
                       value={filters.dateFrom || ""}
@@ -275,7 +275,7 @@ export function GlobalSearch() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Hasta</Label>
+                    <Label>To</Label>
                     <Input
                       type="date"
                       value={filters.dateTo || ""}
@@ -295,7 +295,7 @@ export function GlobalSearch() {
 
         <CommandList>
           {!loading && query && results.length === 0 && (
-            <CommandEmpty>No se encontraron resultados.</CommandEmpty>
+            <CommandEmpty>No results found.</CommandEmpty>
           )}
 
           {results.length > 0 && (
@@ -342,7 +342,7 @@ export function GlobalSearch() {
 
           {!query && !hasActiveFilters && (
             <div className="py-6 text-center text-sm text-muted-foreground">
-              Escribe para buscar o usa los filtros
+              Type to search or use filters
             </div>
           )}
         </CommandList>

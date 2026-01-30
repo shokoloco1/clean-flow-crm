@@ -57,7 +57,7 @@ const PricingPage = () => {
         "Invoicing & payments",
         "Client portal",
         "GST & ABN integration",
-        "Bilingual (English/Spanish)",
+        "Australian localisation",
         "Email support",
       ],
       cta: "Start Free Trial",

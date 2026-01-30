@@ -81,7 +81,7 @@ export default function ClientPortal() {
       }
 
       if (!data || data.length === 0) {
-        setError("Código de acceso inválido o sin trabajos registrados");
+        setError("Invalid access code or no jobs registered");
         setAuthenticated(false);
         setLoading(false);
         return;
@@ -93,11 +93,11 @@ export default function ClientPortal() {
         photos: Array.isArray(job.photos) ? job.photos : []
       }));
       setJobs(typedJobs);
-      setClientName(typedJobs[0]?.client_name || "Cliente");
+      setClientName(typedJobs[0]?.client_name || "Client");
       setToken(accessToken);
       setAuthenticated(true);
     } catch (err: any) {
-      setError("Error al acceder al portal. Verifica tu código de acceso.");
+      setError("Error accessing portal. Please check your access code.");
       setAuthenticated(false);
     }
     
@@ -115,19 +115,19 @@ export default function ClientPortal() {
     switch (status) {
       case "completed":
         return { 
-          label: "Completado", 
+          label: "Completed", 
           variant: "default" as const,
           className: "bg-success/10 text-success border-success/30"
         };
       case "in_progress":
         return { 
-          label: "En Progreso", 
+          label: "In Progress", 
           variant: "secondary" as const,
           className: "bg-warning/10 text-warning border-warning/30"
         };
       default:
         return { 
-          label: "Programado", 
+          label: "Scheduled", 
           variant: "outline" as const,
           className: "bg-muted text-muted-foreground"
         };
@@ -161,7 +161,7 @@ export default function ClientPortal() {
               </div>
               <div>
                 <h1 className="text-xl font-bold text-foreground">CleanFlow</h1>
-                <p className="text-sm text-muted-foreground">Portal de Clientes</p>
+                <p className="text-sm text-muted-foreground">Client Portal</p>
               </div>
             </Link>
           </div>
@@ -174,9 +174,9 @@ export default function ClientPortal() {
               <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
                 <Lock className="h-8 w-8 text-primary" />
               </div>
-              <CardTitle className="text-2xl">Acceso al Portal</CardTitle>
+              <CardTitle className="text-2xl">Portal Access</CardTitle>
               <CardDescription>
-                Ingresa tu código de acceso único para ver tus trabajos de limpieza
+                Enter your unique access code to view your cleaning jobs
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -184,7 +184,7 @@ export default function ClientPortal() {
                 <div className="relative">
                   <Input
                     type="text"
-                    placeholder="Ingresa tu código de acceso"
+                    placeholder="Enter your access code"
                     value={inputToken}
                     onChange={(e) => setInputToken(e.target.value)}
                     className="pr-10 h-12 text-center font-mono text-lg tracking-wider"
@@ -207,19 +207,19 @@ export default function ClientPortal() {
                   {loading ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Verificando...
+                      Verifying...
                     </>
                   ) : (
                     <>
                       <Search className="h-4 w-4 mr-2" />
-                      Acceder al Portal
+                      Access Portal
                     </>
                   )}
                 </Button>
               </form>
 
               <p className="text-xs text-muted-foreground text-center mt-6">
-                ¿No tienes un código? Contacta a tu proveedor de servicios de limpieza.
+                Don't have a code? Contact your cleaning service provider.
               </p>
             </CardContent>
           </Card>
@@ -247,7 +247,7 @@ export default function ClientPortal() {
             </div>
             <div>
               <h1 className="text-xl font-bold text-foreground">CleanFlow</h1>
-              <p className="text-sm text-muted-foreground">Portal de Clientes</p>
+              <p className="text-sm text-muted-foreground">Client Portal</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -265,7 +265,7 @@ export default function ClientPortal() {
                 setInputToken("");
               }}
             >
-              Salir
+              Sign Out
             </Button>
           </div>
         </div>
@@ -276,7 +276,7 @@ export default function ClientPortal() {
         <Card className="mb-8 bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20">
           <CardContent className="py-6">
             <h2 className="text-2xl font-bold text-foreground mb-2">
-              Bienvenido, {clientName}
+              Welcome, {clientName}
             </h2>
             <p className="text-muted-foreground">
               Aquí puedes ver el historial de servicios de limpieza realizados y programados.
@@ -348,7 +348,7 @@ export default function ClientPortal() {
               jobs={scheduledJobs} 
               onViewJob={setSelectedJob}
               getStatusConfig={getStatusConfig}
-              emptyMessage="No hay trabajos programados"
+              emptyMessage="No scheduled jobs"
             />
           </TabsContent>
           <TabsContent value="progress">
@@ -356,7 +356,7 @@ export default function ClientPortal() {
               jobs={inProgressJobs} 
               onViewJob={setSelectedJob}
               getStatusConfig={getStatusConfig}
-              emptyMessage="No hay trabajos en progreso"
+              emptyMessage="No jobs in progress"
             />
           </TabsContent>
           <TabsContent value="completed">
@@ -364,7 +364,7 @@ export default function ClientPortal() {
               jobs={completedJobs} 
               onViewJob={setSelectedJob}
               getStatusConfig={getStatusConfig}
-              emptyMessage="No hay trabajos completados"
+              emptyMessage="No completed jobs"
             />
           </TabsContent>
         </Tabs>
@@ -377,7 +377,7 @@ export default function ClientPortal() {
             <>
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-3">
-                  <span>Detalle del Servicio</span>
+                  <span>Service Details</span>
                   <Badge className={getStatusConfig(selectedJob.status).className}>
                     {getStatusConfig(selectedJob.status).label}
                   </Badge>
@@ -388,14 +388,14 @@ export default function ClientPortal() {
                 {/* Basic Info */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <p className="text-sm text-muted-foreground">Fecha</p>
+                    <p className="text-sm text-muted-foreground">Date</p>
                     <p className="font-medium flex items-center gap-2">
                       <Calendar className="h-4 w-4 text-primary" />
                       {format(parseISO(selectedJob.scheduled_date), "EEEE, d MMMM yyyy")}
                     </p>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-sm text-muted-foreground">Hora Programada</p>
+                    <p className="text-sm text-muted-foreground">Scheduled Time</p>
                     <p className="font-medium flex items-center gap-2">
                       <Clock className="h-4 w-4 text-primary" />
                       {selectedJob.scheduled_time}
@@ -542,7 +542,7 @@ interface JobListProps {
   emptyMessage?: string;
 }
 
-function JobList({ jobs, onViewJob, getStatusConfig, emptyMessage = "No hay trabajos" }: JobListProps) {
+function JobList({ jobs, onViewJob, getStatusConfig, emptyMessage = "No jobs" }: JobListProps) {
   if (jobs.length === 0) {
     return (
       <Card className="border-dashed">
@@ -573,10 +573,10 @@ function JobList({ jobs, onViewJob, getStatusConfig, emptyMessage = "No hay trab
                     <Badge className={statusConfig.className}>
                       {statusConfig.label}
                     </Badge>
-                    {photoCount > 0 && (
+                      {photoCount > 0 && (
                       <Badge variant="outline" className="text-xs">
                         <ImageIcon className="h-3 w-3 mr-1" />
-                        {photoCount} fotos
+                        {photoCount} photos
                       </Badge>
                     )}
                   </div>

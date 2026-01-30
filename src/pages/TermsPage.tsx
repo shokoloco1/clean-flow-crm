@@ -15,14 +15,14 @@ export default function TermsPage() {
           <Link to="/">
             <Button variant="ghost" size="sm">
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Volver
+              Back
             </Button>
           </Link>
         </div>
       </header>
 
       <main className="container mx-auto px-4 py-12 max-w-4xl">
-        <h1 className="text-4xl font-bold text-foreground mb-8">Términos de Servicio</h1>
+        <h1 className="text-4xl font-bold text-foreground mb-8">Terms of Service</h1>
         
         <div className="prose prose-lg dark:prose-invert max-w-none space-y-6 text-muted-foreground">
           <p className="text-sm text-muted-foreground">
@@ -30,94 +30,94 @@ export default function TermsPage() {
           </p>
 
           <section className="space-y-4">
-            <h2 className="text-2xl font-semibold text-foreground">1. Aceptación de los Términos</h2>
+            <h2 className="text-2xl font-semibold text-foreground">1. Acceptance of Terms</h2>
             <p>
-              Al acceder y utilizar CleanFlow ("el Servicio"), usted acepta estar sujeto a estos Términos de Servicio. 
-              Si no está de acuerdo con alguna parte de estos términos, no podrá acceder al Servicio.
+              By accessing and using CleanFlow ("the Service"), you agree to be bound by these Terms of Service. 
+              If you do not agree with any part of these terms, you may not access the Service.
             </p>
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-2xl font-semibold text-foreground">2. Descripción del Servicio</h2>
+            <h2 className="text-2xl font-semibold text-foreground">2. Description of Service</h2>
             <p>
-              CleanFlow es una plataforma de gestión para empresas de limpieza que permite:
+              CleanFlow is a management platform for cleaning businesses that enables:
             </p>
             <ul className="list-disc pl-6 space-y-2">
-              <li>Programación y gestión de trabajos de limpieza</li>
-              <li>Seguimiento de personal y ubicación</li>
-              <li>Gestión de clientes y propiedades</li>
-              <li>Facturación y reportes</li>
-              <li>Comunicación entre equipos</li>
+              <li>Scheduling and management of cleaning jobs</li>
+              <li>Staff and location tracking</li>
+              <li>Client and property management</li>
+              <li>Invoicing and reporting</li>
+              <li>Team communication</li>
             </ul>
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-2xl font-semibold text-foreground">3. Registro y Cuentas</h2>
+            <h2 className="text-2xl font-semibold text-foreground">3. Registration and Accounts</h2>
             <p>
-              Para utilizar el Servicio, debe crear una cuenta proporcionando información precisa y completa. 
-              Usted es responsable de mantener la confidencialidad de su contraseña y de todas las actividades 
-              que ocurran bajo su cuenta.
+              To use the Service, you must create an account by providing accurate and complete information. 
+              You are responsible for maintaining the confidentiality of your password and for all activities 
+              that occur under your account.
             </p>
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-2xl font-semibold text-foreground">4. Uso Aceptable</h2>
-            <p>Usted acepta no utilizar el Servicio para:</p>
+            <h2 className="text-2xl font-semibold text-foreground">4. Acceptable Use</h2>
+            <p>You agree not to use the Service to:</p>
             <ul className="list-disc pl-6 space-y-2">
-              <li>Violar cualquier ley o regulación aplicable</li>
-              <li>Infringir los derechos de propiedad intelectual de terceros</li>
-              <li>Transmitir malware o código malicioso</li>
-              <li>Interferir con el funcionamiento del Servicio</li>
-              <li>Acceder sin autorización a sistemas o datos</li>
+              <li>Violate any applicable law or regulation</li>
+              <li>Infringe the intellectual property rights of third parties</li>
+              <li>Transmit malware or malicious code</li>
+              <li>Interfere with the operation of the Service</li>
+              <li>Access systems or data without authorisation</li>
             </ul>
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-2xl font-semibold text-foreground">5. Pagos y Facturación</h2>
+            <h2 className="text-2xl font-semibold text-foreground">5. Payments and Billing</h2>
             <p>
-              Los planes de suscripción se facturan mensual o anualmente según su elección. 
-              Todos los pagos son no reembolsables excepto según lo establecido en nuestra política de reembolso.
-              Los precios pueden cambiar con previo aviso de 30 días.
+              Subscription plans are billed monthly or annually as you choose. 
+              All payments are non-refundable except as set out in our refund policy.
+              Prices may change with 30 days' prior notice.
             </p>
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-2xl font-semibold text-foreground">6. Propiedad Intelectual</h2>
+            <h2 className="text-2xl font-semibold text-foreground">6. Intellectual Property</h2>
             <p>
-              El Servicio y su contenido original, características y funcionalidad son propiedad de CleanFlow 
-              y están protegidos por leyes de propiedad intelectual. Usted conserva todos los derechos sobre 
-              sus datos y contenido.
+              The Service and its original content, features and functionality are the property of CleanFlow 
+              and are protected by intellectual property laws. You retain all rights to 
+              your data and content.
             </p>
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-2xl font-semibold text-foreground">7. Limitación de Responsabilidad</h2>
+            <h2 className="text-2xl font-semibold text-foreground">7. Limitation of Liability</h2>
             <p>
-              En ningún caso CleanFlow será responsable por daños indirectos, incidentales, especiales, 
-              consecuentes o punitivos, incluyendo pérdida de beneficios, datos, uso u otra pérdida intangible.
+              In no event shall CleanFlow be liable for indirect, incidental, special, 
+              consequential or punitive damages, including loss of profits, data, use or other intangible loss.
             </p>
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-2xl font-semibold text-foreground">8. Terminación</h2>
+            <h2 className="text-2xl font-semibold text-foreground">8. Termination</h2>
             <p>
-              Podemos terminar o suspender su cuenta inmediatamente, sin previo aviso, por cualquier razón, 
-              incluyendo violación de estos Términos. Tras la terminación, su derecho a usar el Servicio cesará.
+              We may terminate or suspend your account immediately, without prior notice, for any reason, 
+              including breach of these Terms. Upon termination, your right to use the Service will cease.
             </p>
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-2xl font-semibold text-foreground">9. Cambios a los Términos</h2>
+            <h2 className="text-2xl font-semibold text-foreground">9. Changes to Terms</h2>
             <p>
-              Nos reservamos el derecho de modificar estos términos en cualquier momento. 
-              Le notificaremos sobre cambios significativos por correo electrónico o mediante un aviso en el Servicio.
+              We reserve the right to modify these terms at any time. 
+              We will notify you of significant changes by email or by posting a notice on the Service.
             </p>
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-2xl font-semibold text-foreground">10. Contacto</h2>
+            <h2 className="text-2xl font-semibold text-foreground">10. Contact</h2>
             <p>
-              Si tiene preguntas sobre estos Términos de Servicio, puede contactarnos en: 
+              If you have questions about these Terms of Service, you can contact us at: 
               <a href="mailto:legal@cleanflow.app" className="text-primary hover:underline ml-1">
                 legal@cleanflow.app
               </a>
@@ -130,11 +130,11 @@ export default function TermsPage() {
       <footer className="border-t py-8 mt-12">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
           <div className="flex items-center justify-center gap-4">
-            <Link to="/terms" className="hover:text-foreground">Términos de Servicio</Link>
+            <Link to="/terms" className="hover:text-foreground">Terms of Service</Link>
             <span>•</span>
-            <Link to="/privacy" className="hover:text-foreground">Política de Privacidad</Link>
+            <Link to="/privacy" className="hover:text-foreground">Privacy Policy</Link>
           </div>
-          <p className="mt-4">© {new Date().getFullYear()} CleanFlow. Todos los derechos reservados.</p>
+          <p className="mt-4">© {new Date().getFullYear()} CleanFlow. All rights reserved.</p>
         </div>
       </footer>
     </div>

@@ -72,31 +72,31 @@ interface StaffMetrics {
 }
 
 const DAYS_OF_WEEK = [
-  { short: "Dom", full: "Domingo" },
-  { short: "Lun", full: "Lunes" },
-  { short: "Mar", full: "Martes" },
-  { short: "Mié", full: "Miércoles" },
-  { short: "Jue", full: "Jueves" },
-  { short: "Vie", full: "Viernes" },
-  { short: "Sáb", full: "Sábado" }
+  { short: "Sun", full: "Sunday" },
+  { short: "Mon", full: "Monday" },
+  { short: "Tue", full: "Tuesday" },
+  { short: "Wed", full: "Wednesday" },
+  { short: "Thu", full: "Thursday" },
+  { short: "Fri", full: "Friday" },
+  { short: "Sat", full: "Saturday" }
 ];
 
 const SKILL_OPTIONS = [
-  "Limpieza Residencial",
-  "Limpieza Comercial",
-  "Limpieza Profunda",
-  "Limpieza de Ventanas",
-  "Limpieza de Alfombras",
-  "Limpieza de Cocina Industrial",
-  "Manejo de Químicos",
-  "Limpieza Post-Construcción"
+  "Residential Cleaning",
+  "Commercial Cleaning",
+  "Deep Cleaning",
+  "Window Cleaning",
+  "Carpet Cleaning",
+  "Industrial Kitchen Cleaning",
+  "Chemical Handling",
+  "Post-Construction Cleaning"
 ];
 
 const CERTIFICATION_OPTIONS = [
-  "Manejo de Químicos Peligrosos",
-  "Primeros Auxilios",
-  "Seguridad Ocupacional",
-  "Limpieza Hospitalaria",
+  "Hazardous Chemical Handling",
+  "First Aid",
+  "Occupational Safety",
+  "Hospital Cleaning",
   "Green Cleaning"
 ];
 
@@ -233,11 +233,11 @@ export default function StaffManagementPage() {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast({ title: "Perfil actualizado correctamente" });
+      toast({ title: "Profile updated successfully" });
       queryClient.invalidateQueries({ queryKey: ["staff-list"] });
     },
     onError: (error) => {
-      toast({ title: "Error al actualizar", description: error.message, variant: "destructive" });
+      toast({ title: "Error updating profile", description: error.message, variant: "destructive" });
     }
   });
 
@@ -763,7 +763,7 @@ export default function StaffManagementPage() {
                     <div className="space-y-4">
                       <h4 className="font-semibold flex items-center gap-2">
                         <Award className="h-4 w-4" />
-                        Certificaciones
+                        Certifications
                       </h4>
                       <div className="flex flex-wrap gap-2">
                         {CERTIFICATION_OPTIONS.map((cert) => (
@@ -785,14 +785,14 @@ export default function StaffManagementPage() {
                       className="w-full mt-6" 
                       disabled={updateProfileMutation.isPending}
                     >
-                      {updateProfileMutation.isPending ? "Guardando..." : "Guardar Cambios"}
+                      {updateProfileMutation.isPending ? "Saving..." : "Save Changes"}
                     </Button>
                   </TabsContent>
 
                   {/* Availability Tab */}
                   <TabsContent value="availability" className="space-y-4 mt-0">
                     <p className="text-sm text-muted-foreground">
-                      Configura el horario semanal de disponibilidad para este empleado.
+                      Configure the weekly availability schedule for this employee.
                     </p>
                     
                     <div className="space-y-3">
@@ -819,7 +819,7 @@ export default function StaffManagementPage() {
                                   <div>
                                     <span className="font-medium">{day.full}</span>
                                     {!isAvailable && (
-                                      <p className="text-xs text-muted-foreground">No disponible</p>
+                                      <p className="text-xs text-muted-foreground">Not available</p>
                                     )}
                                   </div>
                                 </div>
@@ -874,7 +874,7 @@ export default function StaffManagementPage() {
                               <CardContent className="p-4 text-center">
                                 <Briefcase className="h-8 w-8 mx-auto text-primary mb-2" />
                                 <p className="text-2xl font-bold">{metrics.jobs_completed}</p>
-                                <p className="text-sm text-muted-foreground">Trabajos Completados</p>
+                                <p className="text-sm text-muted-foreground">Jobs Completed</p>
                               </CardContent>
                             </Card>
                             
@@ -882,7 +882,7 @@ export default function StaffManagementPage() {
                               <CardContent className="p-4 text-center">
                                 <Clock className="h-8 w-8 mx-auto text-blue-500 mb-2" />
                                 <p className="text-2xl font-bold">{metrics.total_hours.toFixed(1)}</p>
-                                <p className="text-sm text-muted-foreground">Horas Trabajadas</p>
+                                <p className="text-sm text-muted-foreground">Hours Worked</p>
                               </CardContent>
                             </Card>
                           </div>
@@ -894,11 +894,11 @@ export default function StaffManagementPage() {
                                   <Star className="h-6 w-6 text-yellow-500" />
                                 </div>
                                 <div>
-                                  <p className="text-sm text-muted-foreground">Calificación Promedio</p>
+                                  <p className="text-sm text-muted-foreground">Average Rating</p>
                                   <p className="text-2xl font-bold">
                                     {metrics.avg_quality_score 
                                       ? `${metrics.avg_quality_score.toFixed(1)} / 5.0`
-                                      : "Sin calificaciones aún"}
+                                      : "No ratings yet"}
                                   </p>
                                 </div>
                               </div>
@@ -912,20 +912,20 @@ export default function StaffManagementPage() {
                                   <div className="p-3 rounded-full bg-green-500/10">
                                     <Calendar className="h-6 w-6 text-green-500" />
                                   </div>
-                                  <div>
-                                    <p className="text-sm text-muted-foreground">Antigüedad</p>
-                                    <p className="text-2xl font-bold">
-                                      {(() => {
-                                        const months = Math.floor(
-                                          (new Date().getTime() - new Date(selectedStaff.hire_date).getTime()) / 
-                                          (1000 * 60 * 60 * 24 * 30)
-                                        );
-                                        if (months < 1) return "Menos de 1 mes";
-                                        if (months < 12) return `${months} mes${months > 1 ? 'es' : ''}`;
-                                        const years = Math.floor(months / 12);
-                                        const remainingMonths = months % 12;
-                                        return `${years} año${years > 1 ? 's' : ''}${remainingMonths > 0 ? ` y ${remainingMonths} mes${remainingMonths > 1 ? 'es' : ''}` : ''}`;
-                                      })()}
+                                <div>
+                                  <p className="text-sm text-muted-foreground">Tenure</p>
+                                  <p className="text-2xl font-bold">
+                                    {(() => {
+                                      const months = Math.floor(
+                                        (new Date().getTime() - new Date(selectedStaff.hire_date).getTime()) / 
+                                        (1000 * 60 * 60 * 24 * 30)
+                                      );
+                                      if (months < 1) return "Less than 1 month";
+                                      if (months < 12) return `${months} month${months > 1 ? 's' : ''}`;
+                                      const years = Math.floor(months / 12);
+                                      const remainingMonths = months % 12;
+                                      return `${years} year${years > 1 ? 's' : ''}${remainingMonths > 0 ? ` and ${remainingMonths} month${remainingMonths > 1 ? 's' : ''}` : ''}`;
+                                    })()}
                                     </p>
                                     <p className="text-xs text-muted-foreground mt-1">
                                       Since {new Date(selectedStaff.hire_date).toLocaleDateString('en-AU', { 
@@ -947,17 +947,17 @@ export default function StaffManagementPage() {
                                   <div className="p-3 rounded-full bg-primary/10">
                                     <TrendingUp className="h-6 w-6 text-primary" />
                                   </div>
-                                  <div>
-                                    <p className="text-sm text-muted-foreground">Ingresos Estimados</p>
-                                    <p className="text-2xl font-bold">
-                                      ${(metrics.total_hours * selectedStaff.hourly_rate).toLocaleString('en-AU', { 
-                                        minimumFractionDigits: 2,
-                                        maximumFractionDigits: 2 
-                                      })}
-                                    </p>
-                                    <p className="text-xs text-muted-foreground mt-1">
-                                      Basado en {metrics.total_hours.toFixed(1)} hrs × ${selectedStaff.hourly_rate}/hr
-                                    </p>
+                                <div>
+                                  <p className="text-sm text-muted-foreground">Estimated Earnings</p>
+                                  <p className="text-2xl font-bold">
+                                    ${(metrics.total_hours * selectedStaff.hourly_rate).toLocaleString('en-AU', { 
+                                      minimumFractionDigits: 2,
+                                      maximumFractionDigits: 2 
+                                    })}
+                                  </p>
+                                  <p className="text-xs text-muted-foreground mt-1">
+                                    Based on {metrics.total_hours.toFixed(1)} hrs × ${selectedStaff.hourly_rate}/hr
+                                  </p>
                                   </div>
                                 </div>
                               </CardContent>
