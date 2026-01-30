@@ -42,6 +42,7 @@ import { format, parseISO } from "date-fns";
 import { toast } from "sonner";
 import { CreateInvoiceDialog } from "@/components/invoices/CreateInvoiceDialog";
 import { InvoiceDetailDialog } from "@/components/invoices/InvoiceDetailDialog";
+import { XeroExport } from "@/components/invoices/XeroExport";
 
 interface Invoice {
   id: string;
@@ -137,10 +138,13 @@ export default function InvoicesPage() {
               <p className="text-sm text-muted-foreground">Manage your invoices</p>
             </div>
           </div>
-          <Button onClick={() => setIsCreateOpen(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            New Invoice
-          </Button>
+          <div className="flex items-center gap-2">
+            <XeroExport invoices={invoices} />
+            <Button onClick={() => setIsCreateOpen(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              New Invoice
+            </Button>
+          </div>
         </div>
       </header>
 
