@@ -20,14 +20,18 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
-import { Loader2, Plus, Trash2, FileText } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Loader2, Plus, Trash2, FileText, Info } from "lucide-react";
 import { PriceListReference } from "@/components/price-lists/PriceListReference";
+import { GSTSummary } from "./GSTSummary";
 import { format, differenceInMinutes } from "date-fns";
 import { toast } from "sonner";
+import { formatAUD, GST_RATE, calculateGST, formatABN } from "@/lib/australian";
 
 interface Client {
   id: string;
   name: string;
+  abn: string | null;
 }
 
 interface CompletedJob {
@@ -64,9 +68,10 @@ export function CreateInvoiceDialog({
   const [clients, setClients] = useState<Client[]>([]);
   const [completedJobs, setCompletedJobs] = useState<CompletedJob[]>([]);
   const [selectedClientId, setSelectedClientId] = useState<string>("");
+  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [selectedJobs, setSelectedJobs] = useState<Set<string>>(new Set());
   const [lineItems, setLineItems] = useState<InvoiceLineItem[]>([]);
-  const [taxRate, setTaxRate] = useState<number>(0);
+  const [applyGST, setApplyGST] = useState(true); // GST enabled by default for AU
   const [notes, setNotes] = useState("");
   const [dueDate, setDueDate] = useState(
     format(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), "yyyy-MM-dd")
@@ -81,22 +86,24 @@ export function CreateInvoiceDialog({
   useEffect(() => {
     if (selectedClientId) {
       fetchCompletedJobs(selectedClientId);
+      const client = clients.find(c => c.id === selectedClientId);
+      setSelectedClient(client || null);
     } else {
       setCompletedJobs([]);
       setSelectedJobs(new Set());
+      setSelectedClient(null);
     }
-  }, [selectedClientId]);
+  }, [selectedClientId, clients]);
 
   const fetchClients = async () => {
     const { data } = await supabase
       .from("clients")
-      .select("id, name")
+      .select("id, name, abn")
       .order("name");
     if (data) setClients(data);
   };
 
   const fetchCompletedJobs = async (clientId: string) => {
-    // First get jobs
     const { data: jobsData } = await supabase
       .from("jobs")
       .select(`
@@ -109,7 +116,6 @@ export function CreateInvoiceDialog({
       .limit(50);
 
     if (jobsData && jobsData.length > 0) {
-      // Get staff profiles for hourly rates
       const staffIds = [...new Set(jobsData.map(j => j.assigned_staff_id).filter(Boolean))];
       
       const { data: profilesData } = await supabase
@@ -149,7 +155,7 @@ export function CreateInvoiceDialog({
   const calculateJobDuration = (job: CompletedJob): number => {
     if (!job.start_time || !job.end_time) return 1;
     const minutes = differenceInMinutes(new Date(job.end_time), new Date(job.start_time));
-    return Math.max(Math.round((minutes / 60) * 100) / 100, 0.25); // Min 15 min
+    return Math.max(Math.round((minutes / 60) * 100) / 100, 0.25);
   };
 
   const updateLineItemsFromJobs = (jobIds: Set<string>) => {
@@ -159,7 +165,7 @@ export function CreateInvoiceDialog({
       const job = completedJobs.find((j) => j.id === jobId);
       if (job) {
         const hours = calculateJobDuration(job);
-        const hourlyRate = job.profiles?.hourly_rate || 25; // Default rate
+        const hourlyRate = job.profiles?.hourly_rate || 25;
         const total = hours * hourlyRate;
 
         items.push({
@@ -206,7 +212,6 @@ export function CreateInvoiceDialog({
 
   const removeLineItem = (id: string) => {
     setLineItems(lineItems.filter((item) => item.id !== id));
-    // Also remove from selected jobs if it's a job item
     if (id.startsWith("job-")) {
       const jobId = id.replace("job-", "");
       const newSelection = new Set(selectedJobs);
@@ -215,9 +220,12 @@ export function CreateInvoiceDialog({
     }
   };
 
+  // Calculate totals using Australian GST utilities
   const subtotal = lineItems.reduce((sum, item) => sum + item.total, 0);
-  const taxAmount = subtotal * (taxRate / 100);
-  const total = subtotal + taxAmount;
+  const taxRate = applyGST ? GST_RATE * 100 : 0;
+  const { gst: taxAmount, total } = applyGST 
+    ? calculateGST(subtotal) 
+    : { gst: 0, total: subtotal };
 
   const handleSubmit = async () => {
     if (!selectedClientId) {
@@ -232,11 +240,10 @@ export function CreateInvoiceDialog({
     setLoading(true);
 
     try {
-      // Create invoice
       const { data: invoice, error: invoiceError } = await supabase
         .from("invoices")
         .insert({
-          invoice_number: "", // Will be auto-generated
+          invoice_number: "",
           client_id: selectedClientId,
           status: "draft",
           due_date: dueDate,
@@ -251,7 +258,6 @@ export function CreateInvoiceDialog({
 
       if (invoiceError) throw invoiceError;
 
-      // Create invoice items
       const itemsToInsert = lineItems.map((item) => ({
         invoice_id: invoice.id,
         job_id: item.job_id || null,
@@ -267,7 +273,9 @@ export function CreateInvoiceDialog({
 
       if (itemsError) throw itemsError;
 
-      toast.success("Invoice created successfully");
+      toast.success("Tax Invoice created", {
+        description: `Total: ${formatAUD(total)} Inc. GST`,
+      });
       onOpenChange(false);
       onCreated();
       resetForm();
@@ -281,9 +289,10 @@ export function CreateInvoiceDialog({
 
   const resetForm = () => {
     setSelectedClientId("");
+    setSelectedClient(null);
     setSelectedJobs(new Set());
     setLineItems([]);
-    setTaxRate(0);
+    setApplyGST(true);
     setNotes("");
     setDueDate(format(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), "yyyy-MM-dd"));
   };
@@ -293,7 +302,12 @@ export function CreateInvoiceDialog({
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <div className="flex items-center justify-between">
-            <DialogTitle>New Invoice</DialogTitle>
+            <div>
+              <DialogTitle className="text-xl">New Tax Invoice</DialogTitle>
+              <p className="text-sm text-muted-foreground mt-1">
+                Australian Tax Invoice with GST
+              </p>
+            </div>
             <PriceListReference 
               trigger={
                 <Button variant="outline" size="sm" type="button">
@@ -322,6 +336,11 @@ export function CreateInvoiceDialog({
                   ))}
                 </SelectContent>
               </Select>
+              {selectedClient?.abn && (
+                <p className="text-xs text-muted-foreground">
+                  ABN: {formatABN(selectedClient.abn)}
+                </p>
+              )}
             </div>
             <div className="space-y-2">
               <Label>Due Date</Label>
@@ -356,7 +375,7 @@ export function CreateInvoiceDialog({
                           </p>
                         </div>
                         <span className="text-sm font-semibold">
-                          ${(hours * rate).toFixed(2)}
+                          {formatAUD(hours * rate)} <span className="text-xs text-muted-foreground">Ex. GST</span>
                         </span>
                       </div>
                     );
@@ -369,7 +388,10 @@ export function CreateInvoiceDialog({
           {/* Line Items */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label>Invoice Items</Label>
+              <div className="flex items-center gap-2">
+                <Label>Invoice Items</Label>
+                <Badge variant="secondary" className="text-xs">Ex. GST</Badge>
+              </div>
               <Button variant="outline" size="sm" onClick={addManualLineItem}>
                 <Plus className="h-4 w-4 mr-1" />
                 Add Item
@@ -382,56 +404,65 @@ export function CreateInvoiceDialog({
                     Select jobs or add items manually
                   </p>
                 ) : (
-                  lineItems.map((item) => (
-                    <div
-                      key={item.id}
-                      className="grid grid-cols-12 gap-2 items-center"
-                    >
-                      <div className="col-span-5">
-                        <Input
-                          placeholder="Description"
-                          value={item.description}
-                          onChange={(e) =>
-                            updateLineItem(item.id, "description", e.target.value)
-                          }
-                        />
-                      </div>
-                      <div className="col-span-2">
-                        <Input
-                          type="number"
-                          placeholder="Qty"
-                          value={item.quantity}
-                          onChange={(e) =>
-                            updateLineItem(item.id, "quantity", Number(e.target.value))
-                          }
-                          step="0.25"
-                        />
-                      </div>
-                      <div className="col-span-2">
-                        <Input
-                          type="number"
-                          placeholder="Price"
-                          value={item.unit_price}
-                          onChange={(e) =>
-                            updateLineItem(item.id, "unit_price", Number(e.target.value))
-                          }
-                          step="0.01"
-                        />
-                      </div>
-                      <div className="col-span-2 text-right font-semibold">
-                        ${item.total.toFixed(2)}
-                      </div>
-                      <div className="col-span-1">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => removeLineItem(item.id)}
-                        >
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                      </div>
+                  <>
+                    <div className="grid grid-cols-12 gap-2 text-xs font-medium text-muted-foreground px-1">
+                      <div className="col-span-5">Description</div>
+                      <div className="col-span-2 text-center">Qty</div>
+                      <div className="col-span-2 text-right">Unit (Ex. GST)</div>
+                      <div className="col-span-2 text-right">Total</div>
+                      <div className="col-span-1"></div>
                     </div>
-                  ))
+                    {lineItems.map((item) => (
+                      <div
+                        key={item.id}
+                        className="grid grid-cols-12 gap-2 items-center"
+                      >
+                        <div className="col-span-5">
+                          <Input
+                            placeholder="Description"
+                            value={item.description}
+                            onChange={(e) =>
+                              updateLineItem(item.id, "description", e.target.value)
+                            }
+                          />
+                        </div>
+                        <div className="col-span-2">
+                          <Input
+                            type="number"
+                            placeholder="Qty"
+                            value={item.quantity}
+                            onChange={(e) =>
+                              updateLineItem(item.id, "quantity", Number(e.target.value))
+                            }
+                            step="0.25"
+                          />
+                        </div>
+                        <div className="col-span-2">
+                          <Input
+                            type="number"
+                            placeholder="Price"
+                            value={item.unit_price}
+                            onChange={(e) =>
+                              updateLineItem(item.id, "unit_price", Number(e.target.value))
+                            }
+                            step="0.01"
+                          />
+                        </div>
+                        <div className="col-span-2 text-right font-semibold">
+                          {formatAUD(item.total)}
+                        </div>
+                        <div className="col-span-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => removeLineItem(item.id)}
+                          >
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </>
                 )}
               </CardContent>
             </Card>
@@ -439,43 +470,46 @@ export function CreateInvoiceDialog({
 
           {/* Tax and Totals */}
           <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Notes</Label>
-              <Textarea
-                placeholder="Additional notes..."
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                rows={3}
-              />
-            </div>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <Label>Tax (%)</Label>
-                <Input
-                  type="number"
-                  className="w-24 text-right"
-                  value={taxRate}
-                  onChange={(e) => setTaxRate(Number(e.target.value))}
-                  min="0"
-                  max="100"
-                  step="0.5"
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Notes</Label>
+                <Textarea
+                  placeholder="Payment terms, bank details..."
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  rows={3}
                 />
               </div>
-              <div className="border-t pt-3 space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Subtotal</span>
-                  <span>${subtotal.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Tax ({taxRate}%)</span>
-                  <span>${taxAmount.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between text-lg font-bold">
-                  <span>Total</span>
-                  <span>${total.toFixed(2)}</span>
+              
+              {/* GST Toggle */}
+              <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
+                <Checkbox
+                  id="apply-gst"
+                  checked={applyGST}
+                  onCheckedChange={(checked) => setApplyGST(checked === true)}
+                />
+                <div>
+                  <Label htmlFor="apply-gst" className="cursor-pointer">
+                    Apply GST (10%)
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    Required for GST-registered businesses
+                  </p>
                 </div>
               </div>
             </div>
+            
+            <Card>
+              <CardContent className="pt-4">
+                <GSTSummary subtotal={subtotal} />
+                {!applyGST && (
+                  <div className="flex items-center gap-2 mt-3 p-2 bg-warning/10 rounded text-xs text-warning">
+                    <Info className="h-4 w-4" />
+                    GST not applied
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </div>
         </div>
 
@@ -485,7 +519,7 @@ export function CreateInvoiceDialog({
           </Button>
           <Button onClick={handleSubmit} disabled={loading}>
             {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-            Create Invoice
+            Create Tax Invoice
           </Button>
         </DialogFooter>
       </DialogContent>

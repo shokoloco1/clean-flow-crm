@@ -25,12 +25,13 @@ import {
 } from "@/components/ui/table";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Download, Loader2, Building2, Calendar, FileText } from "lucide-react";
+import { Download, Loader2, Building2, Calendar, FileText, Receipt } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { toast } from "sonner";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import { formatAUD } from "@/lib/australian";
+import { formatAUD, formatABN, GST_RATE } from "@/lib/australian";
+import { useBusinessSettings } from "@/hooks/useBusinessSettings";
 
 interface Invoice {
   id: string;
@@ -44,7 +45,7 @@ interface Invoice {
   tax_amount: number;
   total: number;
   notes: string | null;
-  clients?: { name: string; address?: string; email?: string; phone?: string } | null;
+  clients?: { name: string; address?: string; email?: string; phone?: string; abn?: string } | null;
 }
 
 interface InvoiceItem {
@@ -75,7 +76,10 @@ export function InvoiceDetailDialog({
     address?: string;
     email?: string;
     phone?: string;
+    abn?: string;
   } | null>(null);
+  
+  const { settings: businessSettings } = useBusinessSettings();
 
   useEffect(() => {
     if (invoice) {
@@ -87,7 +91,6 @@ export function InvoiceDetailDialog({
     if (!invoice) return;
     setLoading(true);
 
-    // Fetch items
     const { data: itemsData } = await supabase
       .from("invoice_items")
       .select("*")
@@ -98,10 +101,9 @@ export function InvoiceDetailDialog({
       setItems(itemsData as InvoiceItem[]);
     }
 
-    // Fetch client details
     const { data: clientData } = await supabase
       .from("clients")
-      .select("name, address, email, phone")
+      .select("name, address, email, phone, abn")
       .eq("id", invoice.client_id)
       .single();
 
@@ -124,7 +126,7 @@ export function InvoiceDetailDialog({
     if (error) {
       toast.error("Failed to update status");
     } else {
-      toast.success("Status updated successfully");
+      toast.success("Status updated");
       onUpdated();
     }
 
@@ -137,40 +139,85 @@ export function InvoiceDetailDialog({
 
     try {
       const doc = new jsPDF();
+      const hasGST = invoice.tax_rate > 0;
 
-      // Header
+      // === HEADER: TAX INVOICE ===
       doc.setFontSize(24);
-      doc.setTextColor(37, 99, 235); // Primary blue
+      doc.setTextColor(37, 99, 235);
       doc.text("TAX INVOICE", 20, 25);
 
       doc.setFontSize(12);
       doc.setTextColor(100);
       doc.text(invoice.invoice_number, 20, 35);
 
-      // Company info (right side)
-      doc.setFontSize(10);
-      doc.setTextColor(60);
-      doc.text("CleanFlow", 190, 20, { align: "right" });
-      doc.text("Cleaning Management System", 190, 26, { align: "right" });
+      // === BUSINESS INFO (Right side) ===
+      doc.setFontSize(11);
+      doc.setTextColor(0);
+      doc.text(businessSettings.company_name || "CleanFlow", 190, 20, { align: "right" });
+      
+      doc.setFontSize(9);
+      doc.setTextColor(80);
+      let businessY = 26;
+      
+      if (businessSettings.business_address) {
+        doc.text(businessSettings.business_address, 190, businessY, { align: "right" });
+        businessY += 5;
+      }
+      if (businessSettings.business_phone) {
+        doc.text(businessSettings.business_phone, 190, businessY, { align: "right" });
+        businessY += 5;
+      }
+      if (businessSettings.business_email) {
+        doc.text(businessSettings.business_email, 190, businessY, { align: "right" });
+        businessY += 5;
+      }
+      
+      // Business ABN - IMPORTANT for tax invoices
+      if (businessSettings.business_abn) {
+        doc.setFont("helvetica", "bold");
+        doc.text(`ABN: ${formatABN(businessSettings.business_abn)}`, 190, businessY, { align: "right" });
+        doc.setFont("helvetica", "normal");
+      }
 
-      // Client info
+      // === BILL TO (Client info) ===
       doc.setFontSize(11);
       doc.setTextColor(0);
       doc.text("Bill to:", 20, 55);
       doc.setFontSize(12);
+      doc.setFont("helvetica", "bold");
       doc.text(clientDetails.name, 20, 62);
+      doc.setFont("helvetica", "normal");
+      
       doc.setFontSize(10);
       doc.setTextColor(80);
-      if (clientDetails.address) doc.text(clientDetails.address, 20, 69);
-      if (clientDetails.email) doc.text(clientDetails.email, 20, 76);
-      if (clientDetails.phone) doc.text(clientDetails.phone, 20, 83);
+      let clientY = 69;
+      
+      if (clientDetails.address) {
+        doc.text(clientDetails.address, 20, clientY);
+        clientY += 6;
+      }
+      if (clientDetails.email) {
+        doc.text(clientDetails.email, 20, clientY);
+        clientY += 6;
+      }
+      if (clientDetails.phone) {
+        doc.text(clientDetails.phone, 20, clientY);
+        clientY += 6;
+      }
+      // Client ABN if applicable
+      if (clientDetails.abn) {
+        doc.setFont("helvetica", "bold");
+        doc.text(`ABN: ${formatABN(clientDetails.abn)}`, 20, clientY);
+        doc.setFont("helvetica", "normal");
+      }
 
-      // Invoice details (right side)
+      // === INVOICE DETAILS (Right side) ===
       doc.setTextColor(0);
-      doc.text(`Date: ${format(parseISO(invoice.issue_date), "dd/MM/yyyy")}`, 190, 55, { align: "right" });
-      doc.text(`Due: ${format(parseISO(invoice.due_date), "dd/MM/yyyy")}`, 190, 62, { align: "right" });
+      doc.setFontSize(10);
+      doc.text(`Issue Date: ${format(parseISO(invoice.issue_date), "dd/MM/yyyy")}`, 190, 55, { align: "right" });
+      doc.text(`Due Date: ${format(parseISO(invoice.due_date), "dd/MM/yyyy")}`, 190, 62, { align: "right" });
 
-      // Items table
+      // === ITEMS TABLE ===
       const tableData = items.map((item) => [
         item.description,
         item.quantity.toString(),
@@ -179,60 +226,94 @@ export function InvoiceDetailDialog({
       ]);
 
       autoTable(doc, {
-        startY: 95,
-        head: [["Description", "Qty", "Unit Price", "Total"]],
+        startY: 100,
+        head: [["Description", "Qty", "Unit Price (Ex. GST)", "Total (Ex. GST)"]],
         body: tableData,
         theme: "striped",
         headStyles: {
           fillColor: [37, 99, 235],
           textColor: 255,
           fontStyle: "bold",
+          fontSize: 9,
+        },
+        bodyStyles: {
+          fontSize: 9,
         },
         columnStyles: {
-          0: { cellWidth: 90 },
-          1: { cellWidth: 25, halign: "center" },
-          2: { cellWidth: 35, halign: "right" },
-          3: { cellWidth: 35, halign: "right" },
+          0: { cellWidth: 85 },
+          1: { cellWidth: 20, halign: "center" },
+          2: { cellWidth: 40, halign: "right" },
+          3: { cellWidth: 40, halign: "right" },
         },
       });
 
-      // Totals
+      // === TOTALS SECTION ===
       const finalY = (doc as any).lastAutoTable.finalY + 10;
+      
+      // Box for totals
+      doc.setDrawColor(200);
+      doc.setFillColor(248, 250, 252);
+      doc.roundedRect(120, finalY - 3, 75, hasGST ? 40 : 25, 2, 2, 'FD');
 
       doc.setFontSize(10);
-      doc.text("Subtotal:", 140, finalY);
-      doc.text(formatAUD(Number(invoice.subtotal)), 190, finalY, { align: "right" });
+      doc.setTextColor(80);
+      doc.text("Subtotal (Ex. GST):", 125, finalY + 5);
+      doc.setTextColor(0);
+      doc.text(formatAUD(Number(invoice.subtotal)), 190, finalY + 5, { align: "right" });
 
-      doc.text(`GST (${invoice.tax_rate}%):`, 140, finalY + 7);
-      doc.text(formatAUD(Number(invoice.tax_amount)), 190, finalY + 7, { align: "right" });
+      if (hasGST) {
+        doc.setTextColor(80);
+        doc.text(`GST (${invoice.tax_rate}%):`, 125, finalY + 13);
+        doc.setTextColor(0);
+        doc.text(formatAUD(Number(invoice.tax_amount)), 190, finalY + 13, { align: "right" });
 
-      doc.setFontSize(12);
-      doc.setFont("helvetica", "bold");
-      doc.text("TOTAL:", 140, finalY + 17);
-      doc.text(formatAUD(Number(invoice.total)), 190, finalY + 17, { align: "right" });
+        // Total line
+        doc.setDrawColor(37, 99, 235);
+        doc.setLineWidth(0.5);
+        doc.line(125, finalY + 20, 190, finalY + 20);
 
-      // Notes
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "bold");
+        doc.text("TOTAL (Inc. GST):", 125, finalY + 30);
+        doc.text(formatAUD(Number(invoice.total)), 190, finalY + 30, { align: "right" });
+      } else {
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "bold");
+        doc.text("TOTAL:", 125, finalY + 17);
+        doc.text(formatAUD(Number(invoice.total)), 190, finalY + 17, { align: "right" });
+      }
+
+      // === NOTES ===
       if (invoice.notes) {
+        const notesY = hasGST ? finalY + 50 : finalY + 35;
         doc.setFont("helvetica", "normal");
         doc.setFontSize(9);
         doc.setTextColor(80);
-        doc.text("Notes:", 20, finalY + 30);
-        doc.text(invoice.notes, 20, finalY + 37);
+        doc.text("Notes:", 20, notesY);
+        doc.text(invoice.notes, 20, notesY + 7);
       }
 
-      // Footer
+      // === FOOTER ===
       doc.setFontSize(8);
       doc.setTextColor(150);
       doc.text(
-        "Generated with CleanFlow - Cleaning Management System",
+        `Tax Invoice generated by ${businessSettings.company_name || "CleanFlow"}`,
         105,
-        285,
+        280,
         { align: "center" }
       );
+      if (businessSettings.business_abn) {
+        doc.text(
+          `ABN: ${formatABN(businessSettings.business_abn)}`,
+          105,
+          285,
+          { align: "center" }
+        );
+      }
 
       // Save
       doc.save(`${invoice.invoice_number}.pdf`);
-      toast.success("PDF downloaded successfully");
+      toast.success("Tax Invoice PDF downloaded");
     } catch (error) {
       console.error(error);
       toast.error("Failed to generate PDF");
@@ -258,6 +339,7 @@ export function InvoiceDetailDialog({
   if (!invoice) return null;
 
   const statusConfig = getStatusConfig(invoice.status);
+  const hasGST = invoice.tax_rate > 0;
 
   return (
     <Dialog open={!!invoice} onOpenChange={() => onClose()}>
@@ -265,8 +347,11 @@ export function InvoiceDetailDialog({
         <DialogHeader>
           <div className="flex items-center justify-between">
             <DialogTitle className="flex items-center gap-3">
-              <FileText className="h-5 w-5 text-primary" />
-              {invoice.invoice_number}
+              <Receipt className="h-5 w-5 text-primary" />
+              <div>
+                <span>Tax Invoice</span>
+                <span className="text-muted-foreground ml-2">{invoice.invoice_number}</span>
+              </div>
             </DialogTitle>
             <Badge variant="outline" className={statusConfig.className}>
               {statusConfig.label}
@@ -283,7 +368,7 @@ export function InvoiceDetailDialog({
             {/* Client & Dates */}
             <div className="grid grid-cols-2 gap-6">
               <div>
-                <p className="text-sm text-muted-foreground mb-1">Client</p>
+                <p className="text-sm text-muted-foreground mb-1">Bill To</p>
                 <div className="flex items-center gap-2">
                   <Building2 className="h-4 w-4 text-muted-foreground" />
                   <span className="font-medium">{clientDetails?.name}</span>
@@ -291,18 +376,23 @@ export function InvoiceDetailDialog({
                 {clientDetails?.address && (
                   <p className="text-sm text-muted-foreground ml-6">{clientDetails.address}</p>
                 )}
+                {clientDetails?.abn && (
+                  <p className="text-sm text-muted-foreground ml-6 mt-1">
+                    <span className="font-medium">ABN:</span> {formatABN(clientDetails.abn)}
+                  </p>
+                )}
               </div>
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4 text-muted-foreground" />
                   <span className="text-sm">
-                    Issue Date: {format(parseISO(invoice.issue_date), "dd/MM/yyyy")}
+                    Issue: {format(parseISO(invoice.issue_date), "dd/MM/yyyy")}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4 text-muted-foreground" />
                   <span className="text-sm">
-                    Due Date: {format(parseISO(invoice.due_date), "dd/MM/yyyy")}
+                    Due: {format(parseISO(invoice.due_date), "dd/MM/yyyy")}
                   </span>
                 </div>
               </div>
@@ -312,13 +402,13 @@ export function InvoiceDetailDialog({
 
             {/* Items */}
             <div>
-              <p className="text-sm font-medium mb-3">Details</p>
+              <p className="text-sm font-medium mb-3">Line Items</p>
               <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Description</TableHead>
                     <TableHead className="text-center">Qty</TableHead>
-                    <TableHead className="text-right">Unit Price</TableHead>
+                    <TableHead className="text-right">Unit (Ex. GST)</TableHead>
                     <TableHead className="text-right">Total</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -344,18 +434,22 @@ export function InvoiceDetailDialog({
               <CardContent className="py-4">
                 <div className="space-y-2">
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Subtotal</span>
+                    <span className="text-muted-foreground">Subtotal (Ex. GST)</span>
                     <span>{formatAUD(Number(invoice.subtotal))}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">
-                      GST ({invoice.tax_rate}%)
-                    </span>
-                    <span>{formatAUD(Number(invoice.tax_amount))}</span>
-                  </div>
+                  {hasGST && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">
+                        GST ({invoice.tax_rate}%)
+                      </span>
+                      <span>{formatAUD(Number(invoice.tax_amount))}</span>
+                    </div>
+                  )}
                   <Separator />
                   <div className="flex justify-between text-lg font-bold">
-                    <span>Total</span>
+                    <span>
+                      Total {hasGST && <span className="text-sm font-normal text-muted-foreground">(Inc. GST)</span>}
+                    </span>
                     <span>{formatAUD(Number(invoice.total))}</span>
                   </div>
                 </div>
