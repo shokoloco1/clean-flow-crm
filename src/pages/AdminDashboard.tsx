@@ -9,7 +9,7 @@ import {
   TodayStats,
   UrgentAlerts,
   FloatingActionButton,
-  CreateJobDialog,
+  CreateJobWizard,
   JobDetailDialog,
   AdminLayout,
   type Stats,
@@ -146,7 +146,7 @@ export default function AdminDashboard() {
   const fetchClientsAndStaff = async () => {
     const { data: clientsData } = await supabase
       .from("clients")
-      .select("id, name, address")
+      .select("id, name, address, phone, email")
       .order("name");
     
     const { data: staffRoles } = await supabase
@@ -257,8 +257,8 @@ export default function AdminDashboard() {
         label="New Job"
       />
 
-      {/* Create Job Dialog */}
-      <CreateJobDialog
+      {/* Create Job Wizard */}
+      <CreateJobWizard
         isOpen={isCreateOpen}
         onOpenChange={setIsCreateOpen}
         clients={clients}
@@ -266,6 +266,7 @@ export default function AdminDashboard() {
         formData={newJob}
         onFormChange={setNewJob}
         onSubmit={handleCreateJob}
+        onClientCreated={fetchClientsAndStaff}
       />
 
       {/* Job Detail Dialog */}
