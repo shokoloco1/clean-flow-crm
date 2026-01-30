@@ -6,7 +6,6 @@ import { Home, ArrowLeft, Search, MapPin, HelpCircle } from "lucide-react";
 const SUGGESTED_PAGES = [
   { path: "/admin", label: "Admin Dashboard", icon: Home },
   { path: "/staff", label: "Staff Dashboard", icon: MapPin },
-  { path: "/portal", label: "Client Portal", icon: Search },
 ];
 
 const NotFound = () => {

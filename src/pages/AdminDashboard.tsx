@@ -3,14 +3,13 @@ import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { LogOut, Sparkles, HelpCircle } from "lucide-react";
+import { LogOut, Sparkles } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import AlertsPanel from "@/components/AlertsPanel";
 import { NotificationCenter } from "@/components/NotificationCenter";
 import { GlobalSearch } from "@/components/GlobalSearch";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
-import { useOnboarding } from "@/components/OnboardingProvider";
 import { useFetchWithRetry } from "@/hooks/useFetchWithRetry";
 import { DashboardErrorState } from "@/components/admin/DashboardErrorState";
 import {
@@ -42,7 +41,6 @@ interface DashboardData {
 
 export default function AdminDashboard() {
   const { signOut } = useAuth();
-  const { showOnboarding } = useOnboarding();
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [jobPhotos, setJobPhotos] = useState<JobPhoto[]>([]);
   
@@ -288,18 +286,15 @@ export default function AdminDashboard() {
             </div>
             <div>
               <h1 className="text-xl font-bold text-foreground">CleanFlow</h1>
-              <p className="text-sm text-muted-foreground">Panel de Control</p>
+              <p className="text-sm text-muted-foreground">Dashboard</p>
             </div>
           </Link>
           <div className="flex items-center gap-2">
             <GlobalSearch />
             <NotificationCenter />
-            <Button variant="ghost" size="icon" onClick={showOnboarding} title="Ver tutorial">
-              <HelpCircle className="h-5 w-5" />
-            </Button>
             <Button variant="outline" size="sm" onClick={signOut} className="hidden sm:flex">
               <LogOut className="h-4 w-4 mr-2" />
-              Salir
+              Sign Out
             </Button>
             <Button variant="ghost" size="icon" onClick={signOut} className="sm:hidden">
               <LogOut className="h-5 w-5" />
@@ -348,7 +343,7 @@ export default function AdminDashboard() {
           <div className="lg:hidden space-y-4">
             <details className="group">
               <summary className="flex items-center justify-between cursor-pointer p-3 bg-card border border-border rounded-lg">
-                <span className="font-semibold text-foreground">Alertas y Actividad</span>
+                <span className="font-semibold text-foreground">Alerts & Activity</span>
                 <span className="transition-transform group-open:rotate-180">▼</span>
               </summary>
               <div className="mt-4 space-y-4">
