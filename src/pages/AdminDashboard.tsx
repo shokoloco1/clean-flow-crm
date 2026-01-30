@@ -1,14 +1,8 @@
 import { useEffect, useState, lazy, Suspense, useCallback } from "react";
-import { Link } from "react-router-dom";
-import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { LogOut, Sparkles } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import AlertsPanel from "@/components/AlertsPanel";
-import { NotificationCenter } from "@/components/NotificationCenter";
-import { GlobalSearch } from "@/components/GlobalSearch";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { useFetchWithRetry } from "@/hooks/useFetchWithRetry";
 import { DashboardErrorState } from "@/components/admin/DashboardErrorState";
@@ -19,6 +13,7 @@ import {
   ActivityFeed,
   CreateJobDialog,
   JobDetailDialog,
+  AdminLayout,
   type Stats,
   type Job,
   type ActivityItem,
@@ -40,7 +35,6 @@ interface DashboardData {
 }
 
 export default function AdminDashboard() {
-  const { signOut } = useAuth();
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [jobPhotos, setJobPhotos] = useState<JobPhoto[]>([]);
   
@@ -277,34 +271,8 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="bg-card border-b border-border sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-            <div className="h-10 w-10 rounded-lg bg-primary flex items-center justify-center shadow-md shadow-primary/20">
-              <Sparkles className="h-5 w-5 text-primary-foreground" />
-            </div>
-            <div>
-              <h1 className="text-xl font-bold text-foreground">CleanFlow</h1>
-              <p className="text-sm text-muted-foreground">Dashboard</p>
-            </div>
-          </Link>
-          <div className="flex items-center gap-2">
-            <GlobalSearch />
-            <NotificationCenter />
-            <Button variant="outline" size="sm" onClick={signOut} className="hidden sm:flex">
-              <LogOut className="h-4 w-4 mr-2" />
-              Sign Out
-            </Button>
-            <Button variant="ghost" size="icon" onClick={signOut} className="sm:hidden">
-              <LogOut className="h-5 w-5" />
-            </Button>
-          </div>
-        </div>
-      </header>
-
-      <main className="container mx-auto px-4 py-4 md:py-8">
+    <AdminLayout>
+      <div className="container mx-auto px-4 py-4 md:py-8">
         <Breadcrumbs />
         
         {/* Error State */}
@@ -374,7 +342,7 @@ export default function AdminDashboard() {
             <CSVReports />
           </div>
         </Suspense>
-      </main>
+      </div>
 
       {/* Create Job Dialog */}
       <CreateJobDialog
@@ -393,6 +361,6 @@ export default function AdminDashboard() {
         photos={jobPhotos}
         onClose={() => setSelectedJob(null)}
       />
-    </div>
+    </AdminLayout>
   );
 }
