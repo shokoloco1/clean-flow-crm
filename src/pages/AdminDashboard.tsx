@@ -7,8 +7,10 @@ import { useDuplicateJob } from "@/hooks/useDuplicateJob";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { useCreateJob } from "@/hooks/useCreateJob";
 import { useJobDetail } from "@/hooks/useJobDetail";
+import { useOnboarding } from "@/hooks/useOnboarding";
 import { DashboardErrorState } from "@/components/admin/DashboardErrorState";
 import { PendingPaymentsCard } from "@/components/admin/PendingPaymentsCard";
+import { OnboardingWizard } from "@/components/onboarding/OnboardingWizard";
 import {
   TodayKanban,
   TodayStats,
@@ -21,6 +23,9 @@ import {
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
+  
+  // Onboarding
+  const { showOnboarding, isLoading: onboardingLoading, completeOnboarding } = useOnboarding();
   
   // Data fetching
   const {
@@ -83,6 +88,14 @@ export default function AdminDashboard() {
       supabase.removeChannel(channel);
     };
   }, [refreshData]);
+
+  // Show onboarding wizard for new users
+  if (!onboardingLoading && showOnboarding) {
+    return <OnboardingWizard onComplete={() => {
+      completeOnboarding();
+      refreshData();
+    }} />;
+  }
 
   return (
     <AdminLayout>
