@@ -170,13 +170,14 @@ export default function AdminDashboard() {
     error, 
     isFromCache,
     retryCount,
+    isRetrying,
     execute: refreshData,
     retry 
   } = useFetchWithRetry<DashboardData>(fetchDashboardData, {
     cacheKey: 'admin-dashboard-data',
-    timeout: 5000,
+    timeout: 8000,
     maxRetries: 2,
-    retryDelay: 1000,
+    retryDelay: 1500,
   });
 
   // Extract data from the hook
@@ -328,8 +329,11 @@ export default function AdminDashboard() {
             {/* Jobs List */}
             <JobsList 
               jobs={jobs} 
-              loading={loading} 
-              onViewJob={handleViewJob} 
+              loading={loading}
+              error={error}
+              isRetrying={isRetrying}
+              onViewJob={handleViewJob}
+              onRetry={retry}
             />
           </div>
 

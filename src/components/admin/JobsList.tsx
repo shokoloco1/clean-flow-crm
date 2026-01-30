@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ClipboardList, Eye } from "lucide-react";
+import { ClipboardList, Eye, RefreshCw, AlertTriangle, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 
 export interface Job {
@@ -20,7 +20,10 @@ export interface Job {
 interface JobsListProps {
   jobs: Job[];
   loading: boolean;
+  error?: string | null;
+  isRetrying?: boolean;
   onViewJob: (job: Job) => void;
+  onRetry?: () => void;
 }
 
 function getStatusColor(status: string) {
@@ -32,7 +35,10 @@ function getStatusColor(status: string) {
   }
 }
 
-export function JobsList({ jobs, loading, onViewJob }: JobsListProps) {
+export function JobsList({ jobs, loading, error, isRetrying, onViewJob, onRetry }: JobsListProps) {
+  // Show error state when there's an error and no data
+  const showError = error && jobs.length === 0;
+  
   return (
     <Card className="border-border shadow-sm">
       <CardHeader>
@@ -42,8 +48,31 @@ export function JobsList({ jobs, loading, onViewJob }: JobsListProps) {
         </div>
       </CardHeader>
       <CardContent>
-        {loading ? (
-          <div className="text-center py-8 text-muted-foreground">Loading...</div>
+        {loading && !showError ? (
+          <div className="flex flex-col items-center justify-center py-12 text-muted-foreground gap-3">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <span className="text-sm">
+              {isRetrying ? 'Retrying...' : 'Loading jobs...'}
+            </span>
+          </div>
+        ) : showError ? (
+          <div className="flex flex-col items-center justify-center py-12 gap-4">
+            <div className="h-14 w-14 rounded-full bg-destructive/10 flex items-center justify-center">
+              <AlertTriangle className="h-7 w-7 text-destructive" />
+            </div>
+            <div className="text-center">
+              <p className="font-medium text-foreground">Something went wrong</p>
+              <p className="text-sm text-muted-foreground mt-1 max-w-xs">
+                {error || 'Failed to load jobs. Please try again.'}
+              </p>
+            </div>
+            {onRetry && (
+              <Button onClick={onRetry} variant="outline" className="gap-2">
+                <RefreshCw className="h-4 w-4" />
+                Tap to retry
+              </Button>
+            )}
+          </div>
         ) : jobs.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
             No upcoming jobs scheduled. Create a new job to get started.
