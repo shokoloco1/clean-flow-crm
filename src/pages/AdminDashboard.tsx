@@ -1,37 +1,28 @@
-import { useEffect, useState, lazy, Suspense, useCallback } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { toast } from "sonner";
-import AlertsPanel from "@/components/AlertsPanel";
-import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { useFetchWithRetry } from "@/hooks/useFetchWithRetry";
 import { DashboardErrorState } from "@/components/admin/DashboardErrorState";
 import {
-  StatsCards,
-  QuickActions,
-  JobsList,
-  ActivityFeed,
+  TodayKanban,
+  TodayStats,
+  UrgentAlerts,
+  FloatingActionButton,
   CreateJobDialog,
   JobDetailDialog,
   AdminLayout,
   type Stats,
   type Job,
-  type ActivityItem,
   type Client,
   type Staff,
   type NewJobData,
   type JobPhoto,
 } from "@/components/admin";
 
-// Lazy load heavy components
-const MetricsDashboard = lazy(() => import("@/components/MetricsDashboard").then(m => ({ default: m.MetricsDashboard })));
-const PDFReports = lazy(() => import("@/components/PDFReports").then(m => ({ default: m.PDFReports })));
-const CSVReports = lazy(() => import("@/components/CSVReports").then(m => ({ default: m.CSVReports })));
-
 interface DashboardData {
   jobs: Job[];
   stats: Stats;
-  activities: ActivityItem[];
 }
 
 export default function AdminDashboard() {
@@ -56,8 +47,8 @@ export default function AdminDashboard() {
   const fetchDashboardData = useCallback(async (): Promise<DashboardData> => {
     const today = format(new Date(), "yyyy-MM-dd");
     
-    // Batch all independent queries in parallel
-    const [jobsRes, todayCountRes, completedCountRes, staffCountRes, recentJobsRes] = await Promise.all([
+    // Fetch today's jobs with all statuses
+    const [jobsRes, todayCountRes, completedCountRes] = await Promise.all([
       supabase
         .from("jobs")
         .select(`
@@ -65,10 +56,8 @@ export default function AdminDashboard() {
           start_time, end_time, notes, created_at, assigned_staff_id,
           clients (name)
         `)
-        .gte("scheduled_date", today)
-        .order("scheduled_date", { ascending: true })
-        .order("scheduled_time", { ascending: true })
-        .limit(20),
+        .eq("scheduled_date", today)
+        .order("scheduled_time", { ascending: true }),
       supabase
         .from("jobs")
         .select("*", { count: "exact", head: true })
@@ -78,26 +67,13 @@ export default function AdminDashboard() {
         .select("*", { count: "exact", head: true })
         .eq("scheduled_date", today)
         .eq("status", "completed"),
-      supabase
-        .from("user_roles")
-        .select("*", { count: "exact", head: true })
-        .eq("role", "staff"),
-      supabase
-        .from("jobs")
-        .select(`id, status, start_time, end_time, assigned_staff_id, clients (name)`)
-        .eq("scheduled_date", today)
-        .or("status.eq.in_progress,status.eq.completed")
-        .order("updated_at", { ascending: false })
-        .limit(10)
     ]);
 
-    // Check for errors in critical queries
     if (jobsRes.error) throw new Error(jobsRes.error.message);
 
     // Collect all staff IDs and fetch profiles in one query
     const allStaffIds = new Set<string>();
     jobsRes.data?.forEach((j: any) => j.assigned_staff_id && allStaffIds.add(j.assigned_staff_id));
-    recentJobsRes.data?.forEach((j: any) => j.assigned_staff_id && allStaffIds.add(j.assigned_staff_id));
     
     let staffMap: Record<string, string> = {};
     if (allStaffIds.size > 0) {
@@ -114,33 +90,6 @@ export default function AdminDashboard() {
       profiles: job.assigned_staff_id ? { full_name: staffMap[job.assigned_staff_id] || 'Unknown' } : null
     }));
 
-    const activityItems: ActivityItem[] = [];
-    recentJobsRes.data?.forEach((job: any) => {
-      const clientName = job.clients?.name || 'Unknown';
-      const staffName = job.assigned_staff_id ? staffMap[job.assigned_staff_id] || 'Unknown' : 'Unknown';
-      
-      if (job.status === 'completed' && job.end_time) {
-        activityItems.push({
-          id: `${job.id}-completed`,
-          type: 'completed',
-          jobId: job.id,
-          clientName,
-          staffName,
-          time: format(new Date(job.end_time), 'h:mm a')
-        });
-      }
-      if (job.start_time) {
-        activityItems.push({
-          id: `${job.id}-started`,
-          type: 'started',
-          jobId: job.id,
-          clientName,
-          staffName,
-          time: format(new Date(job.start_time), 'h:mm a')
-        });
-      }
-    });
-
     const todayTotal = todayCountRes.count || 0;
     const completedTotal = completedCountRes.count || 0;
     const rate = todayTotal > 0 ? Math.round((completedTotal / todayTotal) * 100) : 0;
@@ -149,11 +98,10 @@ export default function AdminDashboard() {
       jobs: jobsWithStaff as Job[],
       stats: {
         todayJobs: todayTotal,
-        activeStaff: staffCountRes.count || 0,
+        activeStaff: 0,
         completedToday: completedTotal,
         completionRate: rate
       },
-      activities: activityItems.slice(0, 5)
     };
   }, []);
 
@@ -164,11 +112,10 @@ export default function AdminDashboard() {
     error, 
     isFromCache,
     retryCount,
-    isRetrying,
     execute: refreshData,
     retry 
   } = useFetchWithRetry<DashboardData>(fetchDashboardData, {
-    cacheKey: 'admin-dashboard-data',
+    cacheKey: 'admin-dashboard-today',
     timeout: 8000,
     maxRetries: 2,
     retryDelay: 1500,
@@ -177,14 +124,13 @@ export default function AdminDashboard() {
   // Extract data from the hook
   const jobs = dashboardData?.jobs || [];
   const stats = dashboardData?.stats || { todayJobs: 0, activeStaff: 0, completedToday: 0, completionRate: 0 };
-  const activities = dashboardData?.activities || [];
 
   useEffect(() => {
     refreshData();
     fetchClientsAndStaff();
     
     const channel = supabase
-      .channel('admin-jobs')
+      .channel('admin-jobs-today')
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'jobs' },
@@ -272,9 +218,15 @@ export default function AdminDashboard() {
 
   return (
     <AdminLayout>
-      <div className="container mx-auto px-4 py-4 md:py-8">
-        <Breadcrumbs />
-        
+      <div className="container mx-auto px-4 py-4 md:py-6">
+        {/* Page Title */}
+        <div className="mb-4">
+          <h1 className="text-2xl font-bold text-foreground">Today's View</h1>
+          <p className="text-sm text-muted-foreground">
+            {format(new Date(), "EEEE, MMMM d, yyyy")}
+          </p>
+        </div>
+
         {/* Error State */}
         {error && (
           <DashboardErrorState 
@@ -284,65 +236,26 @@ export default function AdminDashboard() {
             onRetry={retry}
           />
         )}
+
+        {/* Urgent Alerts */}
+        <UrgentAlerts jobs={jobs} />
         
-        {/* Stats Cards */}
-        <StatsCards stats={stats} />
+        {/* Today Stats */}
+        <TodayStats stats={stats} />
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
-          {/* Main Content */}
-          <div className="lg:col-span-2 space-y-4 md:space-y-6">
-            {/* Quick Actions */}
-            <QuickActions onNewJobClick={() => setIsCreateOpen(true)} />
-
-            {/* Jobs List */}
-            <JobsList 
-              jobs={jobs} 
-              loading={loading}
-              error={error}
-              isRetrying={isRetrying}
-              onViewJob={handleViewJob}
-              onRetry={retry}
-            />
-          </div>
-
-          {/* Sidebar - Alerts & Activity - Hidden on mobile, shown in drawer trigger */}
-          <div className="hidden lg:block space-y-6">
-            <AlertsPanel />
-            <ActivityFeed activities={activities} />
-          </div>
-          
-          {/* Mobile: Show sidebar content in collapsible sections */}
-          <div className="lg:hidden space-y-4">
-            <details className="group">
-              <summary className="flex items-center justify-between cursor-pointer p-3 bg-card border border-border rounded-lg">
-                <span className="font-semibold text-foreground">Alerts & Activity</span>
-                <span className="transition-transform group-open:rotate-180">▼</span>
-              </summary>
-              <div className="mt-4 space-y-4">
-                <AlertsPanel />
-                <ActivityFeed activities={activities} />
-              </div>
-            </details>
-          </div>
-        </div>
-
-        {/* Metrics Dashboard - Lazy loaded */}
-        <Suspense fallback={
-          <div className="mt-8 flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
-          </div>
-        }>
-          <div className="mt-8">
-            <MetricsDashboard />
-          </div>
-
-          {/* Reports Section */}
-          <div className="mt-8 grid gap-6 lg:grid-cols-2">
-            <PDFReports />
-            <CSVReports />
-          </div>
-        </Suspense>
+        {/* Kanban Board */}
+        <TodayKanban 
+          jobs={jobs} 
+          loading={loading}
+          onViewJob={handleViewJob}
+        />
       </div>
+
+      {/* Floating Action Button */}
+      <FloatingActionButton 
+        onClick={() => setIsCreateOpen(true)} 
+        label="New Job"
+      />
 
       {/* Create Job Dialog */}
       <CreateJobDialog
