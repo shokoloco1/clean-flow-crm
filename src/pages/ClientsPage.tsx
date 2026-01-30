@@ -15,7 +15,7 @@ import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { format } from "date-fns";
-import { es } from "date-fns/locale";
+import { enAU } from "date-fns/locale";
 import { 
   LogOut, Sparkles, Plus, Search, Users, Building2, 
   Mail, Phone, MapPin, FileText, Edit, Trash2, Eye,
@@ -116,7 +116,7 @@ export default function ClientsPage() {
       
       return data.map(job => ({
         ...job,
-        profiles: job.assigned_staff_id ? { full_name: staffMap[job.assigned_staff_id] || 'Sin asignar' } : null
+        profiles: job.assigned_staff_id ? { full_name: staffMap[job.assigned_staff_id] || 'Unassigned' } : null
       })) as ClientJob[];
     },
     enabled: !!selectedClient
@@ -233,9 +233,9 @@ export default function ClientsPage() {
 
   const getStatusBadge = (status: string) => {
     const variants: Record<string, { variant: "default" | "secondary" | "destructive" | "outline"; label: string }> = {
-      pending: { variant: "secondary", label: "Pendiente" },
-      in_progress: { variant: "default", label: "En Progreso" },
-      completed: { variant: "outline", label: "Completado" }
+      pending: { variant: "secondary", label: "Pending" },
+      in_progress: { variant: "default", label: "In Progress" },
+      completed: { variant: "outline", label: "Completed" }
     };
     const config = variants[status] || variants.pending;
     return <Badge variant={config.variant}>{config.label}</Badge>;
@@ -341,24 +341,24 @@ export default function ClientsPage() {
             <DialogTrigger asChild>
               <Button>
                 <Plus className="h-4 w-4 mr-2" />
-                Nuevo Cliente
+                New Client
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-md">
               <DialogHeader>
-                <DialogTitle>{editingClient ? 'Editar Cliente' : 'Nuevo Cliente'}</DialogTitle>
+                <DialogTitle>{editingClient ? 'Edit Client' : 'New Client'}</DialogTitle>
                 <DialogDescription>
-                  {editingClient ? 'Actualiza la información del cliente' : 'Agrega un nuevo cliente al sistema'}
+                  {editingClient ? 'Update client information' : 'Add a new client to the system'}
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-4 py-4">
                 <div className="space-y-2">
-                  <Label htmlFor="name">Nombre *</Label>
+                  <Label htmlFor="name">Name *</Label>
                   <Input
                     id="name"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="Nombre del cliente"
+                    placeholder="Client name"
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
@@ -369,16 +369,16 @@ export default function ClientsPage() {
                       type="email"
                       value={formData.email || ''}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      placeholder="email@ejemplo.com"
+                      placeholder="email@example.com"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="phone">Teléfono</Label>
+                    <Label htmlFor="phone">Phone</Label>
                     <Input
                       id="phone"
                       value={formData.phone || ''}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      placeholder="+1 234 567 890"
+                      placeholder="+61 4XX XXX XXX"
                     />
                   </div>
                 </div>
@@ -420,9 +420,9 @@ export default function ClientsPage() {
         {/* Clients List */}
         <Card>
           <CardHeader>
-            <CardTitle>Clientes</CardTitle>
+            <CardTitle>Clients</CardTitle>
             <CardDescription>
-              {filteredClients.length} cliente{filteredClients.length !== 1 ? 's' : ''} encontrado{filteredClients.length !== 1 ? 's' : ''}
+              {filteredClients.length} client{filteredClients.length !== 1 ? 's' : ''} found
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -435,10 +435,10 @@ export default function ClientsPage() {
             ) : filteredClients.length === 0 ? (
               <div className="text-center py-12">
                 <Users className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                <p className="text-muted-foreground">No hay clientes</p>
+                <p className="text-muted-foreground">No clients found</p>
                 <Button variant="outline" className="mt-4" onClick={() => setIsCreateOpen(true)}>
                   <Plus className="h-4 w-4 mr-2" />
-                  Agregar primer cliente
+                  Add first client
                 </Button>
               </div>
             ) : (
@@ -507,21 +507,21 @@ export default function ClientsPage() {
         <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Eliminar Cliente</DialogTitle>
+              <DialogTitle>Delete Client</DialogTitle>
               <DialogDescription>
-                ¿Estás seguro de que deseas eliminar a "{clientToDelete?.name}"? Esta acción no se puede deshacer.
+                Are you sure you want to delete "{clientToDelete?.name}"? This action cannot be undone.
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
-                Cancelar
+                Cancel
               </Button>
               <Button
                 variant="destructive"
                 onClick={() => clientToDelete && deleteMutation.mutate(clientToDelete.id)}
                 disabled={deleteMutation.isPending}
               >
-                Eliminar
+                Delete
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -538,15 +538,15 @@ export default function ClientsPage() {
                     {selectedClient.name}
                   </SheetTitle>
                   <SheetDescription>
-                    Cliente desde {format(new Date(selectedClient.created_at), "MMMM yyyy", { locale: es })}
+                    Client since {format(new Date(selectedClient.created_at), "MMMM yyyy", { locale: enAU })}
                   </SheetDescription>
                 </SheetHeader>
 
                 <Tabs defaultValue="info" className="mt-6">
                   <TabsList className="grid w-full grid-cols-3">
-                    <TabsTrigger value="info">Información</TabsTrigger>
-                    <TabsTrigger value="jobs">Trabajos</TabsTrigger>
-                    <TabsTrigger value="stats">Estadísticas</TabsTrigger>
+                    <TabsTrigger value="info">Information</TabsTrigger>
+                    <TabsTrigger value="jobs">Jobs</TabsTrigger>
+                    <TabsTrigger value="stats">Statistics</TabsTrigger>
                   </TabsList>
 
                   <TabsContent value="info" className="space-y-4 mt-4">
@@ -560,9 +560,9 @@ export default function ClientsPage() {
                                 <LinkIcon className="h-5 w-5 text-primary" />
                               </div>
                               <div>
-                                <p className="font-medium">Portal de Cliente</p>
+                                <p className="font-medium">Client Portal</p>
                                 <p className="text-sm text-muted-foreground">
-                                  Comparte este enlace con el cliente
+                                  Share this link with the client
                                 </p>
                               </div>
                             </div>
@@ -573,11 +573,11 @@ export default function ClientsPage() {
                                 onClick={() => {
                                   const url = `${window.location.origin}/portal?token=${selectedClient.portal_token}`;
                                   navigator.clipboard.writeText(url);
-                                  toast.success("Enlace copiado al portapapeles");
+                                  toast.success("Link copied to clipboard");
                                 }}
                               >
                                 <Copy className="h-4 w-4 mr-2" />
-                                Copiar
+                                Copy
                               </Button>
                               <Button
                                 variant="default"
@@ -588,7 +588,7 @@ export default function ClientsPage() {
                                 }}
                               >
                                 <ExternalLink className="h-4 w-4 mr-2" />
-                                Abrir
+                                Open
                               </Button>
                             </div>
                           </div>
@@ -632,35 +632,35 @@ export default function ClientsPage() {
                   <TabsContent value="jobs" className="mt-4">
                     <Card>
                       <CardHeader>
-                        <CardTitle className="text-base">Historial de Trabajos</CardTitle>
-                        <CardDescription>{clientJobs.length} trabajos registrados</CardDescription>
+                        <CardTitle className="text-base">Job History</CardTitle>
+                        <CardDescription>{clientJobs.length} jobs recorded</CardDescription>
                       </CardHeader>
                       <CardContent>
                         {clientJobs.length === 0 ? (
                           <p className="text-center text-muted-foreground py-8">
-                            No hay trabajos registrados
+                            No jobs recorded
                           </p>
                         ) : (
                           <Table>
                             <TableHeader>
                               <TableRow>
-                                <TableHead>Fecha</TableHead>
-                                <TableHead>Ubicación</TableHead>
+                                <TableHead>Date</TableHead>
+                                <TableHead>Location</TableHead>
                                 <TableHead>Staff</TableHead>
-                                <TableHead>Estado</TableHead>
+                                <TableHead>Status</TableHead>
                               </TableRow>
                             </TableHeader>
                             <TableBody>
                               {clientJobs.map((job) => (
                                 <TableRow key={job.id}>
                                   <TableCell>
-                                    {format(new Date(job.scheduled_date), "dd MMM yyyy", { locale: es })}
+                                    {format(new Date(job.scheduled_date), "dd MMM yyyy", { locale: enAU })}
                                   </TableCell>
                                   <TableCell className="max-w-[120px] truncate">
                                     {job.location}
                                   </TableCell>
                                   <TableCell>
-                                    {job.profiles?.full_name || "Sin asignar"}
+                                    {job.profiles?.full_name || "Unassigned"}
                                   </TableCell>
                                   <TableCell>{getStatusBadge(job.status)}</TableCell>
                                 </TableRow>
@@ -680,7 +680,7 @@ export default function ClientsPage() {
                             <Briefcase className="h-8 w-8 text-primary" />
                             <div>
                               <p className="text-2xl font-bold">{clientStats.totalJobs}</p>
-                              <p className="text-sm text-muted-foreground">Total Trabajos</p>
+                              <p className="text-sm text-muted-foreground">Total Jobs</p>
                             </div>
                           </div>
                         </CardContent>

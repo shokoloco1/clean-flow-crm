@@ -21,9 +21,9 @@ export default function GeofenceStatus({
               <CheckCircle className="h-5 w-5 text-success" />
             </div>
             <div>
-              <p className="font-semibold text-success">Ubicación Verificada</p>
+              <p className="font-semibold text-success">Location Verified</p>
               <p className="text-sm text-muted-foreground">
-                Estás a {distanceMeters}m de la propiedad (máximo {radiusMeters}m)
+                You are {distanceMeters}m from the property (maximum {radiusMeters}m)
               </p>
             </div>
           </div>
@@ -40,9 +40,9 @@ export default function GeofenceStatus({
             <AlertTriangle className="h-5 w-5 text-destructive" />
           </div>
           <div className="flex-1">
-            <p className="font-semibold text-destructive">Fuera del Área</p>
+            <p className="font-semibold text-destructive">Outside Area</p>
             <p className="text-sm text-muted-foreground">
-              Estás a {distanceMeters}m de la propiedad. Debes estar a menos de {radiusMeters}m.
+              You are {distanceMeters}m from the property. You must be within {radiusMeters}m.
             </p>
           </div>
           <Navigation className="h-5 w-5 text-destructive" />

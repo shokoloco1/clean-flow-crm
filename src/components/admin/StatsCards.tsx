@@ -21,28 +21,28 @@ export function StatsCards({ stats }: StatsCardsProps) {
       value: stats.todayJobs,
       icon: Calendar,
       iconColor: "text-primary",
-      tooltip: "Total de trabajos programados para hoy",
+      tooltip: "Total jobs scheduled for today",
     },
     {
       title: t("completedToday"),
       value: stats.completedToday,
       icon: CheckCircle,
       iconColor: "text-success",
-      tooltip: "Trabajos completados hoy",
+      tooltip: "Jobs completed today",
     },
     {
       title: t("completionRate"),
       value: `${stats.completionRate}%`,
       icon: TrendingUp,
       iconColor: "text-primary",
-      tooltip: "Porcentaje de trabajos completados vs programados hoy",
+      tooltip: "Percentage of jobs completed vs scheduled today",
     },
     {
       title: t("totalStaff"),
       value: stats.activeStaff,
       icon: Users,
       iconColor: "text-primary",
-      tooltip: "Total de miembros del equipo activos",
+      tooltip: "Total active team members",
     },
   ];
 
