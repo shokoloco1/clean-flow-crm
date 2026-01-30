@@ -13,3 +13,4 @@ export { TodayKanban } from './TodayKanban';
 export { TodayStats } from './TodayStats';
 export { UrgentAlerts } from './UrgentAlerts';
 export { FloatingActionButton } from './FloatingActionButton';
+export { QuickStatusButton, QuickStatusChip } from './QuickStatusButton';

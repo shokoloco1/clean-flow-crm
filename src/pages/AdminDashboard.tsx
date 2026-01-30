@@ -248,6 +248,7 @@ export default function AdminDashboard() {
           jobs={jobs} 
           loading={loading}
           onViewJob={handleViewJob}
+          onJobsChange={refreshData}
         />
       </div>
 
