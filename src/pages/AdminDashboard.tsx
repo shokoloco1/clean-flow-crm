@@ -7,6 +7,7 @@ import { useFetchWithRetry } from "@/hooks/useFetchWithRetry";
 import { useAdminShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useDuplicateJob } from "@/hooks/useDuplicateJob";
 import { DashboardErrorState } from "@/components/admin/DashboardErrorState";
+import { PendingPaymentsCard } from "@/components/admin/PendingPaymentsCard";
 import {
   TodayKanban,
   TodayStats,
@@ -256,8 +257,15 @@ export default function AdminDashboard() {
         {/* Urgent Alerts */}
         <UrgentAlerts jobs={jobs} />
         
-        {/* Today Stats */}
-        <TodayStats stats={stats} />
+        {/* Today Stats + Pending Payments */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-6">
+          <div className="lg:col-span-3">
+            <TodayStats stats={stats} />
+          </div>
+          <div className="lg:col-span-1">
+            <PendingPaymentsCard />
+          </div>
+        </div>
 
         {/* Kanban Board */}
         <TodayKanban 
