@@ -8,3 +8,7 @@ export { DashboardErrorState } from './DashboardErrorState';
 export { AdminLayout } from './AdminLayout';
 export { AdminSidebar } from './AdminSidebar';
 export { MobileBottomNav } from './MobileBottomNav';
+export { TodayKanban } from './TodayKanban';
+export { TodayStats } from './TodayStats';
+export { UrgentAlerts } from './UrgentAlerts';
+export { FloatingActionButton } from './FloatingActionButton';

@@ -13,6 +13,7 @@ export interface Job {
   end_time: string | null;
   notes: string | null;
   created_at?: string;
+  assigned_staff_id?: string | null;
   clients: { name: string } | null;
   profiles: { full_name: string } | null;
 }
