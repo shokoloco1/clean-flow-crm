@@ -4,6 +4,7 @@ import { AdminSidebar } from "./AdminSidebar";
 import { MobileBottomNav } from "./MobileBottomNav";
 import { NotificationCenter } from "@/components/NotificationCenter";
 import { GlobalSearch } from "@/components/GlobalSearch";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -36,8 +37,9 @@ export function AdminLayout({ children }: AdminLayoutProps) {
           {/* Desktop Header */}
           <header className="hidden md:flex sticky top-0 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
             <div className="flex items-center justify-between w-full px-4 h-14">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-4">
                 <SidebarTrigger />
+                <Breadcrumbs />
               </div>
               <div className="flex items-center gap-2">
                 <GlobalSearch />

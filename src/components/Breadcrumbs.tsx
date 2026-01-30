@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { ChevronRight, Home } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 
 interface BreadcrumbItem {
   label: string;
@@ -7,17 +7,18 @@ interface BreadcrumbItem {
 }
 
 const ROUTE_LABELS: Record<string, string> = {
-  admin: "Admin Panel",
+  admin: "Dashboard",
   staff: "Staff Panel",
   properties: "Properties",
   clients: "Clients",
-  calendar: "Calendar",
+  calendar: "Jobs",
   recurring: "Recurring Jobs",
   settings: "Settings",
   portal: "Client Portal",
   auth: "Authentication",
   invoices: "Invoices",
   "price-lists": "Price Lists",
+  reports: "Reports",
 };
 
 export function Breadcrumbs() {
@@ -40,17 +41,10 @@ export function Breadcrumbs() {
   });
 
   return (
-    <nav className="flex items-center gap-1 text-sm text-muted-foreground mb-4">
-      <Link
-        to="/"
-        className="flex items-center gap-1 hover:text-foreground transition-colors"
-      >
-        <Home className="h-4 w-4" />
-      </Link>
-      
+    <nav className="flex items-center gap-1 text-sm text-muted-foreground">
       {breadcrumbs.map((crumb, index) => (
         <div key={index} className="flex items-center gap-1">
-          <ChevronRight className="h-4 w-4" />
+          {index > 0 && <ChevronRight className="h-4 w-4" />}
           {crumb.href ? (
             <Link
               to={crumb.href}
