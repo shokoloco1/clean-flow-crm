@@ -4,27 +4,13 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { 
-  LogOut,
-  MapPin,
-  Clock,
-  CheckCircle2,
-  ChevronRight,
-  Sparkles,
-  Calendar,
-  Smile,
-  Bath,
-  Bed,
-  PawPrint,
-  Timer,
-  Play,
-  Loader2
-} from "lucide-react";
+import { LogOut, Sparkles, Calendar, Smile } from "lucide-react";
 import { format, addDays } from "date-fns";
 import JobDetailView from "@/components/JobDetailView";
 import { NotificationCenter } from "@/components/NotificationCenter";
 import { useJobStatusChange } from "@/hooks/useJobStatusChange";
+import { NextJobCard } from "@/components/staff/NextJobCard";
+import { TodayJobsList } from "@/components/staff/TodayJobsList";
 
 interface PropertyPhotos {
   id: string;
@@ -288,193 +274,67 @@ export default function StaffDashboard() {
             </CardContent>
           </Card>
         ) : (
-          <div className="space-y-6">
-            {/* Today's Jobs */}
+          <div className="space-y-4">
+            {/* Next Job - Hero Card */}
             {todayJobs.length > 0 && (
-              <div className="space-y-4">
-                <p className="text-sm font-medium text-muted-foreground px-2">
-                  📋 {todayJobs.length} job{todayJobs.length > 1 ? "s" : ""} for today
-                </p>
-                
-                {todayJobs.map((job) => {
-                  const statusConfig = getStatusConfig(job.status);
-                  const photos = job.property_id ? propertyPhotos[job.property_id] || [] : [];
-                  const isUpdating = updatingJobId === job.id;
-                  
-                  return (
-                    <Card 
-                      key={job.id}
-                      className={`
-                        border-2 shadow-sm transition-all cursor-pointer active:scale-[0.98]
-                        ${statusConfig.border}
-                      `}
-                      onClick={() => setSelectedJob(job)}
-                    >
-                      <CardContent className="p-5">
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="flex-1 min-w-0">
-                            {/* Client Name */}
-                            <h3 className="font-bold text-foreground text-xl mb-1 truncate">
-                              {job.clients?.name || "Unknown Client"}
-                            </h3>
-                            
-                            {/* Status Badge */}
-                            <div className="mb-3">
-                              <span className={`
-                                inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium
-                                ${statusConfig.bg} ${statusConfig.text}
-                              `}>
-                                {job.status === "completed" && <CheckCircle2 className="h-3.5 w-3.5" />}
-                                {job.status === "in_progress" && <Clock className="h-3.5 w-3.5" />}
-                                {statusConfig.label}
-                              </span>
-                            </div>
-                            
-                            {/* Property Quick Info */}
-                            {job.properties && (
-                              <div className="flex flex-wrap gap-3 text-sm text-muted-foreground mb-3 bg-muted/50 p-2 rounded-lg">
-                                {(job.properties.bedrooms ?? 0) > 0 && (
-                                  <span className="flex items-center gap-1">
-                                    <Bed className="h-4 w-4" />
-                                    {job.properties.bedrooms} bed
-                                  </span>
-                                )}
-                                {(job.properties.bathrooms ?? 0) > 0 && (
-                                  <span className="flex items-center gap-1">
-                                    <Bath className="h-4 w-4" />
-                                    {job.properties.bathrooms} bath
-                                  </span>
-                                )}
-                                {job.properties.has_pets && (
-                                  <span className="flex items-center gap-1 text-warning">
-                                    <PawPrint className="h-4 w-4" />
-                                    Pets
-                                  </span>
-                                )}
-                                {job.properties.estimated_hours && (
-                                  <span className="flex items-center gap-1">
-                                    <Timer className="h-4 w-4" />
-                                    ~{job.properties.estimated_hours}h
-                                  </span>
-                                )}
-                              </div>
-                            )}
-                            
-                            {/* Property Photo Preview */}
-                            {photos.length > 0 && (
-                              <div className="flex gap-1 mb-3">
-                                {photos.slice(0, 3).map((photo) => (
-                                  <div key={photo.id} className="w-14 h-14 rounded-md overflow-hidden bg-muted">
-                                    <img src={photo.photo_url} className="w-full h-full object-cover" alt="" />
-                                  </div>
-                                ))}
-                                {photos.length > 3 && (
-                                  <div className="w-14 h-14 rounded-md bg-muted flex items-center justify-center text-sm text-muted-foreground">
-                                    +{photos.length - 3}
-                                  </div>
-                                )}
-                              </div>
-                            )}
-                            
-                            {/* Location */}
-                            <div className="flex items-start gap-2 text-muted-foreground mb-2">
-                              <MapPin className="h-5 w-5 flex-shrink-0 mt-0.5" />
-                              <span className="text-base line-clamp-2">{job.location}</span>
-                            </div>
-                            
-                            {/* Time */}
-                            <div className="flex items-center gap-2 text-muted-foreground">
-                              <Clock className="h-5 w-5 flex-shrink-0" />
-                              <span className="text-base font-medium">{job.scheduled_time}</span>
-                            </div>
-                          </div>
-                          
-                          <div className="flex flex-col items-center gap-2">
-                            {/* Quick Status Button */}
-                            {job.status !== "completed" && job.status !== "cancelled" && (
-                              <Button
-                                size="lg"
-                                className={`
-                                  h-14 w-14 rounded-full shadow-lg
-                                  ${job.status === "in_progress" 
-                                    ? "bg-green-500 hover:bg-green-600" 
-                                    : "bg-blue-500 hover:bg-blue-600"
-                                  }
-                                `}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  advanceStatus(job.id, job.status);
-                                }}
-                                disabled={isUpdating}
-                              >
-                                {isUpdating ? (
-                                  <Loader2 className="h-6 w-6 animate-spin text-white" />
-                                ) : job.status === "in_progress" ? (
-                                  <CheckCircle2 className="h-6 w-6 text-white" />
-                                ) : (
-                                  <Play className="h-6 w-6 text-white" />
-                                )}
-                              </Button>
-                            )}
-                            {job.status === "completed" && (
-                              <div className="h-12 w-12 rounded-full bg-green-500/20 flex items-center justify-center">
-                                <CheckCircle2 className="h-6 w-6 text-green-500" />
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
-              </div>
+              <>
+                <NextJobCard
+                  job={todayJobs.find(j => j.status !== "completed") || todayJobs[0]}
+                  isUpdating={updatingJobId === (todayJobs.find(j => j.status !== "completed") || todayJobs[0]).id}
+                  onStartComplete={() => {
+                    const nextJob = todayJobs.find(j => j.status !== "completed") || todayJobs[0];
+                    advanceStatus(nextJob.id, nextJob.status);
+                  }}
+                  onViewDetails={() => {
+                    const nextJob = todayJobs.find(j => j.status !== "completed") || todayJobs[0];
+                    setSelectedJob(nextJob);
+                  }}
+                />
+
+                {/* Today's Jobs List */}
+                {todayJobs.length > 1 && (
+                  <TodayJobsList
+                    jobs={todayJobs}
+                    currentJobId={(todayJobs.find(j => j.status !== "completed") || todayJobs[0]).id}
+                    onSelectJob={(job) => setSelectedJob(job)}
+                  />
+                )}
+              </>
             )}
 
-            {/* Upcoming Jobs */}
+            {/* Upcoming Jobs (simplified) */}
             {upcomingJobs.length > 0 && (
-              <div className="space-y-4">
-                <p className="text-sm font-medium text-muted-foreground px-2">
+              <div className="pt-2">
+                <h3 className="text-sm font-semibold text-muted-foreground px-1 mb-2">
                   📅 Upcoming ({upcomingJobs.length})
-                </p>
-                
-                {upcomingJobs.map((job) => {
-                  const statusConfig = getStatusConfig(job.status);
-                  
-                  return (
+                </h3>
+                <div className="space-y-2">
+                  {upcomingJobs.slice(0, 3).map((job) => (
                     <Card 
                       key={job.id}
-                      className="border shadow-sm transition-all cursor-pointer active:scale-[0.98] opacity-80"
+                      className="cursor-pointer active:scale-[0.98] transition-all opacity-70"
                       onClick={() => setSelectedJob(job)}
                     >
-                      <CardContent className="p-4">
-                        <div className="flex items-center justify-between gap-3">
+                      <CardContent className="p-3">
+                        <div className="flex items-center justify-between">
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1">
-                              <Badge variant="outline" className="text-xs">
-                                {format(new Date(job.scheduled_date), "EEE, MMM d")}
-                              </Badge>
-                              <span className="text-sm text-muted-foreground">{job.scheduled_time}</span>
-                            </div>
-                            <h3 className="font-semibold text-foreground truncate">
-                              {job.clients?.name || "Unknown Client"}
-                            </h3>
-                            {job.properties && (
-                              <div className="flex gap-2 text-xs text-muted-foreground mt-1">
-                                {(job.properties.bedrooms ?? 0) > 0 && (
-                                  <span>{job.properties.bedrooms} bed</span>
-                                )}
-                                {(job.properties.bathrooms ?? 0) > 0 && (
-                                  <span>{job.properties.bathrooms} bath</span>
-                                )}
-                              </div>
-                            )}
+                            <p className="text-xs text-muted-foreground mb-0.5">
+                              {format(new Date(job.scheduled_date), "EEE, MMM d")} • {job.scheduled_time}
+                            </p>
+                            <p className="font-medium text-foreground truncate">
+                              {job.clients?.name || "Unknown"}
+                            </p>
                           </div>
-                          <ChevronRight className="h-5 w-5 text-muted-foreground" />
                         </div>
                       </CardContent>
                     </Card>
-                  );
-                })}
+                  ))}
+                  {upcomingJobs.length > 3 && (
+                    <p className="text-xs text-center text-muted-foreground py-2">
+                      +{upcomingJobs.length - 3} more upcoming jobs
+                    </p>
+                  )}
+                </div>
               </div>
             )}
           </div>
