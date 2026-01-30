@@ -9,6 +9,9 @@ import {
   Sparkles,
   LogOut,
   BarChart3,
+  Building2,
+  RefreshCw,
+  DollarSign,
 } from "lucide-react";
 import {
   Sidebar,
@@ -31,8 +34,11 @@ const navItems = [
   { title: "Dashboard", url: "/admin", icon: LayoutDashboard },
   { title: "Jobs", url: "/admin/calendar", icon: Calendar },
   { title: "Clients", url: "/admin/clients", icon: Users },
+  { title: "Properties", url: "/admin/properties", icon: Building2 },
   { title: "Staff", url: "/admin/staff", icon: UserCog },
   { title: "Invoices", url: "/admin/invoices", icon: FileText },
+  { title: "Recurring", url: "/admin/recurring", icon: RefreshCw },
+  { title: "Price Lists", url: "/admin/price-lists", icon: DollarSign },
   { title: "Reports", url: "/admin/reports", icon: BarChart3 },
   { title: "Settings", url: "/admin/settings", icon: Settings },
 ];
