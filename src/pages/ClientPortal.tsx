@@ -23,7 +23,6 @@ import {
   AlertCircle
 } from "lucide-react";
 import { format, parseISO } from "date-fns";
-import { t } from "@/lib/i18n";
 
 interface JobPhoto {
   id: string;
@@ -279,7 +278,7 @@ export default function ClientPortal() {
               Welcome, {clientName}
             </h2>
             <p className="text-muted-foreground">
-              Aquí puedes ver el historial de servicios de limpieza realizados y programados.
+              Here you can view your cleaning service history and scheduled jobs.
             </p>
           </CardContent>
         </Card>
@@ -293,7 +292,7 @@ export default function ClientPortal() {
                   <Calendar className="h-6 w-6 text-primary" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Programados</p>
+                  <p className="text-sm text-muted-foreground">Scheduled</p>
                   <p className="text-2xl font-bold">{scheduledJobs.length}</p>
                 </div>
               </div>
@@ -306,7 +305,7 @@ export default function ClientPortal() {
                   <Clock className="h-6 w-6 text-warning" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">En Progreso</p>
+                  <p className="text-sm text-muted-foreground">In Progress</p>
                   <p className="text-2xl font-bold">{inProgressJobs.length}</p>
                 </div>
               </div>
@@ -319,7 +318,7 @@ export default function ClientPortal() {
                   <CheckCircle2 className="h-6 w-6 text-success" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Completados</p>
+                  <p className="text-sm text-muted-foreground">Completed</p>
                   <p className="text-2xl font-bold">{completedJobs.length}</p>
                 </div>
               </div>
@@ -330,10 +329,10 @@ export default function ClientPortal() {
         {/* Jobs Tabs */}
         <Tabs defaultValue="all" className="space-y-6">
           <TabsList className="grid grid-cols-4 w-full max-w-md">
-            <TabsTrigger value="all">Todos ({jobs.length})</TabsTrigger>
-            <TabsTrigger value="scheduled">Programados</TabsTrigger>
-            <TabsTrigger value="progress">En Progreso</TabsTrigger>
-            <TabsTrigger value="completed">Completados</TabsTrigger>
+            <TabsTrigger value="all">All ({jobs.length})</TabsTrigger>
+            <TabsTrigger value="scheduled">Scheduled</TabsTrigger>
+            <TabsTrigger value="progress">In Progress</TabsTrigger>
+            <TabsTrigger value="completed">Completed</TabsTrigger>
           </TabsList>
 
           <TabsContent value="all">
@@ -405,14 +404,14 @@ export default function ClientPortal() {
 
                 {/* Location */}
                 <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground">Ubicación</p>
+                  <p className="text-sm text-muted-foreground">Location</p>
                   <p className="font-medium flex items-center gap-2">
                     <MapPin className="h-4 w-4 text-primary" />
                     {selectedJob.location}
                   </p>
                   {selectedJob.property_name && (
                     <p className="text-sm text-muted-foreground ml-6">
-                      Propiedad: {selectedJob.property_name}
+                      Property: {selectedJob.property_name}
                     </p>
                   )}
                 </div>
@@ -420,7 +419,7 @@ export default function ClientPortal() {
                 {/* Staff */}
                 {selectedJob.staff_name && (
                   <div className="space-y-1">
-                    <p className="text-sm text-muted-foreground">Personal Asignado</p>
+                    <p className="text-sm text-muted-foreground">Assigned Staff</p>
                     <p className="font-medium flex items-center gap-2">
                       <User className="h-4 w-4 text-primary" />
                       {selectedJob.staff_name}
@@ -434,19 +433,19 @@ export default function ClientPortal() {
                     <CardContent className="py-4">
                       <div className="grid grid-cols-3 gap-4 text-center">
                         <div>
-                          <p className="text-sm text-muted-foreground">Inicio</p>
+                          <p className="text-sm text-muted-foreground">Start</p>
                           <p className="font-semibold text-success">
                             {format(new Date(selectedJob.start_time), "HH:mm")}
                           </p>
                         </div>
                         <div>
-                          <p className="text-sm text-muted-foreground">Fin</p>
+                          <p className="text-sm text-muted-foreground">End</p>
                           <p className="font-semibold text-success">
                             {format(new Date(selectedJob.end_time), "HH:mm")}
                           </p>
                         </div>
                         <div>
-                          <p className="text-sm text-muted-foreground">Duración</p>
+                          <p className="text-sm text-muted-foreground">Duration</p>
                           <p className="font-semibold text-success">
                             {calculateDuration(selectedJob.start_time, selectedJob.end_time)}
                           </p>
@@ -461,31 +460,22 @@ export default function ClientPortal() {
                   <div className="space-y-3">
                     <h4 className="font-medium flex items-center gap-2">
                       <ImageIcon className="h-4 w-4 text-primary" />
-                      Fotos del Servicio ({selectedJob.photos.length})
+                      Service Photos ({selectedJob.photos.length})
                     </h4>
                     
                     {/* Before Photos */}
                     {selectedJob.photos.filter(p => p.photo_type === 'before').length > 0 && (
                       <div>
-                        <p className="text-sm text-muted-foreground mb-2">Antes</p>
+                        <p className="text-sm text-muted-foreground mb-2">Before</p>
                         <div className="grid grid-cols-3 gap-2">
-                          {selectedJob.photos
-                            .filter(p => p.photo_type === 'before')
-                            .map((photo) => (
-                              <a
-                                key={photo.id}
-                                href={photo.photo_url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="aspect-square rounded-lg overflow-hidden bg-muted hover:opacity-90 transition-opacity"
-                              >
-                                <img
-                                  src={photo.photo_url}
-                                  alt="Antes"
-                                  className="w-full h-full object-cover"
-                                />
-                              </a>
-                            ))}
+                          {selectedJob.photos.filter(p => p.photo_type === 'before').map(photo => (
+                            <img 
+                              key={photo.id} 
+                              src={photo.photo_url} 
+                              alt="Before" 
+                              className="w-full aspect-square object-cover rounded-lg"
+                            />
+                          ))}
                         </div>
                       </div>
                     )}
@@ -493,36 +483,27 @@ export default function ClientPortal() {
                     {/* After Photos */}
                     {selectedJob.photos.filter(p => p.photo_type === 'after').length > 0 && (
                       <div>
-                        <p className="text-sm text-muted-foreground mb-2">Después</p>
+                        <p className="text-sm text-muted-foreground mb-2">After</p>
                         <div className="grid grid-cols-3 gap-2">
-                          {selectedJob.photos
-                            .filter(p => p.photo_type === 'after')
-                            .map((photo) => (
-                              <a
-                                key={photo.id}
-                                href={photo.photo_url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="aspect-square rounded-lg overflow-hidden bg-muted hover:opacity-90 transition-opacity"
-                              >
-                                <img
-                                  src={photo.photo_url}
-                                  alt="Después"
-                                  className="w-full h-full object-cover"
-                                />
-                              </a>
-                            ))}
+                          {selectedJob.photos.filter(p => p.photo_type === 'after').map(photo => (
+                            <img 
+                              key={photo.id} 
+                              src={photo.photo_url} 
+                              alt="After" 
+                              className="w-full aspect-square object-cover rounded-lg"
+                            />
+                          ))}
                         </div>
                       </div>
                     )}
                   </div>
                 )}
 
-                {/* No photos message */}
-                {(!selectedJob.photos || selectedJob.photos.length === 0) && selectedJob.status === "completed" && (
-                  <div className="text-center py-6 bg-muted/50 rounded-lg">
-                    <ImageIcon className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-                    <p className="text-muted-foreground">No hay fotos disponibles para este servicio</p>
+                {/* Notes */}
+                {selectedJob.notes && (
+                  <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground">Notes</p>
+                    <p className="text-sm">{selectedJob.notes}</p>
                   </div>
                 )}
               </div>
@@ -530,6 +511,13 @@ export default function ClientPortal() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Footer */}
+      <footer className="bg-card border-t border-border py-6 mt-12">
+        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
+          Powered by CleanFlow
+        </div>
+      </footer>
     </div>
   );
 }
@@ -542,12 +530,12 @@ interface JobListProps {
   emptyMessage?: string;
 }
 
-function JobList({ jobs, onViewJob, getStatusConfig, emptyMessage = "No jobs" }: JobListProps) {
+function JobList({ jobs, onViewJob, getStatusConfig, emptyMessage = "No jobs found" }: JobListProps) {
   if (jobs.length === 0) {
     return (
-      <Card className="border-dashed">
-        <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-          <Calendar className="h-12 w-12 text-muted-foreground mb-4" />
+      <Card>
+        <CardContent className="py-12 text-center">
+          <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
           <p className="text-muted-foreground">{emptyMessage}</p>
         </CardContent>
       </Card>
@@ -555,52 +543,34 @@ function JobList({ jobs, onViewJob, getStatusConfig, emptyMessage = "No jobs" }:
   }
 
   return (
-    <div className="space-y-3">
-      {jobs.map((job) => {
+    <div className="grid gap-4">
+      {jobs.map(job => {
         const statusConfig = getStatusConfig(job.status);
-        const photoCount = job.photos?.length || 0;
-        
         return (
-          <Card 
-            key={job.id} 
-            className="hover:shadow-md transition-shadow cursor-pointer"
-            onClick={() => onViewJob(job)}
-          >
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between gap-4">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Badge className={statusConfig.className}>
-                      {statusConfig.label}
-                    </Badge>
-                      {photoCount > 0 && (
-                      <Badge variant="outline" className="text-xs">
-                        <ImageIcon className="h-3 w-3 mr-1" />
-                        {photoCount} photos
-                      </Badge>
-                    )}
-                  </div>
-                  
-                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                    <span className="flex items-center gap-1">
-                      <Calendar className="h-3.5 w-3.5" />
-                      {format(parseISO(job.scheduled_date), "d MMM yyyy")}
+          <Card key={job.id} className="hover:shadow-md transition-shadow">
+            <CardContent className="py-4">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                    <span className="font-medium">
+                      {format(parseISO(job.scheduled_date), "EEEE, d MMM yyyy")}
                     </span>
-                    <span className="flex items-center gap-1">
-                      <Clock className="h-3.5 w-3.5" />
-                      {job.scheduled_time}
-                    </span>
+                    <span className="text-muted-foreground">at {job.scheduled_time}</span>
                   </div>
-                  
-                  <p className="text-foreground mt-1 truncate flex items-center gap-1">
-                    <MapPin className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
-                    {job.location}
-                  </p>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <MapPin className="h-3 w-3" />
+                    <span>{job.property_name || job.location}</span>
+                  </div>
                 </div>
-                
-                <Button variant="ghost" size="icon">
-                  <Eye className="h-4 w-4" />
-                </Button>
+                <div className="flex items-center gap-3">
+                  <Badge className={statusConfig.className}>
+                    {statusConfig.label}
+                  </Badge>
+                  <Button variant="ghost" size="sm" onClick={() => onViewJob(job)}>
+                    <Eye className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>

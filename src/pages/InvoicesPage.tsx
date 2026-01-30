@@ -40,7 +40,6 @@ import {
 } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { toast } from "sonner";
-import { t } from "@/lib/i18n";
 import { CreateInvoiceDialog } from "@/components/invoices/CreateInvoiceDialog";
 import { InvoiceDetailDialog } from "@/components/invoices/InvoiceDetailDialog";
 

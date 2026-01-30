@@ -22,7 +22,6 @@ import {
 } from 'recharts';
 import { TrendingUp, Users, Clock, AlertTriangle, CheckCircle, BarChart3, Loader2 } from 'lucide-react';
 import { format, subDays, startOfDay, eachDayOfInterval, parseISO } from 'date-fns';
-import { t } from '@/lib/i18n';
 
 interface JobsPerDay {
   date: string;

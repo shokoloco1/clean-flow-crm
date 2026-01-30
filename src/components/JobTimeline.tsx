@@ -13,7 +13,6 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { t } from "@/lib/i18n";
 
 interface TimelineEvent {
   id: string;
@@ -47,8 +46,8 @@ export function JobTimeline({ job, photos = [], checklistItems = [], alerts = []
     events.push({
       id: "created",
       type: "created",
-      title: t("jobCreatedEvent"),
-      description: `${t("scheduled")}: ${job.scheduled_date} ${t("scheduledTime")}: ${job.scheduled_time}`,
+      title: "Job created",
+      description: `Scheduled: ${job.scheduled_date} at ${job.scheduled_time}`,
       timestamp: job.created_at,
     });
   }
@@ -58,8 +57,8 @@ export function JobTimeline({ job, photos = [], checklistItems = [], alerts = []
     events.push({
       id: "started",
       type: "started",
-      title: t("jobStartedEvent"),
-      description: t("locationVerified"),
+      title: "Job started",
+      description: "Location verified",
       timestamp: job.start_time,
     });
   }
@@ -69,7 +68,7 @@ export function JobTimeline({ job, photos = [], checklistItems = [], alerts = []
     events.push({
       id: `photo-${index}`,
       type: "photo",
-      title: `${photo.photo_type === "before" ? t("before") : t("after")} ${t("photos")}`,
+      title: `${photo.photo_type === "before" ? "Before" : "After"} photo uploaded`,
       timestamp: photo.created_at,
     });
   });
@@ -80,7 +79,7 @@ export function JobTimeline({ job, photos = [], checklistItems = [], alerts = []
       events.push({
         id: `checklist-${index}`,
         type: "checklist",
-        title: t("complete"),
+        title: "Task completed",
         description: item.task_name,
         timestamp: item.completed_at,
       });
@@ -92,10 +91,10 @@ export function JobTimeline({ job, photos = [], checklistItems = [], alerts = []
     events.push({
       id: `alert-${index}`,
       type: "alert",
-      title: t("activeAlerts"),
+      title: "Alert generated",
       description: alert.message,
       timestamp: alert.created_at,
-      metadata: { resolved: alert.is_resolved ? t("completed") : t("pending") },
+      metadata: { resolved: alert.is_resolved ? "Resolved" : "Pending" },
     });
   });
 
@@ -104,8 +103,8 @@ export function JobTimeline({ job, photos = [], checklistItems = [], alerts = []
     events.push({
       id: "completed",
       type: "completed",
-      title: t("jobCompletedEvent"),
-      description: t("jobCompleted"),
+      title: "Job completed",
+      description: "All tasks finished successfully",
       timestamp: job.end_time,
     });
   }
@@ -115,7 +114,7 @@ export function JobTimeline({ job, photos = [], checklistItems = [], alerts = []
     events.push({
       id: "cancelled",
       type: "cancelled",
-      title: t("jobCancelledEvent"),
+      title: "Job cancelled",
       timestamp: job.end_time || job.created_at || new Date().toISOString(),
     });
   }
@@ -171,7 +170,7 @@ export function JobTimeline({ job, photos = [], checklistItems = [], alerts = []
     return (
       <div className="text-center py-8 text-muted-foreground">
         <Clock className="h-8 w-8 mx-auto mb-2 opacity-50" />
-        <p>{t("noJobsScheduled")}</p>
+        <p>No events recorded yet</p>
       </div>
     );
   }

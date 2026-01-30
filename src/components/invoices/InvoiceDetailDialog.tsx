@@ -30,7 +30,6 @@ import { format, parseISO } from "date-fns";
 import { toast } from "sonner";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import { t } from "@/lib/i18n";
 import { formatAUD } from "@/lib/australian";
 
 interface Invoice {

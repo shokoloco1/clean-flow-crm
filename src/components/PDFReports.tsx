@@ -9,7 +9,6 @@ import { toast } from 'sonner';
 import { format, subDays, startOfMonth, endOfMonth } from 'date-fns';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { t } from '@/lib/i18n';
 
 type ReportType = 'jobs' | 'staff' | 'alerts' | 'job-detail';
 
