@@ -22,21 +22,20 @@ export function PendingPaymentsCard() {
   const [stats, setStats] = useState<PaymentStats | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchPaymentStats();
-  }, []);
-
   const fetchPaymentStats = async () => {
+    // Fetch ALL unpaid invoices (not just sent/overdue, but also draft that might be pending)
     const { data: invoices, error } = await supabase
       .from("invoices")
       .select("status, total, due_date")
-      .in("status", ["sent", "overdue"]);
+      .neq("status", "paid");  // All invoices that are NOT paid
 
     if (error) {
-      console.error("Error fetching payment stats:", error);
+      console.error("[PendingPayments] Error fetching:", error);
       setLoading(false);
       return;
     }
+
+    console.log('[PendingPayments] Found unpaid invoices:', invoices?.length || 0);
 
     const today = new Date();
     let overdueCount = 0;
@@ -45,14 +44,15 @@ export function PendingPaymentsCard() {
     let sentAmount = 0;
 
     invoices?.forEach((inv) => {
-      const isOverdue = differenceInDays(today, parseISO(inv.due_date)) > 0;
+      // Check if invoice is overdue based on due_date
+      const isOverdue = inv.due_date && differenceInDays(today, parseISO(inv.due_date)) > 0;
       
-      if (inv.status === "overdue" || isOverdue) {
+      if (inv.status === "overdue" || (inv.status === "sent" && isOverdue)) {
         overdueCount++;
-        overdueAmount += Number(inv.total);
-      } else if (inv.status === "sent") {
+        overdueAmount += Number(inv.total) || 0;
+      } else if (inv.status === "sent" || inv.status === "draft") {
         sentCount++;
-        sentAmount += Number(inv.total);
+        sentAmount += Number(inv.total) || 0;
       }
     });
 
@@ -65,6 +65,20 @@ export function PendingPaymentsCard() {
     });
     setLoading(false);
   };
+
+  useEffect(() => {
+    fetchPaymentStats();
+    
+    // Refresh on visibility change
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        fetchPaymentStats();
+      }
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, []);
 
   if (loading) {
     return (

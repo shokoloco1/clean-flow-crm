@@ -40,6 +40,7 @@ export default function AdminDashboard() {
     retryCount,
     refreshData,
     retry,
+    hasNoJobsToday,
   } = useDashboardData();
 
   // Job creation
@@ -138,7 +139,7 @@ export default function AdminDashboard() {
         {/* Today Stats + Pending Payments */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-6">
           <div className="lg:col-span-3">
-            <TodayStats stats={stats} />
+            <TodayStats stats={stats} hasNoJobsToday={hasNoJobsToday} />
           </div>
           <div className="lg:col-span-1">
             <PendingPaymentsCard />
