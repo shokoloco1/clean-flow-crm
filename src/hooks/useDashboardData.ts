@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { useFetchWithRetry } from "@/hooks/useFetchWithRetry";
@@ -31,8 +31,14 @@ interface DashboardData {
 }
 
 export function useDashboardData() {
+  const refreshIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  
   const fetchDashboardData = useCallback(async (): Promise<DashboardData> => {
+    // Use local date for filtering
     const today = format(new Date(), "yyyy-MM-dd");
+    
+    // Debug logging
+    console.log('[Dashboard] Fetching data for date:', today);
     
     const [jobsRes, todayCountRes, completedCountRes] = await Promise.all([
       supabase
@@ -56,6 +62,9 @@ export function useDashboardData() {
     ]);
 
     if (jobsRes.error) throw new Error(jobsRes.error.message);
+
+    // Debug logging
+    console.log('[Dashboard] Jobs found for today:', jobsRes.data?.length || 0, 'Date filter:', today);
 
     // Collect all staff IDs and fetch profiles in one query
     const allStaffIds = new Set<string>();
@@ -106,8 +115,36 @@ export function useDashboardData() {
     retryDelay: 1500,
   });
 
+  // Auto-refresh every 30 seconds
+  useEffect(() => {
+    refreshIntervalRef.current = setInterval(() => {
+      console.log('[Dashboard] Auto-refreshing data...');
+      refreshData();
+    }, 30000);
+
+    return () => {
+      if (refreshIntervalRef.current) {
+        clearInterval(refreshIntervalRef.current);
+      }
+    };
+  }, [refreshData]);
+
+  // Refresh on visibility change (when user returns to tab)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        console.log('[Dashboard] Tab became visible, refreshing...');
+        refreshData();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [refreshData]);
+
   const jobs = dashboardData?.jobs || [];
   const stats = dashboardData?.stats || { todayJobs: 0, activeStaff: 0, completedToday: 0, completionRate: 0 };
+  const hasNoJobsToday = !loading && jobs.length === 0;
 
   return {
     jobs,
@@ -118,5 +155,6 @@ export function useDashboardData() {
     retryCount,
     refreshData,
     retry,
+    hasNoJobsToday,
   };
 }

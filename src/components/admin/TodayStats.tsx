@@ -41,7 +41,12 @@ function AnimatedNumber({ value, suffix = "" }: { value: number | string; suffix
   return <>{displayValue}{suffix}</>;
 }
 
-export function TodayStats({ stats }: TodayStatsProps) {
+interface TodayStatsProps {
+  stats: Stats;
+  hasNoJobsToday?: boolean;
+}
+
+export function TodayStats({ stats, hasNoJobsToday = false }: TodayStatsProps) {
   const inProgressCount = Math.max(0, stats.todayJobs - stats.completedToday);
   
   const statItems = [
@@ -80,26 +85,35 @@ export function TodayStats({ stats }: TodayStatsProps) {
   ];
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-      {statItems.map((item) => (
-        <div
-          key={item.label}
-          className="flex items-center gap-3 bg-card border border-border rounded-lg p-3 transition-all hover:shadow-sm"
-        >
-          <div className={`p-2 rounded-lg ${item.bgColor}`}>
-            <item.icon className={`h-4 w-4 ${item.color}`} />
-          </div>
-          <div>
-            <p className="text-lg font-bold text-foreground tabular-nums">
-              <AnimatedNumber 
-                value={item.value} 
-                suffix={item.isPercent ? "%" : ""} 
-              />
-            </p>
-            <p className="text-xs text-muted-foreground">{item.label}</p>
-          </div>
+    <div className="space-y-2">
+      {hasNoJobsToday && (
+        <div className="bg-muted/50 border border-border rounded-lg p-3 text-center">
+          <p className="text-sm text-muted-foreground">
+            📅 No jobs scheduled for today
+          </p>
         </div>
-      ))}
+      )}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        {statItems.map((item) => (
+          <div
+            key={item.label}
+            className="flex items-center gap-3 bg-card border border-border rounded-lg p-3 transition-all hover:shadow-sm"
+          >
+            <div className={`p-2 rounded-lg ${item.bgColor}`}>
+              <item.icon className={`h-4 w-4 ${item.color}`} />
+            </div>
+            <div>
+              <p className="text-lg font-bold text-foreground tabular-nums">
+                <AnimatedNumber 
+                  value={item.value} 
+                  suffix={item.isPercent ? "%" : ""} 
+                />
+              </p>
+              <p className="text-xs text-muted-foreground">{item.label}</p>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
