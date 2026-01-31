@@ -21,7 +21,8 @@ export function FloatingActionButton({
         "fixed z-50 shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 transition-all",
         "rounded-full h-14 px-5 gap-2",
         // Position: bottom-right, accounting for mobile bottom nav
-        "bottom-24 md:bottom-8 right-4 md:right-8",
+        // Hidden on mobile (< 768px) - use header button instead
+        "hidden md:flex bottom-8 right-8",
         className
       )}
     >
