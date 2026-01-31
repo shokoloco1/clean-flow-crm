@@ -42,7 +42,7 @@ import { format, parseISO } from "date-fns";
 import { toast } from "sonner";
 import { CreateInvoiceDialog } from "@/components/invoices/CreateInvoiceDialog";
 import { InvoiceDetailDialog } from "@/components/invoices/InvoiceDetailDialog";
-import { XeroExport } from "@/components/invoices/XeroExport";
+import { AccountingExport } from "@/components/invoices/AccountingExport";
 import { InvoiceStatusActions } from "@/components/invoices/InvoiceStatusActions";
 
 interface Invoice {
@@ -80,7 +80,7 @@ export default function InvoicesPage() {
       .from("invoices")
       .select(`
         *,
-        clients (name, email)
+        clients (name, email, abn, address)
       `)
       .order("created_at", { ascending: false });
 
@@ -140,7 +140,7 @@ export default function InvoicesPage() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <XeroExport invoices={invoices} />
+            <AccountingExport invoices={invoices} />
             <Button onClick={() => setIsCreateOpen(true)}>
               <Plus className="h-4 w-4 mr-2" />
               New Invoice
