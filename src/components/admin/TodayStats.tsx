@@ -1,39 +1,81 @@
-import { CheckCircle, Clock, ListTodo, TrendingUp } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { CheckCircle2, Clock, ClipboardList, TrendingUp } from "lucide-react";
 import type { Stats } from "./StatsCards";
 
 interface TodayStatsProps {
   stats: Stats;
 }
 
+function AnimatedNumber({ value, suffix = "" }: { value: number | string; suffix?: string }) {
+  const [displayValue, setDisplayValue] = useState(0);
+  const previousValue = useRef(0);
+  
+  useEffect(() => {
+    const numValue = typeof value === "string" ? parseInt(value) || 0 : value;
+    const startValue = previousValue.current;
+    const endValue = numValue;
+    const duration = 500;
+    const startTime = Date.now();
+    
+    const animate = () => {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      
+      // Easing function for smooth animation
+      const easeOutQuad = (t: number) => t * (2 - t);
+      const easedProgress = easeOutQuad(progress);
+      
+      const currentValue = Math.round(startValue + (endValue - startValue) * easedProgress);
+      setDisplayValue(currentValue);
+      
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      } else {
+        previousValue.current = endValue;
+      }
+    };
+    
+    requestAnimationFrame(animate);
+  }, [value]);
+  
+  return <>{displayValue}{suffix}</>;
+}
+
 export function TodayStats({ stats }: TodayStatsProps) {
+  const inProgressCount = Math.max(0, stats.todayJobs - stats.completedToday);
+  
   const statItems = [
     {
       label: "Total",
       value: stats.todayJobs,
-      icon: ListTodo,
+      icon: ClipboardList,
       color: "text-blue-600 dark:text-blue-400",
       bgColor: "bg-blue-100 dark:bg-blue-900/30",
+      isPercent: false,
     },
     {
       label: "In Progress",
-      value: stats.todayJobs - stats.completedToday,
+      value: inProgressCount,
       icon: Clock,
       color: "text-amber-600 dark:text-amber-400",
       bgColor: "bg-amber-100 dark:bg-amber-900/30",
+      isPercent: false,
     },
     {
       label: "Completed",
       value: stats.completedToday,
-      icon: CheckCircle,
+      icon: CheckCircle2,
       color: "text-emerald-600 dark:text-emerald-400",
       bgColor: "bg-emerald-100 dark:bg-emerald-900/30",
+      isPercent: false,
     },
     {
       label: "Rate",
-      value: `${stats.completionRate}%`,
+      value: stats.completionRate,
       icon: TrendingUp,
       color: "text-primary",
       bgColor: "bg-primary/10",
+      isPercent: true,
     },
   ];
 
@@ -42,13 +84,18 @@ export function TodayStats({ stats }: TodayStatsProps) {
       {statItems.map((item) => (
         <div
           key={item.label}
-          className="flex items-center gap-3 bg-card border border-border rounded-lg p-3"
+          className="flex items-center gap-3 bg-card border border-border rounded-lg p-3 transition-all hover:shadow-sm"
         >
           <div className={`p-2 rounded-lg ${item.bgColor}`}>
             <item.icon className={`h-4 w-4 ${item.color}`} />
           </div>
           <div>
-            <p className="text-lg font-bold text-foreground">{item.value}</p>
+            <p className="text-lg font-bold text-foreground tabular-nums">
+              <AnimatedNumber 
+                value={item.value} 
+                suffix={item.isPercent ? "%" : ""} 
+              />
+            </p>
             <p className="text-xs text-muted-foreground">{item.label}</p>
           </div>
         </div>

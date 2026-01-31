@@ -2,12 +2,14 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
+import { Plus } from "lucide-react";
 import { useAdminShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useDuplicateJob } from "@/hooks/useDuplicateJob";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { useCreateJob } from "@/hooks/useCreateJob";
 import { useJobDetail } from "@/hooks/useJobDetail";
 import { useOnboarding } from "@/hooks/useOnboarding";
+import { Button } from "@/components/ui/button";
 import { DashboardErrorState } from "@/components/admin/DashboardErrorState";
 import { PendingPaymentsCard } from "@/components/admin/PendingPaymentsCard";
 import { OnboardingWizard } from "@/components/onboarding/OnboardingWizard";
@@ -101,12 +103,23 @@ export default function AdminDashboard() {
   return (
     <AdminLayout>
       <div className="container mx-auto px-4 py-4 md:py-6">
-        {/* Page Title */}
-        <div className="mb-4">
-          <h1 className="text-2xl font-bold text-foreground">Today's View</h1>
-          <p className="text-sm text-muted-foreground">
-            {format(new Date(), "EEEE, MMMM d, yyyy")}
-          </p>
+        {/* Page Title with Mobile New Job Button */}
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">Today's View</h1>
+            <p className="text-sm text-muted-foreground">
+              {format(new Date(), "EEEE, MMMM d, yyyy")}
+            </p>
+          </div>
+          {/* Mobile-only New Job Button */}
+          <Button 
+            onClick={() => setIsCreateOpen(true)}
+            size="sm"
+            className="md:hidden gap-1.5"
+          >
+            <Plus className="h-4 w-4" />
+            New Job
+          </Button>
         </div>
 
         {/* Error State */}

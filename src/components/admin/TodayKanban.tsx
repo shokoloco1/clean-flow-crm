@@ -25,6 +25,7 @@ type KanbanColumn = {
   status: string[];
   color: string;
   bgColor: string;
+  badgeVariant: "default" | "secondary" | "outline";
 };
 
 const columns: KanbanColumn[] = [
@@ -33,21 +34,24 @@ const columns: KanbanColumn[] = [
     title: "Scheduled", 
     status: ["scheduled", "pending"], 
     color: "text-blue-600",
-    bgColor: "bg-blue-50 dark:bg-blue-950/30"
+    bgColor: "bg-blue-50 dark:bg-blue-950/30",
+    badgeVariant: "secondary",
   },
   { 
     id: "in_progress", 
     title: "In Progress", 
     status: ["in_progress"], 
     color: "text-amber-600",
-    bgColor: "bg-amber-50 dark:bg-amber-950/30"
+    bgColor: "bg-amber-50 dark:bg-amber-950/30",
+    badgeVariant: "secondary",
   },
   { 
     id: "completed", 
     title: "Completed", 
     status: ["completed"], 
     color: "text-emerald-600",
-    bgColor: "bg-emerald-50 dark:bg-emerald-950/30"
+    bgColor: "bg-[#E8F5E9] dark:bg-emerald-950/40",
+    badgeVariant: "default",
   },
 ];
 
@@ -169,19 +173,27 @@ function KanbanColumnComponent({
   onGenerateInvoice: (jobId: string) => void;
   isGeneratingInvoice: boolean;
 }) {
+  const isCompleted = column.id === "completed";
+  
   return (
-    <div className="flex-shrink-0 w-72 md:w-80">
+    <div className="w-full md:flex-shrink-0 md:min-w-[280px] md:w-80">
       <div className={cn("rounded-lg p-3", column.bgColor)}>
         <div className="flex items-center justify-between mb-3">
           <h3 className={cn("font-semibold text-sm", column.color)}>
             {column.title}
           </h3>
-          <Badge variant="secondary" className="text-xs">
+          <Badge 
+            variant={isCompleted ? "default" : "secondary"} 
+            className={cn(
+              "text-xs",
+              isCompleted && "bg-emerald-600 hover:bg-emerald-600"
+            )}
+          >
             {jobs.length}
           </Badge>
         </div>
         
-        <div className="space-y-2 min-h-[200px]">
+        <div className="space-y-2 min-h-[100px] md:min-h-[200px]">
           {jobs.length === 0 ? (
             <p className="text-xs text-muted-foreground text-center py-8">
               No jobs
@@ -265,25 +277,46 @@ export function TodayKanban({ jobs, loading, onViewJob, onJobsChange }: TodayKan
         </div>
       </CardHeader>
       <CardContent className="px-3">
-        <ScrollArea className="w-full">
-          <div className="flex gap-3 pb-4">
-            {columns.map((column) => (
-              <KanbanColumnComponent
-                key={column.id}
-                column={column}
-                jobs={jobsByColumn[column.id] || []}
-                onViewJob={onViewJob}
-                updatingJobId={updatingJobId}
-                onAdvanceStatus={handleAdvanceStatus}
-                onDuplicate={handleDuplicate}
-                isDuplicating={isDuplicating}
-                onGenerateInvoice={handleGenerateInvoice}
-                isGeneratingInvoice={isGeneratingInvoice}
-              />
-            ))}
-          </div>
-          <ScrollBar orientation="horizontal" />
-        </ScrollArea>
+        {/* Mobile: Vertical stack */}
+        <div className="flex flex-col gap-4 md:hidden">
+          {columns.map((column) => (
+            <KanbanColumnComponent
+              key={column.id}
+              column={column}
+              jobs={jobsByColumn[column.id] || []}
+              onViewJob={onViewJob}
+              updatingJobId={updatingJobId}
+              onAdvanceStatus={handleAdvanceStatus}
+              onDuplicate={handleDuplicate}
+              isDuplicating={isDuplicating}
+              onGenerateInvoice={handleGenerateInvoice}
+              isGeneratingInvoice={isGeneratingInvoice}
+            />
+          ))}
+        </div>
+        
+        {/* Desktop: Horizontal scroll */}
+        <div className="hidden md:block">
+          <ScrollArea className="w-full">
+            <div className="flex gap-3 pb-4">
+              {columns.map((column) => (
+                <KanbanColumnComponent
+                  key={column.id}
+                  column={column}
+                  jobs={jobsByColumn[column.id] || []}
+                  onViewJob={onViewJob}
+                  updatingJobId={updatingJobId}
+                  onAdvanceStatus={handleAdvanceStatus}
+                  onDuplicate={handleDuplicate}
+                  isDuplicating={isDuplicating}
+                  onGenerateInvoice={handleGenerateInvoice}
+                  isGeneratingInvoice={isGeneratingInvoice}
+                />
+              ))}
+            </div>
+            <ScrollBar orientation="horizontal" />
+          </ScrollArea>
+        </div>
       </CardContent>
     </Card>
   );
