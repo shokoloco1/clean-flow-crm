@@ -34,7 +34,7 @@ import {
   Trash2,
   RefreshCw,
   Repeat,
-  Sparkles,
+  CalendarSync,
 } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
@@ -336,14 +336,16 @@ export default function RecurringJobsPage() {
         ) : schedules.length === 0 ? (
           <Card className="border-border">
             <CardContent className="flex flex-col items-center justify-center py-16 text-center">
-              <Repeat className="h-12 w-12 text-muted-foreground mb-4" />
-              <h3 className="text-lg font-semibold text-foreground mb-2">No schedules</h3>
-              <p className="text-muted-foreground mb-4">
-                Create recurring jobs to automate assignment
+              <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                <CalendarSync className="h-8 w-8 text-primary" />
+              </div>
+              <h3 className="text-lg font-semibold text-foreground mb-2">No recurring schedules yet</h3>
+              <p className="text-muted-foreground mb-6 max-w-sm">
+                Set up weekly or monthly cleaning schedules and let CleanFlow auto-generate jobs for you.
               </p>
               <Button onClick={() => { resetForm(); setIsDialogOpen(true); }}>
                 <Plus className="h-4 w-4 mr-2" />
-                Create First Schedule
+                Create Your First Schedule
               </Button>
             </CardContent>
           </Card>
