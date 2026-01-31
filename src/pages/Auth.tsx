@@ -91,25 +91,28 @@ export default function Auth() {
     // If we have a user and role, redirect immediately
     if (!loading && user && role) {
       navigate(role === "admin" ? "/admin" : "/staff", { replace: true });
-      return;
     }
+  }, [user, role, loading, navigate]);
 
-    // If user is logged in but role is not loaded yet, try bootstrap only once
+  // Separate effect for bootstrap - only runs when user exists but has no role
+  useEffect(() => {
     if (!loading && user && !role && session && !bootstrapTried) {
       setBootstrapTried(true);
-      // Use setTimeout to not block rendering
+      // Only try bootstrap after a brief delay to allow role fetch to complete
       const timer = setTimeout(async () => {
-        try {
-          await supabase.functions.invoke("bootstrap-role");
-        } catch {
-          // Ignore errors - user might already have a role
-        } finally {
-          await refreshRole();
+        // Re-check if role was fetched
+        if (!role) {
+          try {
+            await supabase.functions.invoke("bootstrap-role");
+            await refreshRole();
+          } catch {
+            // User might already have a role or bootstrap failed
+          }
         }
-      }, 100);
+      }, 500);
       return () => clearTimeout(timer);
     }
-  }, [user, role, loading, navigate, session, bootstrapTried, refreshRole]);
+  }, [user, role, loading, session, bootstrapTried, refreshRole]);
 
   const handleBootstrapAdmin = async () => {
     setIsBootstrapping(true);

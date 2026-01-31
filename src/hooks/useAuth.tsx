@@ -17,9 +17,50 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Cache role to avoid refetching
-let cachedRole: AppRole = null;
-let cachedUserId: string | null = null;
+// LocalStorage keys for persistent cache
+const ROLE_CACHE_KEY = "cleanflow_user_role";
+const USER_ID_CACHE_KEY = "cleanflow_user_id";
+
+// Get cached role from localStorage (instant)
+const getCachedRole = (userId: string): AppRole => {
+  try {
+    const cachedUserId = localStorage.getItem(USER_ID_CACHE_KEY);
+    if (cachedUserId === userId) {
+      const role = localStorage.getItem(ROLE_CACHE_KEY);
+      if (role === "admin" || role === "staff") {
+        return role;
+      }
+    }
+  } catch {
+    // localStorage might be unavailable
+  }
+  return null;
+};
+
+// Save role to localStorage
+const setCachedRole = (userId: string, role: AppRole) => {
+  try {
+    if (role) {
+      localStorage.setItem(USER_ID_CACHE_KEY, userId);
+      localStorage.setItem(ROLE_CACHE_KEY, role);
+    } else {
+      localStorage.removeItem(USER_ID_CACHE_KEY);
+      localStorage.removeItem(ROLE_CACHE_KEY);
+    }
+  } catch {
+    // Ignore localStorage errors
+  }
+};
+
+// Clear role cache
+const clearCachedRole = () => {
+  try {
+    localStorage.removeItem(USER_ID_CACHE_KEY);
+    localStorage.removeItem(ROLE_CACHE_KEY);
+  } catch {
+    // Ignore
+  }
+};
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -27,10 +68,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [role, setRole] = useState<AppRole>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchUserRole = useCallback(async (userId: string): Promise<AppRole> => {
-    // Return cached role if same user
-    if (cachedUserId === userId && cachedRole !== null) {
-      return cachedRole;
+  const fetchUserRole = useCallback(async (userId: string, useCache = true): Promise<AppRole> => {
+    // First, try localStorage cache for instant load
+    if (useCache) {
+      const cached = getCachedRole(userId);
+      if (cached) {
+        return cached;
+      }
     }
     
     try {
@@ -39,10 +83,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.error("Error fetching user role:", error);
         return null;
       }
-      // Cache the result
-      cachedRole = (data as AppRole) || null;
-      cachedUserId = userId;
-      return cachedRole;
+      const fetchedRole = (data as AppRole) || null;
+      // Save to localStorage for next time
+      setCachedRole(userId, fetchedRole);
+      return fetchedRole;
     } catch (err) {
       console.error("Exception fetching user role:", err);
       return null;
@@ -61,16 +105,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (existingSession?.user) {
           setSession(existingSession);
           setUser(existingSession.user);
-          const userRole = await fetchUserRole(existingSession.user.id);
-          if (mounted) {
-            setRole(userRole);
+          
+          // Try cached role first for instant display
+          const cachedRole = getCachedRole(existingSession.user.id);
+          if (cachedRole) {
+            setRole(cachedRole);
+            setLoading(false);
+            // Validate in background (non-blocking)
+            fetchUserRole(existingSession.user.id, false).then(freshRole => {
+              if (mounted && freshRole && freshRole !== cachedRole) {
+                setRole(freshRole);
+              }
+            });
+          } else {
+            // No cache, fetch and wait
+            const userRole = await fetchUserRole(existingSession.user.id);
+            if (mounted) {
+              setRole(userRole);
+              setLoading(false);
+            }
           }
         } else {
           setSession(null);
           setUser(null);
           setRole(null);
+          setLoading(false);
         }
-      } finally {
+      } catch {
         if (mounted) {
           setLoading(false);
         }
@@ -79,21 +140,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, newSession) => {
+      (event, newSession) => {
         if (!mounted) return;
 
         if (event === "SIGNED_IN" && newSession?.user) {
           setSession(newSession);
           setUser(newSession.user);
-          const userRole = await fetchUserRole(newSession.user.id);
-          if (mounted) {
-            setRole(userRole);
-            setLoading(false);
-          }
+          // Use setTimeout to avoid blocking
+          setTimeout(async () => {
+            const userRole = await fetchUserRole(newSession.user.id);
+            if (mounted) {
+              setRole(userRole);
+              setLoading(false);
+            }
+          }, 0);
         } else if (event === "SIGNED_OUT") {
-          // Clear cache on sign out
-          cachedRole = null;
-          cachedUserId = null;
+          clearCachedRole();
           setSession(null);
           setUser(null);
           setRole(null);
@@ -138,18 +200,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signOut = useCallback(async () => {
-    cachedRole = null;
-    cachedUserId = null;
+    clearCachedRole();
     await supabase.auth.signOut();
     setRole(null);
   }, []);
 
   const refreshRole = useCallback(async () => {
     if (!user) return;
-    // Clear cache to force refresh
-    cachedRole = null;
-    cachedUserId = null;
-    const nextRole = await fetchUserRole(user.id);
+    // Clear cache and force fresh fetch
+    clearCachedRole();
+    const nextRole = await fetchUserRole(user.id, false);
     setRole(nextRole);
   }, [user, fetchUserRole]);
 
