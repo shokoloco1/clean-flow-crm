@@ -12,13 +12,14 @@ import {
 } from "@/components/ui/dialog";
 import { Calendar } from "@/components/ui/calendar";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { 
   Loader2, Search, Plus, User, MapPin, Clock, 
   Calendar as CalendarIcon, CheckCircle, ArrowLeft, ArrowRight,
-  Phone, Building
+  Phone, Building, AlertTriangle
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { format } from "date-fns";
+import { format, isBefore, startOfDay, parseISO } from "date-fns";
 import { useCleaningServices } from "@/hooks/useCleaningServices";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -90,8 +91,46 @@ export function CreateJobWizard({
   const [quickAddName, setQuickAddName] = useState("");
   const [quickAddPhone, setQuickAddPhone] = useState("");
   const [isCreatingClient, setIsCreatingClient] = useState(false);
+  const [staffConflicts, setStaffConflicts] = useState<string[]>([]);
   
   const { services, loading: loadingServices } = useCleaningServices();
+
+  // Check if selected date is in the past
+  const isDateInPast = useMemo(() => {
+    if (!selectedDate) return false;
+    const today = startOfDay(new Date());
+    return isBefore(selectedDate, today);
+  }, [selectedDate]);
+
+  // Check for staff conflicts when date/time/staff changes
+  useEffect(() => {
+    const checkStaffConflicts = async () => {
+      if (!formData.scheduled_date || !formData.scheduled_time || !formData.assigned_staff_id) {
+        setStaffConflicts([]);
+        return;
+      }
+
+      const { data: existingJobs } = await supabase
+        .from("jobs")
+        .select("id, scheduled_time, clients(name)")
+        .eq("scheduled_date", formData.scheduled_date)
+        .eq("assigned_staff_id", formData.assigned_staff_id)
+        .neq("status", "cancelled");
+
+      if (existingJobs && existingJobs.length > 0) {
+        // Check for time overlap (same time slot)
+        const conflicts = existingJobs
+          .filter(job => job.scheduled_time === formData.scheduled_time)
+          .map(job => `Already assigned to ${(job.clients as any)?.name || 'a job'} at ${job.scheduled_time}`);
+        
+        setStaffConflicts(conflicts);
+      } else {
+        setStaffConflicts([]);
+      }
+    };
+
+    checkStaffConflicts();
+  }, [formData.scheduled_date, formData.scheduled_time, formData.assigned_staff_id]);
 
   // Filter clients based on search
   const filteredClients = useMemo(() => {
@@ -227,6 +266,7 @@ export function CreateJobWizard({
       setShowQuickAdd(false);
       setQuickAddName("");
       setQuickAddPhone("");
+      setStaffConflicts([]);
     }
     onOpenChange(open);
   };
@@ -452,6 +492,14 @@ export function CreateJobWizard({
                       className="mx-auto pointer-events-auto"
                     />
                   </div>
+                  {isDateInPast && (
+                    <Alert variant="destructive" className="py-2">
+                      <AlertTriangle className="h-4 w-4" />
+                      <AlertDescription className="text-sm">
+                        Warning: Selected date is in the past
+                      </AlertDescription>
+                    </Alert>
+                  )}
                 </div>
 
                 {/* Time Slots */}
@@ -502,6 +550,16 @@ export function CreateJobWizard({
                       </button>
                     ))}
                   </div>
+                  
+                  {/* Staff Conflict Warning */}
+                  {staffConflicts.length > 0 && (
+                    <Alert className="border-warning bg-warning/10 py-2">
+                      <AlertTriangle className="h-4 w-4 text-warning" />
+                      <AlertDescription className="text-sm text-warning">
+                        ⚠️ Scheduling conflict: {staffConflicts[0]}
+                      </AlertDescription>
+                    </Alert>
+                  )}
                 </div>
 
                 {/* Notes */}
