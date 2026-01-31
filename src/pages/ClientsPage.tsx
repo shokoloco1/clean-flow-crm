@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -20,10 +20,17 @@ import {
   LogOut, Sparkles, Plus, Search, Users, Building2, 
   Mail, Phone, MapPin, FileText, Edit, Trash2, Eye,
   Briefcase, CheckCircle2, Clock, TrendingUp, ArrowLeft,
-  Copy, ExternalLink, Link as LinkIcon
+  Copy, ExternalLink, Link as LinkIcon, AlertCircle
 } from "lucide-react";
 import { Link } from "react-router-dom";
-
+import {
+  capitalizeWords,
+  formatAUPhone,
+  formatABN,
+  isValidEmail,
+  isValidAUPhone,
+  isValidABN,
+} from "@/lib/validation";
 interface Client {
   id: string;
   name: string;
@@ -73,7 +80,61 @@ export default function ClientsPage() {
   const [clientToDelete, setClientToDelete] = useState<Client | null>(null);
   const [formData, setFormData] = useState<Omit<Client, 'id' | 'created_at' | 'updated_at' | 'portal_token'>>(emptyClient);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
+  // Handle name change with auto-capitalize
+  const handleNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // Apply capitalize on blur, not on every keystroke for better UX
+    setFormData(prev => ({ ...prev, name: value }));
+    if (fieldErrors.name) setFieldErrors(prev => ({ ...prev, name: '' }));
+  }, [fieldErrors.name]);
+
+  const handleNameBlur = useCallback(() => {
+    if (formData.name) {
+      setFormData(prev => ({ ...prev, name: capitalizeWords(prev.name) }));
+    }
+  }, [formData.name]);
+
+  // Handle email change with validation
+  const handleEmailChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.trim();
+    setFormData(prev => ({ ...prev, email: value }));
+    
+    if (value && !isValidEmail(value)) {
+      setFieldErrors(prev => ({ ...prev, email: 'Invalid email format' }));
+    } else {
+      setFieldErrors(prev => ({ ...prev, email: '' }));
+    }
+  }, []);
+
+  // Handle phone change with AU formatting
+  const handlePhoneChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatAUPhone(e.target.value);
+    setFormData(prev => ({ ...prev, phone: formatted }));
+    
+    // Only validate if there's significant input
+    const digits = formatted.replace(/\D/g, '');
+    if (digits.length >= 10 && !isValidAUPhone(formatted)) {
+      setFieldErrors(prev => ({ ...prev, phone: 'Invalid AU phone (04XX XXX XXX or +61 X XXXX XXXX)' }));
+    } else {
+      setFieldErrors(prev => ({ ...prev, phone: '' }));
+    }
+  }, []);
+
+  // Handle ABN change with formatting and validation
+  const handleABNChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatABN(e.target.value);
+    setFormData(prev => ({ ...prev, abn: formatted }));
+    
+    // Only validate when 11 digits entered
+    const digits = formatted.replace(/\D/g, '');
+    if (digits.length === 11 && !isValidABN(formatted)) {
+      setFieldErrors(prev => ({ ...prev, abn: 'Invalid ABN (checksum failed)' }));
+    } else {
+      setFieldErrors(prev => ({ ...prev, abn: '' }));
+    }
+  }, []);
   // Fetch clients
   const { data: clients = [], isLoading } = useQuery({
     queryKey: ['clients'],
@@ -208,14 +269,49 @@ export default function ClientsPage() {
   );
 
   const handleSubmit = () => {
+    // Reset errors
+    setFieldErrors({});
+    
+    // Validate required fields
+    const errors: Record<string, string> = {};
+    
     if (!formData.name.trim()) {
-      toast.error('Name is required');
+      errors.name = 'Name is required';
+    }
+    
+    if (formData.email && !isValidEmail(formData.email)) {
+      errors.email = 'Invalid email format';
+    }
+    
+    const phoneDigits = (formData.phone || '').replace(/\D/g, '');
+    if (phoneDigits.length > 0 && phoneDigits.length >= 10 && !isValidAUPhone(formData.phone || '')) {
+      errors.phone = 'Invalid Australian phone number';
+    }
+    
+    const abnDigits = (formData.abn || '').replace(/\D/g, '');
+    if (abnDigits.length === 11 && !isValidABN(formData.abn || '')) {
+      errors.abn = 'Invalid ABN';
+    }
+    
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      toast.error('Please fix the form errors');
       return;
     }
+
+    // Clean data before submit
+    const cleanData = {
+      ...formData,
+      name: capitalizeWords(formData.name.trim()),
+      email: formData.email?.trim() || '',
+      phone: formData.phone?.trim() || '',
+      abn: formData.abn?.trim() || '',
+    };
+    
     if (editingClient) {
-      updateMutation.mutate({ id: editingClient.id, data: formData });
+      updateMutation.mutate({ id: editingClient.id, data: cleanData });
     } else {
-      createMutation.mutate(formData);
+      createMutation.mutate(cleanData);
     }
   };
 
@@ -357,9 +453,17 @@ export default function ClientsPage() {
                   <Input
                     id="name"
                     value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    onChange={handleNameChange}
+                    onBlur={handleNameBlur}
                     placeholder="Client name"
+                    className={fieldErrors.name ? "border-destructive" : ""}
                   />
+                  {fieldErrors.name && (
+                    <p className="text-xs text-destructive flex items-center gap-1">
+                      <AlertCircle className="h-3 w-3" />
+                      {fieldErrors.name}
+                    </p>
+                  )}
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
@@ -368,28 +472,55 @@ export default function ClientsPage() {
                       id="email"
                       type="email"
                       value={formData.email || ''}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      onChange={handleEmailChange}
                       placeholder="email@example.com"
+                      className={fieldErrors.email ? "border-destructive" : ""}
                     />
+                    {fieldErrors.email && (
+                      <p className="text-xs text-destructive flex items-center gap-1">
+                        <AlertCircle className="h-3 w-3" />
+                        {fieldErrors.email}
+                      </p>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="phone">Phone</Label>
                     <Input
                       id="phone"
                       value={formData.phone || ''}
-                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      placeholder="+61 4XX XXX XXX"
+                      onChange={handlePhoneChange}
+                      placeholder="04XX XXX XXX"
+                      maxLength={15}
+                      className={fieldErrors.phone ? "border-destructive" : ""}
                     />
+                    {fieldErrors.phone && (
+                      <p className="text-xs text-destructive flex items-center gap-1">
+                        <AlertCircle className="h-3 w-3" />
+                        {fieldErrors.phone}
+                      </p>
+                    )}
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="abn">ABN / Client ID</Label>
+                  <Label htmlFor="abn">ABN</Label>
                   <Input
                     id="abn"
                     value={formData.abn || ''}
-                    onChange={(e) => setFormData({ ...formData, abn: e.target.value })}
-                    placeholder="e.g. 51 824 753 556"
+                    onChange={handleABNChange}
+                    placeholder="XX XXX XXX XXX"
+                    maxLength={14}
+                    className={fieldErrors.abn ? "border-destructive" : ""}
                   />
+                  {fieldErrors.abn ? (
+                    <p className="text-xs text-destructive flex items-center gap-1">
+                      <AlertCircle className="h-3 w-3" />
+                      {fieldErrors.abn}
+                    </p>
+                  ) : (
+                    <p className="text-xs text-muted-foreground">
+                      Australian Business Number (11 digits)
+                    </p>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="notes">Notes</Label>
@@ -399,6 +530,7 @@ export default function ClientsPage() {
                     onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                     placeholder="Additional notes about the client"
                     rows={3}
+                    maxLength={1000}
                   />
                 </div>
               </div>

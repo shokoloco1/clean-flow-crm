@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -48,6 +48,7 @@ import {
   Clock,
   Waves,
   Layers,
+  AlertCircle,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -119,6 +120,7 @@ export default function PropertiesPage() {
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [propertyPhotos, setPropertyPhotos] = useState<PropertyPhoto[]>([]);
   const [copiedLink, setCopiedLink] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const [formData, setFormData] = useState({
     name: "",
@@ -255,9 +257,48 @@ export default function PropertiesPage() {
     }
   };
 
+  // Handle positive number inputs
+  const handlePositiveNumberChange = useCallback((field: string, value: string) => {
+    const num = parseInt(value) || 0;
+    const safeValue = Math.max(0, num).toString();
+    setFormData(prev => ({ ...prev, [field]: safeValue }));
+    if (fieldErrors[field]) {
+      setFieldErrors(prev => ({ ...prev, [field]: '' }));
+    }
+  }, [fieldErrors]);
+
   const handleSubmit = async () => {
-    if (!formData.name || !formData.address) {
-      toast.error("Name and address are required");
+    // Reset errors
+    setFieldErrors({});
+    
+    // Validate required fields
+    const errors: Record<string, string> = {};
+    
+    if (!formData.name.trim()) {
+      errors.name = 'Property name is required';
+    }
+    
+    if (!formData.address.trim()) {
+      errors.address = 'Address is required';
+    }
+    
+    // Validate post code format (Australian 4 digits)
+    if (formData.post_code && !/^\d{4}$/.test(formData.post_code)) {
+      errors.post_code = 'Post code must be 4 digits';
+    }
+    
+    // Validate numeric fields
+    const numericFields = ['bedrooms', 'bathrooms', 'living_areas', 'floors', 'sofas', 'dining_chairs', 'beds', 'rugs'];
+    numericFields.forEach(field => {
+      const value = parseInt(formData[field as keyof typeof formData] as string);
+      if (isNaN(value) || value < 0) {
+        errors[field] = 'Must be 0 or a positive number';
+      }
+    });
+    
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      toast.error('Please fix the form errors');
       return;
     }
 
@@ -613,22 +654,42 @@ export default function PropertiesPage() {
                     Basic Information
                   </h3>
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="col-span-2">
+                    <div className="col-span-2 space-y-1">
                       <Label>Property Name *</Label>
                       <Input
                         value={formData.name}
-                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        onChange={(e) => {
+                          setFormData({ ...formData, name: e.target.value });
+                          if (fieldErrors.name) setFieldErrors(prev => ({ ...prev, name: '' }));
+                        }}
                         placeholder="e.g., Smith Family Home"
+                        className={fieldErrors.name ? "border-destructive" : ""}
                       />
+                      {fieldErrors.name && (
+                        <p className="text-xs text-destructive flex items-center gap-1">
+                          <AlertCircle className="h-3 w-3" />
+                          {fieldErrors.name}
+                        </p>
+                      )}
                     </div>
 
-                    <div className="col-span-2">
+                    <div className="col-span-2 space-y-1">
                       <Label>Address *</Label>
                       <Input
                         value={formData.address}
-                        onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                        onChange={(e) => {
+                          setFormData({ ...formData, address: e.target.value });
+                          if (fieldErrors.address) setFieldErrors(prev => ({ ...prev, address: '' }));
+                        }}
                         placeholder="Full address"
+                        className={fieldErrors.address ? "border-destructive" : ""}
                       />
+                      {fieldErrors.address && (
+                        <p className="text-xs text-destructive flex items-center gap-1">
+                          <AlertCircle className="h-3 w-3" />
+                          {fieldErrors.address}
+                        </p>
+                      )}
                     </div>
 
                     <div>
@@ -651,7 +712,7 @@ export default function PropertiesPage() {
                     </div>
 
                     <div>
-                      <Label>Tipo de Propiedad</Label>
+                      <Label>Property Type</Label>
                       <Select
                         value={formData.property_type}
                         onValueChange={(v) => setFormData({ ...formData, property_type: v })}
@@ -660,9 +721,9 @@ export default function PropertiesPage() {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="commercial">Comercial</SelectItem>
+                          <SelectItem value="commercial">Commercial</SelectItem>
                           <SelectItem value="airbnb">Airbnb</SelectItem>
-                          <SelectItem value="other">Otro</SelectItem>
+                          <SelectItem value="other">Other</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -678,13 +739,23 @@ export default function PropertiesPage() {
                         placeholder="e.g., Bondi"
                       />
                     </div>
-                    <div>
+                    <div className="space-y-1">
                       <Label>Post Code</Label>
                       <Input
                         value={formData.post_code}
-                        onChange={(e) => setFormData({ ...formData, post_code: e.target.value })}
+                        onChange={(e) => {
+                          // Only allow 4 digits
+                          const val = e.target.value.replace(/\D/g, '').slice(0, 4);
+                          setFormData({ ...formData, post_code: val });
+                          if (fieldErrors.post_code) setFieldErrors(prev => ({ ...prev, post_code: '' }));
+                        }}
                         placeholder="e.g., 2026"
+                        maxLength={4}
+                        className={fieldErrors.post_code ? "border-destructive" : ""}
                       />
+                      {fieldErrors.post_code && (
+                        <p className="text-xs text-destructive">{fieldErrors.post_code}</p>
+                      )}
                     </div>
                     <div>
                       <Label>State</Label>
@@ -718,7 +789,7 @@ export default function PropertiesPage() {
                     Property Details
                   </h3>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                    <div>
+                    <div className="space-y-1">
                       <Label className="flex items-center gap-1">
                         <Bed className="h-3 w-3" />
                         Bedrooms
@@ -726,13 +797,17 @@ export default function PropertiesPage() {
                       <Input
                         type="number"
                         min="0"
-                        max="10"
+                        max="50"
                         value={formData.bedrooms}
-                        onChange={(e) => setFormData({ ...formData, bedrooms: e.target.value })}
+                        onChange={(e) => handlePositiveNumberChange('bedrooms', e.target.value)}
+                        className={fieldErrors.bedrooms ? "border-destructive" : ""}
                       />
+                      {fieldErrors.bedrooms && (
+                        <p className="text-xs text-destructive">{fieldErrors.bedrooms}</p>
+                      )}
                     </div>
 
-                    <div>
+                    <div className="space-y-1">
                       <Label className="flex items-center gap-1">
                         <Bath className="h-3 w-3" />
                         Bathrooms
@@ -740,10 +815,14 @@ export default function PropertiesPage() {
                       <Input
                         type="number"
                         min="0"
-                        max="10"
+                        max="50"
                         value={formData.bathrooms}
-                        onChange={(e) => setFormData({ ...formData, bathrooms: e.target.value })}
+                        onChange={(e) => handlePositiveNumberChange('bathrooms', e.target.value)}
+                        className={fieldErrors.bathrooms ? "border-destructive" : ""}
                       />
+                      {fieldErrors.bathrooms && (
+                        <p className="text-xs text-destructive">{fieldErrors.bathrooms}</p>
+                      )}
                     </div>
 
                     <div>
@@ -756,7 +835,7 @@ export default function PropertiesPage() {
                         min="0"
                         max="5"
                         value={formData.living_areas}
-                        onChange={(e) => setFormData({ ...formData, living_areas: e.target.value })}
+                        onChange={(e) => handlePositiveNumberChange('living_areas', e.target.value)}
                       />
                     </div>
 
@@ -770,7 +849,7 @@ export default function PropertiesPage() {
                         min="1"
                         max="5"
                         value={formData.floors}
-                        onChange={(e) => setFormData({ ...formData, floors: e.target.value })}
+                        onChange={(e) => handlePositiveNumberChange('floors', e.target.value)}
                       />
                     </div>
                   </div>
