@@ -15,3 +15,4 @@ export { UrgentAlerts } from './UrgentAlerts';
 export { FloatingActionButton } from './FloatingActionButton';
 export { QuickStatusButton, QuickStatusChip } from './QuickStatusButton';
 export { KeyboardShortcutsHelp } from './KeyboardShortcutsHelp';
+export { EmptyStateOnboarding } from './EmptyStateOnboarding';
