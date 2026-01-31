@@ -23,22 +23,26 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/hooks/useAuth";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 
-const navItems = [
+const mainNavItems = [
   { title: "Dashboard", url: "/admin", icon: LayoutDashboard },
+];
+
+const operationsNavItems = [
   { title: "Jobs", url: "/admin/calendar", icon: Calendar },
   { title: "Clients", url: "/admin/clients", icon: Users },
   { title: "Properties", url: "/admin/properties", icon: Building2 },
   { title: "Staff", url: "/admin/staff", icon: UserCog },
   { title: "Invoices", url: "/admin/invoices", icon: FileText },
-  { title: "Recurring", url: "/admin/recurring", icon: RefreshCw },
-  { title: "Price Lists", url: "/admin/price-lists", icon: DollarSign },
+  { title: "Recurring Jobs", url: "/admin/recurring", icon: RefreshCw },
+  { title: "Pricing", url: "/admin/price-lists", icon: DollarSign },
+];
+
+const insightsNavItems = [
   { title: "Reports", url: "/admin/reports", icon: BarChart3 },
   { title: "Settings", url: "/admin/settings", icon: Settings },
 ];
@@ -55,6 +59,25 @@ export function AdminSidebar() {
     }
     return location.pathname.startsWith(url);
   };
+
+  const renderNavItems = (items: typeof mainNavItems) => (
+    <SidebarMenu>
+      {items.map((item) => (
+        <SidebarMenuItem key={item.title}>
+          <SidebarMenuButton
+            asChild
+            isActive={isActive(item.url)}
+            tooltip={item.title}
+          >
+            <Link to={item.url}>
+              <item.icon className="h-4 w-4" />
+              <span>{item.title}</span>
+            </Link>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+      ))}
+    </SidebarMenu>
+  );
 
   return (
     <Sidebar collapsible="icon" className="border-r border-border">
@@ -75,22 +98,23 @@ export function AdminSidebar() {
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupContent>
-            <SidebarMenu>
-              {navItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={isActive(item.url)}
-                    tooltip={item.title}
-                  >
-                    <Link to={item.url}>
-                      <item.icon className="h-4 w-4" />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
+            {renderNavItems(mainNavItems)}
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <Separator className="mx-2 my-2" />
+
+        <SidebarGroup>
+          <SidebarGroupContent>
+            {renderNavItems(operationsNavItems)}
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <Separator className="mx-2 my-2" />
+
+        <SidebarGroup>
+          <SidebarGroupContent>
+            {renderNavItems(insightsNavItems)}
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>

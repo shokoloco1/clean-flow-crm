@@ -203,10 +203,10 @@ export default function PriceListPage() {
             </Button>
             <div>
               <h1 className="text-2xl font-bold text-foreground">
-                Price Lists
+                Service Pricing
               </h1>
               <p className="text-sm text-muted-foreground">
-                Manage your service pricing files
+                Upload rate cards for quick reference when quoting jobs
               </p>
             </div>
           </div>
@@ -228,16 +228,18 @@ export default function PriceListPage() {
               </div>
             ) : priceLists.length === 0 ? (
               <div className="text-center py-12">
-                <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                  <FileText className="h-8 w-8 text-primary" />
+                </div>
                 <h3 className="text-lg font-medium text-foreground mb-2">
-                  No price lists yet
+                  No rate cards uploaded
                 </h3>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Upload your first price list in PDF or Excel
+                <p className="text-sm text-muted-foreground mb-6 max-w-sm mx-auto">
+                  Upload your rate card (PDF or Excel) to access it when creating quotes.
                 </p>
                 <Button onClick={() => setIsUploadOpen(true)}>
                   <Plus className="h-4 w-4 mr-2" />
-                  Upload Price List
+                  Upload Rate Card
                 </Button>
               </div>
             ) : (
