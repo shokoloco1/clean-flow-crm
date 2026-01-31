@@ -19,6 +19,7 @@ import {
   CreateJobWizard,
   JobDetailDialog,
   AdminLayout,
+  EmptyStateOnboarding,
 } from "@/components/admin";
 
 export default function AdminDashboard() {
@@ -131,13 +132,22 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Kanban Board */}
-        <TodayKanban 
-          jobs={jobs} 
-          loading={loading}
-          onViewJob={handleViewJob}
-          onJobsChange={refreshData}
-        />
+        {/* Kanban Board or Empty State */}
+        {!loading && jobs.length === 0 ? (
+          <EmptyStateOnboarding
+            onCreateJob={() => setIsCreateOpen(true)}
+            hasClients={clients.length > 0}
+            hasJobs={jobs.length > 0}
+            hasStaff={staffList.length > 0}
+          />
+        ) : (
+          <TodayKanban 
+            jobs={jobs} 
+            loading={loading}
+            onViewJob={handleViewJob}
+            onJobsChange={refreshData}
+          />
+        )}
       </div>
 
       {/* Floating Action Button */}
