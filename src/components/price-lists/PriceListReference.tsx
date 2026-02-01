@@ -161,7 +161,7 @@ export function PriceListReference({ trigger }: PriceListReferenceProps) {
                       onClick={() => window.open(signedUrl, "_blank")}
                     >
                       <ExternalLink className="h-4 w-4 mr-1" />
-                      Abrir
+                      Open
                     </Button>
                   )}
                 </div>

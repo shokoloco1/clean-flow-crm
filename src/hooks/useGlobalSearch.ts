@@ -108,7 +108,7 @@ export function useGlobalSearch() {
             id: client.id,
             type: "client",
             title: client.name,
-            subtitle: client.email || client.phone || "Sin contacto",
+            subtitle: client.email || client.phone || "No contact info",
             metadata: { 
               phone: client.phone || undefined,
               email: client.email || undefined 

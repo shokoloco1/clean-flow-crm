@@ -32,6 +32,7 @@ import { format } from "date-fns";
 import { toast } from "sonner";
 import AdvancedChecklist from "@/components/AdvancedChecklist";
 import { BeforeAfterPhotos } from "@/components/staff/BeforeAfterPhotos";
+import { AreaPhotoDocumentation } from "@/components/staff/AreaPhotoDocumentation";
 
 interface Property {
   id: string;
@@ -66,6 +67,11 @@ interface PropertyPhoto {
   description: string | null;
 }
 
+interface RequiredArea {
+  name: string;
+  services: string[];
+}
+
 interface Job {
   id: string;
   location: string;
@@ -79,6 +85,7 @@ interface Job {
   property_id: string | null;
   clients: { name: string } | null;
   properties?: Property | null;
+  required_areas?: { areas: RequiredArea[] } | null;
 }
 
 interface JobPhoto {
@@ -102,6 +109,10 @@ export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewPr
   const [isUpdating, setIsUpdating] = useState(false);
   const [accessCode, setAccessCode] = useState<string | null>(null);
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
+  const [allAreasComplete, setAllAreasComplete] = useState(false);
+
+  // Check if job has required areas for area-based photo documentation
+  const hasRequiredAreas = currentJob.required_areas?.areas && currentJob.required_areas.areas.length > 0;
 
   useEffect(() => {
     fetchPhotos();
@@ -216,7 +227,14 @@ export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewPr
   };
 
   const handleCompleteJob = async () => {
-    if (photos.length === 0) {
+    // Check if all required areas have photos
+    if (hasRequiredAreas && !allAreasComplete) {
+      toast.error("Please complete photo documentation for all areas before completing the job");
+      return;
+    }
+
+    // For jobs without required areas, check for at least one photo
+    if (!hasRequiredAreas && photos.length === 0) {
       toast.error("Please upload at least one photo before completing");
       return;
     }
@@ -547,14 +565,24 @@ export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewPr
           />
         )}
 
-        {/* Before/After Photos - Simplified */}
+        {/* Before/After Photos */}
         {currentJob.status !== "pending" && (
-          <BeforeAfterPhotos
-            jobId={currentJob.id}
-            photos={photos}
-            jobStatus={currentJob.status}
-            onPhotosUpdated={fetchPhotos}
-          />
+          hasRequiredAreas ? (
+            <AreaPhotoDocumentation
+              jobId={currentJob.id}
+              jobStatus={currentJob.status}
+              requiredAreas={currentJob.required_areas?.areas || []}
+              onPhotosUpdated={fetchPhotos}
+              onAllAreasComplete={setAllAreasComplete}
+            />
+          ) : (
+            <BeforeAfterPhotos
+              jobId={currentJob.id}
+              photos={photos}
+              jobStatus={currentJob.status}
+              onPhotosUpdated={fetchPhotos}
+            />
+          )
         )}
 
         {/* Action Buttons - Fixed at bottom */}
@@ -575,10 +603,10 @@ export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewPr
           )}
 
           {currentJob.status === "in_progress" && (
-            <Button 
+            <Button
               className="w-full h-16 text-xl font-bold bg-success hover:bg-success/90"
               onClick={handleCompleteJob}
-              disabled={isUpdating || photos.length === 0}
+              disabled={isUpdating || (hasRequiredAreas ? !allAreasComplete : photos.length === 0)}
             >
               {isUpdating ? (
                 <Loader2 className="h-6 w-6 mr-2 animate-spin" />
@@ -586,7 +614,10 @@ export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewPr
                 <CheckCircle2 className="h-6 w-6 mr-2" />
               )}
               ✓ COMPLETE JOB
-              {photos.length === 0 && (
+              {hasRequiredAreas && !allAreasComplete && (
+                <span className="ml-2 text-sm font-normal">(Complete all area photos)</span>
+              )}
+              {!hasRequiredAreas && photos.length === 0 && (
                 <span className="ml-2 text-sm font-normal">(Upload photo first)</span>
               )}
             </Button>

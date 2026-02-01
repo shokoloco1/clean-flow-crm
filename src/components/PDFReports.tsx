@@ -356,7 +356,7 @@ export function PDFReports() {
       doc.rect(14, currentY, 182, 8, 'F');
       doc.setFontSize(11);
       doc.setTextColor(40, 40, 40);
-      doc.text(`Trabajo #${index + 1}: ${property?.name || job.location}`, 16, currentY + 6);
+      doc.text(`Job #${index + 1}: ${property?.name || job.location}`, 16, currentY + 6);
       currentY += 12;
 
       // Job details
