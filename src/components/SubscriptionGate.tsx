@@ -12,6 +12,17 @@ interface SubscriptionGateProps {
 }
 
 export function SubscriptionGate({ children, trialDays = 14 }: SubscriptionGateProps) {
+  // ============================================
+  // DEMO MODE: Free access for testing and demos
+  // Set to false when ready for production with paid subscriptions
+  // ============================================
+  const DEMO_MODE = true;
+
+  if (DEMO_MODE) {
+    // Free access - no subscription required
+    return <>{children}</>;
+  }
+
   const navigate = useNavigate();
   const { user } = useAuth();
   const { subscribed, loading, plan } = useSubscription();
