@@ -209,9 +209,14 @@ export default function Index() {
       {/* Roles Section */}
       <section className="py-12 md:py-16">
         <div className="container mx-auto px-4">
-          <h2 className="text-2xl md:text-3xl font-bold text-center text-foreground mb-10">
-            Everything You Need for Your Business
-          </h2>
+          <div className="text-center mb-10">
+            <h2 className="text-2xl md:text-3xl font-bold text-foreground">
+              Built for Owners & Staff
+            </h2>
+            <p className="text-muted-foreground mt-3 max-w-2xl mx-auto">
+              Give owners clear oversight and give teams the tools they need to finish jobs fast.
+            </p>
+          </div>
           
           <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
             <Card className="p-6 md:p-8 border-primary/30 bg-gradient-to-br from-primary/5 to-transparent hover:shadow-lg transition-shadow">
