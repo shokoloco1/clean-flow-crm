@@ -7,83 +7,51 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "sonner";
-import { Sparkles, Shield, Users, Eye, EyeOff, AlertTriangle, Lock, CheckCircle } from "lucide-react";
-import { signupSchema, loginSchema, validatePassword } from "@/lib/passwordSecurity";
-import { PasswordStrengthIndicator } from "@/components/PasswordStrengthIndicator";
+import { Sparkles, Eye, EyeOff, AlertTriangle, Lock, CheckCircle, ArrowRight } from "lucide-react";
+import { loginSchema } from "@/lib/passwordSecurity";
 
 export default function Auth() {
   const navigate = useNavigate();
-  const { user, session, role, loading, signIn, signUp, signOut, refreshRole } = useAuth();
+  const { user, session, role, loading, signIn, signOut, refreshRole } = useAuth();
   const { rateLimitState, checkRateLimit, recordAttempt, clearRateLimitState } = useRateLimit();
-  
-  const [activeTab, setActiveTab] = useState<"login" | "signup">("login");
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showResetForm, setShowResetForm] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
   const [resetSent, setResetSent] = useState(false);
-  
+
   // Login form state
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
   const [showLoginPassword, setShowLoginPassword] = useState(false);
-  
-  // Signup form state
-  const [signupEmail, setSignupEmail] = useState("");
-  const [signupPassword, setSignupPassword] = useState("");
-  const [signupName, setSignupName] = useState("");
-  const [signupRole, setSignupRole] = useState<"admin" | "staff">("staff");
-  const [showSignupPassword, setShowSignupPassword] = useState(false);
-  
+
   const [isBootstrapping, setIsBootstrapping] = useState(false);
   const [bootstrapTried, setBootstrapTried] = useState(false);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
-  // Reset form state when switching tabs
-  const handleTabChange = (value: string) => {
-    setActiveTab(value as "login" | "signup");
-    setFormErrors({});
-    clearRateLimitState();
-    setShowResetForm(false);
-    setResetSent(false);
-    
-    // Reset login form
-    setLoginEmail("");
-    setLoginPassword("");
-    setShowLoginPassword(false);
-    
-    // Reset signup form
-    setSignupEmail("");
-    setSignupPassword("");
-    setSignupName("");
-    setSignupRole("staff");
-    setShowSignupPassword(false);
-  };
-
   const handlePasswordReset = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!resetEmail) {
       toast.error("Please enter your email");
       return;
     }
-    
+
     setIsSubmitting(true);
-    
+
     const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
       redirectTo: `${window.location.origin}/auth?reset=true`,
     });
-    
+
     if (error) {
       toast.error(error.message || "Failed to send email");
     } else {
       setResetSent(true);
       toast.success("Email sent. Check your inbox.");
     }
-    
+
     setIsSubmitting(false);
   };
 
@@ -129,20 +97,20 @@ export default function Auth() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormErrors({});
-    
+
     // Check rate limiting first
     const isBlocked = await checkRateLimit(loginEmail);
     if (isBlocked) {
       toast.error(`Too many failed attempts. Please try again in ${rateLimitState.remainingMinutes} minutes.`);
       return;
     }
-    
+
     // Validate with zod
     const result = loginSchema.safeParse({
       email: loginEmail,
       password: loginPassword
     });
-    
+
     if (!result.success) {
       const errors: Record<string, string> = {};
       result.error.errors.forEach((err) => {
@@ -152,11 +120,11 @@ export default function Auth() {
       setFormErrors(errors);
       return;
     }
-    
+
     setIsSubmitting(true);
-    
+
     const { error } = await signIn(loginEmail, loginPassword);
-    
+
     if (error) {
       await recordAttempt(loginEmail, false);
       toast.error("Invalid credentials. Please check your email and password.");
@@ -164,47 +132,7 @@ export default function Auth() {
       await recordAttempt(loginEmail, true);
       toast.success("Welcome back!");
     }
-    
-    setIsSubmitting(false);
-  };
 
-  const handleSignup = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setFormErrors({});
-    
-    // Validate with zod
-    const result = signupSchema.safeParse({
-      email: signupEmail,
-      password: signupPassword,
-      name: signupName,
-      role: signupRole
-    });
-    
-    if (!result.success) {
-      const errors: Record<string, string> = {};
-      result.error.errors.forEach((err) => {
-        const field = err.path[0] as string;
-        errors[`signup_${field}`] = err.message;
-      });
-      setFormErrors(errors);
-      toast.error("Please check the highlighted fields");
-      return;
-    }
-    
-    setIsSubmitting(true);
-    
-    const { error } = await signUp(signupEmail, signupPassword, signupName, signupRole);
-    
-    if (error) {
-      if (error.message?.includes("already registered")) {
-        toast.error("This email is already registered. Please sign in instead.");
-      } else {
-        toast.error(error.message || "Something went wrong. Please try again.");
-      }
-    } else {
-      toast.success("Account created successfully!");
-    }
-    
     setIsSubmitting(false);
   };
 
@@ -272,269 +200,179 @@ export default function Auth() {
 
         <Card className="border-border shadow-xl">
           <CardHeader className="pb-2 text-center">
-            <CardTitle className="text-xl">👋 Welcome</CardTitle>
-          <CardDescription>
-              Sign in to your account or create a new one
+            <CardTitle className="text-xl">👋 Welcome Back</CardTitle>
+            <CardDescription>
+              Sign in to your account
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-              <TabsList className="grid w-full grid-cols-2 mb-6">
-                <TabsTrigger value="login">Sign In</TabsTrigger>
-                <TabsTrigger value="signup">Create Account</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="login">
-                {/* Password Reset Form */}
-                {showResetForm ? (
-                  <div className="space-y-4">
-                    {resetSent ? (
-                      <div className="text-center space-y-4">
-                        <div className="h-16 w-16 rounded-full bg-success/10 flex items-center justify-center mx-auto">
-                          <CheckCircle className="h-8 w-8 text-success" />
-                        </div>
-                        <h3 className="font-semibold text-foreground">Email sent!</h3>
-                        <p className="text-sm text-muted-foreground">
-                          Check your inbox at <strong>{resetEmail}</strong> and follow the instructions.
-                        </p>
-                        <Button 
-                          variant="outline" 
-                          className="w-full"
-                          onClick={() => {
-                            setShowResetForm(false);
-                            setResetSent(false);
-                            setResetEmail("");
-                          }}
-                        >
-                          Back to sign in
-                        </Button>
-                      </div>
-                    ) : (
-                      <form onSubmit={handlePasswordReset} className="space-y-4">
-                        <div className="text-center mb-4">
-                          <h3 className="font-semibold text-foreground">Forgot your password?</h3>
-                          <p className="text-sm text-muted-foreground">
-                            Enter your email and we'll send you a reset link.
-                          </p>
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="reset-email">Email</Label>
-                          <Input
-                            id="reset-email"
-                            type="email"
-                            placeholder="you@example.com"
-                            value={resetEmail}
-                            onChange={(e) => setResetEmail(e.target.value)}
-                            required
-                          />
-                        </div>
-                        <Button 
-                          type="submit" 
-                          className="w-full"
-                          disabled={isSubmitting}
-                        >
-                          {isSubmitting ? "Sending..." : "Send reset link"}
-                        </Button>
-                        <Button 
-                          type="button"
-                          variant="ghost" 
-                          className="w-full"
-                          onClick={() => setShowResetForm(false)}
-                        >
-                          Back to sign in
-                        </Button>
-                      </form>
-                    )}
+            {/* Password Reset Form */}
+            {showResetForm ? (
+              <div className="space-y-4">
+                {resetSent ? (
+                  <div className="text-center space-y-4">
+                    <div className="h-16 w-16 rounded-full bg-success/10 flex items-center justify-center mx-auto">
+                      <CheckCircle className="h-8 w-8 text-success" />
+                    </div>
+                    <h3 className="font-semibold text-foreground">Email sent!</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Check your inbox at <strong>{resetEmail}</strong> and follow the instructions.
+                    </p>
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => {
+                        setShowResetForm(false);
+                        setResetSent(false);
+                        setResetEmail("");
+                      }}
+                    >
+                      Back to sign in
+                    </Button>
                   </div>
                 ) : (
-                  <>
-                    {/* Rate limit warning */}
-                    {rateLimitState.isBlocked && (
-                      <Alert variant="destructive" className="mb-4">
-                        <Lock className="h-4 w-4" />
-                        <AlertDescription>
-                          Account temporarily blocked. Please try again in {rateLimitState.remainingMinutes} minutes.
-                        </AlertDescription>
-                      </Alert>
-                    )}
-                    
-                    {rateLimitState.failedAttempts > 0 && !rateLimitState.isBlocked && (
-                      <Alert variant="default" className="mb-4 border-warning/50 bg-warning/10">
-                        <AlertTriangle className="h-4 w-4 text-warning" />
-                        <AlertDescription className="text-warning-foreground">
-                          {5 - rateLimitState.failedAttempts} attempts remaining before lockout.
-                        </AlertDescription>
-                      </Alert>
-                    )}
-                    
-                    <form onSubmit={handleLogin} className="space-y-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="login-email">Email</Label>
-                        <Input
-                          id="login-email"
-                          type="email"
-                          placeholder="you@example.com"
-                          value={loginEmail}
-                          onChange={(e) => {
-                            setLoginEmail(e.target.value);
-                            setFormErrors((prev) => ({ ...prev, login_email: "" }));
-                          }}
-                          className={formErrors.login_email ? "border-destructive" : ""}
-                          disabled={rateLimitState.isBlocked}
-                          required
-                        />
-                        {formErrors.login_email && (
-                          <p className="text-xs text-destructive">{formErrors.login_email}</p>
-                        )}
-                      </div>
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <Label htmlFor="login-password">Password</Label>
-                          <button
-                            type="button"
-                            onClick={() => setShowResetForm(true)}
-                            className="text-xs text-primary hover:underline"
-                          >
-                            Forgot password?
-                          </button>
-                        </div>
-                        <div className="relative">
-                          <Input
-                            id="login-password"
-                            type={showLoginPassword ? "text" : "password"}
-                            placeholder="••••••••"
-                            value={loginPassword}
-                            onChange={(e) => {
-                              setLoginPassword(e.target.value);
-                              setFormErrors((prev) => ({ ...prev, login_password: "" }));
-                            }}
-                            className={formErrors.login_password ? "border-destructive pr-10" : "pr-10"}
-                            disabled={rateLimitState.isBlocked}
-                            required
-                          />
-                          <button
-                            type="button"
-                            onClick={() => setShowLoginPassword(!showLoginPassword)}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                            disabled={rateLimitState.isBlocked}
-                          >
-                            {showLoginPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                          </button>
-                        </div>
-                        {formErrors.login_password && (
-                          <p className="text-xs text-destructive">{formErrors.login_password}</p>
-                        )}
-                      </div>
-                      <Button 
-                        type="submit" 
-                        className="w-full h-12 text-base" 
-                        disabled={isSubmitting || rateLimitState.isBlocked}
-                      >
-                        {isSubmitting ? "Signing in..." : "Sign In"}
-                      </Button>
-                    </form>
-                  </>
+                  <form onSubmit={handlePasswordReset} className="space-y-4">
+                    <div className="text-center mb-4">
+                      <h3 className="font-semibold text-foreground">Forgot your password?</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Enter your email and we'll send you a reset link.
+                      </p>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="reset-email">Email</Label>
+                      <Input
+                        id="reset-email"
+                        type="email"
+                        placeholder="you@example.com"
+                        value={resetEmail}
+                        onChange={(e) => setResetEmail(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <Button
+                      type="submit"
+                      className="w-full"
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? "Sending..." : "Send reset link"}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      className="w-full"
+                      onClick={() => setShowResetForm(false)}
+                    >
+                      Back to sign in
+                    </Button>
+                  </form>
                 )}
-              </TabsContent>
-              
-              <TabsContent value="signup">
-                <form onSubmit={handleSignup} className="space-y-4">
+              </div>
+            ) : (
+              <>
+                {/* Rate limit warning */}
+                {rateLimitState.isBlocked && (
+                  <Alert variant="destructive" className="mb-4">
+                    <Lock className="h-4 w-4" />
+                    <AlertDescription>
+                      Account temporarily blocked. Please try again in {rateLimitState.remainingMinutes} minutes.
+                    </AlertDescription>
+                  </Alert>
+                )}
+
+                {rateLimitState.failedAttempts > 0 && !rateLimitState.isBlocked && (
+                  <Alert variant="default" className="mb-4 border-warning/50 bg-warning/10">
+                    <AlertTriangle className="h-4 w-4 text-warning" />
+                    <AlertDescription className="text-warning-foreground">
+                      {5 - rateLimitState.failedAttempts} attempts remaining before lockout.
+                    </AlertDescription>
+                  </Alert>
+                )}
+
+                <form onSubmit={handleLogin} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="signup-name">Full Name</Label>
+                    <Label htmlFor="login-email">Email</Label>
                     <Input
-                      id="signup-name"
-                      type="text"
-                      placeholder="John Smith"
-                      value={signupName}
-                      onChange={(e) => {
-                        setSignupName(e.target.value);
-                        setFormErrors((prev) => ({ ...prev, signup_name: "" }));
-                      }}
-                      className={formErrors.signup_name ? "border-destructive" : ""}
-                      required
-                    />
-                    {formErrors.signup_name && (
-                      <p className="text-xs text-destructive">{formErrors.signup_name}</p>
-                    )}
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-email">Email</Label>
-                    <Input
-                      id="signup-email"
+                      id="login-email"
                       type="email"
-                          placeholder="you@example.com"
-                      value={signupEmail}
+                      placeholder="you@example.com"
+                      value={loginEmail}
                       onChange={(e) => {
-                        setSignupEmail(e.target.value);
-                        setFormErrors((prev) => ({ ...prev, signup_email: "" }));
+                        setLoginEmail(e.target.value);
+                        setFormErrors((prev) => ({ ...prev, login_email: "" }));
                       }}
-                      className={formErrors.signup_email ? "border-destructive" : ""}
+                      className={formErrors.login_email ? "border-destructive" : ""}
+                      disabled={rateLimitState.isBlocked}
                       required
                     />
-                    {formErrors.signup_email && (
-                      <p className="text-xs text-destructive">{formErrors.signup_email}</p>
+                    {formErrors.login_email && (
+                      <p className="text-xs text-destructive">{formErrors.login_email}</p>
                     )}
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="signup-password">Password</Label>
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="login-password">Password</Label>
+                      <button
+                        type="button"
+                        onClick={() => setShowResetForm(true)}
+                        className="text-xs text-primary hover:underline"
+                      >
+                        Forgot password?
+                      </button>
+                    </div>
                     <div className="relative">
                       <Input
-                        id="signup-password"
-                        type={showSignupPassword ? "text" : "password"}
+                        id="login-password"
+                        type={showLoginPassword ? "text" : "password"}
                         placeholder="••••••••"
-                        value={signupPassword}
+                        value={loginPassword}
                         onChange={(e) => {
-                          setSignupPassword(e.target.value);
-                          setFormErrors((prev) => ({ ...prev, signup_password: "" }));
+                          setLoginPassword(e.target.value);
+                          setFormErrors((prev) => ({ ...prev, login_password: "" }));
                         }}
-                        className={formErrors.signup_password ? "border-destructive pr-10" : "pr-10"}
+                        className={formErrors.login_password ? "border-destructive pr-10" : "pr-10"}
+                        disabled={rateLimitState.isBlocked}
                         required
                       />
                       <button
                         type="button"
-                        onClick={() => setShowSignupPassword(!showSignupPassword)}
+                        onClick={() => setShowLoginPassword(!showLoginPassword)}
                         className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                        disabled={rateLimitState.isBlocked}
                       >
-                        {showSignupPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        {showLoginPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </button>
                     </div>
-                    <PasswordStrengthIndicator password={signupPassword} />
-                    {formErrors.signup_password && (
-                      <p className="text-xs text-destructive">{formErrors.signup_password}</p>
+                    {formErrors.login_password && (
+                      <p className="text-xs text-destructive">{formErrors.login_password}</p>
                     )}
                   </div>
-                  <div className="space-y-2">
-                    <Label>Account Type</Label>
-                    <Select value={signupRole} onValueChange={(v) => setSignupRole(v as "admin" | "staff")}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="admin">
-                          <div className="flex items-center gap-2">
-                            <Shield className="h-4 w-4" />
-                            <span>Admin (Owner)</span>
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="staff">
-                          <div className="flex items-center gap-2">
-                            <Users className="h-4 w-4" />
-                            <span>Staff (Cleaner)</span>
-                          </div>
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <Button 
-                    type="submit" 
-                    className="w-full h-12 text-base" 
-                    disabled={isSubmitting || validatePassword(signupPassword).strength === "weak"}
+                  <Button
+                    type="submit"
+                    className="w-full h-12 text-base"
+                    disabled={isSubmitting || rateLimitState.isBlocked}
                   >
-                    {isSubmitting ? "Creating account..." : "Create Account"}
+                    {isSubmitting ? "Signing in..." : "Sign In"}
                   </Button>
                 </form>
-              </TabsContent>
-            </Tabs>
+
+                {/* Create account link */}
+                <div className="mt-6 pt-6 border-t border-border">
+                  <p className="text-center text-sm text-muted-foreground mb-3">
+                    Don't have an account yet?
+                  </p>
+                  <Button
+                    variant="outline"
+                    className="w-full group"
+                    asChild
+                  >
+                    <Link to="/signup">
+                      Start your 14-day free trial
+                      <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                    </Link>
+                  </Button>
+                </div>
+              </>
+            )}
           </CardContent>
         </Card>
 

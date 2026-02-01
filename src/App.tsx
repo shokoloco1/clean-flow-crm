@@ -30,6 +30,7 @@ const InstallPage = lazy(() => import("./pages/InstallPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const PricingPage = lazy(() => import("./pages/PricingPage"));
 const SignupPage = lazy(() => import("./pages/SignupPage"));
+const OnboardingPage = lazy(() => import("./pages/Onboarding"));
 const TermsPage = lazy(() => import("./pages/TermsPage"));
 const PrivacyPage = lazy(() => import("./pages/PrivacyPage"));
 
@@ -71,6 +72,14 @@ const App = () => (
                   <Route path="/auth" element={<Auth />} />
                   <Route path="/pricing" element={<PricingPage />} />
                   <Route path="/signup" element={<SignupPage />} />
+                  <Route
+                    path="/onboarding"
+                    element={
+                      <ProtectedRoute allowedRoles={["admin"]}>
+                        <OnboardingPage />
+                      </ProtectedRoute>
+                    }
+                  />
                   <Route 
                     path="/admin" 
                     element={

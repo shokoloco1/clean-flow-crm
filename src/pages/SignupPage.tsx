@@ -1,450 +1,643 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { Eye, EyeOff, Building2, ArrowRight, Check, Loader2 } from "lucide-react";
+import { useNavigate, useSearchParams, Link } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+import { Sparkles, ArrowLeft, ArrowRight, Check, Eye, EyeOff, Loader2, Users, CheckCircle } from "lucide-react";
+import { signupSchema, validatePassword } from "@/lib/passwordSecurity";
 import { PasswordStrengthIndicator } from "@/components/PasswordStrengthIndicator";
+import { PlanSelection, type PlanType } from "@/components/signup/PlanSelection";
+import { PaymentStep } from "@/components/signup/PaymentStep";
 import { PRICE_IDS } from "@/hooks/useSubscription";
+import { cn } from "@/lib/utils";
 
-// Australian ABN validation regex (11 digits)
-const abnRegex = /^(\d{2}\s?\d{3}\s?\d{3}\s?\d{3}|\d{11})$/;
+type Step = "account" | "plan" | "payment";
 
-const signupSchema = z.object({
-  businessName: z
-    .string()
-    .min(2, "Business name must be at least 2 characters")
-    .max(100, "Business name must be less than 100 characters"),
-  ownerName: z
-    .string()
-    .min(2, "Name must be at least 2 characters")
-    .max(100, "Name must be less than 100 characters"),
-  email: z
-    .string()
-    .email("Please enter a valid email address")
-    .max(255, "Email must be less than 255 characters"),
-  password: z
-    .string()
-    .min(8, "Password must be at least 8 characters")
-    .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
-    .regex(/[a-z]/, "Password must contain at least one lowercase letter")
-    .regex(/[0-9]/, "Password must contain at least one number"),
-  phone: z
-    .string()
-    .min(8, "Please enter a valid phone number")
-    .max(20, "Phone number is too long"),
-  abn: z
-    .string()
-    .optional()
-    .refine((val) => !val || abnRegex.test(val.replace(/\s/g, "")), {
-      message: "Please enter a valid 11-digit ABN",
-    }),
-  acceptTerms: z.literal(true, {
-    errorMap: () => ({ message: "You must accept the terms and conditions" }),
-  }),
-});
-
-type SignupFormData = z.infer<typeof signupSchema>;
-
-const PLAN_NAMES: Record<string, { name: string; price: { monthly: number; annual: number } }> = {
-  starter: { name: "Starter", price: { monthly: 89, annual: 74 } },
-  professional: { name: "Professional", price: { monthly: 149, annual: 124 } },
-  business: { name: "Business", price: { monthly: 249, annual: 207 } },
-};
+const ownerSteps: { id: Step; title: string; description: string }[] = [
+  { id: "account", title: "Create Account", description: "Your business details" },
+  { id: "plan", title: "Choose Plan", description: "Select your subscription" },
+  { id: "payment", title: "Start Trial", description: "14 days free" },
+];
 
 const SignupPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { user, session, signUp, loading: authLoading, role } = useAuth();
+
+  // Check if this is an invited staff member
+  const isInvitedStaff = searchParams.get("invited") === "true";
+
+  const [currentStep, setCurrentStep] = useState<Step>("account");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+
+  // Account form state
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [businessName, setBusinessName] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isRedirectingToCheckout, setIsRedirectingToCheckout] = useState(false);
 
-  // Get plan from URL if coming from pricing page
-  const selectedPlan = searchParams.get("plan") as keyof typeof PRICE_IDS | null;
-  const billingCycle = searchParams.get("billing") === "annual" ? "annual" : "monthly";
+  // Plan selection state - check URL params for pre-selected plan
+  const urlPlan = searchParams.get("plan") as PlanType | null;
+  const urlBilling = searchParams.get("billing");
+  const [selectedPlan, setSelectedPlan] = useState<PlanType | null>(
+    urlPlan && ["starter", "professional", "business"].includes(urlPlan) ? urlPlan : null
+  );
+  const [isAnnual, setIsAnnual] = useState(urlBilling === "annual");
 
-  const form = useForm<SignupFormData>({
-    resolver: zodResolver(signupSchema),
-    defaultValues: {
-      businessName: "",
-      ownerName: "",
-      email: "",
-      password: "",
-      phone: "",
-      abn: "",
-      acceptTerms: undefined,
-    },
-  });
+  // Determine which steps to show based on user type
+  const steps = isInvitedStaff
+    ? [{ id: "account" as Step, title: "Set Up Account", description: "Complete your profile" }]
+    : ownerSteps;
 
-  const password = form.watch("password");
+  // Check for checkout canceled
+  useEffect(() => {
+    if (searchParams.get("checkout") === "canceled") {
+      toast.error("Checkout was canceled. You can try again when ready.");
+    }
+  }, [searchParams]);
 
-  const onSubmit = async (data: SignupFormData) => {
-    setIsLoading(true);
+  // Handle already logged-in users
+  useEffect(() => {
+    if (!authLoading && user && session) {
+      // If user has a role, redirect to appropriate dashboard
+      if (role) {
+        navigate(role === "admin" ? "/admin" : "/staff", { replace: true });
+        return;
+      }
+
+      // For invited staff who just set their password
+      if (isInvitedStaff) {
+        // They should go to staff dashboard after setting password
+        // Wait a moment for role to be assigned
+        setTimeout(() => {
+          navigate("/staff", { replace: true });
+        }, 1000);
+        return;
+      }
+
+      // For new owners, check subscription status
+      supabase
+        .from("subscriptions")
+        .select("status")
+        .eq("user_id", user.id)
+        .maybeSingle()
+        .then(({ data }) => {
+          if (data?.status === "trialing" || data?.status === "active") {
+            navigate("/admin", { replace: true });
+          } else if (currentStep === "account") {
+            setCurrentStep("plan");
+          }
+        });
+    }
+  }, [user, session, authLoading, navigate, currentStep, isInvitedStaff, role]);
+
+  const handleAccountSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setFormErrors({});
+
+    // For invited staff, role should be "staff"
+    const userRole = isInvitedStaff ? "staff" : "admin";
+
+    // Validate with zod
+    const result = signupSchema.safeParse({
+      email,
+      password,
+      name: fullName,
+      role: userRole,
+    });
+
+    if (!result.success) {
+      const errors: Record<string, string> = {};
+      result.error.errors.forEach((err) => {
+        const field = err.path[0] as string;
+        errors[field] = err.message;
+      });
+      setFormErrors(errors);
+      toast.error("Please check the highlighted fields");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    const { error } = await signUp(email, password, fullName, userRole);
+
+    if (error) {
+      if (error.message?.includes("already registered")) {
+        toast.error("This email is already registered. Please sign in instead.");
+        setFormErrors({ email: "Email already registered" });
+      } else {
+        toast.error(error.message || "Something went wrong. Please try again.");
+      }
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (isInvitedStaff) {
+      toast.success("Account setup complete! Redirecting to dashboard...");
+      // Redirect will happen via the useEffect
+    } else {
+      toast.success("Account created! Now choose your plan.");
+      setCurrentStep("plan");
+    }
+    setIsSubmitting(false);
+  };
+
+  const handlePlanSelect = (plan: PlanType, annual: boolean) => {
+    setSelectedPlan(plan);
+    setIsAnnual(annual);
+  };
+
+  const handleContinueToPayment = () => {
+    if (!selectedPlan) {
+      toast.error("Please select a plan to continue");
+      return;
+    }
+    setCurrentStep("payment");
+  };
+
+  const handleStartCheckout = async () => {
+    if (!selectedPlan || !session?.access_token) {
+      toast.error("Please complete all steps first");
+      return;
+    }
+
+    setIsSubmitting(true);
+
     try {
-      // Sign up the user
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: data.email,
-        password: data.password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/admin`,
-          data: {
-            full_name: data.ownerName,
-            business_name: data.businessName,
-            phone: data.phone,
-            abn: data.abn || null,
-          },
+      const priceId = isAnnual
+        ? PRICE_IDS[selectedPlan].annual
+        : PRICE_IDS[selectedPlan].monthly;
+
+      const { data, error } = await supabase.functions.invoke("create-checkout", {
+        body: { priceId, isNewSignup: true },
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
         },
       });
 
-      if (authError) {
-        throw authError;
+      if (error) throw error;
+
+      if (data?.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error("No checkout URL returned");
       }
-
-      if (authData.user && authData.session) {
-        toast.success("Account created successfully!", {
-          description: selectedPlan 
-            ? "Redirecting you to complete your subscription..." 
-            : "Welcome to CleanFlow! Let's set up your business.",
-        });
-
-        // If a plan was selected, redirect to Stripe checkout
-        if (selectedPlan && PRICE_IDS[selectedPlan]) {
-          setIsRedirectingToCheckout(true);
-          try {
-            const priceId = billingCycle === "annual" 
-              ? PRICE_IDS[selectedPlan].annual 
-              : PRICE_IDS[selectedPlan].monthly;
-
-            const { data: checkoutData, error: checkoutError } = await supabase.functions.invoke("create-checkout", {
-              body: { priceId },
-              headers: {
-                Authorization: `Bearer ${authData.session.access_token}`,
-              },
-            });
-
-            if (checkoutError) throw checkoutError;
-            
-            if (checkoutData?.url) {
-              window.location.href = checkoutData.url;
-              return;
-            }
-          } catch (checkoutErr) {
-            console.error("Checkout error:", checkoutErr);
-            toast.error("Could not start checkout. Please try again from Settings.");
-            navigate("/admin");
-          }
-        } else {
-          navigate("/admin");
-        }
-      } else if (authData.user && !authData.session) {
-        // Email confirmation required
-        toast.success("Account created!", {
-          description: "Please check your email to confirm your account.",
-        });
-      }
-    } catch (error: any) {
-      toast.error("Failed to create account", {
-        description: error.message || "Please try again later.",
-      });
-    } finally {
-      setIsLoading(false);
-      setIsRedirectingToCheckout(false);
+    } catch (error) {
+      console.error("Checkout error:", error);
+      toast.error("Failed to start checkout. Please try again.");
+      setIsSubmitting(false);
     }
   };
 
-  const benefits = [
-    "14-day free trial with full access",
-    "No credit card required",
-    "Set up in under 5 minutes",
-    "Cancel anytime",
-  ];
+  const goBack = () => {
+    if (currentStep === "plan") {
+      setCurrentStep("account");
+    } else if (currentStep === "payment") {
+      setCurrentStep("plan");
+    }
+  };
 
-  return (
-    <div className="min-h-screen bg-background flex">
-      {/* Left Side - Form */}
-      <div className="flex-1 flex items-center justify-center p-8">
-        <div className="w-full max-w-md">
-          <div className="mb-8">
-            <Link to="/" className="text-2xl font-bold text-primary">
-              CleanFlow
+  const currentStepIndex = steps.findIndex((s) => s.id === currentStep);
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <span className="text-sm text-muted-foreground">Loading...</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Invited Staff - Simplified Flow
+  if (isInvitedStaff) {
+    return (
+      <div className="min-h-screen flex flex-col bg-gradient-to-br from-background via-background to-primary/5">
+        {/* Header */}
+        <header className="border-b border-border bg-background/80 backdrop-blur-sm">
+          <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+            <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+              <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center">
+                <Sparkles className="h-6 w-6 text-primary-foreground" />
+              </div>
+              <span className="text-xl font-bold">CleanFlow</span>
             </Link>
-          </div>
 
-          <Card className="border-0 shadow-none">
-            <CardHeader className="px-0">
-              <CardTitle className="text-2xl">Start your free trial</CardTitle>
+            <div className="flex items-center gap-4">
+              <span className="text-sm text-muted-foreground hidden sm:block">
+                Already have an account?
+              </span>
+              <Button variant="outline" size="sm" asChild>
+                <Link to="/auth">Sign In</Link>
+              </Button>
+            </div>
+          </div>
+        </header>
+
+        <main className="flex-1 container mx-auto px-4 py-8 flex items-center justify-center">
+          <Card className="max-w-md w-full border-border shadow-xl">
+            <CardHeader className="text-center">
+              <div className="mx-auto h-16 w-16 rounded-full bg-secondary/10 flex items-center justify-center mb-4">
+                <Users className="h-8 w-8 text-secondary" />
+              </div>
+              <CardTitle className="text-2xl">Welcome to the Team!</CardTitle>
               <CardDescription>
-                Create your account and start managing your cleaning business
+                You've been invited to join CleanFlow. Set up your account to get started.
               </CardDescription>
-              {selectedPlan && PLAN_NAMES[selectedPlan] && (
-                <div className="mt-4 p-3 bg-primary/10 rounded-lg border border-primary/20">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Badge variant="secondary" className="mb-1">Selected Plan</Badge>
-                      <p className="font-semibold text-lg">{PLAN_NAMES[selectedPlan].name}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-2xl font-bold">
-                        ${billingCycle === "annual" 
-                          ? PLAN_NAMES[selectedPlan].price.annual 
-                          : PLAN_NAMES[selectedPlan].price.monthly}
-                        <span className="text-sm font-normal text-muted-foreground">/mo</span>
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {billingCycle === "annual" ? "Billed annually" : "Billed monthly"}
-                      </p>
-                    </div>
-                  </div>
-                  <p className="text-sm text-muted-foreground mt-2">
-                    5-day free trial • No charge today
+            </CardHeader>
+            <CardContent>
+              <Alert className="mb-6 border-primary/20 bg-primary/5">
+                <CheckCircle className="h-4 w-4 text-primary" />
+                <AlertDescription className="text-sm">
+                  Your admin has already set up your profile. Just create a password to access your account.
+                </AlertDescription>
+              </Alert>
+
+              <form onSubmit={handleAccountSubmit} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="fullName">Full Name</Label>
+                  <Input
+                    id="fullName"
+                    type="text"
+                    placeholder="Your name"
+                    value={fullName}
+                    onChange={(e) => {
+                      setFullName(e.target.value);
+                      setFormErrors((prev) => ({ ...prev, name: "" }));
+                    }}
+                    className={formErrors.name ? "border-destructive" : ""}
+                    required
+                  />
+                  {formErrors.name && (
+                    <p className="text-xs text-destructive">{formErrors.name}</p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="your.email@example.com"
+                    value={email}
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      setFormErrors((prev) => ({ ...prev, email: "" }));
+                    }}
+                    className={formErrors.email ? "border-destructive" : ""}
+                    required
+                  />
+                  {formErrors.email && (
+                    <p className="text-xs text-destructive">{formErrors.email}</p>
+                  )}
+                  <p className="text-xs text-muted-foreground">
+                    Use the same email your admin invited you with
                   </p>
                 </div>
-              )}
-            </CardHeader>
-            <CardContent className="px-0">
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                  <FormField
-                    control={form.control}
-                    name="businessName"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Business Name</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="Your Cleaning Business"
-                            {...field}
-                            disabled={isLoading}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
 
-                  <FormField
-                    control={form.control}
-                    name="ownerName"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Your Name</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="John Smith"
-                            {...field}
-                            disabled={isLoading}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                <div className="space-y-2">
+                  <Label htmlFor="password">Create Password</Label>
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Create a strong password"
+                      value={password}
+                      onChange={(e) => {
+                        setPassword(e.target.value);
+                        setFormErrors((prev) => ({ ...prev, password: "" }));
+                      }}
+                      className={
+                        formErrors.password ? "border-destructive pr-10" : "pr-10"
+                      }
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </button>
+                  </div>
+                  <PasswordStrengthIndicator password={password} />
+                  {formErrors.password && (
+                    <p className="text-xs text-destructive">{formErrors.password}</p>
+                  )}
+                </div>
 
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email Address</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="email"
-                            placeholder="john@yourbusiness.com.au"
-                            {...field}
-                            disabled={isLoading}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                <Button
+                  type="submit"
+                  className="w-full h-12 text-base group"
+                  disabled={
+                    isSubmitting || validatePassword(password).strength === "weak"
+                  }
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                      Setting up account...
+                    </>
+                  ) : (
+                    <>
+                      Complete Setup
+                      <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                    </>
+                  )}
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+        </main>
 
-                  <FormField
-                    control={form.control}
-                    name="password"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Password</FormLabel>
-                        <FormControl>
-                          <div className="relative">
-                            <Input
-                              type={showPassword ? "text" : "password"}
-                              placeholder="Create a strong password"
-                              {...field}
-                              disabled={isLoading}
-                            />
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="icon"
-                              className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
-                              onClick={() => setShowPassword(!showPassword)}
-                            >
-                              {showPassword ? (
-                                <EyeOff className="h-4 w-4 text-muted-foreground" />
-                              ) : (
-                                <Eye className="h-4 w-4 text-muted-foreground" />
-                              )}
-                            </Button>
-                          </div>
-                        </FormControl>
-                        {password && <PasswordStrengthIndicator password={password} />}
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+        <footer className="border-t border-border py-4">
+          <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
+            <p>CleanFlow - Professional Cleaning Business Management</p>
+          </div>
+        </footer>
+      </div>
+    );
+  }
 
-                  <FormField
-                    control={form.control}
-                    name="phone"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Phone Number</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="tel"
-                            placeholder="04XX XXX XXX"
-                            {...field}
-                            disabled={isLoading}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+  // Owner/Admin - Full Multi-Step Flow
+  return (
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-background via-background to-primary/5">
+      {/* Header */}
+      <header className="border-b border-border bg-background/80 backdrop-blur-sm">
+        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+          <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+            <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center">
+              <Sparkles className="h-6 w-6 text-primary-foreground" />
+            </div>
+            <span className="text-xl font-bold">CleanFlow</span>
+          </Link>
 
-                  <FormField
-                    control={form.control}
-                    name="abn"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>
-                          ABN <span className="text-muted-foreground">(Optional)</span>
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="XX XXX XXX XXX"
-                            {...field}
-                            disabled={isLoading}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+          <div className="flex items-center gap-4">
+            <span className="text-sm text-muted-foreground hidden sm:block">
+              Already have an account?
+            </span>
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/auth">Sign In</Link>
+            </Button>
+          </div>
+        </div>
+      </header>
 
-                  <FormField
-                    control={form.control}
-                    name="acceptTerms"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-start space-x-3 space-y-0 pt-2">
-                        <FormControl>
-                          <Checkbox
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                            disabled={isLoading}
-                          />
-                        </FormControl>
-                        <div className="space-y-1 leading-none">
-                          <FormLabel className="text-sm font-normal">
-                            I agree to the{" "}
-                            <Link
-                              to="/terms"
-                              className="text-primary hover:underline"
-                            >
-                              Terms of Service
-                            </Link>{" "}
-                            and{" "}
-                            <Link
-                              to="/privacy"
-                              className="text-primary hover:underline"
-                            >
-                              Privacy Policy
-                            </Link>
-                          </FormLabel>
-                          <FormMessage />
-                        </div>
-                      </FormItem>
+      <main className="flex-1 container mx-auto px-4 py-8">
+        {/* Progress Steps */}
+        <div className="max-w-2xl mx-auto mb-8">
+          <div className="flex items-center justify-between">
+            {steps.map((step, idx) => (
+              <div key={step.id} className="flex-1 flex items-center">
+                <div className="flex flex-col items-center flex-1">
+                  <div
+                    className={cn(
+                      "h-10 w-10 rounded-full flex items-center justify-center font-medium text-sm transition-colors",
+                      idx < currentStepIndex
+                        ? "bg-primary text-primary-foreground"
+                        : idx === currentStepIndex
+                        ? "bg-primary text-primary-foreground ring-4 ring-primary/20"
+                        : "bg-muted text-muted-foreground"
+                    )}
+                  >
+                    {idx < currentStepIndex ? (
+                      <Check className="h-5 w-5" />
+                    ) : (
+                      idx + 1
+                    )}
+                  </div>
+                  <div className="mt-2 text-center">
+                    <p
+                      className={cn(
+                        "text-sm font-medium",
+                        idx <= currentStepIndex
+                          ? "text-foreground"
+                          : "text-muted-foreground"
+                      )}
+                    >
+                      {step.title}
+                    </p>
+                    <p className="text-xs text-muted-foreground hidden sm:block">
+                      {step.description}
+                    </p>
+                  </div>
+                </div>
+                {idx < steps.length - 1 && (
+                  <div
+                    className={cn(
+                      "h-0.5 flex-1 mx-2 mt-[-20px]",
+                      idx < currentStepIndex ? "bg-primary" : "bg-muted"
                     )}
                   />
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Step Content */}
+        <div className="max-w-4xl mx-auto">
+          {/* Step 1: Account */}
+          {currentStep === "account" && (
+            <Card className="max-w-md mx-auto border-border shadow-xl">
+              <CardHeader className="text-center">
+                <CardTitle className="text-2xl">Create Your Account</CardTitle>
+                <CardDescription>
+                  Start your 14-day free trial of CleanFlow
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleAccountSubmit} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="fullName">Full Name</Label>
+                    <Input
+                      id="fullName"
+                      type="text"
+                      placeholder="John Smith"
+                      value={fullName}
+                      onChange={(e) => {
+                        setFullName(e.target.value);
+                        setFormErrors((prev) => ({ ...prev, name: "" }));
+                      }}
+                      className={formErrors.name ? "border-destructive" : ""}
+                      required
+                    />
+                    {formErrors.name && (
+                      <p className="text-xs text-destructive">{formErrors.name}</p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="businessName">Business Name (optional)</Label>
+                    <Input
+                      id="businessName"
+                      type="text"
+                      placeholder="ABC Cleaning Services"
+                      value={businessName}
+                      onChange={(e) => setBusinessName(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="you@example.com"
+                      value={email}
+                      onChange={(e) => {
+                        setEmail(e.target.value);
+                        setFormErrors((prev) => ({ ...prev, email: "" }));
+                      }}
+                      className={formErrors.email ? "border-destructive" : ""}
+                      required
+                    />
+                    {formErrors.email && (
+                      <p className="text-xs text-destructive">{formErrors.email}</p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="password">Password</Label>
+                    <div className="relative">
+                      <Input
+                        id="password"
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Create a strong password"
+                        value={password}
+                        onChange={(e) => {
+                          setPassword(e.target.value);
+                          setFormErrors((prev) => ({ ...prev, password: "" }));
+                        }}
+                        className={
+                          formErrors.password ? "border-destructive pr-10" : "pr-10"
+                        }
+                        required
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </button>
+                    </div>
+                    <PasswordStrengthIndicator password={password} />
+                    {formErrors.password && (
+                      <p className="text-xs text-destructive">{formErrors.password}</p>
+                    )}
+                  </div>
 
                   <Button
                     type="submit"
-                    className="w-full"
-                    size="lg"
-                    disabled={isLoading || isRedirectingToCheckout}
+                    className="w-full h-12 text-base group"
+                    disabled={
+                      isSubmitting || validatePassword(password).strength === "weak"
+                    }
                   >
-                    {isRedirectingToCheckout ? (
+                    {isSubmitting ? (
                       <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Redirecting to checkout...
-                      </>
-                    ) : isLoading ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                         Creating account...
                       </>
                     ) : (
                       <>
-                        {selectedPlan ? "Create Account & Continue" : "Start Free Trial"}
-                        <ArrowRight className="ml-2 h-4 w-4" />
+                        Continue
+                        <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                       </>
                     )}
                   </Button>
                 </form>
-              </Form>
+              </CardContent>
+            </Card>
+          )}
 
-              <p className="text-center text-sm text-muted-foreground mt-6">
-                Already have an account?{" "}
-                <Link to="/auth" className="text-primary hover:underline">
-                  Sign in
-                </Link>
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+          {/* Step 2: Plan Selection */}
+          {currentStep === "plan" && (
+            <div className="space-y-6">
+              <div className="text-center mb-8">
+                <h2 className="text-2xl font-bold">Choose Your Plan</h2>
+                <p className="text-muted-foreground mt-1">
+                  All plans include a 14-day free trial
+                </p>
+              </div>
 
-      {/* Right Side - Benefits */}
-      <div className="hidden lg:flex flex-1 bg-primary text-primary-foreground items-center justify-center p-8">
-        <div className="max-w-md">
-          <div className="mb-8 p-4 rounded-full bg-primary-foreground/10 w-fit">
-            <Building2 className="h-12 w-12" />
-          </div>
-          <h2 className="text-3xl font-bold mb-4">
-            Join hundreds of Australian cleaning businesses
-          </h2>
-          <p className="text-lg opacity-90 mb-8">
-            CleanFlow helps you manage your team, schedule jobs, and grow your
-            business—all from one simple platform.
-          </p>
-          <ul className="space-y-4">
-            {benefits.map((benefit) => (
-              <li key={benefit} className="flex items-center gap-3">
-                <div className="rounded-full bg-primary-foreground/20 p-1">
-                  <Check className="h-4 w-4" />
-                </div>
-                <span>{benefit}</span>
-              </li>
-            ))}
-          </ul>
+              <PlanSelection
+                selectedPlan={selectedPlan}
+                onSelectPlan={handlePlanSelect}
+                isAnnual={isAnnual}
+                onToggleAnnual={setIsAnnual}
+              />
+
+              <div className="flex items-center justify-between max-w-md mx-auto pt-4">
+                <Button variant="ghost" onClick={goBack}>
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Back
+                </Button>
+                <Button
+                  onClick={handleContinueToPayment}
+                  disabled={!selectedPlan}
+                  className="group"
+                >
+                  Continue
+                  <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Step 3: Payment */}
+          {currentStep === "payment" && selectedPlan && (
+            <div className="space-y-6">
+              <div className="text-center mb-8">
+                <h2 className="text-2xl font-bold">Start Your Free Trial</h2>
+                <p className="text-muted-foreground mt-1">
+                  Add payment details to begin your 14-day trial
+                </p>
+              </div>
+
+              <PaymentStep
+                selectedPlan={selectedPlan}
+                isAnnual={isAnnual}
+                userEmail={email || user?.email || ""}
+                userName={fullName || user?.user_metadata?.full_name || ""}
+                onStartCheckout={handleStartCheckout}
+                isLoading={isSubmitting}
+              />
+
+              <div className="flex justify-center pt-4">
+                <Button variant="ghost" onClick={goBack}>
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Back to plans
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
-      </div>
+      </main>
+
+      {/* Footer */}
+      <footer className="border-t border-border py-4">
+        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
+          <p>CleanFlow - Professional Cleaning Business Management</p>
+        </div>
+      </footer>
     </div>
   );
 };

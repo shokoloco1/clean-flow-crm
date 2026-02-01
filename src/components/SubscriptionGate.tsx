@@ -1,14 +1,25 @@
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useSubscription } from "@/hooks/useSubscription";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Sparkles, Clock, Rocket, ArrowRight, Loader2 } from "lucide-react";
+import { TrialBanner } from "./TrialBanner";
 
 interface SubscriptionGateProps {
   children: React.ReactNode;
-  trialDays?: number; // Default 14 days
+  trialDays?: number; // Default 14 days (legacy, now uses DB)
+}
+
+interface TrialInfo {
+  isInTrial: boolean;
+  daysRemaining: number;
+  expired: boolean;
+  trialEnd: Date | null;
+  plan: string | null;
 }
 
 export function SubscriptionGate({ children, trialDays = 14 }: SubscriptionGateProps) {
@@ -18,36 +29,104 @@ export function SubscriptionGate({ children, trialDays = 14 }: SubscriptionGateP
   // ============================================
   const DEMO_MODE = true;
 
-  if (DEMO_MODE) {
-    // Free access - no subscription required
-    return <>{children}</>;
-  }
-
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { subscribed, loading, plan } = useSubscription();
+  const { subscribed, loading: subscriptionLoading } = useSubscription();
+  const [trialInfo, setTrialInfo] = useState<TrialInfo | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  // Calculate trial status
-  const getTrialStatus = () => {
-    if (!user?.created_at) return { isInTrial: false, daysRemaining: 0, expired: true };
+  // Legacy trial calculation based on account creation date
+  const getLegacyTrialStatus = (): TrialInfo => {
+    if (!user?.created_at) {
+      return { isInTrial: false, daysRemaining: 0, expired: true, trialEnd: null, plan: null };
+    }
 
     const createdAt = new Date(user.created_at);
+    const trialEnd = new Date(createdAt);
+    trialEnd.setDate(trialEnd.getDate() + trialDays);
     const now = new Date();
-    const diffTime = now.getTime() - createdAt.getTime();
-    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-    const daysRemaining = Math.max(0, trialDays - diffDays);
+    const diffTime = trialEnd.getTime() - now.getTime();
+    const daysRemaining = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
 
     return {
       isInTrial: daysRemaining > 0,
       daysRemaining,
-      expired: daysRemaining <= 0
+      expired: daysRemaining <= 0,
+      trialEnd,
+      plan: null,
     };
   };
 
-  const trialStatus = getTrialStatus();
+  // Fetch trial info from subscriptions table
+  useEffect(() => {
+    const fetchTrialInfo = async () => {
+      if (DEMO_MODE) {
+        setLoading(false);
+        return;
+      }
+
+      if (!user) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from("subscriptions")
+          .select("status, trial_start, trial_end, plan")
+          .eq("user_id", user.id)
+          .maybeSingle();
+
+        if (error) {
+          console.error("Error fetching trial info:", error);
+          // Fall back to legacy behavior
+          setTrialInfo(getLegacyTrialStatus());
+        } else if (data?.status === "trialing" && data.trial_end) {
+          const trialEnd = new Date(data.trial_end);
+          const now = new Date();
+          const diffTime = trialEnd.getTime() - now.getTime();
+          const daysRemaining = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+
+          setTrialInfo({
+            isInTrial: daysRemaining > 0,
+            daysRemaining,
+            expired: daysRemaining <= 0,
+            trialEnd,
+            plan: data.plan,
+          });
+        } else if (data?.status === "active") {
+          // Active subscription, not in trial
+          setTrialInfo({
+            isInTrial: false,
+            daysRemaining: 0,
+            expired: false,
+            trialEnd: null,
+            plan: data.plan,
+          });
+        } else {
+          // No subscription record, fall back to legacy behavior
+          setTrialInfo(getLegacyTrialStatus());
+        }
+      } catch (err) {
+        console.error("Error fetching trial info:", err);
+        setTrialInfo(getLegacyTrialStatus());
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (!subscriptionLoading) {
+      fetchTrialInfo();
+    }
+  }, [user, subscriptionLoading, trialDays]);
+
+  // DEMO MODE - bypass all checks
+  if (DEMO_MODE) {
+    return <>{children}</>;
+  }
 
   // Show loading while checking subscription
-  if (loading) {
+  if (loading || subscriptionLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-3">
@@ -64,28 +143,10 @@ export function SubscriptionGate({ children, trialDays = 14 }: SubscriptionGateP
   }
 
   // User is in trial period - allow access with banner
-  if (trialStatus.isInTrial) {
+  if (trialInfo?.isInTrial) {
     return (
       <div className="relative">
-        {/* Trial Banner */}
-        <div className="fixed top-0 left-0 right-0 z-[100] bg-gradient-to-r from-primary to-primary/80 text-primary-foreground py-2 px-4">
-          <div className="container mx-auto flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Clock className="h-4 w-4" />
-              <span className="text-sm font-medium">
-                {trialStatus.daysRemaining} {trialStatus.daysRemaining === 1 ? 'day' : 'days'} left in your free trial
-              </span>
-            </div>
-            <Button
-              size="sm"
-              variant="secondary"
-              onClick={() => navigate("/pricing")}
-              className="h-7 text-xs"
-            >
-              Upgrade Now
-            </Button>
-          </div>
-        </div>
+        <TrialBanner />
         {/* Add padding to account for banner */}
         <div className="pt-10">
           {children}
