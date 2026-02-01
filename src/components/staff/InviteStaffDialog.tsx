@@ -14,15 +14,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { 
-  UserPlus, 
-  Phone, 
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  UserPlus,
+  Phone,
   DollarSign,
   Award,
   AlertCircle,
   Loader2,
   CheckCircle2,
-  Mail
+  Mail,
+  RefreshCw,
+  AlertTriangle
 } from "lucide-react";
 
 const CERTIFICATION_OPTIONS = [
@@ -48,6 +51,14 @@ interface FormData {
   certifications: string[];
 }
 
+interface InviteResult {
+  success: boolean;
+  userId?: string;
+  emailSent: boolean;
+  emailError?: string;
+  message: string;
+}
+
 const initialFormData: FormData = {
   email: "",
   fullName: "",
@@ -60,6 +71,8 @@ export function InviteStaffDialog({ open, onOpenChange }: InviteStaffDialogProps
   const queryClient = useQueryClient();
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [lastInviteResult, setLastInviteResult] = useState<InviteResult | null>(null);
+  const [showEmailWarning, setShowEmailWarning] = useState(false);
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
@@ -85,7 +98,7 @@ export function InviteStaffDialog({ open, onOpenChange }: InviteStaffDialogProps
   };
 
   const createStaffMutation = useMutation({
-    mutationFn: async () => {
+    mutationFn: async (): Promise<InviteResult> => {
       const { data, error } = await supabase.functions.invoke('invite-staff', {
         body: {
           email: formData.email,
@@ -95,17 +108,28 @@ export function InviteStaffDialog({ open, onOpenChange }: InviteStaffDialogProps
           certifications: formData.certifications
         }
       });
-      
+
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
-      return data;
+      return data as InviteResult;
     },
-    onSuccess: () => {
-      toast.success(`Invitation sent to ${formData.email}`, {
-        description: "They will receive an email to set up their account"
-      });
+    onSuccess: (result) => {
+      setLastInviteResult(result);
       queryClient.invalidateQueries({ queryKey: ["staff-list"] });
-      handleClose();
+
+      if (result.emailSent) {
+        toast.success(`Invitation sent to ${formData.email}`, {
+          description: "They will receive an email to set up their account"
+        });
+        handleClose();
+      } else {
+        // Staff was created but email failed
+        setShowEmailWarning(true);
+        toast.warning("Staff member created", {
+          description: "Email delivery may have failed. You can resend the invitation.",
+          duration: 6000
+        });
+      }
     },
     onError: (error: any) => {
       if (error.message?.includes("already registered")) {
@@ -119,9 +143,33 @@ export function InviteStaffDialog({ open, onOpenChange }: InviteStaffDialogProps
     }
   });
 
+  // Resend invitation mutation
+  const resendInvitationMutation = useMutation({
+    mutationFn: async () => {
+      // For resending, we can use Supabase's password reset which sends an email
+      const { error } = await supabase.auth.resetPasswordForEmail(formData.email, {
+        redirectTo: `${window.location.origin}/auth`
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Password reset email sent", {
+        description: `${formData.fullName} can use this link to set up their password`
+      });
+      handleClose();
+    },
+    onError: (error: any) => {
+      toast.error("Failed to resend invitation", {
+        description: error.message
+      });
+    }
+  });
+
   const handleClose = () => {
     setFormData(initialFormData);
     setErrors({});
+    setLastInviteResult(null);
+    setShowEmailWarning(false);
     onOpenChange(false);
   };
 
@@ -139,6 +187,10 @@ export function InviteStaffDialog({ open, onOpenChange }: InviteStaffDialogProps
     }
   };
 
+  const handleResend = () => {
+    resendInvitationMutation.mutate();
+  };
+
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
@@ -153,6 +205,48 @@ export function InviteStaffDialog({ open, onOpenChange }: InviteStaffDialogProps
             Enter employee details and they'll receive login instructions via email.
           </DialogDescription>
         </DialogHeader>
+
+        {/* Email delivery warning */}
+        {showEmailWarning && lastInviteResult && !lastInviteResult.emailSent && (
+          <Alert variant="destructive" className="border-amber-500 bg-amber-50 dark:bg-amber-950/20">
+            <AlertTriangle className="h-4 w-4 text-amber-600" />
+            <AlertDescription className="text-amber-800 dark:text-amber-200">
+              <p className="font-medium">Staff member created, but email may not have been delivered.</p>
+              <p className="text-sm mt-1">
+                {lastInviteResult.emailError || "Please resend the invitation or share login instructions manually."}
+              </p>
+              <div className="flex gap-2 mt-3">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={handleResend}
+                  disabled={resendInvitationMutation.isPending}
+                  className="border-amber-600 text-amber-700 hover:bg-amber-100"
+                >
+                  {resendInvitationMutation.isPending ? (
+                    <>
+                      <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                      Sending...
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw className="h-3 w-3 mr-1" />
+                      Resend Invitation
+                    </>
+                  )}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={handleClose}
+                  className="text-amber-700"
+                >
+                  Close
+                </Button>
+              </div>
+            </AlertDescription>
+          </Alert>
+        )}
 
         <div className="space-y-5 py-2">
           {/* Basic Info Section */}
@@ -169,6 +263,7 @@ export function InviteStaffDialog({ open, onOpenChange }: InviteStaffDialogProps
                   setFormData({ ...formData, fullName: e.target.value });
                   setErrors({ ...errors, fullName: "" });
                 }}
+                disabled={showEmailWarning}
                 className={`h-12 ${errors.fullName ? "border-destructive" : ""}`}
               />
               {errors.fullName && (
@@ -194,6 +289,7 @@ export function InviteStaffDialog({ open, onOpenChange }: InviteStaffDialogProps
                     setFormData({ ...formData, email: e.target.value });
                     setErrors({ ...errors, email: "" });
                   }}
+                  disabled={showEmailWarning}
                   className={`h-12 pl-10 ${errors.email ? "border-destructive" : ""}`}
                 />
               </div>
@@ -220,6 +316,7 @@ export function InviteStaffDialog({ open, onOpenChange }: InviteStaffDialogProps
                   placeholder="04XX XXX XXX"
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  disabled={showEmailWarning}
                   className="h-12"
                 />
               </div>
@@ -239,6 +336,7 @@ export function InviteStaffDialog({ open, onOpenChange }: InviteStaffDialogProps
                     setFormData({ ...formData, hourlyRate: e.target.value });
                     setErrors({ ...errors, hourlyRate: "" });
                   }}
+                  disabled={showEmailWarning}
                   className={`h-12 ${errors.hourlyRate ? "border-destructive" : ""}`}
                 />
                 {errors.hourlyRate && (
@@ -262,8 +360,8 @@ export function InviteStaffDialog({ open, onOpenChange }: InviteStaffDialogProps
                 <Badge
                   key={cert}
                   variant={formData.certifications.includes(cert) ? "default" : "outline"}
-                  className="cursor-pointer transition-all hover:scale-105 py-2 px-3"
-                  onClick={() => toggleCertification(cert)}
+                  className={`cursor-pointer transition-all hover:scale-105 py-2 px-3 ${showEmailWarning ? "opacity-50 pointer-events-none" : ""}`}
+                  onClick={() => !showEmailWarning && toggleCertification(cert)}
                 >
                   {formData.certifications.includes(cert) && (
                     <CheckCircle2 className="h-3 w-3 mr-1" />
@@ -275,28 +373,30 @@ export function InviteStaffDialog({ open, onOpenChange }: InviteStaffDialogProps
           </div>
         </div>
 
-        <DialogFooter className="flex-col sm:flex-row gap-2 mt-4">
-          <Button variant="outline" onClick={handleClose} className="w-full sm:w-auto h-12">
-            Cancel
-          </Button>
-          <Button 
-            onClick={handleSubmit} 
-            disabled={createStaffMutation.isPending}
-            className="w-full sm:w-auto h-12"
-          >
-            {createStaffMutation.isPending ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Sending Invite...
-              </>
-            ) : (
-              <>
-                <Mail className="h-4 w-4 mr-2" />
-                Send Invitation
-              </>
-            )}
-          </Button>
-        </DialogFooter>
+        {!showEmailWarning && (
+          <DialogFooter className="flex-col sm:flex-row gap-2 mt-4">
+            <Button variant="outline" onClick={handleClose} className="w-full sm:w-auto h-12">
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSubmit}
+              disabled={createStaffMutation.isPending}
+              className="w-full sm:w-auto h-12"
+            >
+              {createStaffMutation.isPending ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Sending Invite...
+                </>
+              ) : (
+                <>
+                  <Mail className="h-4 w-4 mr-2" />
+                  Send Invitation
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        )}
       </DialogContent>
     </Dialog>
   );
