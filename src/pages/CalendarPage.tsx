@@ -21,7 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowLeft, Sparkles, LogOut, Calendar, Plus, Clock, MapPin, User } from "lucide-react";
+import { ArrowLeft, Sparkles, LogOut, Calendar, Plus, Clock, MapPin, User, Loader2 } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { toast } from "sonner";
 import FullCalendar from "@fullcalendar/react";
@@ -75,6 +75,13 @@ export default function CalendarPage() {
   const [loading, setLoading] = useState(true);
   const [clients, setClients] = useState<Client[]>([]);
   const [staffList, setStaffList] = useState<Staff[]>([]);
+  const [isSigningOut, setIsSigningOut] = useState(false);
+
+  const handleSignOut = async () => {
+    if (isSigningOut) return;
+    setIsSigningOut(true);
+    await signOut();
+  };
   
   // Dialog states
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -350,9 +357,13 @@ export default function CalendarPage() {
               <Plus className="h-4 w-4 mr-2" />
               New Job
             </Button>
-            <Button variant="outline" size="sm" onClick={signOut}>
-              <LogOut className="h-4 w-4 mr-2" />
-              Sign Out
+            <Button variant="outline" size="sm" onClick={handleSignOut} disabled={isSigningOut}>
+              {isSigningOut ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <LogOut className="h-4 w-4 mr-2" />
+              )}
+              {isSigningOut ? "Signing out..." : "Sign Out"}
             </Button>
           </div>
         </div>

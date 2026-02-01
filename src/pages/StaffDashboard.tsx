@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { LogOut, Sparkles, Calendar, Smile, ChevronDown, Clock } from "lucide-react";
+import { LogOut, Sparkles, Calendar, Smile, ChevronDown, Clock, Loader2 } from "lucide-react";
 import { format, addDays } from "date-fns";
 import JobDetailView from "@/components/JobDetailView";
 import { NotificationCenter } from "@/components/NotificationCenter";
@@ -67,7 +67,14 @@ export default function StaffDashboard() {
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [loading, setLoading] = useState(true);
   const [propertyPhotos, setPropertyPhotos] = useState<Record<string, PropertyPhotos[]>>({});
+  const [isSigningOut, setIsSigningOut] = useState(false);
   const { updatingJobId, advanceStatus } = useJobStatusChange(() => fetchMyJobs());
+
+  const handleSignOut = async () => {
+    if (isSigningOut) return;
+    setIsSigningOut(true);
+    await signOut();
+  };
 
   useEffect(() => {
     if (user) {
@@ -234,13 +241,18 @@ export default function StaffDashboard() {
           </Link>
           <div className="flex items-center gap-2">
             <NotificationCenter />
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={signOut}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleSignOut}
+              disabled={isSigningOut}
               className="h-12 w-12"
             >
-              <LogOut className="h-5 w-5" />
+              {isSigningOut ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                <LogOut className="h-5 w-5" />
+              )}
             </Button>
           </div>
         </div>

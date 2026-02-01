@@ -202,9 +202,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signOut = useCallback(async () => {
-    clearCachedRole();
-    await supabase.auth.signOut();
-    setRole(null);
+    try {
+      // Clear cached data first
+      clearCachedRole();
+
+      // Clear any additional session data
+      setRole(null);
+      setUser(null);
+      setSession(null);
+
+      // Sign out from Supabase
+      const { error } = await supabase.auth.signOut();
+
+      if (error) {
+        console.error("Sign out error:", error);
+        throw error;
+      }
+
+      // Force a page reload to clear any in-memory state
+      // This ensures clean state for next login
+      window.location.href = "/auth";
+    } catch (error) {
+      console.error("Sign out failed:", error);
+      // Even if sign out fails, try to clear local state
+      clearCachedRole();
+      setRole(null);
+      setUser(null);
+      setSession(null);
+      // Still redirect to auth page
+      window.location.href = "/auth";
+    }
   }, []);
 
   const refreshRole = useCallback(async () => {

@@ -1,4 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
+import { useState } from "react";
 import {
   LayoutDashboard,
   Calendar,
@@ -12,6 +13,7 @@ import {
   Building2,
   RefreshCw,
   DollarSign,
+  Loader2,
 } from "lucide-react";
 import {
   Sidebar,
@@ -52,6 +54,14 @@ export function AdminSidebar() {
   const { signOut } = useAuth();
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
+  const [isSigningOut, setIsSigningOut] = useState(false);
+
+  const handleSignOut = async () => {
+    if (isSigningOut) return; // Prevent double-click
+    setIsSigningOut(true);
+    await signOut();
+    // signOut handles navigation, no need to reset state
+  };
 
   const isActive = (url: string) => {
     if (url === "/admin") {
@@ -123,12 +133,17 @@ export function AdminSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
-              onClick={signOut}
+              onClick={handleSignOut}
               tooltip="Sign Out"
-              className="text-muted-foreground hover:text-foreground"
+              disabled={isSigningOut}
+              className="text-muted-foreground hover:text-foreground disabled:opacity-50"
             >
-              <LogOut className="h-4 w-4" />
-              <span>Sign Out</span>
+              {isSigningOut ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <LogOut className="h-4 w-4" />
+              )}
+              <span>{isSigningOut ? "Signing out..." : "Sign Out"}</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

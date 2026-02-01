@@ -16,11 +16,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { enAU } from "date-fns/locale";
-import { 
-  LogOut, Sparkles, Plus, Search, Users, Building2, 
+import {
+  LogOut, Sparkles, Plus, Search, Users, Building2,
   Mail, Phone, MapPin, FileText, Edit, Trash2, Eye,
   Briefcase, CheckCircle2, Clock, TrendingUp, ArrowLeft,
-  Copy, ExternalLink, Link as LinkIcon, AlertCircle
+  Copy, ExternalLink, Link as LinkIcon, AlertCircle, Loader2
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import {
@@ -81,6 +81,13 @@ export default function ClientsPage() {
   const [formData, setFormData] = useState<Omit<Client, 'id' | 'created_at' | 'updated_at' | 'portal_token'>>(emptyClient);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [isSigningOut, setIsSigningOut] = useState(false);
+
+  const handleSignOut = async () => {
+    if (isSigningOut) return;
+    setIsSigningOut(true);
+    await signOut();
+  };
 
   // Handle name change with auto-capitalize
   const handleNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -365,9 +372,13 @@ export default function ClientsPage() {
               </div>
             </Link>
           </div>
-          <Button variant="outline" size="sm" onClick={signOut}>
-            <LogOut className="h-4 w-4 mr-2" />
-            Sign Out
+          <Button variant="outline" size="sm" onClick={handleSignOut} disabled={isSigningOut}>
+            {isSigningOut ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <LogOut className="h-4 w-4 mr-2" />
+            )}
+            {isSigningOut ? "Signing out..." : "Sign Out"}
           </Button>
         </div>
       </header>
