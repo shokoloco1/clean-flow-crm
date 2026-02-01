@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,9 +7,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Settings, Building, MapPin, Clock, Save, Loader2, Receipt } from "lucide-react";
+import { Building, MapPin, Clock, Save, Loader2, Receipt } from "lucide-react";
 import { CleaningServicesManager, CleaningService } from "@/components/settings/CleaningServicesManager";
 import { formatABN, validateABN } from "@/lib/australian";
+import { AdminLayout } from "@/components/admin";
 
 interface SystemSettings {
   company_name: string;
@@ -43,7 +43,6 @@ const DEFAULT_SERVICES: CleaningService[] = [
 ];
 
 export default function SettingsPage() {
-  const navigate = useNavigate();
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -193,28 +192,25 @@ export default function SettingsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
+      <AdminLayout>
+        <div className="flex items-center justify-center min-h-[50vh]">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </AdminLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-card sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4 flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate("/admin")}>
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <div className="flex items-center gap-2">
-            <Settings className="h-6 w-6 text-primary" />
-            <h1 className="text-xl font-bold text-foreground">System Settings</h1>
-          </div>
+    <AdminLayout>
+      <div className="container mx-auto px-4 py-6">
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-foreground">System Settings</h1>
+          <p className="text-sm text-muted-foreground">
+            Configure your business settings and preferences
+          </p>
         </div>
-      </header>
 
-      <main className="container mx-auto px-4 py-8">
-        <div className="max-w-3xl mx-auto space-y-6">
+        <div className="max-w-3xl space-y-6">
           {/* Company Info */}
           <Card>
             <CardHeader>
@@ -488,7 +484,7 @@ export default function SettingsPage() {
             </Button>
           </div>
         </div>
-      </main>
-    </div>
+      </div>
+    </AdminLayout>
   );
 }

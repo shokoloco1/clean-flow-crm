@@ -1,32 +1,31 @@
 import { useLocation, Link } from "react-router-dom";
-import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Home, ArrowLeft, Search, MapPin, HelpCircle } from "lucide-react";
+import { Home, ArrowLeft, MapPin, Sparkles } from "lucide-react";
 
 const SUGGESTED_PAGES = [
-  { path: "/admin", label: "Admin Dashboard", icon: Home },
-  { path: "/staff", label: "Staff Dashboard", icon: MapPin },
+  { path: "/admin", label: "Admin Dashboard", description: "Manage your business", icon: Home },
+  { path: "/staff", label: "Staff Dashboard", description: "View your jobs", icon: MapPin },
+  { path: "/pricing", label: "Pricing", description: "View our plans", icon: Sparkles },
 ];
 
 const NotFound = () => {
   const location = useLocation();
 
-  useEffect(() => {
-    // Log 404 errors for analytics - only in dev mode via logger
-  }, [location.pathname]);
-
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background p-4">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-background via-background to-primary/5 p-4">
       <div className="max-w-md w-full text-center space-y-8">
-        {/* Animated 404 */}
-        <div className="relative">
-          <div className="text-[150px] font-bold text-primary/10 leading-none select-none">
-            404
+        {/* Branding */}
+        <Link to="/" className="inline-flex items-center gap-2 hover:opacity-80 transition-opacity">
+          <div className="h-10 w-10 rounded-lg bg-primary flex items-center justify-center">
+            <Sparkles className="h-5 w-5 text-primary-foreground" />
           </div>
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="h-24 w-24 rounded-full bg-primary/10 flex items-center justify-center animate-pulse">
-              <HelpCircle className="h-12 w-12 text-primary" />
-            </div>
+          <span className="font-bold text-lg text-foreground">CleanFlow</span>
+        </Link>
+
+        {/* 404 Display */}
+        <div className="relative">
+          <div className="text-[120px] font-bold text-primary/10 leading-none select-none">
+            404
           </div>
         </div>
 
@@ -59,21 +58,21 @@ const NotFound = () => {
         {/* Suggested pages */}
         <div className="pt-6 border-t border-border">
           <p className="text-sm text-muted-foreground mb-4">
-            Perhaps you were looking for one of these pages?
+            Try one of these instead:
           </p>
           <div className="grid gap-2">
             {SUGGESTED_PAGES.map((page) => (
               <Link
                 key={page.path}
                 to={page.path}
-                className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors text-left"
+                className="flex items-center gap-3 p-3 rounded-lg border border-border hover:border-primary/50 hover:bg-primary/5 transition-all text-left"
               >
-                <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
                   <page.icon className="h-5 w-5 text-primary" />
                 </div>
-                <div>
+                <div className="min-w-0">
                   <p className="font-medium text-foreground">{page.label}</p>
-                  <p className="text-xs text-muted-foreground">{page.path}</p>
+                  <p className="text-xs text-muted-foreground">{page.description}</p>
                 </div>
               </Link>
             ))}
