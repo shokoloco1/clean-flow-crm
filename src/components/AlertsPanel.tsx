@@ -47,7 +47,7 @@ export default function AlertsPanel() {
         },
         (payload) => {
           // Play notification sound or show toast
-          toast.warning("Nueva alerta recibida", {
+          toast.warning("New alert received", {
             description: (payload.new as JobAlert).message
           });
           fetchAlerts();
@@ -123,7 +123,7 @@ export default function AlertsPanel() {
 
     if (!error) {
       setAlerts(alerts.filter(a => a.id !== alertId));
-      toast.success("Alerta resuelta");
+      toast.success("Alert resolved");
     }
   };
 
@@ -156,13 +156,13 @@ export default function AlertsPanel() {
   const getAlertLabel = (type: string) => {
     switch (type) {
       case 'late_arrival':
-        return "Llegada Tardía";
+        return "Late Arrival";
       case 'no_show':
-        return "No Presentación";
+        return "No Show";
       case 'geofence_violation':
-        return "Fuera de Área";
+        return "Outside Area";
       case 'early_checkout':
-        return "Salida Temprana";
+        return "Early Checkout";
       default:
         return type;
     }
@@ -172,7 +172,7 @@ export default function AlertsPanel() {
     return (
       <Card>
         <CardContent className="p-4">
-          <p className="text-center text-muted-foreground">Cargando alertas...</p>
+          <p className="text-center text-muted-foreground">Loading alerts...</p>
         </CardContent>
       </Card>
     );
@@ -184,7 +184,7 @@ export default function AlertsPanel() {
         <CardTitle className="flex items-center justify-between text-lg">
           <div className="flex items-center gap-2">
             <Bell className="h-5 w-5 text-destructive" />
-            Alertas Activas
+            Active Alerts
           </div>
           {alerts.length > 0 && (
             <Badge variant="destructive">{alerts.length}</Badge>
@@ -197,7 +197,7 @@ export default function AlertsPanel() {
             <div className="h-12 w-12 rounded-full bg-success/10 flex items-center justify-center mb-3">
               <CheckCircle className="h-6 w-6 text-success" />
             </div>
-            <p className="text-muted-foreground">Sin alertas pendientes</p>
+            <p className="text-muted-foreground">No pending alerts</p>
           </div>
         ) : (
           <div className="space-y-3">

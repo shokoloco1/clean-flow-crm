@@ -1025,18 +1025,18 @@ export default function PropertiesPage() {
                 <div className="space-y-4">
                   <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                     <Link2 className="h-4 w-4" />
-                    Ubicación (Google Maps)
+                    Location (Google Maps)
                   </h3>
                   <div className="flex gap-2">
                     <div className="flex-1">
-                      <Label>Link de Google Maps</Label>
+                      <Label>Google Maps Link</Label>
                       <Input
                         value={formData.google_maps_link}
                         onChange={(e) => setFormData({ ...formData, google_maps_link: e.target.value })}
-                        placeholder="Pega aquí el link de Google Maps..."
+                        placeholder="Paste Google Maps link here..."
                       />
                       <p className="text-xs text-muted-foreground mt-1">
-                        Copia el link desde Google Maps o WhatsApp
+                        Copy the link from Google Maps or WhatsApp
                       </p>
                     </div>
                     {formData.google_maps_link && (
