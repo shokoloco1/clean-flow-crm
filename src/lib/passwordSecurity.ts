@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-// Lista de contraseñas más comunes/filtradas (Top 100)
+// List of most common/leaked passwords (Top 100)
 const COMMON_PASSWORDS = new Set([
   "123456", "password", "12345678", "qwerty", "123456789",
   "12345", "1234", "111111", "1234567", "dragon",
@@ -24,13 +24,13 @@ const COMMON_PASSWORDS = new Set([
   "harley", "george", "bailey", "junior", "batman"
 ]);
 
-// Patrones débiles comunes
+// Common weak patterns
 const WEAK_PATTERNS = [
-  /^(.)\1+$/, // Caracteres repetidos: "aaaaaa"
-  /^(012|123|234|345|456|567|678|789|890)+$/, // Secuencias numéricas
-  /^(abc|bcd|cde|def|efg|fgh|ghi|hij|ijk|jkl|klm|lmn|mno|nop|opq|pqr|qrs|rst|stu|tuv|uvw|vwx|wxy|xyz)+$/i, // Secuencias alfabéticas
-  /^(qwerty|asdfgh|zxcvbn|qwertyuiop|asdfghjkl|zxcvbnm)+$/i, // Patrones de teclado
-  /^(.+)\1+$/, // Patrones repetitivos
+  /^(.)\1+$/, // Repeated characters: "aaaaaa"
+  /^(012|123|234|345|456|567|678|789|890)+$/, // Numeric sequences
+  /^(abc|bcd|cde|def|efg|fgh|ghi|hij|ijk|jkl|klm|lmn|mno|nop|opq|pqr|qrs|rst|stu|tuv|uvw|vwx|wxy|xyz)+$/i, // Alphabetic sequences
+  /^(qwerty|asdfgh|zxcvbn|qwertyuiop|asdfghjkl|zxcvbnm)+$/i, // Keyboard patterns
+  /^(.+)\1+$/, // Repetitive patterns
 ];
 
 export interface PasswordValidationResult {
@@ -41,158 +41,158 @@ export interface PasswordValidationResult {
 }
 
 /**
- * Valida si una contraseña está en la lista de contraseñas filtradas/comunes
+ * Checks if password is in the list of leaked/common passwords
  */
 export function isPasswordBreached(password: string): boolean {
   return COMMON_PASSWORDS.has(password.toLowerCase());
 }
 
 /**
- * Detecta patrones débiles en la contraseña
+ * Detects weak patterns in the password
  */
 export function hasWeakPattern(password: string): boolean {
   return WEAK_PATTERNS.some(pattern => pattern.test(password));
 }
 
 /**
- * Calcula la fortaleza de la contraseña
+ * Calculates password strength
  */
 export function calculatePasswordStrength(password: string): { score: number; strength: "weak" | "medium" | "strong" } {
   let score = 0;
-  
-  // Longitud base
+
+  // Base length
   if (password.length >= 8) score += 1;
   if (password.length >= 12) score += 1;
   if (password.length >= 16) score += 1;
-  
-  // Complejidad
+
+  // Complexity
   if (/[a-z]/.test(password)) score += 1;
   if (/[A-Z]/.test(password)) score += 1;
   if (/[0-9]/.test(password)) score += 1;
   if (/[^a-zA-Z0-9]/.test(password)) score += 2;
-  
-  // Penalizaciones
+
+  // Penalties
   if (isPasswordBreached(password)) score -= 5;
   if (hasWeakPattern(password)) score -= 3;
-  
+
   score = Math.max(0, Math.min(10, score));
-  
+
   let strength: "weak" | "medium" | "strong";
   if (score <= 3) strength = "weak";
   else if (score <= 6) strength = "medium";
   else strength = "strong";
-  
+
   return { score, strength };
 }
 
 /**
- * Esquema de validación para contraseñas seguras
+ * Validation schema for secure passwords
  */
 export const passwordSchema = z
   .string()
-  .min(8, "La contraseña debe tener al menos 8 caracteres")
-  .max(128, "La contraseña no puede exceder 128 caracteres")
+  .min(8, "Password must be at least 8 characters")
+  .max(128, "Password cannot exceed 128 characters")
   .refine(
     (password) => /[a-z]/.test(password),
-    "Debe incluir al menos una letra minúscula"
+    "Must include at least one lowercase letter"
   )
   .refine(
     (password) => /[A-Z]/.test(password),
-    "Debe incluir al menos una letra mayúscula"
+    "Must include at least one uppercase letter"
   )
   .refine(
     (password) => /[0-9]/.test(password),
-    "Debe incluir al menos un número"
+    "Must include at least one number"
   )
   .refine(
     (password) => /[^a-zA-Z0-9]/.test(password),
-    "Debe incluir al menos un carácter especial (!@#$%^&*)"
+    "Must include at least one special character (!@#$%^&*)"
   )
   .refine(
     (password) => !isPasswordBreached(password),
-    "Esta contraseña es muy común y ha sido filtrada. Elige una más segura"
+    "This password is too common and has been leaked. Choose a more secure one"
   )
   .refine(
     (password) => !hasWeakPattern(password),
-    "La contraseña contiene un patrón muy predecible"
+    "Password contains a predictable pattern"
   );
 
 /**
- * Esquema de validación para email
+ * Email validation schema
  */
 export const emailSchema = z
   .string()
   .trim()
-  .min(1, "El email es requerido")
-  .email("Ingresa un email válido")
-  .max(255, "El email es demasiado largo");
+  .min(1, "Email is required")
+  .email("Enter a valid email")
+  .max(255, "Email is too long");
 
 /**
- * Esquema de validación para nombre completo
+ * Full name validation schema
  */
 export const nameSchema = z
   .string()
   .trim()
-  .min(2, "El nombre debe tener al menos 2 caracteres")
-  .max(100, "El nombre no puede exceder 100 caracteres")
+  .min(2, "Name must be at least 2 characters")
+  .max(100, "Name cannot exceed 100 characters")
   .refine(
     (name) => /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s'-]+$/.test(name),
-    "El nombre solo puede contener letras, espacios, guiones y apóstrofes"
+    "Name can only contain letters, spaces, hyphens and apostrophes"
   );
 
 /**
- * Esquema completo para signup
+ * Complete signup schema
  */
 export const signupSchema = z.object({
   email: emailSchema,
   password: passwordSchema,
   name: nameSchema,
   role: z.enum(["admin", "staff"], {
-    errorMap: () => ({ message: "Selecciona un tipo de cuenta válido" })
+    errorMap: () => ({ message: "Select a valid account type" })
   })
 });
 
 /**
- * Esquema para login (menos estricto en contraseña)
+ * Login schema (less strict on password)
  */
 export const loginSchema = z.object({
   email: emailSchema,
-  password: z.string().min(1, "La contraseña es requerida")
+  password: z.string().min(1, "Password is required")
 });
 
 export type SignupFormData = z.infer<typeof signupSchema>;
 export type LoginFormData = z.infer<typeof loginSchema>;
 
 /**
- * Valida una contraseña y retorna resultado detallado
+ * Validates a password and returns detailed result
  */
 export function validatePassword(password: string): PasswordValidationResult {
   const errors: string[] = [];
-  
+
   if (password.length < 8) {
-    errors.push("Mínimo 8 caracteres");
+    errors.push("Minimum 8 characters");
   }
   if (!/[a-z]/.test(password)) {
-    errors.push("Una minúscula");
+    errors.push("One lowercase");
   }
   if (!/[A-Z]/.test(password)) {
-    errors.push("Una mayúscula");
+    errors.push("One uppercase");
   }
   if (!/[0-9]/.test(password)) {
-    errors.push("Un número");
+    errors.push("One number");
   }
   if (!/[^a-zA-Z0-9]/.test(password)) {
-    errors.push("Un carácter especial");
+    errors.push("One special character");
   }
   if (isPasswordBreached(password)) {
-    errors.push("Contraseña filtrada");
+    errors.push("Leaked password");
   }
   if (hasWeakPattern(password)) {
-    errors.push("Patrón débil");
+    errors.push("Weak pattern");
   }
-  
+
   const { score, strength } = calculatePasswordStrength(password);
-  
+
   return {
     isValid: errors.length === 0,
     errors,

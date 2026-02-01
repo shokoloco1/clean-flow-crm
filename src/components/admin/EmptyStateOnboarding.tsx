@@ -11,38 +11,38 @@ interface EmptyStateOnboardingProps {
   hasStaff?: boolean;
 }
 
-export function EmptyStateOnboarding({ 
-  onCreateJob, 
-  hasClients = false, 
-  hasJobs = false, 
-  hasStaff = false 
+export function EmptyStateOnboarding({
+  onCreateJob,
+  hasClients = false,
+  hasJobs = false,
+  hasStaff = false
 }: EmptyStateOnboardingProps) {
   const navigate = useNavigate();
-  
+
   const completedSteps = [hasClients, hasJobs, hasStaff].filter(Boolean).length;
   const progressPercent = (completedSteps / 3) * 100;
 
   const steps = [
     {
       id: 1,
-      title: "Agregar tu primer cliente",
-      description: "Registra los datos de tu primer cliente",
+      title: "Add your first client",
+      description: "Register your first client's details",
       icon: Users,
       completed: hasClients,
       action: () => navigate("/admin/clients"),
     },
     {
       id: 2,
-      title: "Crear tu primer trabajo",
-      description: "Programa tu primera limpieza",
+      title: "Create your first job",
+      description: "Schedule your first cleaning",
       icon: Briefcase,
       completed: hasJobs,
       action: onCreateJob,
     },
     {
       id: 3,
-      title: "Invitar a tu equipo",
-      description: "Añade miembros de tu staff",
+      title: "Invite your team",
+      description: "Add members to your staff",
       icon: UserPlus,
       completed: hasStaff,
       action: () => navigate("/admin/staff"),
@@ -54,19 +54,19 @@ export function EmptyStateOnboarding({
       {/* Header */}
       <div className="text-center mb-8">
         <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
-          ¡Bienvenido a CleanFlow! 🎉
+          Welcome to CleanFlow!
         </h2>
         <p className="text-muted-foreground text-lg">
-          Configura tu negocio en 3 pasos
+          Set up your business in 3 steps
         </p>
       </div>
 
       {/* Progress */}
       <div className="w-full max-w-md mb-8">
         <div className="flex justify-between items-center mb-2">
-          <span className="text-sm text-muted-foreground">Progreso</span>
+          <span className="text-sm text-muted-foreground">Progress</span>
           <span className="text-sm font-medium text-foreground">
-            {completedSteps}/3 completados
+            {completedSteps}/3 completed
           </span>
         </div>
         <Progress value={progressPercent} className="h-2" />
@@ -112,7 +112,7 @@ export function EmptyStateOnboarding({
                   size="sm"
                   className="w-full gap-2"
                 >
-                  {step.completed ? "Completado" : "Comenzar"}
+                  {step.completed ? "Completed" : "Get Started"}
                   {!step.completed && <ChevronRight className="h-4 w-4" />}
                 </Button>
               </div>

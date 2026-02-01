@@ -89,7 +89,7 @@ export function useGlobalSearch() {
       // Process jobs
       if (jobsResult.data) {
         jobsResult.data.forEach((job) => {
-          const clientName = (job.clients as any)?.name || "Sin cliente";
+          const clientName = (job.clients as any)?.name || "No client";
           const propertyName = (job.properties as any)?.name;
           searchResults.push({
             id: job.id,

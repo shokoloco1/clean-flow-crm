@@ -74,7 +74,7 @@ serve(async (req) => {
     const userId = userData.user.id;
     console.log(`[invite-staff] User created with ID: ${userId}`);
 
-    // 2. Create profile
+    // 2. Create profile (without sensitive data)
     const { error: profileError } = await supabaseAdmin
       .from("profiles")
       .insert({
@@ -82,7 +82,6 @@ serve(async (req) => {
         email,
         full_name: fullName,
         phone: phone || null,
-        hourly_rate: hourlyRate ? parseFloat(hourlyRate) : null,
         certifications: certifications || [],
         hire_date: new Date().toISOString().split('T')[0],
         is_active: true
@@ -91,6 +90,21 @@ serve(async (req) => {
     if (profileError) {
       console.error("[invite-staff] Profile creation error:", profileError);
       throw profileError;
+    }
+
+    // 2b. Create sensitive profile data (hourly rate)
+    if (hourlyRate) {
+      const { error: sensitiveError } = await supabaseAdmin
+        .from("profiles_sensitive")
+        .insert({
+          user_id: userId,
+          hourly_rate: parseFloat(hourlyRate)
+        });
+
+      if (sensitiveError) {
+        console.error("[invite-staff] Sensitive profile error:", sensitiveError);
+        // Don't throw - profile was created, just log the error
+      }
     }
 
     // 3. Assign staff role

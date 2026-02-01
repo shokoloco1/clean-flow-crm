@@ -48,15 +48,15 @@ export class ErrorBoundary extends React.Component<Props, State> {
               <AlertTriangle className="h-6 w-6 text-destructive" />
             </div>
             <h2 className="text-lg font-semibold text-foreground mb-2">
-              Algo salió mal
+              Something went wrong
             </h2>
             <p className="text-sm text-muted-foreground mb-4">
-              Ha ocurrido un error inesperado. Por favor, intenta recargar la página.
+              An unexpected error occurred. Please try reloading the page.
             </p>
             {this.state.error && (
               <details className="text-left mb-4">
                 <summary className="text-xs text-muted-foreground cursor-pointer hover:text-foreground">
-                  Detalles del error
+                  Error details
                 </summary>
                 <pre className="mt-2 p-2 bg-muted rounded text-xs overflow-auto max-h-32">
                   {this.state.error.message}
@@ -65,11 +65,11 @@ export class ErrorBoundary extends React.Component<Props, State> {
             )}
             <div className="flex gap-2 justify-center">
               <Button variant="outline" size="sm" onClick={this.handleReset}>
-                Intentar de nuevo
+                Try again
               </Button>
               <Button size="sm" onClick={this.handleReload}>
                 <RefreshCw className="h-4 w-4 mr-2" />
-                Recargar página
+                Reload page
               </Button>
             </div>
           </div>

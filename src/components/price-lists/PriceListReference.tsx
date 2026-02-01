@@ -58,7 +58,7 @@ export function PriceListReference({ trigger }: PriceListReferenceProps) {
     } catch (error) {
       toast({
         title: "Error",
-        description: "No se pudieron cargar las listas de precios",
+        description: "Failed to load price lists",
         variant: "destructive",
       });
     } finally {
@@ -81,7 +81,7 @@ export function PriceListReference({ trigger }: PriceListReferenceProps) {
     } catch (error) {
       toast({
         title: "Error",
-        description: "No se pudo cargar el archivo",
+        description: "Failed to load file",
         variant: "destructive",
       });
     } finally {
@@ -102,13 +102,13 @@ export function PriceListReference({ trigger }: PriceListReferenceProps) {
         {trigger || (
           <Button variant="outline" size="sm">
             <FileText className="h-4 w-4 mr-2" />
-            Ver Precios
+            View Prices
           </Button>
         )}
       </SheetTrigger>
       <SheetContent className="w-full sm:max-w-2xl overflow-hidden flex flex-col">
         <SheetHeader className="flex-shrink-0">
-          <SheetTitle>Lista de Precios</SheetTitle>
+          <SheetTitle>Price List</SheetTitle>
         </SheetHeader>
 
         {loading ? (
@@ -118,9 +118,9 @@ export function PriceListReference({ trigger }: PriceListReferenceProps) {
         ) : priceLists.length === 0 ? (
           <div className="flex-1 flex flex-col items-center justify-center text-center p-8">
             <FileText className="h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-medium">No hay listas de precios</h3>
+            <h3 className="text-lg font-medium">No price lists available</h3>
             <p className="text-sm text-muted-foreground mt-2">
-              El administrador debe subir una lista de precios primero.
+              The administrator must upload a price list first.
             </p>
           </div>
         ) : (
@@ -180,17 +180,17 @@ export function PriceListReference({ trigger }: PriceListReferenceProps) {
                   <div className="flex-1 flex flex-col items-center justify-center text-center p-8 border border-border rounded-lg">
                     {getFileIcon(selectedList.file_type)}
                     <h3 className="text-lg font-medium mt-4">
-                      Vista previa no disponible
+                      Preview not available
                     </h3>
                     <p className="text-sm text-muted-foreground mt-2">
-                      Abre el archivo en una nueva pestaña para verlo.
+                      Open the file in a new tab to view it.
                     </p>
                     <Button
                       className="mt-4"
                       onClick={() => window.open(signedUrl, "_blank")}
                     >
                       <ExternalLink className="h-4 w-4 mr-2" />
-                      Abrir archivo
+                      Open file
                     </Button>
                   </div>
                 ) : null}
