@@ -9,6 +9,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { PWAInstallBanner } from "@/components/PWAInstallBanner";
 import { OfflineIndicator } from "@/components/OfflineIndicator";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { AnalyticsProvider } from "@/components/AnalyticsProvider";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 
@@ -62,9 +63,10 @@ const App = () => (
         <OfflineIndicator />
         <BrowserRouter>
           <AuthProvider>
-            <ErrorBoundary>
-              <Suspense fallback={<PageLoader />}>
-                <Routes>
+            <AnalyticsProvider>
+              <ErrorBoundary>
+                <Suspense fallback={<PageLoader />}>
+                  <Routes>
                   <Route path="/" element={<Index />} />
                   <Route path="/auth" element={<Auth />} />
                   <Route path="/pricing" element={<PricingPage />} />
@@ -161,10 +163,11 @@ const App = () => (
                   <Route path="/terms" element={<TermsPage />} />
                   <Route path="/privacy" element={<PrivacyPage />} />
                   <Route path="*" element={<NotFound />} />
-                </Routes>
-              </Suspense>
-            </ErrorBoundary>
-            <PWAInstallBanner />
+                  </Routes>
+                </Suspense>
+              </ErrorBoundary>
+              <PWAInstallBanner />
+            </AnalyticsProvider>
           </AuthProvider>
         </BrowserRouter>
       </TooltipProvider>

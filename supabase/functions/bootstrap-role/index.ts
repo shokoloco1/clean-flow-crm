@@ -39,19 +39,34 @@ Deno.serve(async (req) => {
   // Admin client (bypasses RLS)
   const adminClient = createClient(supabaseUrl, serviceRoleKey);
 
-  // Only allow bootstrap if *no* roles exist yet
-  const { data: existingRoles, error: existingError } = await adminClient
+  // SECURITY: Only allow bootstrap if no ADMIN exists yet
+  // This prevents privilege escalation after initial setup
+  const { data: existingAdmins, error: existingError } = await adminClient
     .from("user_roles")
     .select("id")
+    .eq("role", "admin")
     .limit(1);
 
-  if (existingError) return json(500, { error: existingError.message });
-  if ((existingRoles?.length ?? 0) > 0) {
+  if (existingError) {
+    console.error("[bootstrap-role] Error checking existing admins:", existingError);
+    return json(500, { error: existingError.message });
+  }
+
+  if ((existingAdmins?.length ?? 0) > 0) {
+    console.warn("[bootstrap-role] Rejected bootstrap attempt - admin already exists", {
+      requestingUserId: userData.user.id,
+      requestingEmail: userData.user.email,
+    });
     return json(403, {
-      error: "Roles already initialized",
-      message: "An admin must assign your role.",
+      error: "An administrator already exists",
+      message: "Please contact your business owner to get access. They can assign you a role from Settings > Staff Management.",
     });
   }
+
+  console.log("[bootstrap-role] Creating first admin", {
+    userId: userData.user.id,
+    email: userData.user.email,
+  });
 
   const { error: insertError } = await adminClient.from("user_roles").insert({
     user_id: userData.user.id,

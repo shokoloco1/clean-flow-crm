@@ -235,9 +235,10 @@ export function XeroExport({ invoices }: XeroExportProps) {
         onClick={handleOpenDialog}
         disabled={exportableInvoices.length === 0}
         className="gap-2"
+        title="Download CSV file compatible with Xero import"
       >
         <FileSpreadsheet className="h-4 w-4" />
-        Export to Xero
+        Export CSV for Xero
       </Button>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -248,7 +249,7 @@ export function XeroExport({ invoices }: XeroExportProps) {
               Export to Xero
             </DialogTitle>
             <DialogDescription>
-              Select invoices to export in Xero-compatible CSV format. Only sent and paid invoices can be exported.
+              Download a CSV file to manually import into Xero. This is not a direct sync - you'll need to import the file in Xero.
             </DialogDescription>
           </DialogHeader>
 

@@ -48,15 +48,9 @@ export default function Index() {
 
   const benefits = [
     "Setup in 3 clicks",
-    "Australian owned",
+    "Made for Australia",
     "GST & ABN ready",
     "Mobile-first design"
-  ];
-
-  const stats = [
-    { value: "500+", label: "Jobs Completed" },
-    { value: "50+", label: "Happy Businesses" },
-    { value: "4.9★", label: "Average Rating" }
   ];
 
   return (
@@ -101,13 +95,6 @@ export default function Index() {
         
         <div className="relative container mx-auto px-4 py-12 md:py-20">
           <div className="max-w-4xl mx-auto text-center">
-            {/* Logo */}
-            <Link to="/" className="flex items-center justify-center gap-3 mb-6 hover:opacity-80 transition-opacity">
-              <div className="h-16 w-16 md:h-20 md:w-20 rounded-2xl bg-primary flex items-center justify-center shadow-lg shadow-primary/30">
-                <Sparkles className="h-8 w-8 md:h-10 md:w-10 text-primary-foreground" />
-              </div>
-            </Link>
-            
             <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-foreground mb-4 leading-tight">
               Manage your cleaning business without the <span className="text-primary">stress</span>
             </h1>
@@ -162,18 +149,12 @@ export default function Index() {
         </div>
       </div>
 
-      {/* Social Proof Stats */}
-      <section className="py-8 bg-muted/30 border-y border-border">
+      {/* Trust Banner */}
+      <section className="py-6 bg-muted/30 border-y border-border">
         <div className="container mx-auto px-4">
-          <p className="text-center text-muted-foreground mb-6">Trusted by cleaning businesses across Australia</p>
-          <div className="flex flex-wrap justify-center gap-8 md:gap-16">
-            {stats.map((stat, index) => (
-              <div key={index} className="text-center">
-                <div className="text-3xl md:text-4xl font-bold text-foreground">{stat.value}</div>
-                <div className="text-sm text-muted-foreground">{stat.label}</div>
-              </div>
-            ))}
-          </div>
+          <p className="text-center text-muted-foreground">
+            Built specifically for Australian cleaning businesses. Start your 14-day free trial today.
+          </p>
         </div>
       </section>
 
@@ -210,15 +191,15 @@ export default function Index() {
       <section className="py-12 md:py-16">
         <div className="container mx-auto px-4">
           <h2 className="text-2xl md:text-3xl font-bold text-center text-foreground mb-10">
-            Everything You Need for Your Business
+            Built for Two Roles
           </h2>
-          
+
           <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
             <Card className="p-6 md:p-8 border-primary/30 bg-gradient-to-br from-primary/5 to-transparent hover:shadow-lg transition-shadow">
               <div className="h-14 w-14 rounded-xl bg-primary flex items-center justify-center mb-6 shadow-md">
                 <Shield className="h-7 w-7 text-primary-foreground" />
               </div>
-              <h3 className="text-xl font-bold text-foreground mb-3">👔 For Business Owners</h3>
+              <h3 className="text-xl font-bold text-foreground mb-3">For Business Owners</h3>
               <ul className="space-y-3 text-muted-foreground">
                 <li className="flex items-start gap-2">
                   <CheckCircle className="h-5 w-5 text-success mt-0.5 shrink-0" />
@@ -243,7 +224,7 @@ export default function Index() {
               <div className="h-14 w-14 rounded-xl bg-secondary flex items-center justify-center mb-6 shadow-md">
                 <Users className="h-7 w-7 text-secondary-foreground" />
               </div>
-              <h3 className="text-xl font-bold text-foreground mb-3">🧹 For Cleaning Staff</h3>
+              <h3 className="text-xl font-bold text-foreground mb-3">For Cleaning Staff</h3>
               <ul className="space-y-3 text-muted-foreground">
                 <li className="flex items-start gap-2">
                   <CheckCircle className="h-5 w-5 text-success mt-0.5 shrink-0" />
@@ -272,16 +253,16 @@ export default function Index() {
         <div className="container mx-auto px-4">
           <div className="flex flex-wrap justify-center gap-6 md:gap-12">
             <div className="flex items-center gap-2 text-muted-foreground">
-              <span className="text-2xl">🇦🇺</span>
-              <span className="font-medium">Australian Owned</span>
+              <MapPin className="h-5 w-5 text-primary" />
+              <span className="font-medium">Made for Australia</span>
             </div>
             <div className="flex items-center gap-2 text-muted-foreground">
               <Lock className="h-5 w-5 text-success" />
-              <span className="font-medium">Secure Payments</span>
+              <span className="font-medium">Bank-level Security</span>
             </div>
             <div className="flex items-center gap-2 text-muted-foreground">
-              <span className="text-xl">📱</span>
-              <span className="font-medium">iOS & Android</span>
+              <Camera className="h-5 w-5 text-secondary" />
+              <span className="font-medium">Works on Any Device</span>
             </div>
           </div>
         </div>

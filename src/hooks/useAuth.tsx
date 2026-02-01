@@ -9,10 +9,12 @@ interface AuthContextType {
   session: Session | null;
   role: AppRole;
   loading: boolean;
+  emailVerified: boolean;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signUp: (email: string, password: string, fullName: string, role: AppRole) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   refreshRole: () => Promise<void>;
+  resendVerificationEmail: () => Promise<{ error: Error | null }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -213,16 +215,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setRole(nextRole);
   }, [user, fetchUserRole]);
 
+  const resendVerificationEmail = useCallback(async () => {
+    if (!user?.email) return { error: new Error("No email found") };
+
+    const { error } = await supabase.auth.resend({
+      type: 'signup',
+      email: user.email,
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth`
+      }
+    });
+
+    return { error };
+  }, [user?.email]);
+
+  // Check if email is verified
+  const emailVerified = useMemo(() => {
+    if (!user) return false;
+    // email_confirmed_at is set when user verifies their email
+    return !!user.email_confirmed_at;
+  }, [user]);
+
   const value = useMemo(() => ({
     user,
     session,
     role,
     loading,
+    emailVerified,
     signIn,
     signUp,
     signOut,
-    refreshRole
-  }), [user, session, role, loading, signIn, signUp, signOut, refreshRole]);
+    refreshRole,
+    resendVerificationEmail
+  }), [user, session, role, loading, emailVerified, signIn, signUp, signOut, refreshRole, resendVerificationEmail]);
 
   return (
     <AuthContext.Provider value={value}>
