@@ -6,8 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "sonner";
-import { Sparkles, ArrowLeft, ArrowRight, Check, Eye, EyeOff, Loader2 } from "lucide-react";
+import { Sparkles, ArrowLeft, ArrowRight, Check, Eye, EyeOff, Loader2, Users, CheckCircle } from "lucide-react";
 import { signupSchema, validatePassword } from "@/lib/passwordSecurity";
 import { PasswordStrengthIndicator } from "@/components/PasswordStrengthIndicator";
 import { PlanSelection, type PlanType } from "@/components/signup/PlanSelection";
@@ -17,7 +18,7 @@ import { cn } from "@/lib/utils";
 
 type Step = "account" | "plan" | "payment";
 
-const steps: { id: Step; title: string; description: string }[] = [
+const ownerSteps: { id: Step; title: string; description: string }[] = [
   { id: "account", title: "Create Account", description: "Your business details" },
   { id: "plan", title: "Choose Plan", description: "Select your subscription" },
   { id: "payment", title: "Start Trial", description: "14 days free" },
@@ -26,7 +27,10 @@ const steps: { id: Step; title: string; description: string }[] = [
 const SignupPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { user, session, signUp, loading: authLoading } = useAuth();
+  const { user, session, signUp, loading: authLoading, role } = useAuth();
+
+  // Check if this is an invited staff member
+  const isInvitedStaff = searchParams.get("invited") === "true";
 
   const [currentStep, setCurrentStep] = useState<Step>("account");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -47,6 +51,11 @@ const SignupPage = () => {
   );
   const [isAnnual, setIsAnnual] = useState(urlBilling === "annual");
 
+  // Determine which steps to show based on user type
+  const steps = isInvitedStaff
+    ? [{ id: "account" as Step, title: "Set Up Account", description: "Complete your profile" }]
+    : ownerSteps;
+
   // Check for checkout canceled
   useEffect(() => {
     if (searchParams.get("checkout") === "canceled") {
@@ -54,10 +63,26 @@ const SignupPage = () => {
     }
   }, [searchParams]);
 
-  // If user is already logged in, redirect or advance to plan step
+  // Handle already logged-in users
   useEffect(() => {
     if (!authLoading && user && session) {
-      // User has account, check if they have a subscription
+      // If user has a role, redirect to appropriate dashboard
+      if (role) {
+        navigate(role === "admin" ? "/admin" : "/staff", { replace: true });
+        return;
+      }
+
+      // For invited staff who just set their password
+      if (isInvitedStaff) {
+        // They should go to staff dashboard after setting password
+        // Wait a moment for role to be assigned
+        setTimeout(() => {
+          navigate("/staff", { replace: true });
+        }, 1000);
+        return;
+      }
+
+      // For new owners, check subscription status
       supabase
         .from("subscriptions")
         .select("status")
@@ -65,26 +90,27 @@ const SignupPage = () => {
         .maybeSingle()
         .then(({ data }) => {
           if (data?.status === "trialing" || data?.status === "active") {
-            // Already has subscription, redirect to admin
             navigate("/admin", { replace: true });
           } else if (currentStep === "account") {
-            // Advance to plan selection
             setCurrentStep("plan");
           }
         });
     }
-  }, [user, session, authLoading, navigate, currentStep]);
+  }, [user, session, authLoading, navigate, currentStep, isInvitedStaff, role]);
 
   const handleAccountSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormErrors({});
+
+    // For invited staff, role should be "staff"
+    const userRole = isInvitedStaff ? "staff" : "admin";
 
     // Validate with zod
     const result = signupSchema.safeParse({
       email,
       password,
       name: fullName,
-      role: "admin", // New signups are always admins
+      role: userRole,
     });
 
     if (!result.success) {
@@ -100,7 +126,7 @@ const SignupPage = () => {
 
     setIsSubmitting(true);
 
-    const { error } = await signUp(email, password, fullName, "admin");
+    const { error } = await signUp(email, password, fullName, userRole);
 
     if (error) {
       if (error.message?.includes("already registered")) {
@@ -113,8 +139,13 @@ const SignupPage = () => {
       return;
     }
 
-    toast.success("Account created! Now choose your plan.");
-    setCurrentStep("plan");
+    if (isInvitedStaff) {
+      toast.success("Account setup complete! Redirecting to dashboard...");
+      // Redirect will happen via the useEffect
+    } else {
+      toast.success("Account created! Now choose your plan.");
+      setCurrentStep("plan");
+    }
     setIsSubmitting(false);
   };
 
@@ -154,7 +185,6 @@ const SignupPage = () => {
       if (error) throw error;
 
       if (data?.url) {
-        // Redirect to Stripe Checkout
         window.location.href = data.url;
       } else {
         throw new Error("No checkout URL returned");
@@ -187,6 +217,161 @@ const SignupPage = () => {
     );
   }
 
+  // Invited Staff - Simplified Flow
+  if (isInvitedStaff) {
+    return (
+      <div className="min-h-screen flex flex-col bg-gradient-to-br from-background via-background to-primary/5">
+        {/* Header */}
+        <header className="border-b border-border bg-background/80 backdrop-blur-sm">
+          <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+            <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+              <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center">
+                <Sparkles className="h-6 w-6 text-primary-foreground" />
+              </div>
+              <span className="text-xl font-bold">CleanFlow</span>
+            </Link>
+
+            <div className="flex items-center gap-4">
+              <span className="text-sm text-muted-foreground hidden sm:block">
+                Already have an account?
+              </span>
+              <Button variant="outline" size="sm" asChild>
+                <Link to="/auth">Sign In</Link>
+              </Button>
+            </div>
+          </div>
+        </header>
+
+        <main className="flex-1 container mx-auto px-4 py-8 flex items-center justify-center">
+          <Card className="max-w-md w-full border-border shadow-xl">
+            <CardHeader className="text-center">
+              <div className="mx-auto h-16 w-16 rounded-full bg-secondary/10 flex items-center justify-center mb-4">
+                <Users className="h-8 w-8 text-secondary" />
+              </div>
+              <CardTitle className="text-2xl">Welcome to the Team!</CardTitle>
+              <CardDescription>
+                You've been invited to join CleanFlow. Set up your account to get started.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Alert className="mb-6 border-primary/20 bg-primary/5">
+                <CheckCircle className="h-4 w-4 text-primary" />
+                <AlertDescription className="text-sm">
+                  Your admin has already set up your profile. Just create a password to access your account.
+                </AlertDescription>
+              </Alert>
+
+              <form onSubmit={handleAccountSubmit} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="fullName">Full Name</Label>
+                  <Input
+                    id="fullName"
+                    type="text"
+                    placeholder="Your name"
+                    value={fullName}
+                    onChange={(e) => {
+                      setFullName(e.target.value);
+                      setFormErrors((prev) => ({ ...prev, name: "" }));
+                    }}
+                    className={formErrors.name ? "border-destructive" : ""}
+                    required
+                  />
+                  {formErrors.name && (
+                    <p className="text-xs text-destructive">{formErrors.name}</p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="your.email@example.com"
+                    value={email}
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      setFormErrors((prev) => ({ ...prev, email: "" }));
+                    }}
+                    className={formErrors.email ? "border-destructive" : ""}
+                    required
+                  />
+                  {formErrors.email && (
+                    <p className="text-xs text-destructive">{formErrors.email}</p>
+                  )}
+                  <p className="text-xs text-muted-foreground">
+                    Use the same email your admin invited you with
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="password">Create Password</Label>
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Create a strong password"
+                      value={password}
+                      onChange={(e) => {
+                        setPassword(e.target.value);
+                        setFormErrors((prev) => ({ ...prev, password: "" }));
+                      }}
+                      className={
+                        formErrors.password ? "border-destructive pr-10" : "pr-10"
+                      }
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </button>
+                  </div>
+                  <PasswordStrengthIndicator password={password} />
+                  {formErrors.password && (
+                    <p className="text-xs text-destructive">{formErrors.password}</p>
+                  )}
+                </div>
+
+                <Button
+                  type="submit"
+                  className="w-full h-12 text-base group"
+                  disabled={
+                    isSubmitting || validatePassword(password).strength === "weak"
+                  }
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                      Setting up account...
+                    </>
+                  ) : (
+                    <>
+                      Complete Setup
+                      <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                    </>
+                  )}
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+        </main>
+
+        <footer className="border-t border-border py-4">
+          <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
+            <p>CleanFlow - Professional Cleaning Business Management</p>
+          </div>
+        </footer>
+      </div>
+    );
+  }
+
+  // Owner/Admin - Full Multi-Step Flow
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-background via-background to-primary/5">
       {/* Header */}

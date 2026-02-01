@@ -79,9 +79,9 @@ export default function Index() {
             >
               Sign In
             </Button>
-            <Button 
+            <Button
               size="sm"
-              onClick={() => navigate("/auth")}
+              onClick={() => navigate("/signup")}
             >
               Start Free Trial
             </Button>
@@ -115,10 +115,10 @@ export default function Index() {
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
-              <Button 
-                size="lg" 
+              <Button
+                size="lg"
                 className="h-14 px-8 text-lg shadow-lg shadow-primary/30 hover:shadow-primary/50 transition-all group"
-                onClick={() => navigate("/auth")}
+                onClick={() => navigate("/signup")}
               >
                 Start Free Trial
                 <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
