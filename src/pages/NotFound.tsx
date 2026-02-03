@@ -1,6 +1,7 @@
 import { useLocation, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Home, ArrowLeft, MapPin, Sparkles } from "lucide-react";
+import { PulcrixLogo } from "@/components/PulcrixLogo";
 
 const SUGGESTED_PAGES = [
   { path: "/admin", label: "Admin Dashboard", description: "Manage your business", icon: Home },
@@ -16,10 +17,8 @@ const NotFound = () => {
       <div className="max-w-md w-full text-center space-y-8">
         {/* Branding */}
         <Link to="/" className="inline-flex items-center gap-2 hover:opacity-80 transition-opacity">
-          <div className="h-10 w-10 rounded-lg bg-primary flex items-center justify-center">
-            <Sparkles className="h-5 w-5 text-primary-foreground" />
-          </div>
-          <span className="font-bold text-lg text-foreground">CleanFlow</span>
+          <PulcrixLogo />
+          <span className="font-bold text-lg text-foreground">Pulcrix</span>
         </Link>
 
         {/* 404 Display */}

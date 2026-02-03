@@ -32,7 +32,7 @@ const getEmailTemplate = (type: string, data: EmailRequest['data'] = {}) => {
   const buttonStyle = `
     display: inline-block;
     padding: 12px 24px;
-    background-color: #0d9488;
+    background-color: #2D5A3D;
     color: white;
     text-decoration: none;
     border-radius: 8px;
@@ -42,12 +42,12 @@ const getEmailTemplate = (type: string, data: EmailRequest['data'] = {}) => {
   switch (type) {
     case 'password_reset':
       return {
-        subject: 'Reset Your Password - CleanFlow',
+        subject: 'Reset Your Password - Pulcrix',
         html: `
           <div style="${baseStyles}">
             <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
               <div style="text-align: center; margin-bottom: 30px;">
-                <h1 style="color: #0d9488; margin: 0;">✨ CleanFlow</h1>
+                <h1 style="color: #2D5A3D; margin: 0;">✨ Pulcrix</h1>
               </div>
               <h2 style="color: #111827;">Hi ${data.name || 'there'},</h2>
               <p>We received a request to reset the password for your account.</p>
@@ -60,7 +60,7 @@ const getEmailTemplate = (type: string, data: EmailRequest['data'] = {}) => {
               </p>
               <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;" />
               <p style="color: #9ca3af; font-size: 12px; text-align: center;">
-                © ${new Date().getFullYear()} CleanFlow. All rights reserved.
+                © ${new Date().getFullYear()} Pulcrix. All rights reserved.
               </p>
             </div>
           </div>
@@ -69,16 +69,16 @@ const getEmailTemplate = (type: string, data: EmailRequest['data'] = {}) => {
 
     case 'welcome':
       return {
-        subject: 'Welcome to CleanFlow! 🎉',
+        subject: 'Welcome to Pulcrix! 🎉',
         html: `
           <div style="${baseStyles}">
             <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
               <div style="text-align: center; margin-bottom: 30px;">
-                <h1 style="color: #0d9488; margin: 0;">✨ CleanFlow</h1>
+                <h1 style="color: #2D5A3D; margin: 0;">✨ Pulcrix</h1>
               </div>
               <h2 style="color: #111827;">Hi ${data.name || 'there'}! 👋</h2>
-              <p>Thanks for joining CleanFlow! We're excited to have you on board.</p>
-              <p>With CleanFlow you can:</p>
+              <p>Thanks for joining Pulcrix! We're excited to have you on board.</p>
+              <p>With Pulcrix you can:</p>
               <ul>
                 <li>📋 Manage all your cleaning jobs</li>
                 <li>👥 Coordinate your team effortlessly</li>
@@ -88,7 +88,7 @@ const getEmailTemplate = (type: string, data: EmailRequest['data'] = {}) => {
               <p>Start organising your cleaning business today!</p>
               <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;" />
               <p style="color: #9ca3af; font-size: 12px; text-align: center;">
-                © ${new Date().getFullYear()} CleanFlow. All rights reserved.
+                © ${new Date().getFullYear()} Pulcrix. All rights reserved.
               </p>
             </div>
           </div>
@@ -97,12 +97,12 @@ const getEmailTemplate = (type: string, data: EmailRequest['data'] = {}) => {
 
     case 'job_notification':
       return {
-        subject: 'New Job Assigned - CleanFlow',
+        subject: 'New Job Assigned - Pulcrix',
         html: `
           <div style="${baseStyles}">
             <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
               <div style="text-align: center; margin-bottom: 30px;">
-                <h1 style="color: #0d9488; margin: 0;">✨ CleanFlow</h1>
+                <h1 style="color: #2D5A3D; margin: 0;">✨ Pulcrix</h1>
               </div>
               <h2 style="color: #111827;">Hi ${data.name || 'there'},</h2>
               <p>You've been assigned a new job:</p>
@@ -114,7 +114,7 @@ const getEmailTemplate = (type: string, data: EmailRequest['data'] = {}) => {
               <p>Open the app for more details.</p>
               <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;" />
               <p style="color: #9ca3af; font-size: 12px; text-align: center;">
-                © ${new Date().getFullYear()} CleanFlow. All rights reserved.
+                © ${new Date().getFullYear()} Pulcrix. All rights reserved.
               </p>
             </div>
           </div>
@@ -123,12 +123,12 @@ const getEmailTemplate = (type: string, data: EmailRequest['data'] = {}) => {
 
     case 'job_completed':
       return {
-        subject: 'Job Completed - CleanFlow',
+        subject: 'Job Completed - Pulcrix',
         html: `
           <div style="${baseStyles}">
             <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
               <div style="text-align: center; margin-bottom: 30px;">
-                <h1 style="color: #0d9488; margin: 0;">✨ CleanFlow</h1>
+                <h1 style="color: #2D5A3D; margin: 0;">✨ Pulcrix</h1>
               </div>
               <h2 style="color: #111827;">Job Completed! ✅</h2>
               <p>The job at <strong>${data.jobLocation || 'the location'}</strong> has been marked as completed.</p>
@@ -138,7 +138,7 @@ const getEmailTemplate = (type: string, data: EmailRequest['data'] = {}) => {
               <p>You can view details and photos in the client portal.</p>
               <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;" />
               <p style="color: #9ca3af; font-size: 12px; text-align: center;">
-                © ${new Date().getFullYear()} CleanFlow. All rights reserved.
+                © ${new Date().getFullYear()} Pulcrix. All rights reserved.
               </p>
             </div>
           </div>
@@ -147,13 +147,13 @@ const getEmailTemplate = (type: string, data: EmailRequest['data'] = {}) => {
 
     case 'custom':
       return {
-        subject: data.customHtml ? 'CleanFlow Notification' : 'CleanFlow',
+        subject: data.customHtml ? 'Pulcrix Notification' : 'Pulcrix',
         html: data.customHtml || '<p>No content</p>'
       };
 
     default:
       return {
-        subject: 'CleanFlow Notification',
+        subject: 'Pulcrix Notification',
         html: '<p>You have a new notification.</p>'
       };
   }
@@ -179,8 +179,8 @@ const handler = async (req: Request): Promise<Response> => {
     const template = getEmailTemplate(type, data);
 
     // NOTE: Update this to your verified domain in Resend
-    // e.g., "CleanFlow <noreply@yourdomain.com.au>"
-    const fromEmail = Deno.env.get("RESEND_FROM_EMAIL") || "CleanFlow <onboarding@resend.dev>";
+    // e.g., "Pulcrix <noreply@yourdomain.com.au>"
+    const fromEmail = Deno.env.get("RESEND_FROM_EMAIL") || "Pulcrix <onboarding@resend.dev>";
 
     const emailResponse = await resend.emails.send({
       from: fromEmail,

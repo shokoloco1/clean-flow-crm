@@ -3,7 +3,8 @@ import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Sparkles, Shield, Users, ClipboardCheck, Camera, MapPin, Building2, ArrowRight, CheckCircle, Star, Zap, Lock } from "lucide-react";
+import { Shield, Users, ClipboardCheck, Camera, MapPin, Building2, ArrowRight, CheckCircle, Star, Zap, Lock } from "lucide-react";
+import { PulcrixLogo } from "@/components/PulcrixLogo";
 
 export default function Index() {
   const navigate = useNavigate();
@@ -58,11 +59,8 @@ export default function Index() {
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-sm border-b border-border">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-              <Sparkles className="h-5 w-5 text-primary-foreground" />
-            </div>
-            <span className="font-bold text-lg text-foreground">CleanFlow</span>
+          <Link to="/" className="hover:opacity-80 transition-opacity">
+            <PulcrixLogo variant="full" size="sm" />
           </Link>
           <div className="flex items-center gap-2">
             <Button 
@@ -272,12 +270,11 @@ export default function Index() {
       {/* Footer */}
       <footer className="py-8 border-t border-border">
         <div className="container mx-auto px-4 text-center">
-          <Link to="/" className="flex items-center justify-center gap-2 mb-4 hover:opacity-80 transition-opacity">
-            <Sparkles className="h-5 w-5 text-primary" />
-            <span className="font-bold text-foreground">CleanFlow</span>
+          <Link to="/" className="flex items-center justify-center mb-4 hover:opacity-80 transition-opacity">
+            <PulcrixLogo variant="full" size="sm" />
           </Link>
           <p className="text-sm text-muted-foreground mb-4">
-            Streamline your cleaning business operations
+            Clean Living. Pure Solutions.
           </p>
           <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground">
             <Link to="/terms" className="hover:text-foreground transition-colors">
@@ -289,7 +286,7 @@ export default function Index() {
             </Link>
           </div>
           <p className="text-xs text-muted-foreground mt-4">
-            © {new Date().getFullYear()} CleanFlow. All rights reserved.
+            © {new Date().getFullYear()} Pulcrix. All rights reserved.
           </p>
         </div>
       </footer>

@@ -19,7 +19,7 @@ interface EmailRequest {
 }
 
 function getEmailContent(type: EmailType, userName: string, daysRemaining: number, plan: string): { subject: string; html: string } {
-  const appUrl = Deno.env.get("APP_URL") || "https://cleanflow.com.au";
+  const appUrl = Deno.env.get("APP_URL") || "https://pulcrix.com";
 
   const baseStyles = `
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
@@ -29,7 +29,7 @@ function getEmailContent(type: EmailType, userName: string, daysRemaining: numbe
 
   const buttonStyle = `
     display: inline-block;
-    background-color: #0FA573;
+    background-color: #2D5A3D;
     color: white;
     padding: 14px 28px;
     text-decoration: none;
@@ -40,11 +40,11 @@ function getEmailContent(type: EmailType, userName: string, daysRemaining: numbe
 
   const templates: Record<EmailType, { subject: string; content: string }> = {
     welcome: {
-      subject: "Welcome to CleanFlow! Your 14-Day Trial Starts Now",
+      subject: "Welcome to Pulcrix! Your 14-Day Trial Starts Now",
       content: `
-        <h2 style="color: #0FA573; margin-bottom: 16px;">Welcome to CleanFlow!</h2>
+        <h2 style="color: #2D5A3D; margin-bottom: 16px;">Welcome to Pulcrix!</h2>
         <p>Hi ${userName},</p>
-        <p>Thank you for signing up for CleanFlow! Your <strong>14-day free trial</strong> is now active.</p>
+        <p>Thank you for signing up for Pulcrix! Your <strong>14-day free trial</strong> is now active.</p>
         <p>Here's what you can do during your trial:</p>
         <ul style="margin: 16px 0; padding-left: 20px;">
           <li>Schedule unlimited cleaning jobs</li>
@@ -63,20 +63,20 @@ function getEmailContent(type: EmailType, userName: string, daysRemaining: numbe
       `,
     },
     day_7: {
-      subject: "One Week Down! How's CleanFlow Working for You?",
+      subject: "One Week Down! How's Pulcrix Working for You?",
       content: `
-        <h2 style="color: #0FA573; margin-bottom: 16px;">You're Halfway Through Your Trial!</h2>
+        <h2 style="color: #2D5A3D; margin-bottom: 16px;">You're Halfway Through Your Trial!</h2>
         <p>Hi ${userName},</p>
-        <p>You've been using CleanFlow for a week now. We hope it's making your cleaning business easier to manage!</p>
+        <p>You've been using Pulcrix for a week now. We hope it's making your cleaning business easier to manage!</p>
         <p><strong>${daysRemaining} days left</strong> in your free trial.</p>
-        <p>Quick tips to get the most out of CleanFlow:</p>
+        <p>Quick tips to get the most out of Pulcrix:</p>
         <ul style="margin: 16px 0; padding-left: 20px;">
           <li>Set up recurring jobs for regular clients</li>
           <li>Invite your staff members to the app</li>
           <li>Try the mobile-friendly photo capture</li>
         </ul>
         <p style="margin: 24px 0;">
-          <a href="${appUrl}/admin" style="${buttonStyle}">Continue Using CleanFlow</a>
+          <a href="${appUrl}/admin" style="${buttonStyle}">Continue Using Pulcrix</a>
         </p>
         <p style="color: #666; font-size: 14px;">
           Questions? Reply to this email - we're here to help!
@@ -84,11 +84,11 @@ function getEmailContent(type: EmailType, userName: string, daysRemaining: numbe
       `,
     },
     day_3: {
-      subject: "3 Days Left in Your CleanFlow Trial",
+      subject: "3 Days Left in Your Pulcrix Trial",
       content: `
         <h2 style="color: #f59e0b; margin-bottom: 16px;">Your Trial Ends Soon</h2>
         <p>Hi ${userName},</p>
-        <p>Just a heads up - you have <strong>3 days left</strong> in your CleanFlow trial.</p>
+        <p>Just a heads up - you have <strong>3 days left</strong> in your Pulcrix trial.</p>
         <p>After your trial ends, your subscription will automatically start and you'll continue to have full access to all features on the <strong>${plan}</strong> plan.</p>
         <p>If you're not ready to continue, you can cancel anytime from your account settings. No questions asked.</p>
         <p style="margin: 24px 0;">
@@ -97,28 +97,28 @@ function getEmailContent(type: EmailType, userName: string, daysRemaining: numbe
       `,
     },
     day_1: {
-      subject: "Final Day of Your CleanFlow Trial",
+      subject: "Final Day of Your Pulcrix Trial",
       content: `
         <h2 style="color: #ef4444; margin-bottom: 16px;">Last Day of Your Trial</h2>
         <p>Hi ${userName},</p>
-        <p>This is your final day of the CleanFlow free trial.</p>
+        <p>This is your final day of the Pulcrix free trial.</p>
         <p>Tomorrow, your <strong>${plan}</strong> subscription will begin and your card will be charged.</p>
         <p>Want to cancel? You can do so from your account settings before midnight tonight.</p>
         <p style="margin: 24px 0;">
           <a href="${appUrl}/admin/settings" style="${buttonStyle}">Review Your Account</a>
         </p>
         <p style="color: #666; font-size: 14px;">
-          If you continue, you'll keep all your data and have uninterrupted access to CleanFlow.
+          If you continue, you'll keep all your data and have uninterrupted access to Pulcrix.
         </p>
       `,
     },
     expired: {
-      subject: "Your CleanFlow Trial Has Ended",
+      subject: "Your Pulcrix Trial Has Ended",
       content: `
-        <h2 style="color: #0FA573; margin-bottom: 16px;">Trial Ended - Subscription Active</h2>
+        <h2 style="color: #2D5A3D; margin-bottom: 16px;">Trial Ended - Subscription Active</h2>
         <p>Hi ${userName},</p>
-        <p>Your 14-day CleanFlow trial has ended and your <strong>${plan}</strong> subscription is now active.</p>
-        <p>Thank you for choosing CleanFlow to manage your cleaning business!</p>
+        <p>Your 14-day Pulcrix trial has ended and your <strong>${plan}</strong> subscription is now active.</p>
+        <p>Thank you for choosing Pulcrix to manage your cleaning business!</p>
         <p>You now have full, uninterrupted access to all features:</p>
         <ul style="margin: 16px 0; padding-left: 20px;">
           <li>Unlimited job scheduling</li>
@@ -128,16 +128,16 @@ function getEmailContent(type: EmailType, userName: string, daysRemaining: numbe
           <li>Client portal access</li>
         </ul>
         <p style="margin: 24px 0;">
-          <a href="${appUrl}/admin" style="${buttonStyle}">Open CleanFlow</a>
+          <a href="${appUrl}/admin" style="${buttonStyle}">Open Pulcrix</a>
         </p>
       `,
     },
     converted: {
-      subject: "Thanks for Subscribing to CleanFlow!",
+      subject: "Thanks for Subscribing to Pulcrix!",
       content: `
-        <h2 style="color: #0FA573; margin-bottom: 16px;">Welcome Aboard!</h2>
+        <h2 style="color: #2D5A3D; margin-bottom: 16px;">Welcome Aboard!</h2>
         <p>Hi ${userName},</p>
-        <p>Your first payment has been processed successfully. Thank you for subscribing to CleanFlow!</p>
+        <p>Your first payment has been processed successfully. Thank you for subscribing to Pulcrix!</p>
         <p>You're now on the <strong>${plan}</strong> plan with full access to everything.</p>
         <p>If you ever need help, our support team is just an email away.</p>
         <p style="margin: 24px 0;">
@@ -161,10 +161,10 @@ function getEmailContent(type: EmailType, userName: string, daysRemaining: numbe
         <div style="background-color: white; border-radius: 12px; padding: 32px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
           <!-- Logo -->
           <div style="text-align: center; margin-bottom: 24px;">
-            <div style="display: inline-block; background-color: #0FA573; border-radius: 12px; padding: 12px; margin-bottom: 12px;">
+            <div style="display: inline-block; background-color: #2D5A3D; border-radius: 12px; padding: 12px; margin-bottom: 12px;">
               <span style="color: white; font-size: 24px;">✨</span>
             </div>
-            <h1 style="margin: 0; color: #1a1a1a; font-size: 24px;">CleanFlow</h1>
+            <h1 style="margin: 0; color: #1a1a1a; font-size: 24px;">Pulcrix</h1>
           </div>
 
           <!-- Content -->
@@ -173,8 +173,8 @@ function getEmailContent(type: EmailType, userName: string, daysRemaining: numbe
           <!-- Footer -->
           <hr style="border: none; border-top: 1px solid #eee; margin: 32px 0;">
           <p style="color: #666; font-size: 12px; text-align: center; margin: 0;">
-            CleanFlow - Professional Cleaning Business Management<br>
-            <a href="${appUrl}" style="color: #0FA573;">cleanflow.com.au</a>
+            Pulcrix - Clean Living. Pure Solutions.<br>
+            <a href="${appUrl}" style="color: #2D5A3D;">pulcrix.com</a>
           </p>
         </div>
       </div>
@@ -201,7 +201,7 @@ async function sendEmailWithResend(to: string, subject: string, html: string): P
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: "CleanFlow <notifications@cleanflow.com.au>",
+        from: "Pulcrix <notifications@pulcrix.com>",
         to: [to],
         subject: subject,
         html: html,

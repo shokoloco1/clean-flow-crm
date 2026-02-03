@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import {
-  Sparkles,
   CheckCircle2,
   ArrowRight,
   Loader2,
@@ -16,6 +15,7 @@ import {
   Camera,
   Rocket,
 } from "lucide-react";
+import { PulcrixLogo } from "@/components/PulcrixLogo";
 import { cn } from "@/lib/utils";
 
 interface OnboardingStep {
@@ -84,7 +84,7 @@ export default function Onboarding() {
         const sessionId = searchParams.get("session_id");
 
         if (checkoutStatus === "success" && sessionId) {
-          toast.success("Welcome to CleanFlow! Your 14-day trial has started.");
+          toast.success("Welcome to Pulcrix! Your 14-day trial has started.");
         }
 
         // Fetch subscription status
@@ -157,12 +157,7 @@ export default function Onboarding() {
       {/* Header */}
       <header className="border-b border-border bg-background/80 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center">
-              <Sparkles className="h-6 w-6 text-primary-foreground" />
-            </div>
-            <span className="text-xl font-bold">CleanFlow</span>
-          </div>
+          <PulcrixLogo variant="full" size="md" />
           <Button variant="outline" size="sm" onClick={() => navigate("/admin")}>
             Go to Dashboard
             <ArrowRight className="ml-2 h-4 w-4" />
@@ -176,7 +171,7 @@ export default function Onboarding() {
           <div className="inline-flex items-center justify-center h-20 w-20 rounded-full bg-primary/10 mb-6">
             <CheckCircle2 className="h-10 w-10 text-primary" />
           </div>
-          <h1 className="text-3xl font-bold mb-4">Welcome to CleanFlow!</h1>
+          <h1 className="text-3xl font-bold mb-4">Welcome to Pulcrix!</h1>
           <p className="text-lg text-muted-foreground mb-6">
             Your account is ready. You have{" "}
             <span className="font-semibold text-primary">{getDaysRemaining()} days</span> of
@@ -209,7 +204,7 @@ export default function Onboarding() {
         <div className="max-w-4xl mx-auto">
           <h2 className="text-xl font-semibold mb-6 text-center">Get Started</h2>
           <p className="text-center text-muted-foreground mb-8">
-            Here's what we recommend to make the most of your CleanFlow trial
+            Here's what we recommend to make the most of your Pulcrix trial
           </p>
 
           <div className="grid gap-4 md:grid-cols-2">
@@ -280,7 +275,7 @@ export default function Onboarding() {
         <div className="max-w-2xl mx-auto mt-12 text-center">
           <p className="text-sm text-muted-foreground">
             Need help getting started?{" "}
-            <a href="mailto:support@cleanflow.com.au" className="text-primary hover:underline">
+            <a href="mailto:support@pulcrix.com" className="text-primary hover:underline">
               Contact our support team
             </a>
             {" "}or check out our{" "}

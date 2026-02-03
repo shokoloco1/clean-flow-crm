@@ -7,10 +7,11 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { 
   Building2, Users, UserPlus, Briefcase, 
-  ArrowRight, ArrowLeft, Check, Sparkles,
+  ArrowRight, ArrowLeft, Check,
   Phone, Mail, MapPin
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { PulcrixLogo } from "@/components/PulcrixLogo";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -234,7 +235,7 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
       <Card className="w-full max-w-2xl shadow-xl">
         <CardHeader className="text-center pb-2">
           <div className="flex items-center justify-center gap-2 mb-4">
-            <Sparkles className="h-6 w-6 text-primary" />
+            <PulcrixLogo variant="icon" size="sm" />
             <CardTitle className="text-2xl">Welcome to Your Cleaning Business</CardTitle>
           </div>
           <CardDescription>Let's get you set up in just a few steps</CardDescription>
@@ -527,7 +528,7 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
                 ) : currentStep === 4 ? (
                   <>
                     Complete Setup
-                    <Sparkles className="h-4 w-4 ml-2" />
+                    <PulcrixLogo variant="icon" size="sm" />
                   </>
                 ) : (
                   <>

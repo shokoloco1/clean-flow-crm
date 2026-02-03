@@ -6,7 +6,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Sparkles, Clock, Rocket, ArrowRight, Loader2 } from "lucide-react";
+import { Clock, Rocket, ArrowRight, Loader2 } from "lucide-react";
+import { PulcrixLogo } from "@/components/PulcrixLogo";
 import { TrialBanner } from "./TrialBanner";
 
 interface SubscriptionGateProps {
@@ -161,12 +162,9 @@ export function SubscriptionGate({ children, trialDays = 14 }: SubscriptionGateP
       <div className="w-full max-w-lg space-y-6">
         {/* Logo */}
         <div className="text-center space-y-3">
-          <div className="flex items-center justify-center gap-2">
-            <div className="h-14 w-14 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
-              <Sparkles className="h-8 w-8 text-primary-foreground" />
-            </div>
+          <div className="flex items-center justify-center">
+            <PulcrixLogo size="lg" />
           </div>
-          <h1 className="text-3xl font-bold text-foreground">CleanFlow</h1>
         </div>
 
         <Card className="border-border shadow-xl">
@@ -177,14 +175,14 @@ export function SubscriptionGate({ children, trialDays = 14 }: SubscriptionGateP
             </Badge>
             <CardTitle className="text-xl">Your Free Trial Has Expired</CardTitle>
             <CardDescription>
-              Upgrade to continue managing your cleaning business with CleanFlow
+              Upgrade to continue managing your cleaning business with Pulcrix
             </CardDescription>
           </CardHeader>
 
           <CardContent className="space-y-6">
             {/* Benefits reminder */}
             <div className="bg-muted/50 rounded-lg p-4 space-y-2">
-              <p className="font-medium text-sm text-foreground">With CleanFlow you get:</p>
+              <p className="font-medium text-sm text-foreground">With Pulcrix you get:</p>
               <ul className="text-sm text-muted-foreground space-y-1">
                 <li className="flex items-center gap-2">
                   <span className="text-success">✓</span> Unlimited job scheduling
@@ -222,7 +220,7 @@ export function SubscriptionGate({ children, trialDays = 14 }: SubscriptionGateP
         </Card>
 
         <p className="text-center text-sm text-muted-foreground">
-          Need help? Contact us at support@cleanflow.com.au
+          Need help? Contact us at support@pulcrix.com
         </p>
       </div>
     </div>

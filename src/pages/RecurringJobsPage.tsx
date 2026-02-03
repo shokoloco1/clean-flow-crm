@@ -341,7 +341,7 @@ export default function RecurringJobsPage() {
               </div>
               <h3 className="text-lg font-semibold text-foreground mb-2">No recurring schedules yet</h3>
               <p className="text-muted-foreground mb-6 max-w-sm">
-                Set up weekly or monthly cleaning schedules and let CleanFlow auto-generate jobs for you.
+                Set up weekly or monthly cleaning schedules and let Pulcrix auto-generate jobs for you.
               </p>
               <Button onClick={() => { resetForm(); setIsDialogOpen(true); }}>
                 <Plus className="h-4 w-4 mr-2" />

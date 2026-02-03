@@ -58,7 +58,7 @@ export function useInvoiceEmail() {
       ]);
 
     const settings: BusinessSettings = {
-      company_name: "CleanFlow",
+      company_name: "Pulcrix",
       business_abn: "",
       business_address: "",
       business_phone: "",

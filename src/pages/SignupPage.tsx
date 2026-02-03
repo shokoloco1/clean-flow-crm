@@ -8,7 +8,8 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "sonner";
-import { Sparkles, ArrowLeft, ArrowRight, Check, Eye, EyeOff, Loader2, Users, CheckCircle } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Eye, EyeOff, Loader2, Users, CheckCircle } from "lucide-react";
+import { PulcrixLogo } from "@/components/PulcrixLogo";
 import { signupSchema, validatePassword } from "@/lib/passwordSecurity";
 import { PasswordStrengthIndicator } from "@/components/PasswordStrengthIndicator";
 import { PlanSelection, type PlanType } from "@/components/signup/PlanSelection";
@@ -224,11 +225,8 @@ const SignupPage = () => {
         {/* Header */}
         <header className="border-b border-border bg-background/80 backdrop-blur-sm">
           <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-            <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-              <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center">
-                <Sparkles className="h-6 w-6 text-primary-foreground" />
-              </div>
-              <span className="text-xl font-bold">CleanFlow</span>
+            <Link to="/" className="hover:opacity-80 transition-opacity">
+              <PulcrixLogo variant="full" size="md" />
             </Link>
 
             <div className="flex items-center gap-4">
@@ -250,7 +248,7 @@ const SignupPage = () => {
               </div>
               <CardTitle className="text-2xl">Welcome to the Team!</CardTitle>
               <CardDescription>
-                You've been invited to join CleanFlow. Set up your account to get started.
+                You've been invited to join Pulcrix. Set up your account to get started.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -364,7 +362,7 @@ const SignupPage = () => {
 
         <footer className="border-t border-border py-4">
           <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-            <p>CleanFlow - Professional Cleaning Business Management</p>
+            <p>Pulcrix - Professional Cleaning Business Management</p>
           </div>
         </footer>
       </div>
@@ -381,7 +379,7 @@ const SignupPage = () => {
             <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center">
               <Sparkles className="h-6 w-6 text-primary-foreground" />
             </div>
-            <span className="text-xl font-bold">CleanFlow</span>
+            <span className="text-xl font-bold">Pulcrix</span>
           </Link>
 
           <div className="flex items-center gap-4">
@@ -455,7 +453,7 @@ const SignupPage = () => {
               <CardHeader className="text-center">
                 <CardTitle className="text-2xl">Create Your Account</CardTitle>
                 <CardDescription>
-                  Start your 14-day free trial of CleanFlow
+                  Start your 14-day free trial of Pulcrix
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -635,7 +633,7 @@ const SignupPage = () => {
       {/* Footer */}
       <footer className="border-t border-border py-4">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>CleanFlow - Professional Cleaning Business Management</p>
+          <p>Pulcrix - Professional Cleaning Business Management</p>
         </div>
       </footer>
     </div>

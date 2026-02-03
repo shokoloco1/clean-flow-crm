@@ -21,7 +21,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowLeft, Sparkles, LogOut, Calendar, Plus, Clock, MapPin, User, Loader2 } from "lucide-react";
+import { ArrowLeft, LogOut, Calendar, Plus, Clock, MapPin, User, Loader2 } from "lucide-react";
+import { PulcrixLogo } from "@/components/PulcrixLogo";
 import { format, parseISO } from "date-fns";
 import { toast } from "sonner";
 import FullCalendar from "@fullcalendar/react";
@@ -343,9 +344,7 @@ export default function CalendarPage() {
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-              <div className="h-10 w-10 rounded-lg bg-primary flex items-center justify-center">
-                <Sparkles className="h-5 w-5 text-primary-foreground" />
-              </div>
+              <PulcrixLogo />
               <div>
                 <h1 className="text-xl font-bold text-foreground">Calendar</h1>
                 <p className="text-sm text-muted-foreground">Job Scheduling</p>

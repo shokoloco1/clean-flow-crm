@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Clock, X, Sparkles, CreditCard } from "lucide-react";
+import { Clock, X, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { PulcrixLogo } from "@/components/PulcrixLogo";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
@@ -90,7 +91,7 @@ export function TrialBanner({ className }: TrialBannerProps) {
           {isUrgent ? (
             <Clock className="h-4 w-4 animate-pulse" />
           ) : (
-            <Sparkles className="h-4 w-4" />
+            <PulcrixLogo variant="icon" size="sm" />
           )}
           <span className="text-sm font-medium">
             {isLastDay ? (

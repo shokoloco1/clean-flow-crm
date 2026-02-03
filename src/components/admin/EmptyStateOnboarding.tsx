@@ -54,7 +54,7 @@ export function EmptyStateOnboarding({
       {/* Header */}
       <div className="text-center mb-8">
         <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
-          Welcome to CleanFlow!
+          Welcome to Pulcrix!
         </h2>
         <p className="text-muted-foreground text-lg">
           Set up your business in 3 steps

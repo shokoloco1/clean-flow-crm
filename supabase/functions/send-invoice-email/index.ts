@@ -43,7 +43,7 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error("Missing required fields: to, invoiceNumber, and pdfBase64 are required");
     }
 
-    const fromEmail = Deno.env.get("RESEND_FROM_EMAIL") || "CleanFlow <onboarding@resend.dev>";
+    const fromEmail = Deno.env.get("RESEND_FROM_EMAIL") || "Pulcrix <onboarding@resend.dev>";
 
     // Convert base64 to Uint8Array for attachment
     const pdfBuffer = Uint8Array.from(atob(pdfBase64), c => c.charCodeAt(0));
@@ -52,7 +52,7 @@ const handler = async (req: Request): Promise<Response> => {
       <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #374151;">
         <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
           <div style="text-align: center; margin-bottom: 30px;">
-            <h1 style="color: #0d9488; margin: 0;">✨ ${companyName || "CleanFlow"}</h1>
+            <h1 style="color: #2D5A3D; margin: 0;">✨ ${companyName || "Pulcrix"}</h1>
           </div>
           
           <h2 style="color: #111827;">Hi ${clientName},</h2>
@@ -75,7 +75,7 @@ const handler = async (req: Request): Promise<Response> => {
           <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;" />
           
           <p style="color: #9ca3af; font-size: 12px; text-align: center;">
-            © ${new Date().getFullYear()} ${companyName || "CleanFlow"}. All rights reserved.
+            © ${new Date().getFullYear()} ${companyName || "Pulcrix"}. All rights reserved.
           </p>
         </div>
       </div>
@@ -84,7 +84,7 @@ const handler = async (req: Request): Promise<Response> => {
     const emailResponse = await resend.emails.send({
       from: fromEmail,
       to: [to],
-      subject: `Tax Invoice ${invoiceNumber} - ${companyName || "CleanFlow"}`,
+      subject: `Tax Invoice ${invoiceNumber} - ${companyName || "Pulcrix"}`,
       html: emailHtml,
       attachments: [
         {

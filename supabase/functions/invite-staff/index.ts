@@ -13,7 +13,7 @@ const getInvitationEmailHtml = (staffName: string, inviteLink: string, adminName
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Welcome to CleanFlow</title>
+  <title>Welcome to Pulcrix</title>
 </head>
 <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f4f4f5;">
   <table role="presentation" style="width: 100%; border-collapse: collapse;">
@@ -22,7 +22,7 @@ const getInvitationEmailHtml = (staffName: string, inviteLink: string, adminName
         <table role="presentation" style="width: 100%; max-width: 600px; border-collapse: collapse; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
           <!-- Header -->
           <tr>
-            <td style="background: linear-gradient(135deg, #0FA573 0%, #0d8a61 100%); padding: 32px 40px; text-align: center;">
+            <td style="background: linear-gradient(135deg, #2D5A3D 0%, #1A3A2A 100%); padding: 32px 40px; text-align: center;">
               <table role="presentation" style="width: 100%;">
                 <tr>
                   <td align="center">
@@ -33,8 +33,8 @@ const getInvitationEmailHtml = (staffName: string, inviteLink: string, adminName
                 </tr>
                 <tr>
                   <td align="center" style="padding-top: 16px;">
-                    <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 700;">CleanFlow</h1>
-                    <p style="margin: 8px 0 0; color: rgba(255, 255, 255, 0.9); font-size: 14px;">Cleaning Business Management</p>
+                    <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 700;">Pulcrix</h1>
+                    <p style="margin: 8px 0 0; color: rgba(255, 255, 255, 0.9); font-size: 14px;">Clean Living. Pure Solutions.</p>
                   </td>
                 </tr>
               </table>
@@ -49,7 +49,7 @@ const getInvitationEmailHtml = (staffName: string, inviteLink: string, adminName
               </h2>
 
               <p style="margin: 0 0 24px; color: #52525b; font-size: 16px; line-height: 1.6;">
-                ${adminName} has invited you to join their cleaning business on CleanFlow. You'll be able to view your assigned jobs, check in at locations, and upload photos directly from your phone.
+                ${adminName} has invited you to join their cleaning business on Pulcrix. You'll be able to view your assigned jobs, check in at locations, and upload photos directly from your phone.
               </p>
 
               <p style="margin: 0 0 32px; color: #52525b; font-size: 16px; line-height: 1.6;">
@@ -61,7 +61,7 @@ const getInvitationEmailHtml = (staffName: string, inviteLink: string, adminName
                 <tr>
                   <td align="center">
                     <a href="${inviteLink}"
-                       style="display: inline-block; background-color: #0FA573; color: #ffffff; text-decoration: none; font-size: 16px; font-weight: 600; padding: 16px 40px; border-radius: 8px; box-shadow: 0 2px 4px rgba(15, 165, 115, 0.3);">
+                       style="display: inline-block; background-color: #2D5A3D; color: #ffffff; text-decoration: none; font-size: 16px; font-weight: 600; padding: 16px 40px; border-radius: 8px; box-shadow: 0 2px 4px rgba(45, 90, 61, 0.3);">
                       Set Up My Account
                     </a>
                   </td>
@@ -69,7 +69,7 @@ const getInvitationEmailHtml = (staffName: string, inviteLink: string, adminName
               </table>
 
               <p style="margin: 32px 0 0; color: #71717a; font-size: 14px; line-height: 1.6;">
-                <strong>What you can do with CleanFlow:</strong>
+                <strong>What you can do with Pulcrix:</strong>
               </p>
               <ul style="margin: 12px 0 24px; color: #52525b; font-size: 14px; line-height: 1.8; padding-left: 20px;">
                 <li>View your daily job schedule</li>
@@ -95,10 +95,10 @@ const getInvitationEmailHtml = (staffName: string, inviteLink: string, adminName
           <tr>
             <td style="background-color: #fafafa; padding: 24px 40px; text-align: center; border-top: 1px solid #e4e4e7;">
               <p style="margin: 0; color: #71717a; font-size: 13px;">
-                © ${new Date().getFullYear()} CleanFlow. All rights reserved.
+                © ${new Date().getFullYear()} Pulcrix. All rights reserved.
               </p>
               <p style="margin: 8px 0 0; color: #a1a1aa; font-size: 12px;">
-                Made for Australian cleaning businesses 🇦🇺
+                Clean Living. Pure Solutions.
               </p>
             </td>
           </tr>
@@ -112,14 +112,14 @@ const getInvitationEmailHtml = (staffName: string, inviteLink: string, adminName
 
 // Plain text version for email clients that don't support HTML
 const getInvitationEmailText = (staffName: string, inviteLink: string, adminName: string) => `
-Welcome to CleanFlow, ${staffName}!
+Welcome to Pulcrix, ${staffName}!
 
-${adminName} has invited you to join their cleaning business on CleanFlow.
+${adminName} has invited you to join their cleaning business on Pulcrix.
 
 Click the link below to set up your account:
 ${inviteLink}
 
-What you can do with CleanFlow:
+What you can do with Pulcrix:
 - View your daily job schedule
 - Get directions to job locations
 - Upload before & after photos
@@ -130,7 +130,7 @@ If you didn't expect this invitation, you can safely ignore this email.
 
 This link will expire in 24 hours for security reasons.
 
-© ${new Date().getFullYear()} CleanFlow. All rights reserved.
+© ${new Date().getFullYear()} Pulcrix. All rights reserved.
 `;
 
 // Send email via Resend
@@ -157,7 +157,7 @@ async function sendEmailWithResend(
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: "CleanFlow <noreply@cleanflow.com.au>",
+        from: "Pulcrix <noreply@pulcrix.com>",
         to: [to],
         subject,
         html,
@@ -349,7 +349,7 @@ serve(async (req) => {
 
     // 5. Generate magic link for password setup
     const origin = req.headers.get("origin");
-    const redirectTo = `${origin || "https://cleanflow.com.au"}/auth`;
+    const redirectTo = `${origin || "https://pulcrix.com"}/auth`;
 
     const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
       type: "magiclink",
@@ -380,7 +380,7 @@ serve(async (req) => {
 
       const emailResult = await sendEmailWithRetry(
         email,
-        `Welcome to CleanFlow - ${adminName} invited you to join!`,
+        `Welcome to Pulcrix - ${adminName} invited you to join!`,
         emailHtml,
         emailText
       );

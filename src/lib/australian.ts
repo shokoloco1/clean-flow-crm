@@ -1,4 +1,4 @@
-// Australian business utilities for CleanFlow
+// Australian business utilities for Pulcrix
 // ABN validation, GST calculation, and AU formatting
 
 /**
