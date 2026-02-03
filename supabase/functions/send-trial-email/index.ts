@@ -29,7 +29,7 @@ function getEmailContent(type: EmailType, userName: string, daysRemaining: numbe
 
   const buttonStyle = `
     display: inline-block;
-    background-color: #2D5A3D;
+    background-color: #0D9488;
     color: white;
     padding: 14px 28px;
     text-decoration: none;
@@ -42,7 +42,7 @@ function getEmailContent(type: EmailType, userName: string, daysRemaining: numbe
     welcome: {
       subject: "Welcome to Pulcrix! Your 14-Day Trial Starts Now",
       content: `
-        <h2 style="color: #2D5A3D; margin-bottom: 16px;">Welcome to Pulcrix!</h2>
+        <h2 style="color: #0D9488; margin-bottom: 16px;">Welcome to Pulcrix!</h2>
         <p>Hi ${userName},</p>
         <p>Thank you for signing up for Pulcrix! Your <strong>14-day free trial</strong> is now active.</p>
         <p>Here's what you can do during your trial:</p>
@@ -65,7 +65,7 @@ function getEmailContent(type: EmailType, userName: string, daysRemaining: numbe
     day_7: {
       subject: "One Week Down! How's Pulcrix Working for You?",
       content: `
-        <h2 style="color: #2D5A3D; margin-bottom: 16px;">You're Halfway Through Your Trial!</h2>
+        <h2 style="color: #0D9488; margin-bottom: 16px;">You're Halfway Through Your Trial!</h2>
         <p>Hi ${userName},</p>
         <p>You've been using Pulcrix for a week now. We hope it's making your cleaning business easier to manage!</p>
         <p><strong>${daysRemaining} days left</strong> in your free trial.</p>
@@ -115,7 +115,7 @@ function getEmailContent(type: EmailType, userName: string, daysRemaining: numbe
     expired: {
       subject: "Your Pulcrix Trial Has Ended",
       content: `
-        <h2 style="color: #2D5A3D; margin-bottom: 16px;">Trial Ended - Subscription Active</h2>
+        <h2 style="color: #0D9488; margin-bottom: 16px;">Trial Ended - Subscription Active</h2>
         <p>Hi ${userName},</p>
         <p>Your 14-day Pulcrix trial has ended and your <strong>${plan}</strong> subscription is now active.</p>
         <p>Thank you for choosing Pulcrix to manage your cleaning business!</p>
@@ -135,7 +135,7 @@ function getEmailContent(type: EmailType, userName: string, daysRemaining: numbe
     converted: {
       subject: "Thanks for Subscribing to Pulcrix!",
       content: `
-        <h2 style="color: #2D5A3D; margin-bottom: 16px;">Welcome Aboard!</h2>
+        <h2 style="color: #0D9488; margin-bottom: 16px;">Welcome Aboard!</h2>
         <p>Hi ${userName},</p>
         <p>Your first payment has been processed successfully. Thank you for subscribing to Pulcrix!</p>
         <p>You're now on the <strong>${plan}</strong> plan with full access to everything.</p>
@@ -161,7 +161,7 @@ function getEmailContent(type: EmailType, userName: string, daysRemaining: numbe
         <div style="background-color: white; border-radius: 12px; padding: 32px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
           <!-- Logo -->
           <div style="text-align: center; margin-bottom: 24px;">
-            <div style="display: inline-block; background-color: #2D5A3D; border-radius: 12px; padding: 12px; margin-bottom: 12px;">
+            <div style="display: inline-block; background-color: #0D9488; border-radius: 12px; padding: 12px; margin-bottom: 12px;">
               <span style="color: white; font-size: 24px;">✨</span>
             </div>
             <h1 style="margin: 0; color: #1a1a1a; font-size: 24px;">Pulcrix</h1>
@@ -174,7 +174,7 @@ function getEmailContent(type: EmailType, userName: string, daysRemaining: numbe
           <hr style="border: none; border-top: 1px solid #eee; margin: 32px 0;">
           <p style="color: #666; font-size: 12px; text-align: center; margin: 0;">
             Pulcrix - Clean Living. Pure Solutions.<br>
-            <a href="${appUrl}" style="color: #2D5A3D;">pulcrix.com</a>
+            <a href="${appUrl}" style="color: #0D9488;">pulcrix.com</a>
           </p>
         </div>
       </div>

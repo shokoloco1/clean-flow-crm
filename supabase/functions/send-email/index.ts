@@ -32,7 +32,7 @@ const getEmailTemplate = (type: string, data: EmailRequest['data'] = {}) => {
   const buttonStyle = `
     display: inline-block;
     padding: 12px 24px;
-    background-color: #2D5A3D;
+    background-color: #0D9488;
     color: white;
     text-decoration: none;
     border-radius: 8px;
@@ -47,7 +47,7 @@ const getEmailTemplate = (type: string, data: EmailRequest['data'] = {}) => {
           <div style="${baseStyles}">
             <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
               <div style="text-align: center; margin-bottom: 30px;">
-                <h1 style="color: #2D5A3D; margin: 0;">✨ Pulcrix</h1>
+                <h1 style="color: #0D9488; margin: 0;">✨ Pulcrix</h1>
               </div>
               <h2 style="color: #111827;">Hi ${data.name || 'there'},</h2>
               <p>We received a request to reset the password for your account.</p>
@@ -74,7 +74,7 @@ const getEmailTemplate = (type: string, data: EmailRequest['data'] = {}) => {
           <div style="${baseStyles}">
             <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
               <div style="text-align: center; margin-bottom: 30px;">
-                <h1 style="color: #2D5A3D; margin: 0;">✨ Pulcrix</h1>
+                <h1 style="color: #0D9488; margin: 0;">✨ Pulcrix</h1>
               </div>
               <h2 style="color: #111827;">Hi ${data.name || 'there'}! 👋</h2>
               <p>Thanks for joining Pulcrix! We're excited to have you on board.</p>
@@ -102,7 +102,7 @@ const getEmailTemplate = (type: string, data: EmailRequest['data'] = {}) => {
           <div style="${baseStyles}">
             <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
               <div style="text-align: center; margin-bottom: 30px;">
-                <h1 style="color: #2D5A3D; margin: 0;">✨ Pulcrix</h1>
+                <h1 style="color: #0D9488; margin: 0;">✨ Pulcrix</h1>
               </div>
               <h2 style="color: #111827;">Hi ${data.name || 'there'},</h2>
               <p>You've been assigned a new job:</p>
@@ -128,7 +128,7 @@ const getEmailTemplate = (type: string, data: EmailRequest['data'] = {}) => {
           <div style="${baseStyles}">
             <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
               <div style="text-align: center; margin-bottom: 30px;">
-                <h1 style="color: #2D5A3D; margin: 0;">✨ Pulcrix</h1>
+                <h1 style="color: #0D9488; margin: 0;">✨ Pulcrix</h1>
               </div>
               <h2 style="color: #111827;">Job Completed! ✅</h2>
               <p>The job at <strong>${data.jobLocation || 'the location'}</strong> has been marked as completed.</p>

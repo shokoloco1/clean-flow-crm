@@ -44,7 +44,7 @@ export function PulcrixLogo({ variant = "full", size = "md", className }: Pulcri
           config.text,
           className
         )}
-        style={{ fontFamily: "'Montserrat', sans-serif" }}
+        style={{ fontFamily: "'Inter', sans-serif" }}
       >
         PULCRIX
       </span>
@@ -56,7 +56,7 @@ export function PulcrixLogo({ variant = "full", size = "md", className }: Pulcri
       <PulcrixIcon size={config.icon} className="text-primary" />
       <span
         className={cn("font-bold tracking-wider text-foreground", config.text)}
-        style={{ fontFamily: "'Montserrat', sans-serif" }}
+        style={{ fontFamily: "'Inter', sans-serif" }}
       >
         PULCRIX
       </span>
