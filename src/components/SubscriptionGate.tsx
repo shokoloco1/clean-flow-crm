@@ -74,7 +74,7 @@ export function SubscriptionGate({ children, trialDays = 14 }: SubscriptionGateP
       try {
         const { data, error } = await supabase
           .from("subscriptions")
-          .select("status, trial_start, trial_end, plan")
+          .select("status, current_period_end, stripe_price_id")
           .eq("user_id", user.id)
           .maybeSingle();
 
@@ -82,8 +82,8 @@ export function SubscriptionGate({ children, trialDays = 14 }: SubscriptionGateP
           console.error("Error fetching trial info:", error);
           // Fall back to legacy behavior
           setTrialInfo(getLegacyTrialStatus());
-        } else if (data?.status === "trialing" && data.trial_end) {
-          const trialEnd = new Date(data.trial_end);
+        } else if (data?.status === "trialing" && data.current_period_end) {
+          const trialEnd = new Date(data.current_period_end);
           const now = new Date();
           const diffTime = trialEnd.getTime() - now.getTime();
           const daysRemaining = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
@@ -93,7 +93,7 @@ export function SubscriptionGate({ children, trialDays = 14 }: SubscriptionGateP
             daysRemaining,
             expired: daysRemaining <= 0,
             trialEnd,
-            plan: data.plan,
+            plan: data.stripe_price_id ? "subscription" : null,
           });
         } else if (data?.status === "active") {
           // Active subscription, not in trial
@@ -102,7 +102,7 @@ export function SubscriptionGate({ children, trialDays = 14 }: SubscriptionGateP
             daysRemaining: 0,
             expired: false,
             trialEnd: null,
-            plan: data.plan,
+            plan: data.stripe_price_id ? "subscription" : null,
           });
         } else {
           // No subscription record, fall back to legacy behavior

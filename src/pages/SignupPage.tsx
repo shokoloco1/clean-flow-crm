@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "sonner";
-import { ArrowLeft, ArrowRight, Check, Eye, EyeOff, Loader2, Users, CheckCircle } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Eye, EyeOff, Loader2, Users, CheckCircle, Sparkles } from "lucide-react";
 import { PulcrixLogo } from "@/components/PulcrixLogo";
 import { signupSchema, validatePassword } from "@/lib/passwordSecurity";
 import { PasswordStrengthIndicator } from "@/components/PasswordStrengthIndicator";

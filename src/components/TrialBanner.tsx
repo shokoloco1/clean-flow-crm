@@ -28,14 +28,14 @@ export function TrialBanner({ className }: TrialBannerProps) {
     const fetchTrialInfo = async () => {
       const { data, error } = await supabase
         .from("subscriptions")
-        .select("trial_end, plan, status")
+        .select("current_period_end, stripe_price_id, status")
         .eq("user_id", user.id)
         .maybeSingle();
 
       if (error || !data) return;
 
-      if (data.status === "trialing" && data.trial_end) {
-        const trialEnd = new Date(data.trial_end);
+      if (data.status === "trialing" && data.current_period_end) {
+        const trialEnd = new Date(data.current_period_end);
         const now = new Date();
         const diffTime = trialEnd.getTime() - now.getTime();
         const daysRemaining = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
@@ -43,7 +43,7 @@ export function TrialBanner({ className }: TrialBannerProps) {
         setTrialInfo({
           daysRemaining,
           trialEnd,
-          plan: data.plan,
+          plan: data.stripe_price_id ? "subscription" : null,
           status: data.status,
         });
       } else {
@@ -155,14 +155,14 @@ export function TrialBannerCompact({ className }: TrialBannerProps) {
     const fetchTrialInfo = async () => {
       const { data, error } = await supabase
         .from("subscriptions")
-        .select("trial_end, status")
+        .select("current_period_end, status")
         .eq("user_id", user.id)
         .maybeSingle();
 
       if (error || !data) return;
 
-      if (data.status === "trialing" && data.trial_end) {
-        const trialEnd = new Date(data.trial_end);
+      if (data.status === "trialing" && data.current_period_end) {
+        const trialEnd = new Date(data.current_period_end);
         const now = new Date();
         const diffTime = trialEnd.getTime() - now.getTime();
         const daysRemaining = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));

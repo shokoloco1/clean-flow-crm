@@ -90,7 +90,7 @@ export default function Onboarding() {
         // Fetch subscription status
         const { data, error } = await supabase
           .from("subscriptions")
-          .select("status, trial_end, plan")
+          .select("status, current_period_end, stripe_price_id")
           .eq("user_id", user.id)
           .maybeSingle();
 
@@ -100,9 +100,9 @@ export default function Onboarding() {
 
         if (data) {
           setSubscriptionStatus(data.status);
-          setPlan(data.plan);
-          if (data.trial_end) {
-            setTrialEnd(new Date(data.trial_end));
+          setPlan(data.stripe_price_id ? "subscription" : null);
+          if (data.current_period_end) {
+            setTrialEnd(new Date(data.current_period_end));
           }
         }
       } catch (error) {

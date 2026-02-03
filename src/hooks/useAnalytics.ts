@@ -35,28 +35,15 @@ export function useAnalytics() {
   const { user } = useAuth();
   const lastPageRef = useRef<string>("");
 
-  // Track a custom event
+  // Track a custom event (stubbed - analytics_events table not yet created)
   const trackEvent = useCallback(
     async ({ event, data = {} }: TrackEventOptions) => {
-      try {
-        // Don't track in development unless explicitly enabled
-        if (import.meta.env.DEV && !import.meta.env.VITE_ENABLE_ANALYTICS) {
-          console.log("[Analytics]", event, data);
-          return;
-        }
-
-        await supabase.from("analytics_events").insert({
-          user_id: user?.id || null,
-          event_name: event,
-          event_data: data,
-          page_path: location.pathname,
-          referrer: document.referrer || null,
-          user_agent: navigator.userAgent,
-        });
-      } catch (error) {
-        // Silently fail - analytics should never break the app
-        console.warn("[Analytics] Failed to track event:", error);
+      // Log to console for development/debugging
+      // analytics_events table doesn't exist yet - log only
+      if (import.meta.env.DEV || !import.meta.env.VITE_ENABLE_ANALYTICS) {
+        console.log("[Analytics]", event, data);
       }
+      // TODO: Implement database tracking when analytics_events table is created
     },
     [user?.id, location.pathname]
   );

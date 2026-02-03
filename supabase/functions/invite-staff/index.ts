@@ -174,9 +174,10 @@ async function sendEmailWithResend(
 
     console.log(`[invite-staff] Email sent successfully. ID: ${responseData.id}`);
     return { success: true };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("[invite-staff] Email sending error:", error);
-    return { success: false, error: error.message || "Network error" };
+    const errorMessage = error instanceof Error ? error.message : "Network error";
+    return { success: false, error: errorMessage };
   }
 }
 

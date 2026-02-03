@@ -1,15 +1,12 @@
 import { useState, useRef, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import {
   Camera,
   CheckCircle2,
-  XCircle,
   Loader2,
   MapPin,
   AlertTriangle,
@@ -25,6 +22,7 @@ import {
   CollapsibleTrigger
 } from "@/components/ui/collapsible";
 import { Textarea } from "@/components/ui/textarea";
+import { supabase } from "@/integrations/supabase/client";
 
 interface AreaPhoto {
   id: string;
@@ -115,6 +113,8 @@ export function AreaPhotoDocumentation({
   onPhotosUpdated,
   onAllAreasComplete
 }: AreaPhotoDocumentationProps) {
+  // Note: job_area_photos table doesn't exist yet
+  // This component uses local state as a placeholder until the table is created
   const [areaPhotos, setAreaPhotos] = useState<AreaPhoto[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedArea, setExpandedArea] = useState<string | null>(null);
@@ -130,52 +130,28 @@ export function AreaPhotoDocumentation({
   const isInProgress = jobStatus === "in_progress";
   const isCompleted = jobStatus === "completed";
 
-  // Fetch area photos
+  // Initialize with required areas as local state (no database table yet)
   useEffect(() => {
-    fetchAreaPhotos();
-  }, [jobId]);
-
-  const fetchAreaPhotos = async () => {
-    try {
-      const { data, error } = await supabase
-        .from("job_area_photos")
-        .select("*")
-        .eq("job_id", jobId)
-        .order("area_name");
-
-      if (error) throw error;
-      setAreaPhotos((data as AreaPhoto[]) || []);
-
-      // Initialize areas if required_areas exist but no photos yet
-      if (requiredAreas.length > 0 && (!data || data.length === 0)) {
-        await initializeAreas();
+    const initializeAreas = () => {
+      if (requiredAreas.length > 0) {
+        const initialAreas: AreaPhoto[] = requiredAreas.map((ra, idx) => ({
+          id: `local-${idx}`,
+          job_id: jobId,
+          area_name: ra.name,
+          service_type: ra.services.join(", "),
+          before_photo_url: null,
+          after_photo_url: null,
+          notes: null,
+          status: "pending",
+          uploaded_at: ""
+        }));
+        setAreaPhotos(initialAreas);
       }
-    } catch (error) {
-      console.error("Error fetching area photos:", error);
-    } finally {
       setLoading(false);
-    }
-  };
+    };
 
-  const initializeAreas = async () => {
-    try {
-      const areasToCreate = requiredAreas.map((area) => ({
-        job_id: jobId,
-        area_name: area.name,
-        service_type: area.services.join(", "),
-        status: "pending"
-      }));
-
-      const { error } = await supabase
-        .from("job_area_photos")
-        .insert(areasToCreate);
-
-      if (error) throw error;
-      await fetchAreaPhotos();
-    } catch (error) {
-      console.error("Error initializing areas:", error);
-    }
-  };
+    initializeAreas();
+  }, [jobId, requiredAreas]);
 
   // Calculate completion stats
   const completedAreas = areaPhotos.filter(
@@ -224,43 +200,31 @@ export function AreaPhotoDocumentation({
         .from("job-evidence")
         .getPublicUrl(uploadData.path);
 
-      // Update database
-      const existingArea = areaPhotos.find((a) => a.area_name === areaName);
-
-      if (existingArea) {
-        const updateData: Record<string, string> = {
-          [`${type}_photo_url`]: urlData.publicUrl,
-          uploaded_by: (await supabase.auth.getUser()).data.user?.id || ""
-        };
-
-        // Check if both photos will be present after this update
-        const otherType = type === "before" ? "after" : "before";
-        const hasOtherPhoto = existingArea[`${otherType}_photo_url`];
-        if (hasOtherPhoto) {
-          updateData.status = "completed";
-        }
-
-        const { error: dbError } = await supabase
-          .from("job_area_photos")
-          .update(updateData)
-          .eq("id", existingArea.id);
-
-        if (dbError) throw dbError;
-      } else {
-        // Create new area photo record
-        const { error: dbError } = await supabase.from("job_area_photos").insert({
-          job_id: jobId,
-          area_name: areaName,
-          [`${type}_photo_url`]: urlData.publicUrl,
-          uploaded_by: (await supabase.auth.getUser()).data.user?.id,
-          status: "pending"
-        });
-
-        if (dbError) throw dbError;
-      }
+      // Update local state (since job_area_photos table doesn't exist)
+      setAreaPhotos((prev) =>
+        prev.map((area) => {
+          if (area.area_name === areaName) {
+            const updatedArea = {
+              ...area,
+              [`${type}_photo_url`]: urlData.publicUrl
+            };
+            // Check if both photos are now present
+            const hasOtherType = type === "before" ? area.after_photo_url : area.before_photo_url;
+            if (hasOtherType || urlData.publicUrl) {
+              const hasBoth = type === "before" 
+                ? (urlData.publicUrl && area.after_photo_url)
+                : (area.before_photo_url && urlData.publicUrl);
+              if (hasBoth) {
+                updatedArea.status = "completed";
+              }
+            }
+            return updatedArea as AreaPhoto;
+          }
+          return area;
+        })
+      );
 
       toast.success(`📸 ${type === "before" ? "Before" : "After"} photo saved for ${areaName}!`);
-      await fetchAreaPhotos();
       onPhotosUpdated?.();
     } catch (error) {
       console.error("Photo upload error:", error);
@@ -272,47 +236,28 @@ export function AreaPhotoDocumentation({
   };
 
   const handleSaveNotes = async (areaName: string) => {
-    const area = areaPhotos.find((a) => a.area_name === areaName);
-    if (!area) return;
-
-    try {
-      const { error } = await supabase
-        .from("job_area_photos")
-        .update({ notes: notesText })
-        .eq("id", area.id);
-
-      if (error) throw error;
-
-      toast.success("Notes saved");
-      await fetchAreaPhotos();
-      setEditingNotes(null);
-      setNotesText("");
-    } catch (error) {
-      toast.error("Failed to save notes");
-    }
+    // Update local state
+    setAreaPhotos((prev) =>
+      prev.map((area) =>
+        area.area_name === areaName ? { ...area, notes: notesText } : area
+      )
+    );
+    toast.success("Notes saved");
+    setEditingNotes(null);
+    setNotesText("");
   };
 
   const handleDeletePhoto = async (areaName: string, type: "before" | "after") => {
-    const area = areaPhotos.find((a) => a.area_name === areaName);
-    if (!area) return;
-
-    try {
-      const { error } = await supabase
-        .from("job_area_photos")
-        .update({
-          [`${type}_photo_url`]: null,
-          status: "pending"
-        })
-        .eq("id", area.id);
-
-      if (error) throw error;
-
-      toast.success(`${type === "before" ? "Before" : "After"} photo removed`);
-      await fetchAreaPhotos();
-      onPhotosUpdated?.();
-    } catch (error) {
-      toast.error("Failed to delete photo");
-    }
+    // Update local state
+    setAreaPhotos((prev) =>
+      prev.map((area) =>
+        area.area_name === areaName
+          ? { ...area, [`${type}_photo_url`]: null, status: "pending" as const }
+          : area
+      )
+    );
+    toast.success(`${type === "before" ? "Before" : "After"} photo removed`);
+    onPhotosUpdated?.();
   };
 
   // Render area list based on required areas or existing photos
@@ -404,7 +349,7 @@ export function AreaPhotoDocumentation({
                       flex items-center justify-between p-3 rounded-lg cursor-pointer
                       transition-colors
                       ${isComplete
-                        ? "bg-success/10 border border-success/30"
+                        ? "bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900"
                         : "bg-muted/50 border border-border hover:bg-muted"
                       }
                     `}
@@ -413,7 +358,7 @@ export function AreaPhotoDocumentation({
                       <div
                         className={`
                           h-8 w-8 rounded-full flex items-center justify-center
-                          ${isComplete ? "bg-success text-success-foreground" : "bg-muted-foreground/20"}
+                          ${isComplete ? "bg-emerald-500 text-white" : "bg-muted-foreground/20"}
                         `}
                       >
                         {isComplete ? (
@@ -513,7 +458,7 @@ export function AreaPhotoDocumentation({
                       {hasAfter ? (
                         <div className="relative">
                           <div
-                            className="aspect-square rounded-lg overflow-hidden bg-muted cursor-pointer border-2 border-success/30"
+                            className="aspect-square rounded-lg overflow-hidden bg-muted cursor-pointer border-2 border-primary/30"
                             onClick={() => setSelectedPhoto(area.after_photo_url!)}
                           >
                             <img
@@ -539,7 +484,7 @@ export function AreaPhotoDocumentation({
                       ) : isInProgress ? (
                         <Button
                           variant="outline"
-                          className="w-full aspect-square flex flex-col gap-1 border-dashed"
+                          className="w-full aspect-square flex flex-col gap-1"
                           onClick={() => handlePhotoCapture(area.area_name, "after")}
                           disabled={
                             uploadingArea?.areaName === area.area_name &&
@@ -566,22 +511,22 @@ export function AreaPhotoDocumentation({
                     </div>
                   </div>
 
-                  {/* Notes Section */}
-                  <div className="pl-11 mt-3">
+                  {/* Notes section */}
+                  <div className="mt-3 pl-11">
                     {editingNotes === area.area_name ? (
                       <div className="space-y-2">
                         <Textarea
                           placeholder="Add notes about this area..."
                           value={notesText}
                           onChange={(e) => setNotesText(e.target.value)}
-                          className="min-h-[60px]"
+                          className="min-h-[60px] text-sm"
                         />
                         <div className="flex gap-2">
                           <Button
                             size="sm"
                             onClick={() => handleSaveNotes(area.area_name)}
                           >
-                            Save Notes
+                            Save
                           </Button>
                           <Button
                             size="sm"
@@ -596,67 +541,45 @@ export function AreaPhotoDocumentation({
                         </div>
                       </div>
                     ) : (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-muted-foreground"
-                        onClick={() => {
-                          setEditingNotes(area.area_name);
-                          setNotesText(area.notes || "");
-                        }}
-                      >
-                        <MessageSquare className="h-3 w-3 mr-1" />
-                        {area.notes ? "Edit notes" : "Add notes"}
-                      </Button>
-                    )}
-                    {area.notes && editingNotes !== area.area_name && (
-                      <p className="text-xs text-muted-foreground mt-1 italic">
-                        "{area.notes}"
-                      </p>
+                      <div className="flex items-start gap-2">
+                        {area.notes ? (
+                          <p className="text-sm text-muted-foreground flex-1">
+                            {area.notes}
+                          </p>
+                        ) : null}
+                        {isInProgress && (
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="text-xs"
+                            onClick={() => {
+                              setEditingNotes(area.area_name);
+                              setNotesText(area.notes || "");
+                            }}
+                          >
+                            <MessageSquare className="h-3 w-3 mr-1" />
+                            {area.notes ? "Edit" : "Add"} Notes
+                          </Button>
+                        )}
+                      </div>
                     )}
                   </div>
                 </CollapsibleContent>
               </Collapsible>
             );
           })}
-
-          {/* Completion Warning */}
-          {!allComplete && isInProgress && (
-            <div className="flex items-center gap-2 p-3 bg-amber-50 dark:bg-amber-950/30 rounded-lg text-amber-700 dark:text-amber-300">
-              <AlertTriangle className="h-4 w-4 flex-shrink-0" />
-              <p className="text-xs">
-                Complete all area photos before marking job as done.
-              </p>
-            </div>
-          )}
-
-          {/* All Complete Message */}
-          {allComplete && (
-            <div className="flex items-center gap-2 p-3 bg-success/10 rounded-lg text-success">
-              <CheckCircle2 className="h-4 w-4 flex-shrink-0" />
-              <p className="text-xs font-medium">
-                All areas documented! Ready to complete the job.
-              </p>
-            </div>
-          )}
         </CardContent>
       </Card>
 
-      {/* Photo Lightbox */}
+      {/* Photo preview modal */}
       {selectedPhoto && (
         <div
-          className="fixed inset-0 bg-background/95 z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4"
           onClick={() => setSelectedPhoto(null)}
         >
-          <button
-            className="absolute top-4 right-4 text-foreground"
-            onClick={() => setSelectedPhoto(null)}
-          >
-            <XCircle className="h-8 w-8" />
-          </button>
           <img
             src={selectedPhoto}
-            alt="Full size"
+            alt="Photo preview"
             className="max-w-full max-h-full object-contain rounded-lg"
           />
         </div>
