@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Check, Sparkles, Building2, Rocket, Users } from "lucide-react";
+import { Check, Zap, Building2, Rocket, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -29,7 +29,7 @@ const plans: Plan[] = [
     monthlyPrice: 89,
     annualPrice: 890,
     staffLimit: "1-2 staff",
-    icon: <Sparkles className="h-6 w-6" />,
+    icon: <Zap className="h-6 w-6" />,
     features: [
       "Up to 50 jobs/month",
       "2 staff members",

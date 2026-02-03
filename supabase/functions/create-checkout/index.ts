@@ -104,7 +104,7 @@ serve(async (req) => {
       }
     }
 
-    const origin = req.headers.get("origin") || Deno.env.get("APP_URL") || "https://cleanflow.com.au";
+    const origin = req.headers.get("origin") || Deno.env.get("APP_URL") || "https://pulcrix.com";
 
     // Calculate trial end date for metadata
     const trialEnd = new Date();

@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
-import { ArrowLeft, Sparkles } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { PulcrixLogo } from "@/components/PulcrixLogo";
 
 export default function TermsPage() {
   return (
@@ -8,9 +9,8 @@ export default function TermsPage() {
       {/* Header */}
       <header className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2">
-            <Sparkles className="h-6 w-6 text-primary" />
-            <span className="text-xl font-bold text-primary">CleanFlow</span>
+          <Link to="/" className="hover:opacity-80 transition-opacity">
+            <PulcrixLogo variant="full" size="sm" />
           </Link>
           <Link to="/">
             <Button variant="ghost" size="sm">
@@ -23,7 +23,7 @@ export default function TermsPage() {
 
       <main className="container mx-auto px-4 py-12 max-w-4xl">
         <h1 className="text-4xl font-bold text-foreground mb-8">Terms of Service</h1>
-        
+
         <div className="prose prose-lg dark:prose-invert max-w-none space-y-6 text-muted-foreground">
           <p className="text-sm text-muted-foreground">
             Last updated: {new Date().toLocaleDateString('en-AU', { year: 'numeric', month: 'long', day: 'numeric' })}
@@ -32,7 +32,7 @@ export default function TermsPage() {
           <section className="space-y-4">
             <h2 className="text-2xl font-semibold text-foreground">1. Acceptance of Terms</h2>
             <p>
-              By accessing and using CleanFlow ("the Service"), you agree to be bound by these Terms of Service. 
+              By accessing and using Pulcrix ("the Service"), you agree to be bound by these Terms of Service.
               If you do not agree with any part of these terms, you may not access the Service.
             </p>
           </section>
@@ -40,7 +40,7 @@ export default function TermsPage() {
           <section className="space-y-4">
             <h2 className="text-2xl font-semibold text-foreground">2. Description of Service</h2>
             <p>
-              CleanFlow is a management platform for cleaning businesses that enables:
+              Pulcrix is a management platform for cleaning businesses that enables:
             </p>
             <ul className="list-disc pl-6 space-y-2">
               <li>Scheduling and management of cleaning jobs</li>
@@ -54,8 +54,8 @@ export default function TermsPage() {
           <section className="space-y-4">
             <h2 className="text-2xl font-semibold text-foreground">3. Registration and Accounts</h2>
             <p>
-              To use the Service, you must create an account by providing accurate and complete information. 
-              You are responsible for maintaining the confidentiality of your password and for all activities 
+              To use the Service, you must create an account by providing accurate and complete information.
+              You are responsible for maintaining the confidentiality of your password and for all activities
               that occur under your account.
             </p>
           </section>
@@ -75,7 +75,7 @@ export default function TermsPage() {
           <section className="space-y-4">
             <h2 className="text-2xl font-semibold text-foreground">5. Payments and Billing</h2>
             <p>
-              Subscription plans are billed monthly or annually as you choose. 
+              Subscription plans are billed monthly or annually as you choose.
               All payments are non-refundable except as set out in our refund policy.
               Prices may change with 30 days' prior notice.
             </p>
@@ -84,8 +84,8 @@ export default function TermsPage() {
           <section className="space-y-4">
             <h2 className="text-2xl font-semibold text-foreground">6. Intellectual Property</h2>
             <p>
-              The Service and its original content, features and functionality are the property of CleanFlow 
-              and are protected by intellectual property laws. You retain all rights to 
+              The Service and its original content, features and functionality are the property of Pulcrix
+              and are protected by intellectual property laws. You retain all rights to
               your data and content.
             </p>
           </section>
@@ -93,7 +93,7 @@ export default function TermsPage() {
           <section className="space-y-4">
             <h2 className="text-2xl font-semibold text-foreground">7. Limitation of Liability</h2>
             <p>
-              In no event shall CleanFlow be liable for indirect, incidental, special, 
+              In no event shall Pulcrix be liable for indirect, incidental, special,
               consequential or punitive damages, including loss of profits, data, use or other intangible loss.
             </p>
           </section>
@@ -101,7 +101,7 @@ export default function TermsPage() {
           <section className="space-y-4">
             <h2 className="text-2xl font-semibold text-foreground">8. Termination</h2>
             <p>
-              We may terminate or suspend your account immediately, without prior notice, for any reason, 
+              We may terminate or suspend your account immediately, without prior notice, for any reason,
               including breach of these Terms. Upon termination, your right to use the Service will cease.
             </p>
           </section>
@@ -109,7 +109,7 @@ export default function TermsPage() {
           <section className="space-y-4">
             <h2 className="text-2xl font-semibold text-foreground">9. Changes to Terms</h2>
             <p>
-              We reserve the right to modify these terms at any time. 
+              We reserve the right to modify these terms at any time.
               We will notify you of significant changes by email or by posting a notice on the Service.
             </p>
           </section>
@@ -117,9 +117,9 @@ export default function TermsPage() {
           <section className="space-y-4">
             <h2 className="text-2xl font-semibold text-foreground">10. Contact</h2>
             <p>
-              If you have questions about these Terms of Service, you can contact us at: 
-              <a href="mailto:legal@cleanflow.app" className="text-primary hover:underline ml-1">
-                legal@cleanflow.app
+              If you have questions about these Terms of Service, you can contact us at:
+              <a href="mailto:legal@pulcrix.com" className="text-primary hover:underline ml-1">
+                legal@pulcrix.com
               </a>
             </p>
           </section>
@@ -134,7 +134,7 @@ export default function TermsPage() {
             <span>•</span>
             <Link to="/privacy" className="hover:text-foreground">Privacy Policy</Link>
           </div>
-          <p className="mt-4">© {new Date().getFullYear()} CleanFlow. All rights reserved.</p>
+          <p className="mt-4">© {new Date().getFullYear()} Pulcrix. All rights reserved.</p>
         </div>
       </footer>
     </div>

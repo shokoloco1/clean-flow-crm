@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
-import { Check, Sparkles, Building2, Users, CreditCard, Shield, Loader2 } from "lucide-react";
+import { Check, Building2, Users, CreditCard, Shield, Loader2, Rocket } from "lucide-react";
+import { PulcrixLogo } from "@/components/PulcrixLogo";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -87,7 +88,7 @@ const PricingPage = () => {
       cta: "Start Free Trial",
       ctaVariant: "default" as const,
       highlighted: true,
-      icon: Sparkles,
+      icon: Rocket,
       planKey: "professional" as const,
     },
     {
@@ -119,7 +120,7 @@ const PricingPage = () => {
   const faqs = [
     {
       question: "How does the 14-day free trial work?",
-      answer: "Start using CleanFlow immediately with full access to all features in your selected plan. No credit card required. After 14 days, choose to subscribe or your account will be paused until you decide to continue.",
+      answer: "Start using Pulcrix immediately with full access to all features in your selected plan. No credit card required. After 14 days, choose to subscribe or your account will be paused until you decide to continue.",
     },
     {
       question: "Can I change plans later?",
@@ -156,8 +157,8 @@ const PricingPage = () => {
       {/* Header */}
       <header className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link to="/" className="text-2xl font-bold text-primary">
-            CleanFlow
+          <Link to="/" className="hover:opacity-80 transition-opacity">
+            <PulcrixLogo variant="full" size="sm" />
           </Link>
           <div className="flex items-center gap-4">
             <Link to="/auth">
@@ -331,7 +332,7 @@ const PricingPage = () => {
             Ready to streamline your cleaning business?
           </h2>
           <p className="text-lg opacity-90 mb-8">
-            Join hundreds of Australian cleaning businesses using CleanFlow
+            Join hundreds of Australian cleaning businesses using Pulcrix
           </p>
           <Link to="/signup">
             <Button size="lg" variant="secondary">

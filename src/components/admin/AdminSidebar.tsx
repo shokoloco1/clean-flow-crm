@@ -7,7 +7,6 @@ import {
   UserCog,
   FileText,
   Settings,
-  Sparkles,
   LogOut,
   BarChart3,
   Building2,
@@ -28,6 +27,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
+import { PulcrixLogo } from "@/components/PulcrixLogo";
 import { useAuth } from "@/hooks/useAuth";
 
 const mainNavItems = [
@@ -93,12 +93,11 @@ export function AdminSidebar() {
     <Sidebar collapsible="icon" className="border-r border-border">
       <SidebarHeader className="border-b border-border">
         <Link to="/" className="flex items-center gap-3 px-2 py-3 hover:opacity-80 transition-opacity">
-          <div className="h-9 w-9 rounded-lg bg-primary flex items-center justify-center shadow-md shadow-primary/20 shrink-0">
-            <Sparkles className="h-5 w-5 text-primary-foreground" />
-          </div>
-          {!isCollapsed && (
+          {isCollapsed ? (
+            <PulcrixLogo variant="icon" size="sm" className="text-primary shrink-0" />
+          ) : (
             <div className="overflow-hidden">
-              <h1 className="text-lg font-bold text-foreground truncate">CleanFlow</h1>
+              <PulcrixLogo size="sm" />
               <p className="text-xs text-muted-foreground truncate">Admin Panel</p>
             </div>
           )}

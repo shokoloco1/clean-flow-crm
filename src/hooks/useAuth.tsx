@@ -20,8 +20,8 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // LocalStorage keys for persistent cache
-const ROLE_CACHE_KEY = "cleanflow_user_role";
-const USER_ID_CACHE_KEY = "cleanflow_user_id";
+const ROLE_CACHE_KEY = "pulcrix_user_role";
+const USER_ID_CACHE_KEY = "pulcrix_user_id";
 
 // Get cached role from localStorage (instant)
 const getCachedRole = (userId: string): AppRole => {

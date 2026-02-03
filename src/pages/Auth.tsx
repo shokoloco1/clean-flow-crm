@@ -9,8 +9,9 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "sonner";
-import { Sparkles, Eye, EyeOff, AlertTriangle, Lock, CheckCircle, ArrowRight } from "lucide-react";
+import { Eye, EyeOff, AlertTriangle, Lock, CheckCircle, ArrowRight } from "lucide-react";
 import { loginSchema } from "@/lib/passwordSecurity";
+import { PulcrixLogo } from "@/components/PulcrixLogo";
 
 export default function Auth() {
   const navigate = useNavigate();
@@ -150,12 +151,10 @@ export default function Auth() {
       <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4">
         <div className="w-full max-w-md space-y-6">
           <div className="text-center space-y-2">
-            <div className="flex items-center justify-center gap-2">
-              <div className="h-12 w-12 rounded-xl bg-primary flex items-center justify-center">
-                <Sparkles className="h-7 w-7 text-primary-foreground" />
-              </div>
+            <div className="flex items-center justify-center">
+              <PulcrixLogo variant="icon" size="lg" className="text-primary" />
             </div>
-            <h1 className="text-3xl font-bold text-foreground">CleanFlow</h1>
+            <h1 className="text-3xl font-bold text-foreground">Pulcrix</h1>
             <p className="text-muted-foreground">Your account doesn't have a role assigned</p>
           </div>
 
@@ -189,13 +188,11 @@ export default function Auth() {
       <div className="w-full max-w-md space-y-6">
         {/* Logo and branding */}
         <div className="text-center space-y-3">
-          <Link to="/" className="flex items-center justify-center gap-2 hover:opacity-80 transition-opacity">
-            <div className="h-14 w-14 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
-              <Sparkles className="h-8 w-8 text-primary-foreground" />
-            </div>
+          <Link to="/" className="flex items-center justify-center hover:opacity-80 transition-opacity">
+            <PulcrixLogo variant="icon" size="lg" className="text-primary" />
           </Link>
-          <h1 className="text-3xl font-bold text-foreground">CleanFlow</h1>
-          <p className="text-muted-foreground">Professional cleaning management</p>
+          <h1 className="text-3xl font-bold text-foreground">Pulcrix</h1>
+          <p className="text-muted-foreground">Clean Living. Pure Solutions.</p>
         </div>
 
         <Card className="border-border shadow-xl">
@@ -377,7 +374,7 @@ export default function Auth() {
         </Card>
 
         <p className="text-center text-sm text-muted-foreground">
-          CleanFlow — Manage your cleaning business without the stress
+          Pulcrix — Clean Living. Pure Solutions.
         </p>
       </div>
     </div>

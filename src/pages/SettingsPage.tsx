@@ -48,7 +48,7 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false);
   const [abnError, setAbnError] = useState<string | null>(null);
   const [settings, setSettings] = useState<SystemSettings>({
-    company_name: "CleanFlow",
+    company_name: "Pulcrix",
     company_logo: "",
     business_abn: "",
     business_address: "",

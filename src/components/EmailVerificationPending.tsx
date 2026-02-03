@@ -2,7 +2,8 @@ import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Mail, RefreshCw, LogOut, CheckCircle, Sparkles } from "lucide-react";
+import { Mail, RefreshCw, LogOut, CheckCircle } from "lucide-react";
+import { PulcrixLogo } from "@/components/PulcrixLogo";
 import { toast } from "sonner";
 
 export function EmailVerificationPending() {
@@ -34,12 +35,9 @@ export function EmailVerificationPending() {
       <div className="w-full max-w-md space-y-6">
         {/* Logo */}
         <div className="text-center space-y-3">
-          <div className="flex items-center justify-center gap-2">
-            <div className="h-14 w-14 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
-              <Sparkles className="h-8 w-8 text-primary-foreground" />
-            </div>
+          <div className="flex items-center justify-center">
+            <PulcrixLogo size="lg" />
           </div>
-          <h1 className="text-3xl font-bold text-foreground">CleanFlow</h1>
         </div>
 
         <Card className="border-border shadow-xl">

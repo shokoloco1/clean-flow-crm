@@ -12,7 +12,7 @@ export interface BusinessSettings {
 }
 
 const DEFAULT_SETTINGS: BusinessSettings = {
-  company_name: "CleanFlow",
+  company_name: "Pulcrix",
   company_logo: "",
   business_abn: "",
   business_address: "",

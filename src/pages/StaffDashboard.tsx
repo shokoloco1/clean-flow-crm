@@ -5,7 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { LogOut, Sparkles, Calendar, Smile, ChevronDown, Clock, Loader2 } from "lucide-react";
+import { LogOut, Calendar, Smile, ChevronDown, Clock, Loader2 } from "lucide-react";
+import { PulcrixLogo } from "@/components/PulcrixLogo";
 import { format, addDays } from "date-fns";
 import JobDetailView from "@/components/JobDetailView";
 import { NotificationCenter } from "@/components/NotificationCenter";
@@ -231,11 +232,9 @@ export default function StaffDashboard() {
       <header className="bg-card border-b border-border sticky top-0 z-10 px-4 py-4 safe-area-inset-top">
         <div className="flex items-center justify-between">
           <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-            <div className="h-12 w-12 rounded-xl bg-primary flex items-center justify-center shadow-sm">
-              <Sparkles className="h-6 w-6 text-primary-foreground" />
-            </div>
+            <PulcrixLogo />
             <div>
-              <h1 className="text-xl font-bold text-foreground">CleanFlow</h1>
+              <h1 className="text-xl font-bold text-foreground">Pulcrix</h1>
               <p className="text-sm text-muted-foreground">My Jobs</p>
             </div>
           </Link>

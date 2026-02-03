@@ -17,12 +17,13 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { enAU } from "date-fns/locale";
 import {
-  LogOut, Sparkles, Plus, Search, Users, Building2,
+  LogOut, Plus, Search, Users, Building2,
   Mail, Phone, MapPin, FileText, Edit, Trash2, Eye,
   Briefcase, CheckCircle2, Clock, TrendingUp, ArrowLeft,
   Copy, ExternalLink, Link as LinkIcon, AlertCircle, Loader2
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { PulcrixLogo } from "@/components/PulcrixLogo";
 import {
   capitalizeWords,
   formatAUPhone,
@@ -363,11 +364,9 @@ export default function ClientsPage() {
               </Button>
             </Link>
             <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-              <div className="h-10 w-10 rounded-lg bg-primary flex items-center justify-center">
-                <Sparkles className="h-5 w-5 text-primary-foreground" />
-              </div>
+              <PulcrixLogo />
               <div>
-                <h1 className="text-xl font-bold text-foreground">CleanFlow</h1>
+                <h1 className="text-xl font-bold text-foreground">Pulcrix</h1>
                 <p className="text-sm text-muted-foreground">Client Management</p>
               </div>
             </Link>

@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
-import { ArrowLeft, Sparkles } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { PulcrixLogo } from "@/components/PulcrixLogo";
 
 export default function PrivacyPage() {
   return (
@@ -8,9 +9,8 @@ export default function PrivacyPage() {
       {/* Header */}
       <header className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2">
-            <Sparkles className="h-6 w-6 text-primary" />
-            <span className="text-xl font-bold text-primary">CleanFlow</span>
+          <Link to="/" className="hover:opacity-80 transition-opacity">
+            <PulcrixLogo variant="full" size="sm" />
           </Link>
           <Link to="/">
             <Button variant="ghost" size="sm">
@@ -23,7 +23,7 @@ export default function PrivacyPage() {
 
       <main className="container mx-auto px-4 py-12 max-w-4xl">
         <h1 className="text-4xl font-bold text-foreground mb-8">Privacy Policy</h1>
-        
+
         <div className="prose prose-lg dark:prose-invert max-w-none space-y-6 text-muted-foreground">
           <p className="text-sm text-muted-foreground">
             Last updated: {new Date().toLocaleDateString('en-AU', { year: 'numeric', month: 'long', day: 'numeric' })}
@@ -31,9 +31,7 @@ export default function PrivacyPage() {
 
           <section className="space-y-4">
             <h2 className="text-2xl font-semibold text-foreground">1. Information We Collect</h2>
-            <p>
-              We collect information that you provide to us directly, including:
-            </p>
+            <p>We collect information that you provide to us directly, including:</p>
             <ul className="list-disc pl-6 space-y-2">
               <li><strong>Account information:</strong> name, email, phone, password</li>
               <li><strong>Business information:</strong> company name, address, tax details</li>
@@ -58,9 +56,7 @@ export default function PrivacyPage() {
 
           <section className="space-y-4">
             <h2 className="text-2xl font-semibold text-foreground">3. Sharing Information</h2>
-            <p>
-              We do not sell or rent your personal information to third parties. We may share information with:
-            </p>
+            <p>We do not sell or rent your personal information to third parties. We may share information with:</p>
             <ul className="list-disc pl-6 space-y-2">
               <li><strong>Service providers:</strong> who help us operate the Service</li>
               <li><strong>Legal compliance:</strong> when required by law</li>
@@ -71,9 +67,7 @@ export default function PrivacyPage() {
 
           <section className="space-y-4">
             <h2 className="text-2xl font-semibold text-foreground">4. Data Security</h2>
-            <p>
-              We implement technical and organisational security measures to protect your information:
-            </p>
+            <p>We implement technical and organisational security measures to protect your information:</p>
             <ul className="list-disc pl-6 space-y-2">
               <li>Encryption of data in transit and at rest</li>
               <li>Role-based access control</li>
@@ -86,8 +80,8 @@ export default function PrivacyPage() {
           <section className="space-y-4">
             <h2 className="text-2xl font-semibold text-foreground">5. Data Retention</h2>
             <p>
-              We retain your information while your account is active or as necessary to 
-              provide you with services. We also retain and use information as necessary 
+              We retain your information while your account is active or as necessary to
+              provide you with services. We also retain and use information as necessary
               to comply with legal obligations, resolve disputes and enforce our agreements.
             </p>
           </section>
@@ -107,8 +101,8 @@ export default function PrivacyPage() {
           <section className="space-y-4">
             <h2 className="text-2xl font-semibold text-foreground">7. Cookies and Similar Technologies</h2>
             <p>
-              We use cookies and similar technologies to maintain your session, 
-              remember your preferences and improve your experience. You can configure your browser 
+              We use cookies and similar technologies to maintain your session,
+              remember your preferences and improve your experience. You can configure your browser
               to reject cookies, but this may affect the functionality of the Service.
             </p>
           </section>
@@ -116,8 +110,8 @@ export default function PrivacyPage() {
           <section className="space-y-4">
             <h2 className="text-2xl font-semibold text-foreground">8. Location Data</h2>
             <p>
-              We collect GPS location data when staff perform check-in/check-out on jobs. 
-              This information is used to verify presence at the workplace and is shared 
+              We collect GPS location data when staff perform check-in/check-out on jobs.
+              This information is used to verify presence at the workplace and is shared
               only with the administrators of your organisation.
             </p>
           </section>
@@ -125,8 +119,8 @@ export default function PrivacyPage() {
           <section className="space-y-4">
             <h2 className="text-2xl font-semibold text-foreground">9. Minors</h2>
             <p>
-              The Service is not directed to persons under 18 years of age. We do not intentionally 
-              collect information from minors. If we discover that we have collected information from a minor, 
+              The Service is not directed to persons under 18 years of age. We do not intentionally
+              collect information from minors. If we discover that we have collected information from a minor,
               we will take steps to delete it.
             </p>
           </section>
@@ -134,8 +128,8 @@ export default function PrivacyPage() {
           <section className="space-y-4">
             <h2 className="text-2xl font-semibold text-foreground">10. Changes to this Policy</h2>
             <p>
-              We may update this Privacy Policy periodically. We will notify you of 
-              significant changes by posting the new policy on this page and, if appropriate, 
+              We may update this Privacy Policy periodically. We will notify you of
+              significant changes by posting the new policy on this page and, if appropriate,
               sending you a notice by email.
             </p>
           </section>
@@ -143,9 +137,9 @@ export default function PrivacyPage() {
           <section className="space-y-4">
             <h2 className="text-2xl font-semibold text-foreground">11. Contact</h2>
             <p>
-              If you have questions about this Privacy Policy, you can contact us at: 
-              <a href="mailto:privacy@cleanflow.app" className="text-primary hover:underline ml-1">
-                privacy@cleanflow.app
+              If you have questions about this Privacy Policy, you can contact us at:
+              <a href="mailto:privacy@pulcrix.com" className="text-primary hover:underline ml-1">
+                privacy@pulcrix.com
               </a>
             </p>
           </section>
@@ -160,7 +154,7 @@ export default function PrivacyPage() {
             <span>•</span>
             <Link to="/privacy" className="hover:text-foreground">Privacy Policy</Link>
           </div>
-          <p className="mt-4">© {new Date().getFullYear()} CleanFlow. All rights reserved.</p>
+          <p className="mt-4">© {new Date().getFullYear()} Pulcrix. All rights reserved.</p>
         </div>
       </footer>
     </div>

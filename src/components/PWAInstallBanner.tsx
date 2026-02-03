@@ -65,7 +65,7 @@ const PWAInstallBannerComponent: ForwardRefRenderFunction<HTMLDivElement> = (_, 
         
         <div className="flex-1 min-w-0">
           <p className="font-semibold text-foreground text-base">
-            Install CleanFlow
+            Install Pulcrix
           </p>
           <p className="text-sm text-muted-foreground">
             Add to home screen for quick access

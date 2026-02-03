@@ -6,7 +6,7 @@ import { KeyboardShortcutsHelp } from "./KeyboardShortcutsHelp";
 import { NotificationCenter } from "@/components/NotificationCenter";
 import { GlobalSearch } from "@/components/GlobalSearch";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
-import { Sparkles } from "lucide-react";
+import { PulcrixLogo } from "@/components/PulcrixLogo";
 import { Link } from "react-router-dom";
 
 interface AdminLayoutProps {
@@ -23,10 +23,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
           <header className="md:hidden sticky top-0 z-40 bg-card border-b border-border">
             <div className="flex items-center justify-between px-4 h-14">
               <Link to="/" className="flex items-center gap-2">
-                <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-                  <Sparkles className="h-4 w-4 text-primary-foreground" />
-                </div>
-                <span className="font-bold text-foreground">CleanFlow</span>
+                <PulcrixLogo size="sm" />
               </Link>
               <div className="flex items-center gap-2">
                 <GlobalSearch />

@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  Sparkles,
   Download,
   Smartphone,
   CheckCircle2,
@@ -17,6 +16,7 @@ import {
   Bell,
   Shield
 } from "lucide-react";
+import { PulcrixLogo } from "@/components/PulcrixLogo";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -126,12 +126,10 @@ export default function InstallPage() {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div className="flex items-center gap-3">
-            <div className="h-12 w-12 rounded-xl bg-primary flex items-center justify-center">
-              <Sparkles className="h-6 w-6 text-primary-foreground" />
-            </div>
+            <PulcrixLogo variant="icon" size="md" className="text-primary" />
             <div>
               <h1 className="text-xl font-bold text-foreground">Install App</h1>
-              <p className="text-sm text-muted-foreground">CleanFlow Mobile</p>
+              <p className="text-sm text-muted-foreground">Pulcrix Mobile</p>
             </div>
           </div>
         </div>
@@ -167,7 +165,7 @@ export default function InstallPage() {
                   You're already using the app!
                 </h2>
                 <p className="text-muted-foreground mb-6 text-lg">
-                  CleanFlow is installed and running as a native app.
+                  Pulcrix is installed and running as a native app.
                 </p>
                 <Button onClick={() => navigate("/")} size="lg" className="h-14 px-8">
                   Go to Home
@@ -186,7 +184,7 @@ export default function InstallPage() {
                   App Installed!
                 </h2>
                 <p className="text-muted-foreground text-lg">
-                  Find CleanFlow on your home screen to use it.
+                  Find Pulcrix on your home screen to use it.
                 </p>
               </div>
             </CardContent>
@@ -199,7 +197,7 @@ export default function InstallPage() {
                 <div className="h-24 w-24 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
                   <Smartphone className="h-12 w-12 text-primary" />
                 </div>
-                <CardTitle className="text-2xl">Install CleanFlow</CardTitle>
+                <CardTitle className="text-2xl">Install Pulcrix</CardTitle>
                 <CardDescription className="text-base">
                   Quick access from your home screen
                 </CardDescription>
