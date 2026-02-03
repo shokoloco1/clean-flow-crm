@@ -12,30 +12,14 @@ export function AnalyticsProvider({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
 
   useEffect(() => {
-    // Track page view on route change
+    // Track page view on route change (stubbed - analytics_events table not yet created)
     const trackPageView = async () => {
-      try {
-        // Skip tracking in development unless explicitly enabled
-        if (import.meta.env.DEV && !import.meta.env.VITE_ENABLE_ANALYTICS) {
-          console.log("[Analytics] Page view:", location.pathname);
-          return;
-        }
-
-        await supabase.from("analytics_events").insert({
-          user_id: user?.id || null,
-          event_name: "page_view",
-          event_data: {
-            path: location.pathname,
-            search: location.search,
-            hash: location.hash,
-          },
-          page_path: location.pathname,
-          referrer: document.referrer || null,
-          user_agent: navigator.userAgent,
-        });
-      } catch {
-        // Silently fail - analytics should never break the app
+      // Skip tracking - table doesn't exist yet
+      // Log to console for development/debugging only
+      if (import.meta.env.DEV || !import.meta.env.VITE_ENABLE_ANALYTICS) {
+        console.log("[Analytics] Page view:", location.pathname);
       }
+      // TODO: Implement database tracking when analytics_events table is created
     };
 
     trackPageView();
