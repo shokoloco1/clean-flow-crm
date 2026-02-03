@@ -22,7 +22,7 @@ const getInvitationEmailHtml = (staffName: string, inviteLink: string, adminName
         <table role="presentation" style="width: 100%; max-width: 600px; border-collapse: collapse; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
           <!-- Header -->
           <tr>
-            <td style="background: linear-gradient(135deg, #2D5A3D 0%, #1A3A2A 100%); padding: 32px 40px; text-align: center;">
+            <td style="background: linear-gradient(135deg, #0D9488 0%, #134E4A 100%); padding: 32px 40px; text-align: center;">
               <table role="presentation" style="width: 100%;">
                 <tr>
                   <td align="center">
@@ -61,7 +61,7 @@ const getInvitationEmailHtml = (staffName: string, inviteLink: string, adminName
                 <tr>
                   <td align="center">
                     <a href="${inviteLink}"
-                       style="display: inline-block; background-color: #2D5A3D; color: #ffffff; text-decoration: none; font-size: 16px; font-weight: 600; padding: 16px 40px; border-radius: 8px; box-shadow: 0 2px 4px rgba(45, 90, 61, 0.3);">
+                       style="display: inline-block; background-color: #0D9488; color: #ffffff; text-decoration: none; font-size: 16px; font-weight: 600; padding: 16px 40px; border-radius: 8px; box-shadow: 0 2px 4px rgba(13, 148, 136, 0.3);">
                       Set Up My Account
                     </a>
                   </td>

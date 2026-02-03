@@ -121,7 +121,7 @@ const handler = async (req: Request): Promise<Response> => {
         const emailHtml = `
           <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #374151; max-width: 600px; margin: 0 auto; padding: 20px;">
             <div style="text-align: center; margin-bottom: 30px;">
-              <h1 style="color: #2D5A3D; margin: 0;">${companyName}</h1>
+              <h1 style="color: #0D9488; margin: 0;">${companyName}</h1>
             </div>
             
             <h2 style="color: #dc2626;">⚠️ Payment Reminder</h2>
