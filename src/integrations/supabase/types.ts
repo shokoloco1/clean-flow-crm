@@ -1216,6 +1216,17 @@ export type Database = {
           phone: string
         }[]
       }
+      get_client_for_job_safe: {
+        Args: { _job_id: string }
+        Returns: {
+          address: string
+          email: string
+          id: string
+          name: string
+          notes: string
+          phone: string
+        }[]
+      }
       get_client_portal_data: {
         Args: { p_token: string }
         Returns: {
