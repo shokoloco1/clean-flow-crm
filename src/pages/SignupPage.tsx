@@ -36,6 +36,8 @@ const SignupPage = () => {
   const [currentStep, setCurrentStep] = useState<Step>("account");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  // Track that we're actively in the signup flow — prevents premature redirect
+  const [isSigningUp, setIsSigningUp] = useState(false);
 
   // Account form state
   const [email, setEmail] = useState("");
@@ -64,26 +66,51 @@ const SignupPage = () => {
     }
   }, [searchParams]);
 
-  // Handle already logged-in users
+  // Handle already logged-in users (but NOT users actively in signup flow)
   useEffect(() => {
     if (!authLoading && user && session) {
-      // If user has a role, redirect to appropriate dashboard
-      if (role) {
-        navigate(role === "admin" ? "/admin" : "/staff", { replace: true });
+      // If we're in the middle of a signup flow, don't redirect
+      // Let the user complete all steps (account → plan → payment)
+      if (isSigningUp) {
+        // User just created their account — advance to plan selection
+        if (currentStep === "account") {
+          setCurrentStep("plan");
+        }
         return;
       }
 
       // For invited staff who just set their password
       if (isInvitedStaff) {
         // They should go to staff dashboard after setting password
-        // Wait a moment for role to be assigned
         setTimeout(() => {
           navigate("/staff", { replace: true });
         }, 1000);
         return;
       }
 
-      // For new owners, check subscription status
+      // Only redirect if user navigated to /signup while already logged in
+      // (not during an active signup flow)
+      if (role) {
+        // Check subscription status first — maybe they need to complete payment
+        supabase
+          .from("subscriptions")
+          .select("status")
+          .eq("user_id", user.id)
+          .maybeSingle()
+          .then(({ data }) => {
+            if (data?.status === "trialing" || data?.status === "active") {
+              navigate(role === "admin" ? "/admin" : "/staff", { replace: true });
+            } else {
+              // User has role but no active subscription — let them pick a plan
+              if (currentStep === "account") {
+                setCurrentStep("plan");
+              }
+            }
+          });
+        return;
+      }
+
+      // No role yet, check subscription
       supabase
         .from("subscriptions")
         .select("status")
@@ -97,7 +124,7 @@ const SignupPage = () => {
           }
         });
     }
-  }, [user, session, authLoading, navigate, currentStep, isInvitedStaff, role]);
+  }, [user, session, authLoading, navigate, currentStep, isInvitedStaff, role, isSigningUp]);
 
   const handleAccountSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -127,6 +154,11 @@ const SignupPage = () => {
 
     setIsSubmitting(true);
 
+    // Mark that we're actively signing up — prevents premature redirect
+    if (!isInvitedStaff) {
+      setIsSigningUp(true);
+    }
+
     const { error } = await signUp(email, password, fullName, userRole);
 
     if (error) {
@@ -136,6 +168,7 @@ const SignupPage = () => {
       } else {
         toast.error(error.message || "Something went wrong. Please try again.");
       }
+      setIsSigningUp(false);
       setIsSubmitting(false);
       return;
     }
@@ -375,11 +408,8 @@ const SignupPage = () => {
       {/* Header */}
       <header className="border-b border-border bg-background/80 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center">
-              <Sparkles className="h-6 w-6 text-primary-foreground" />
-            </div>
-            <span className="text-xl font-bold">Pulcrix</span>
+          <Link to="/" className="hover:opacity-80 transition-opacity">
+            <PulcrixLogo variant="full" size="md" />
           </Link>
 
           <div className="flex items-center gap-4">
