@@ -20,6 +20,8 @@ import { cn } from "@/lib/utils";
 
 type Step = "account" | "plan" | "payment";
 
+const SIGNUP_FLOW_KEY = "pulcrix_signup_in_progress";
+
 const ownerSteps: { id: Step; title: string; description: string }[] = [
   { id: "account", title: "Create Account", description: "Your business details" },
   { id: "plan", title: "Choose Plan", description: "Select your subscription" },
@@ -37,8 +39,25 @@ const SignupPage = () => {
   const [currentStep, setCurrentStep] = useState<Step>("account");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-  // Track that we're actively in the signup flow — prevents premature redirect
-  const [isSigningUp, setIsSigningUp] = useState(false);
+  // Track that we're actively in the signup flow — persisted in sessionStorage
+  // so it survives Google OAuth redirects and page reloads
+  const [isSigningUp, setIsSigningUp] = useState(() => {
+    try {
+      return sessionStorage.getItem(SIGNUP_FLOW_KEY) === "true";
+    } catch {
+      return false;
+    }
+  });
+
+  // Persist signup flag to sessionStorage (survives OAuth redirects)
+  const markSignupStarted = () => {
+    try { sessionStorage.setItem(SIGNUP_FLOW_KEY, "true"); } catch {}
+    setIsSigningUp(true);
+  };
+  const clearSignupFlag = () => {
+    try { sessionStorage.removeItem(SIGNUP_FLOW_KEY); } catch {}
+    setIsSigningUp(false);
+  };
 
   // Account form state
   const [email, setEmail] = useState("");
@@ -100,6 +119,7 @@ const SignupPage = () => {
           .maybeSingle()
           .then(({ data }) => {
             if (data?.status === "trialing" || data?.status === "active") {
+              clearSignupFlag();
               navigate(role === "admin" ? "/admin" : "/staff", { replace: true });
             } else {
               // User has role but no active subscription — let them pick a plan
@@ -119,6 +139,7 @@ const SignupPage = () => {
         .maybeSingle()
         .then(({ data }) => {
           if (data?.status === "trialing" || data?.status === "active") {
+            clearSignupFlag();
             navigate("/admin", { replace: true });
           } else if (currentStep === "account") {
             setCurrentStep("plan");
@@ -157,7 +178,7 @@ const SignupPage = () => {
 
     // Mark that we're actively signing up — prevents premature redirect
     if (!isInvitedStaff) {
-      setIsSigningUp(true);
+      markSignupStarted();
     }
 
     const { error } = await signUp(email, password, fullName, userRole);
@@ -169,7 +190,7 @@ const SignupPage = () => {
       } else {
         toast.error(error.message || "Something went wrong. Please try again.");
       }
-      setIsSigningUp(false);
+      clearSignupFlag();
       setIsSubmitting(false);
       return;
     }
@@ -611,11 +632,15 @@ const SignupPage = () => {
                   className="w-full h-12"
                   onClick={async () => {
                     setIsSubmitting(true);
+                    // Mark signup in progress BEFORE the OAuth redirect
+                    // sessionStorage persists across the redirect round-trip
+                    markSignupStarted();
                     const { error } = await lovable.auth.signInWithOAuth("google", {
-                      redirect_uri: window.location.origin,
+                      redirect_uri: `${window.location.origin}/signup`,
                     });
                     if (error) {
                       toast.error("Failed to sign up with Google");
+                      clearSignupFlag();
                       setIsSubmitting(false);
                     }
                   }}

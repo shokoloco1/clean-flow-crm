@@ -33,6 +33,11 @@ export default function Auth() {
   const [bootstrapTried, setBootstrapTried] = useState(false);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
+  // Clear any in-progress signup flag — user navigated to login instead
+  useEffect(() => {
+    try { sessionStorage.removeItem("pulcrix_signup_in_progress"); } catch {}
+  }, []);
+
   const handlePasswordReset = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -371,7 +376,7 @@ export default function Auth() {
                   onClick={async () => {
                     setIsSubmitting(true);
                     const { error } = await lovable.auth.signInWithOAuth("google", {
-                      redirect_uri: window.location.origin,
+                      redirect_uri: `${window.location.origin}/auth`,
                     });
                     if (error) {
                       toast.error("Failed to sign in with Google");
