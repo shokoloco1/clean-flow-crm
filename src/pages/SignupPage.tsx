@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "sonner";
-import { ArrowLeft, ArrowRight, Check, Eye, EyeOff, Loader2, Users, CheckCircle, Sparkles, Chrome } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Eye, EyeOff, Loader2, Users, CheckCircle, Chrome } from "lucide-react";
 import { lovable } from "@/integrations/lovable";
 import { PulcrixLogo } from "@/components/PulcrixLogo";
 import { signupSchema, validatePassword } from "@/lib/passwordSecurity";
@@ -39,8 +39,11 @@ const SignupPage = () => {
   const [currentStep, setCurrentStep] = useState<Step>("account");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-  // Track that we're actively in the signup flow — persisted in sessionStorage
-  // so it survives Google OAuth redirects and page reloads
+
+  // Track signup flow with MULTIPLE layers to prevent race conditions:
+  // 1. React state (for re-renders)
+  // 2. Ref (synchronous access, immune to React batching)
+  // 3. sessionStorage (survives page reloads and OAuth redirects)
   const [isSigningUp, setIsSigningUp] = useState(() => {
     try {
       return sessionStorage.getItem(SIGNUP_FLOW_KEY) === "true";
@@ -49,12 +52,31 @@ const SignupPage = () => {
     }
   });
 
-  // Persist signup flag to sessionStorage (survives OAuth redirects)
+  // Ref for synchronous access - critical for avoiding race conditions
+  // Use IIFE to immediately evaluate the sessionStorage check
+  const isSigningUpRef = useRef<boolean>((() => {
+    try {
+      return sessionStorage.getItem(SIGNUP_FLOW_KEY) === "true";
+    } catch {
+      return false;
+    }
+  })());
+
+  // Initialize ref from sessionStorage on mount
+  useEffect(() => {
+    try {
+      isSigningUpRef.current = sessionStorage.getItem(SIGNUP_FLOW_KEY) === "true";
+    } catch {}
+  }, []);
+
+  // Persist signup flag to ALL layers (ref + sessionStorage + state)
   const markSignupStarted = () => {
+    isSigningUpRef.current = true;
     try { sessionStorage.setItem(SIGNUP_FLOW_KEY, "true"); } catch {}
     setIsSigningUp(true);
   };
   const clearSignupFlag = () => {
+    isSigningUpRef.current = false;
     try { sessionStorage.removeItem(SIGNUP_FLOW_KEY); } catch {}
     setIsSigningUp(false);
   };
@@ -89,14 +111,26 @@ const SignupPage = () => {
   // Handle already logged-in users (but NOT users actively in signup flow)
   useEffect(() => {
     if (!authLoading && user && session) {
-      // If we're in the middle of a signup flow, don't redirect
-      // Let the user complete all steps (account → plan → payment)
-      if (isSigningUp) {
-        // User just created their account — advance to plan selection
+      // ROBUST GUARD: Check MULTIPLE sources to prevent race conditions
+      // React state updates are async/batched, so we check:
+      // 1. URL parameter (survives OAuth redirects)
+      // 2. Ref (synchronous, immune to React batching)
+      // 3. React state (for completeness)
+      // 4. sessionStorage directly (ground truth)
+      const sessionStorageFlag = (() => {
+        try { return sessionStorage.getItem(SIGNUP_FLOW_KEY) === "true"; }
+        catch { return false; }
+      })();
+      const isSignupFromUrl = searchParams.get("flow") === "signup";
+
+      const inSignupFlow = isSignupFromUrl || isSigningUpRef.current || isSigningUp || sessionStorageFlag;
+
+      if (inSignupFlow) {
+        // User is actively signing up — advance to next step, DO NOT redirect
         if (currentStep === "account") {
           setCurrentStep("plan");
         }
-        return;
+        return; // CRITICAL: Prevent all redirects during signup
       }
 
       // For invited staff who just set their password
@@ -146,11 +180,17 @@ const SignupPage = () => {
           }
         });
     }
-  }, [user, session, authLoading, navigate, currentStep, isInvitedStaff, role, isSigningUp]);
+  }, [user, session, authLoading, navigate, currentStep, isInvitedStaff, role, isSigningUp, searchParams]);
 
   const handleAccountSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormErrors({});
+
+    // Clear stale role cache from previous sessions to prevent interference
+    try {
+      localStorage.removeItem("pulcrix_user_role");
+      localStorage.removeItem("pulcrix_user_id");
+    } catch {}
 
     // For invited staff, role should be "staff"
     const userRole = isInvitedStaff ? "staff" : "admin";
@@ -632,11 +672,14 @@ const SignupPage = () => {
                   className="w-full h-12"
                   onClick={async () => {
                     setIsSubmitting(true);
-                    // Mark signup in progress BEFORE the OAuth redirect
-                    // sessionStorage persists across the redirect round-trip
+                    // Clear stale cache and mark signup in progress BEFORE the OAuth redirect
+                    try {
+                      localStorage.removeItem("pulcrix_user_role");
+                      localStorage.removeItem("pulcrix_user_id");
+                    } catch {}
                     markSignupStarted();
                     const { error } = await lovable.auth.signInWithOAuth("google", {
-                      redirect_uri: `${window.location.origin}/signup`,
+                      redirect_uri: `${window.location.origin}/signup?flow=signup`,
                     });
                     if (error) {
                       toast.error("Failed to sign up with Google");
