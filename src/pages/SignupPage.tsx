@@ -704,8 +704,9 @@ const SignupPage = () => {
                       localStorage.removeItem("pulcrix_user_id");
                     } catch {}
                     markSignupStarted();
+                    // Use /signup without query params - sessionStorage handles the flow tracking
                     const { error } = await lovable.auth.signInWithOAuth("google", {
-                      redirect_uri: `${window.location.origin}/signup?flow=signup`,
+                      redirect_uri: `${window.location.origin}/signup`,
                     });
                     if (error) {
                       toast.error("Failed to sign up with Google");
