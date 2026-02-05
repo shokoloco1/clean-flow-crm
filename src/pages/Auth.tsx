@@ -376,7 +376,7 @@ export default function Auth() {
                   onClick={async () => {
                     setIsSubmitting(true);
                     const { error } = await lovable.auth.signInWithOAuth("google", {
-                      redirect_uri: `${window.location.origin}/auth`,
+                      redirect_uri: window.location.origin,
                     });
                     if (error) {
                       toast.error("Failed to sign in with Google");

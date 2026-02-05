@@ -1,4 +1,5 @@
 import { useLocation, Link } from "react-router-dom";
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Home, ArrowLeft, MapPin, Sparkles } from "lucide-react";
 import { PulcrixLogo } from "@/components/PulcrixLogo";
@@ -11,6 +12,26 @@ const SUGGESTED_PAGES = [
 
 const NotFound = () => {
   const location = useLocation();
+
+  // Handle Lovable Cloud OAuth routes - these should be handled by the server
+  useEffect(() => {
+    if (location.pathname.startsWith("/~oauth")) {
+      // Force a full page reload to let the server handle OAuth
+      window.location.href = window.location.href;
+    }
+  }, [location.pathname]);
+
+  // Don't render 404 for OAuth routes
+  if (location.pathname.startsWith("/~oauth")) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary" />
+          <p className="text-sm text-muted-foreground">Authenticating...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-background via-background to-primary/5 p-4">
