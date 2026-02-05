@@ -10,7 +10,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Calendar } from "@/components/ui/calendar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { 
@@ -62,13 +61,6 @@ const STEPS = [
   { id: 1, title: "Select Client", icon: User },
   { id: 2, title: "Service & Schedule", icon: CalendarIcon },
   { id: 3, title: "Confirm", icon: CheckCircle },
-];
-
-const TIME_SLOTS = [
-  "07:00", "07:30", "08:00", "08:30", "09:00", "09:30",
-  "10:00", "10:30", "11:00", "11:30", "12:00", "12:30",
-  "13:00", "13:30", "14:00", "14:30", "15:00", "15:30",
-  "16:00", "16:30", "17:00", "17:30", "18:00"
 ];
 
 export function CreateJobWizard({
@@ -480,48 +472,55 @@ export function CreateJobWizard({
                   )}
                 </div>
 
-                {/* Date Selection */}
-                <div className="space-y-3">
-                  <Label className="font-medium">Select Date</Label>
-                  <div className="border rounded-lg p-1">
-                    <Calendar
-                      mode="single"
-                      selected={selectedDate}
-                      onSelect={handleDateSelect}
-                      disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
-                      className="mx-auto pointer-events-auto"
+                {/* Date & Time Selection - Simple inputs */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="job-date" className="font-medium">Date *</Label>
+                    <Input
+                      id="job-date"
+                      type="date"
+                      value={formData.scheduled_date}
+                      onChange={(e) => {
+                        const dateValue = e.target.value;
+                        onFormChange({ ...formData, scheduled_date: dateValue });
+                        if (dateValue) {
+                          handleDateSelect(new Date(dateValue + "T00:00:00"));
+                        }
+                      }}
+                      min={new Date().toISOString().split("T")[0]}
+                      className="h-12"
                     />
                   </div>
-                  {isDateInPast && (
-                    <Alert variant="destructive" className="py-2">
-                      <AlertTriangle className="h-4 w-4" />
-                      <AlertDescription className="text-sm">
-                        Warning: Selected date is in the past
-                      </AlertDescription>
-                    </Alert>
-                  )}
-                </div>
-
-                {/* Time Slots */}
-                <div className="space-y-3">
-                  <Label className="font-medium">Select Time</Label>
-                  <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-                    {TIME_SLOTS.map(time => (
-                      <button
-                        key={time}
-                        onClick={() => handleTimeSelect(time)}
-                        className={cn(
-                          "px-3 py-2 rounded-lg border text-sm transition-all",
-                          formData.scheduled_time === time
-                            ? "bg-primary text-primary-foreground border-primary"
-                            : "hover:border-primary/50 hover:bg-muted/50"
-                        )}
-                      >
-                        {time}
-                      </button>
-                    ))}
+                  <div className="space-y-2">
+                    <Label htmlFor="job-time" className="font-medium">Time *</Label>
+                    <Input
+                      id="job-time"
+                      type="time"
+                      value={formData.scheduled_time ? formData.scheduled_time.slice(0, 5) : ""}
+                      onChange={(e) => {
+                        const timeValue = e.target.value;
+                        if (timeValue) {
+                          // Convert 24h to 12h format for display consistency
+                          const [hours, minutes] = timeValue.split(":");
+                          const h = parseInt(hours);
+                          const suffix = h >= 12 ? "PM" : "AM";
+                          const h12 = h % 12 || 12;
+                          const formatted = `${h12}:${minutes} ${suffix}`;
+                          handleTimeSelect(formatted);
+                        }
+                      }}
+                      className="h-12"
+                    />
                   </div>
                 </div>
+                {isDateInPast && (
+                  <Alert variant="destructive" className="py-2">
+                    <AlertTriangle className="h-4 w-4" />
+                    <AlertDescription className="text-sm">
+                      Warning: Selected date is in the past
+                    </AlertDescription>
+                  </Alert>
+                )}
 
                 {/* Staff Assignment (Auto-suggested) */}
                 <div className="space-y-3">
