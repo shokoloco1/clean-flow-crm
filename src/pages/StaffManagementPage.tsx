@@ -11,19 +11,36 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import { InviteStaffDialog } from "@/components/staff/InviteStaffDialog";
-import { 
-  ArrowLeft, 
-  Users, 
-  Plus, 
-  Phone, 
-  Mail, 
-  Calendar, 
-  Clock, 
+import {
+  ArrowLeft,
+  Users,
+  Plus,
+  Phone,
+  Mail,
+  Calendar,
+  Clock,
   Star,
   Briefcase,
   AlertCircle,
@@ -33,6 +50,7 @@ import {
   Filter,
   UserCheck,
   UserX,
+  UserMinus,
   TrendingUp,
   MoreVertical,
   Edit,
@@ -112,6 +130,7 @@ export default function StaffManagementPage() {
   const [editForm, setEditForm] = useState<Partial<StaffProfile>>({});
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive">("all");
+  const [staffToDelete, setStaffToDelete] = useState<StaffProfile | null>(null);
 
   // Fetch all staff members (profiles with staff role)
   const { data: staffList, isLoading } = useQuery({
@@ -264,6 +283,57 @@ export default function StaffManagementPage() {
       queryClient.invalidateQueries({ queryKey: ["staff-availability", selectedStaff?.user_id] });
     }
   });
+
+  // Quick toggle status from list
+  const handleQuickToggleStatus = async (staff: StaffProfile) => {
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({ is_active: !staff.is_active })
+        .eq("id", staff.id);
+
+      if (error) throw error;
+
+      toast({
+        title: staff.is_active ? "Staff deactivated" : "Staff activated",
+        description: `${staff.full_name} has been ${staff.is_active ? "deactivated" : "activated"}.`
+      });
+      queryClient.invalidateQueries({ queryKey: ["staff-list"] });
+    } catch (error: any) {
+      toast({
+        title: "Error updating status",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  };
+
+  // Delete (soft delete - deactivate) staff
+  const handleDeleteStaff = async () => {
+    if (!staffToDelete) return;
+
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({ is_active: false })
+        .eq("id", staffToDelete.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Staff member removed",
+        description: `${staffToDelete.full_name} has been deactivated.`
+      });
+      queryClient.invalidateQueries({ queryKey: ["staff-list"] });
+      setStaffToDelete(null);
+    } catch (error: any) {
+      toast({
+        title: "Error removing staff",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  };
 
   const openStaffDetails = (staff: StaffProfile) => {
     setSelectedStaff(staff);
@@ -570,17 +640,71 @@ export default function StaffManagementPage() {
                             </p>
                           </div>
                         </div>
-                        <Button 
-                          variant="ghost" 
-                          size="icon"
-                          className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            openStaffDetails(staff);
-                          }}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
+                        <div className="flex items-center gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openStaffDetails(staff);
+                            }}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="shrink-0"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <MoreVertical className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  openStaffDetails(staff);
+                                }}
+                              >
+                                <Edit className="mr-2 h-4 w-4" />
+                                Edit Profile
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleQuickToggleStatus(staff);
+                                }}
+                              >
+                                {staff.is_active ? (
+                                  <>
+                                    <UserMinus className="mr-2 h-4 w-4" />
+                                    Deactivate
+                                  </>
+                                ) : (
+                                  <>
+                                    <UserCheck className="mr-2 h-4 w-4" />
+                                    Activate
+                                  </>
+                                )}
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                className="text-destructive focus:text-destructive"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setStaffToDelete(staff);
+                                }}
+                              >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Delete
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
                       </div>
                     </div>
                   );
@@ -681,7 +805,7 @@ export default function StaffManagementPage() {
                         />
                       </div>
 
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="space-y-2">
                           <Label>Hire Date</Label>
                           <Input
@@ -714,7 +838,7 @@ export default function StaffManagementPage() {
                         <AlertCircle className="h-4 w-4 text-orange-500" />
                         Emergency Contact
                       </h4>
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="space-y-2">
                           <Label>Name</Label>
                           <Input
@@ -975,10 +1099,32 @@ export default function StaffManagementPage() {
       </Sheet>
 
       {/* Invite Staff Dialog */}
-      <InviteStaffDialog 
-        open={isInviteDialogOpen} 
-        onOpenChange={setIsInviteDialogOpen} 
+      <InviteStaffDialog
+        open={isInviteDialogOpen}
+        onOpenChange={setIsInviteDialogOpen}
       />
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!staffToDelete} onOpenChange={() => setStaffToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Staff Member</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to remove {staffToDelete?.full_name}?
+              This will deactivate their account but preserve their job history.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={handleDeleteStaff}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

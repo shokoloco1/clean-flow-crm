@@ -150,6 +150,9 @@ async function sendEmailWithResend(
   try {
     console.log(`[invite-staff] Sending email to ${to} via Resend`);
 
+    // Use configured from email or fallback to Resend's test domain
+    const fromEmail = Deno.env.get("RESEND_FROM_EMAIL") || "Pulcrix <onboarding@resend.dev>";
+
     const response = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
@@ -157,7 +160,7 @@ async function sendEmailWithResend(
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: "Pulcrix <noreply@pulcrix.com>",
+        from: fromEmail,
         to: [to],
         subject,
         html,

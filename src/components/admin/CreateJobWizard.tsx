@@ -283,7 +283,7 @@ export function CreateJobWizard({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-hidden flex flex-col">
+      <DialogContent className="sm:max-w-lg max-h-[85vh] sm:max-h-[90vh] overflow-y-auto flex flex-col p-4 sm:p-6">
         <DialogHeader>
           <DialogTitle className="text-xl">📋 New Job</DialogTitle>
           
@@ -316,7 +316,7 @@ export function CreateJobWizard({
           </div>
         </DialogHeader>
 
-        <ScrollArea className="flex-1 -mx-6 px-6">
+        <ScrollArea className="flex-1 -mx-4 px-4 sm:-mx-6 sm:px-6">
           <div className="space-y-4 py-4">
             {/* Step 1: Select Client */}
             {currentStep === 1 && (
@@ -505,7 +505,7 @@ export function CreateJobWizard({
                 {/* Time Slots */}
                 <div className="space-y-3">
                   <Label className="font-medium">Select Time</Label>
-                  <div className="grid grid-cols-4 gap-2">
+                  <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
                     {TIME_SLOTS.map(time => (
                       <button
                         key={time}
