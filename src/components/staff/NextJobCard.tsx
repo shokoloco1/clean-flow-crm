@@ -1,6 +1,7 @@
-import { MapPin, Navigation, Clock, Bed, Bath, PawPrint, Timer, Play, CheckCircle2, Loader2 } from "lucide-react";
+import { MapPin, Navigation, Clock, Bed, Bath, PawPrint, Timer, Play, CheckCircle2, Loader2, ListChecks } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 
 interface Property {
   bedrooms?: number | null;
@@ -11,18 +12,27 @@ interface Property {
   address?: string;
 }
 
+interface ChecklistProgress {
+  completed: number;
+  total: number;
+}
+
 interface NextJobCardProps<T extends { id: string; location: string; scheduled_time: string; status: string; clients: { name: string } | null; properties: Property | null }> {
   job: T;
   isUpdating: boolean;
   onStartComplete: () => void;
   onViewDetails: () => void;
+  checklistProgress?: ChecklistProgress | null;
 }
 
-export function NextJobCard<T extends { id: string; location: string; scheduled_time: string; status: string; clients: { name: string } | null; properties: Property | null }>({ 
-  job, isUpdating, onStartComplete, onViewDetails 
+export function NextJobCard<T extends { id: string; location: string; scheduled_time: string; status: string; clients: { name: string } | null; properties: Property | null }>({
+  job, isUpdating, onStartComplete, onViewDetails, checklistProgress
 }: NextJobCardProps<T>) {
   const isInProgress = job.status === "in_progress";
   const isCompleted = job.status === "completed";
+  const progressPercent = checklistProgress && checklistProgress.total > 0
+    ? Math.round((checklistProgress.completed / checklistProgress.total) * 100)
+    : 0;
   
   const openMaps = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -76,12 +86,28 @@ export function NextJobCard<T extends { id: string; location: string; scheduled_
           </div>
         )}
 
+        {/* Checklist Progress - Only show when in progress and has tasks */}
+        {isInProgress && checklistProgress && checklistProgress.total > 0 && (
+          <div className="mb-3 p-2 bg-background/60 rounded-lg">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                <ListChecks className="h-3 w-3" />
+                Tasks
+              </span>
+              <span className="text-xs font-semibold text-foreground">
+                {checklistProgress.completed}/{checklistProgress.total}
+              </span>
+            </div>
+            <Progress value={progressPercent} className="h-2" />
+          </div>
+        )}
+
         {/* Address with Maps Button */}
         <div className="flex items-start gap-2 mb-4 p-3 bg-background/60 rounded-lg">
           <MapPin className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5" />
           <p className="text-sm text-foreground flex-1 line-clamp-2">{job.location}</p>
-          <Button 
-            size="sm" 
+          <Button
+            size="sm"
             variant="secondary"
             className="flex-shrink-0 gap-1"
             onClick={openMaps}

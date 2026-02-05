@@ -10,10 +10,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
+import {
   MapPin, Clock, Image as ImageIcon, FileText, Loader2, History,
   Phone, MessageSquare, User, CheckCircle, Circle,
-  Receipt, Mail, Send
+  Receipt, Mail, Send, Navigation, MapPinned
 } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
@@ -39,6 +39,13 @@ interface ClientInfo {
   phone: string | null;
   email: string | null;
   address: string | null;
+}
+
+interface GPSLocation {
+  checkin_lat: number | null;
+  checkin_lng: number | null;
+  checkout_lat: number | null;
+  checkout_lng: number | null;
 }
 
 interface JobDetailDialogProps {
@@ -86,6 +93,7 @@ export function JobDetailDialog({ job, photos, onClose }: JobDetailDialogProps) 
   const [alerts, setAlerts] = useState<{ created_at: string; message: string; is_resolved: boolean }[]>([]);
   const [clientInfo, setClientInfo] = useState<ClientInfo | null>(null);
   const [generatedInvoice, setGeneratedInvoice] = useState<{ id: string; total: number } | null>(null);
+  const [gpsLocation, setGpsLocation] = useState<GPSLocation | null>(null);
 
   const { generateInvoiceFromJob, isGenerating: isGeneratingInvoice } = useQuickInvoice();
   const { sendInvoiceEmail, isSending: isSendingEmail } = useInvoiceEmail();
@@ -94,6 +102,7 @@ export function JobDetailDialog({ job, photos, onClose }: JobDetailDialogProps) 
     if (job) {
       fetchTimelineData();
       fetchClientInfo();
+      fetchGPSLocation();
       setGeneratedInvoice(null);
     }
   }, [job]);
@@ -118,17 +127,35 @@ export function JobDetailDialog({ job, photos, onClose }: JobDetailDialogProps) 
 
   const fetchClientInfo = async () => {
     if (!job) return;
-    
+
     // Fetch client info via the job
     const { data: jobData } = await supabase
       .from('jobs')
       .select('client_id, clients(id, name, phone, email, address)')
       .eq('id', job.id)
       .single();
-    
+
     if (jobData?.clients) {
       setClientInfo(jobData.clients as unknown as ClientInfo);
     }
+  };
+
+  const fetchGPSLocation = async () => {
+    if (!job) return;
+
+    const { data: jobData } = await supabase
+      .from('jobs')
+      .select('checkin_lat, checkin_lng, checkout_lat, checkout_lng')
+      .eq('id', job.id)
+      .single();
+
+    if (jobData) {
+      setGpsLocation(jobData as GPSLocation);
+    }
+  };
+
+  const openGoogleMaps = (lat: number, lng: number) => {
+    window.open(`https://www.google.com/maps?q=${lat},${lng}`, '_blank');
   };
 
   const handleCall = () => {
@@ -378,6 +405,46 @@ export function JobDetailDialog({ job, photos, onClose }: JobDetailDialogProps) 
                 </div>
               </div>
             </div>
+
+            {/* GPS Check-in/Check-out */}
+            {gpsLocation && (gpsLocation.checkin_lat || gpsLocation.checkout_lat) && (
+              <div className="flex items-start gap-3">
+                <MapPinned className="h-5 w-5 text-primary mt-0.5" />
+                <div className="flex-1">
+                  <p className="text-sm text-muted-foreground">Staff Location Verification</p>
+                  <div className="grid grid-cols-2 gap-4 mt-2">
+                    {gpsLocation.checkin_lat && gpsLocation.checkin_lng && (
+                      <div>
+                        <p className="text-xs text-muted-foreground">Check-in Location</p>
+                        <Button
+                          variant="link"
+                          size="sm"
+                          className="h-auto p-0 text-primary font-medium"
+                          onClick={() => openGoogleMaps(gpsLocation.checkin_lat!, gpsLocation.checkin_lng!)}
+                        >
+                          <Navigation className="h-3 w-3 mr-1" />
+                          View on Map
+                        </Button>
+                      </div>
+                    )}
+                    {gpsLocation.checkout_lat && gpsLocation.checkout_lng && (
+                      <div>
+                        <p className="text-xs text-muted-foreground">Check-out Location</p>
+                        <Button
+                          variant="link"
+                          size="sm"
+                          className="h-auto p-0 text-green-600 font-medium"
+                          onClick={() => openGoogleMaps(gpsLocation.checkout_lat!, gpsLocation.checkout_lng!)}
+                        >
+                          <Navigation className="h-3 w-3 mr-1" />
+                          View on Map
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Notes */}
             {job.notes && (
