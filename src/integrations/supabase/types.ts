@@ -244,6 +244,13 @@ export type Database = {
             referencedRelation: "clients"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "invoices_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients_staff_view"
+            referencedColumns: ["id"]
+          },
         ]
       }
       job_alerts: {
@@ -410,6 +417,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "jobs_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients_staff_view"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "jobs_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
@@ -521,6 +535,13 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "portal_access_log_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients_staff_view"
             referencedColumns: ["id"]
           },
         ]
@@ -754,6 +775,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "properties_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients_staff_view"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "properties_default_checklist_template_id_fkey"
             columns: ["default_checklist_template_id"]
             isOneToOne: false
@@ -898,6 +926,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "recurring_schedules_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients_staff_view"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "recurring_schedules_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
@@ -1035,6 +1070,42 @@ export type Database = {
       }
     }
     Views: {
+      clients_staff_view: {
+        Row: {
+          abn: string | null
+          address: string | null
+          created_at: string | null
+          email: string | null
+          id: string | null
+          name: string | null
+          notes: string | null
+          phone: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          abn?: string | null
+          address?: string | null
+          created_at?: string | null
+          email?: string | null
+          id?: string | null
+          name?: string | null
+          notes?: string | null
+          phone?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          abn?: string | null
+          address?: string | null
+          created_at?: string | null
+          email?: string | null
+          id?: string | null
+          name?: string | null
+          notes?: string | null
+          phone?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       profiles_public: {
         Row: {
           certifications: Json | null
@@ -1174,6 +1245,13 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "properties_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients_staff_view"
             referencedColumns: ["id"]
           },
           {
