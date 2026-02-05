@@ -62,12 +62,18 @@ interface Job {
   properties: Property | null;
 }
 
+interface ChecklistProgress {
+  completed: number;
+  total: number;
+}
+
 export default function StaffDashboard() {
   const { user, signOut } = useAuth();
   const [jobs, setJobs] = useState<Job[]>([]);
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [loading, setLoading] = useState(true);
   const [propertyPhotos, setPropertyPhotos] = useState<Record<string, PropertyPhotos[]>>({});
+  const [checklistProgressMap, setChecklistProgressMap] = useState<Record<string, ChecklistProgress>>({});
   const [isSigningOut, setIsSigningOut] = useState(false);
   const { updatingJobId, advanceStatus } = useJobStatusChange(() => fetchMyJobs());
 
@@ -163,7 +169,7 @@ export default function StaffDashboard() {
         .from("property_photos")
         .select("id, photo_url, room_area, property_id")
         .in("property_id", propertyIds);
-      
+
       if (photos) {
         const photosMap: Record<string, PropertyPhotos[]> = {};
         photos.forEach((photo: any) => {
@@ -175,7 +181,33 @@ export default function StaffDashboard() {
         setPropertyPhotos(photosMap);
       }
     }
-    
+
+    // Fetch checklist progress for in_progress jobs
+    const inProgressJobIds = jobsData
+      .filter(j => j.status === "in_progress")
+      .map(j => j.id);
+
+    if (inProgressJobIds.length > 0) {
+      const { data: checklistItems } = await supabase
+        .from("checklist_items")
+        .select("job_id, completed_at")
+        .in("job_id", inProgressJobIds);
+
+      if (checklistItems) {
+        const progressMap: Record<string, ChecklistProgress> = {};
+        checklistItems.forEach((item: { job_id: string; completed_at: string | null }) => {
+          if (!progressMap[item.job_id]) {
+            progressMap[item.job_id] = { completed: 0, total: 0 };
+          }
+          progressMap[item.job_id].total++;
+          if (item.completed_at) {
+            progressMap[item.job_id].completed++;
+          }
+        });
+        setChecklistProgressMap(progressMap);
+      }
+    }
+
     setLoading(false);
   };
 
@@ -302,6 +334,7 @@ export default function StaffDashboard() {
                     const nextJob = todayJobs.find(j => j.status !== "completed") || todayJobs[0];
                     setSelectedJob(nextJob);
                   }}
+                  checklistProgress={checklistProgressMap[(todayJobs.find(j => j.status !== "completed") || todayJobs[0]).id] || null}
                 />
 
                 {/* Today's Jobs List */}

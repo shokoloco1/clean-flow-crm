@@ -40,8 +40,8 @@ export function BeforeAfterPhotos({
             <span className="font-semibold text-foreground">Before & After Photos</span>
           </div>
 
-          {/* Quick Capture Buttons - Only show when in progress */}
-          {isInProgress && (
+          {/* Quick Capture Buttons - Show when in progress or completed */}
+          {(isInProgress || isCompleted) && (
             <div className="flex gap-3">
               <QuickPhotoCapture
                 jobId={jobId}
@@ -111,8 +111,8 @@ export function BeforeAfterPhotos({
             </div>
           )}
 
-          {/* Empty State */}
-          {photos.length === 0 && !isInProgress && (
+          {/* Empty State - only show if pending (not started yet) */}
+          {photos.length === 0 && !isInProgress && !isCompleted && (
             <p className="text-sm text-muted-foreground text-center py-4">
               No photos uploaded yet
             </p>
@@ -123,6 +123,9 @@ export function BeforeAfterPhotos({
             <div className="text-center py-2 bg-success/10 rounded-lg">
               <p className="text-sm font-medium text-success">
                 ✓ {beforePhotos.length} before, {afterPhotos.length} after photos
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                You can still add more photos if needed
               </p>
             </div>
           )}
