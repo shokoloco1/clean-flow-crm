@@ -132,6 +132,28 @@ serve(async (req) => {
                 status: subscription.status,
                 trialEnd
               });
+
+              // IMPORTANT: Assign admin role if user doesn't have one yet
+              // This handles the case where new signups complete payment
+              const { data: existingRole } = await supabaseAdmin
+                .from("user_roles")
+                .select("role")
+                .eq("user_id", profileUserId)
+                .maybeSingle();
+
+              if (!existingRole) {
+                const { error: roleError } = await supabaseAdmin
+                  .from("user_roles")
+                  .insert({ user_id: profileUserId, role: "admin" });
+
+                if (roleError) {
+                  logStep("ERROR assigning admin role", { error: roleError.message });
+                } else {
+                  logStep("Admin role assigned to new user", { userId: profileUserId });
+                }
+              } else {
+                logStep("User already has role", { userId: profileUserId, role: existingRole.role });
+              }
             }
           } else {
             logStep("No user found for checkout", { email: customerEmail, userId });

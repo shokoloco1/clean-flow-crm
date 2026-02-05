@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "sonner";
-import { ArrowLeft, ArrowRight, Check, Eye, EyeOff, Loader2, Users, CheckCircle, Sparkles, Chrome } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Eye, EyeOff, Loader2, Users, CheckCircle, Chrome } from "lucide-react";
 import { lovable } from "@/integrations/lovable";
 import { PulcrixLogo } from "@/components/PulcrixLogo";
 import { signupSchema, validatePassword } from "@/lib/passwordSecurity";
@@ -19,6 +19,8 @@ import { PRICE_IDS } from "@/hooks/useSubscription";
 import { cn } from "@/lib/utils";
 
 type Step = "account" | "plan" | "payment";
+
+const SIGNUP_FLOW_KEY = "pulcrix_signup_in_progress";
 
 const ownerSteps: { id: Step; title: string; description: string }[] = [
   { id: "account", title: "Create Account", description: "Your business details" },
@@ -37,6 +39,47 @@ const SignupPage = () => {
   const [currentStep, setCurrentStep] = useState<Step>("account");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+
+  // Track signup flow with MULTIPLE layers to prevent race conditions:
+  // 1. React state (for re-renders)
+  // 2. Ref (synchronous access, immune to React batching)
+  // 3. sessionStorage (survives page reloads and OAuth redirects)
+  const [isSigningUp, setIsSigningUp] = useState(() => {
+    try {
+      return sessionStorage.getItem(SIGNUP_FLOW_KEY) === "true";
+    } catch {
+      return false;
+    }
+  });
+
+  // Ref for synchronous access - critical for avoiding race conditions
+  // Use IIFE to immediately evaluate the sessionStorage check
+  const isSigningUpRef = useRef<boolean>((() => {
+    try {
+      return sessionStorage.getItem(SIGNUP_FLOW_KEY) === "true";
+    } catch {
+      return false;
+    }
+  })());
+
+  // Initialize ref from sessionStorage on mount
+  useEffect(() => {
+    try {
+      isSigningUpRef.current = sessionStorage.getItem(SIGNUP_FLOW_KEY) === "true";
+    } catch {}
+  }, []);
+
+  // Persist signup flag to ALL layers (ref + sessionStorage + state)
+  const markSignupStarted = () => {
+    isSigningUpRef.current = true;
+    try { sessionStorage.setItem(SIGNUP_FLOW_KEY, "true"); } catch {}
+    setIsSigningUp(true);
+  };
+  const clearSignupFlag = () => {
+    isSigningUpRef.current = false;
+    try { sessionStorage.removeItem(SIGNUP_FLOW_KEY); } catch {}
+    setIsSigningUp(false);
+  };
 
   // Account form state
   const [email, setEmail] = useState("");
@@ -65,26 +108,64 @@ const SignupPage = () => {
     }
   }, [searchParams]);
 
-  // Handle already logged-in users
+  // Handle already logged-in users (but NOT users actively in signup flow)
   useEffect(() => {
     if (!authLoading && user && session) {
-      // If user has a role, redirect to appropriate dashboard
-      if (role) {
-        navigate(role === "admin" ? "/admin" : "/staff", { replace: true });
-        return;
+      // ROBUST GUARD: Check MULTIPLE sources to prevent race conditions
+      // React state updates are async/batched, so we check:
+      // 1. URL parameter (survives OAuth redirects)
+      // 2. Ref (synchronous, immune to React batching)
+      // 3. React state (for completeness)
+      // 4. sessionStorage directly (ground truth)
+      const sessionStorageFlag = (() => {
+        try { return sessionStorage.getItem(SIGNUP_FLOW_KEY) === "true"; }
+        catch { return false; }
+      })();
+      const isSignupFromUrl = searchParams.get("flow") === "signup";
+
+      const inSignupFlow = isSignupFromUrl || isSigningUpRef.current || isSigningUp || sessionStorageFlag;
+
+      if (inSignupFlow) {
+        // User is actively signing up — advance to next step, DO NOT redirect
+        if (currentStep === "account") {
+          setCurrentStep("plan");
+        }
+        return; // CRITICAL: Prevent all redirects during signup
       }
 
       // For invited staff who just set their password
       if (isInvitedStaff) {
         // They should go to staff dashboard after setting password
-        // Wait a moment for role to be assigned
         setTimeout(() => {
           navigate("/staff", { replace: true });
         }, 1000);
         return;
       }
 
-      // For new owners, check subscription status
+      // Only redirect if user navigated to /signup while already logged in
+      // (not during an active signup flow)
+      if (role) {
+        // Check subscription status first — maybe they need to complete payment
+        supabase
+          .from("subscriptions")
+          .select("status")
+          .eq("user_id", user.id)
+          .maybeSingle()
+          .then(({ data }) => {
+            if (data?.status === "trialing" || data?.status === "active") {
+              clearSignupFlag();
+              navigate(role === "admin" ? "/admin" : "/staff", { replace: true });
+            } else {
+              // User has role but no active subscription — let them pick a plan
+              if (currentStep === "account") {
+                setCurrentStep("plan");
+              }
+            }
+          });
+        return;
+      }
+
+      // No role yet, check subscription
       supabase
         .from("subscriptions")
         .select("status")
@@ -92,17 +173,24 @@ const SignupPage = () => {
         .maybeSingle()
         .then(({ data }) => {
           if (data?.status === "trialing" || data?.status === "active") {
+            clearSignupFlag();
             navigate("/admin", { replace: true });
           } else if (currentStep === "account") {
             setCurrentStep("plan");
           }
         });
     }
-  }, [user, session, authLoading, navigate, currentStep, isInvitedStaff, role]);
+  }, [user, session, authLoading, navigate, currentStep, isInvitedStaff, role, isSigningUp, searchParams]);
 
   const handleAccountSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormErrors({});
+
+    // Clear stale role cache from previous sessions to prevent interference
+    try {
+      localStorage.removeItem("pulcrix_user_role");
+      localStorage.removeItem("pulcrix_user_id");
+    } catch {}
 
     // For invited staff, role should be "staff"
     const userRole = isInvitedStaff ? "staff" : "admin";
@@ -128,6 +216,11 @@ const SignupPage = () => {
 
     setIsSubmitting(true);
 
+    // Mark that we're actively signing up — prevents premature redirect
+    if (!isInvitedStaff) {
+      markSignupStarted();
+    }
+
     const { error } = await signUp(email, password, fullName, userRole);
 
     if (error) {
@@ -137,6 +230,7 @@ const SignupPage = () => {
       } else {
         toast.error(error.message || "Something went wrong. Please try again.");
       }
+      clearSignupFlag();
       setIsSubmitting(false);
       return;
     }
@@ -376,11 +470,8 @@ const SignupPage = () => {
       {/* Header */}
       <header className="border-b border-border bg-background/80 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center">
-              <Sparkles className="h-6 w-6 text-primary-foreground" />
-            </div>
-            <span className="text-xl font-bold">Pulcrix</span>
+          <Link to="/" className="hover:opacity-80 transition-opacity">
+            <PulcrixLogo variant="full" size="md" />
           </Link>
 
           <div className="flex items-center gap-4">
@@ -581,11 +672,18 @@ const SignupPage = () => {
                   className="w-full h-12"
                   onClick={async () => {
                     setIsSubmitting(true);
+                    // Clear stale cache and mark signup in progress BEFORE the OAuth redirect
+                    try {
+                      localStorage.removeItem("pulcrix_user_role");
+                      localStorage.removeItem("pulcrix_user_id");
+                    } catch {}
+                    markSignupStarted();
                     const { error } = await lovable.auth.signInWithOAuth("google", {
-                      redirect_uri: window.location.origin,
+                      redirect_uri: `${window.location.origin}/signup?flow=signup`,
                     });
                     if (error) {
                       toast.error("Failed to sign up with Google");
+                      clearSignupFlag();
                       setIsSubmitting(false);
                     }
                   }}

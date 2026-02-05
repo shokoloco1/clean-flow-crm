@@ -186,15 +186,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { error };
   }, []);
 
-  const signUp = useCallback(async (email: string, password: string, fullName: string, _role?: AppRole) => {
+  const signUp = useCallback(async (email: string, password: string, fullName: string, intendedRole?: AppRole) => {
     const redirectUrl = `${window.location.origin}/`;
-    
+
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         emailRedirectTo: redirectUrl,
-        data: { full_name: fullName }
+        data: {
+          full_name: fullName,
+          intended_role: intendedRole || "staff",
+        }
       }
     });
 
