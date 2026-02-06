@@ -279,11 +279,37 @@ const SignupPage = () => {
         },
       });
 
-      if (error) throw error;
+      console.log("[Checkout] Response:", { data, error });
+
+      if (error) {
+        console.error("[Checkout] Function error:", error);
+        throw error;
+      }
 
       if (data?.url) {
-        window.location.href = data.url;
+        console.log("[Checkout] Redirecting to:", data.url);
+        // Try redirect, with fallback to new tab for iframe restrictions
+        try {
+          window.location.href = data.url;
+          // If still here after delay, try opening new tab
+          setTimeout(() => {
+            if (document.hasFocus()) {
+              toast.info("Opening checkout in new tab...");
+              window.open(data.url, "_blank");
+              setIsSubmitting(false);
+            }
+          }, 2000);
+        } catch (redirectError) {
+          console.error("[Checkout] Redirect failed:", redirectError);
+          window.open(data.url, "_blank");
+          setIsSubmitting(false);
+        }
+      } else if (data?.hasSubscription) {
+        toast.info("You already have an active subscription!");
+        setIsSubmitting(false);
+        navigate("/admin", { replace: true });
       } else {
+        console.error("[Checkout] No URL in response:", data);
         throw new Error("No checkout URL returned");
       }
     } catch (error) {
