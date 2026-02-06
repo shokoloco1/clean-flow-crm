@@ -17,7 +17,7 @@ const PricingPage = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { subscribed, plan: currentPlan, createCheckout } = useSubscription();
+  const { plan: currentPlan, createCheckout } = useSubscription();
 
   // Show message if checkout was canceled
   if (searchParams.get("checkout") === "canceled") {

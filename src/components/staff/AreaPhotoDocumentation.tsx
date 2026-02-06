@@ -138,7 +138,7 @@ export function AreaPhotoDocumentation({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isInProgress = jobStatus === "in_progress";
-  const isCompleted = jobStatus === "completed";
+  // const isCompleted = jobStatus === "completed"; // Unused currently
 
   // Load area photos from database and merge with required areas
   useEffect(() => {

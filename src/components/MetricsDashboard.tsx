@@ -20,8 +20,8 @@ import {
   Area,
   AreaChart
 } from 'recharts';
-import { TrendingUp, Users, Clock, AlertTriangle, CheckCircle, BarChart3, Loader2 } from 'lucide-react';
-import { format, subDays, startOfDay, eachDayOfInterval, parseISO } from 'date-fns';
+import { TrendingUp, Clock, AlertTriangle, CheckCircle, BarChart3, Loader2 } from 'lucide-react';
+import { format, subDays, eachDayOfInterval, parseISO } from 'date-fns';
 import { logger } from "@/lib/logger";
 
 interface JobsPerDay {

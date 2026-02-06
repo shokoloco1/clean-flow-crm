@@ -13,12 +13,12 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
-  Loader2, Search, Plus, User, MapPin, Clock,
+  Loader2, Search, Plus, User, MapPin,
   Calendar as CalendarIcon, CheckCircle, ArrowLeft, ArrowRight,
   Phone, Building, AlertTriangle
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { format, isBefore, startOfDay, parseISO } from "date-fns";
+import { format, isBefore, startOfDay } from "date-fns";
 import { useCleaningServices } from "@/hooks/useCleaningServices";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";

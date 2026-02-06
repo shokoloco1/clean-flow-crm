@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
+
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -47,7 +47,6 @@ import {
   CheckCircle,
   Award,
   Search,
-  Filter,
   UserCheck,
   UserX,
   UserMinus,
@@ -119,7 +118,7 @@ const CERTIFICATION_OPTIONS = [
 ];
 
 export default function StaffManagementPage() {
-  const { signOut } = useAuth();
+  // const { signOut } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const queryClient = useQueryClient();

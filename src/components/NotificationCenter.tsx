@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Bell, Check, CheckCheck, Trash2, X, Briefcase, AlertCircle, Info, CheckCircle } from 'lucide-react';
+import { Bell, Check, CheckCheck, Trash2, Briefcase, AlertCircle, Info, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Popover,

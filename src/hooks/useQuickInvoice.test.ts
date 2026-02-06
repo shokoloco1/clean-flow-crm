@@ -32,7 +32,7 @@ const supabaseMock = createSupabaseMock();
 
 vi.mock('@/integrations/supabase/client', () => ({
   supabase: {
-    from: (...args: any[]) => supabaseMock.from(...args),
+    from: (...args: any[]) => (supabaseMock.from as any)(...args),
   },
 }));
 

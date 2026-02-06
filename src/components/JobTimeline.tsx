@@ -2,11 +2,9 @@ import { format } from "date-fns";
 import {
   Calendar,
   Clock,
-  MapPin,
   User,
   CheckCircle2,
   PlayCircle,
-  PauseCircle,
   XCircle,
   Camera,
   ClipboardCheck,
@@ -180,7 +178,7 @@ export function JobTimeline({ job, photos = [], checklistItems = [], alerts = []
       {/* Timeline line */}
       <div className="absolute left-[19px] top-2 bottom-2 w-0.5 bg-border" />
 
-      {events.map((event, index) => (
+      {events.map((event) => (
         <div key={event.id} className="relative flex gap-4">
           {/* Icon */}
           <div

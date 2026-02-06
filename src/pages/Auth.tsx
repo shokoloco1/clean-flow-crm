@@ -17,7 +17,7 @@ import { PulcrixLogo } from "@/components/PulcrixLogo";
 export default function Auth() {
   const navigate = useNavigate();
   const { user, session, role, loading, signIn, signOut, refreshRole } = useAuth();
-  const { rateLimitState, checkRateLimit, recordAttempt, clearRateLimitState } = useRateLimit();
+  const { rateLimitState, checkRateLimit, recordAttempt } = useRateLimit();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showResetForm, setShowResetForm] = useState(false);

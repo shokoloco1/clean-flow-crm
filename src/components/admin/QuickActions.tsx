@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+
 import { useNavigate } from "react-router-dom";
 import { Plus, Home, Users, Calendar, UserCircle, Repeat, Settings, FileText, DollarSign } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";

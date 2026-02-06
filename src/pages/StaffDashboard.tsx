@@ -72,7 +72,9 @@ export default function StaffDashboard() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [loading, setLoading] = useState(true);
-  const [propertyPhotos, setPropertyPhotos] = useState<Record<string, PropertyPhotos[]>>({});
+  // const [propertyPhotos, setPropertyPhotos] = useState<Record<string, PropertyPhotos[]>>({}); // Unused in this component
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [_propertyPhotos, _setPropertyPhotos] = useState<Record<string, PropertyPhotos[]>>({});
   const [checklistProgressMap, setChecklistProgressMap] = useState<Record<string, ChecklistProgress>>({});
   const [isSigningOut, setIsSigningOut] = useState(false);
   const { updatingJobId, advanceStatus } = useJobStatusChange(() => fetchMyJobs());
@@ -178,7 +180,7 @@ export default function StaffDashboard() {
           }
           photosMap[photo.property_id].push(photo);
         });
-        setPropertyPhotos(photosMap);
+        _setPropertyPhotos(photosMap);
       }
     }
 
@@ -211,34 +213,8 @@ export default function StaffDashboard() {
     setLoading(false);
   };
 
-  const getStatusConfig = (status: string) => {
-    switch (status) {
-      case "completed": 
-        return { 
-          bg: "bg-success/10", 
-          text: "text-success", 
-          border: "border-success/30",
-          label: "✅ Completed",
-          pulse: false
-        };
-      case "in_progress": 
-        return { 
-          bg: "bg-warning/10", 
-          text: "text-warning", 
-          border: "border-warning",
-          label: "🔄 In Progress",
-          pulse: true
-        };
-      default: 
-        return { 
-          bg: "bg-muted", 
-          text: "text-muted-foreground", 
-          border: "border-border",
-          label: "⏳ Pending",
-          pulse: false
-        };
-    }
-  };
+  // getStatusConfig is unused locally
+  // const getStatusConfig = (status: string) => { ... }
 
   // Group jobs by date
   const todayStr = format(new Date(), "yyyy-MM-dd");

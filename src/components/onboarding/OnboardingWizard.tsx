@@ -253,7 +253,7 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
         {/* Step indicators */}
         <div className="px-6 py-4">
           <div className="flex justify-between">
-            {STEPS.map((step, index) => (
+            {STEPS.map((step) => (
               <div key={step.id} className="flex flex-col items-center">
                 <div className={cn(
                   "w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all",

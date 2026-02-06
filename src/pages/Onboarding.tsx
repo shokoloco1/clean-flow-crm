@@ -12,11 +12,10 @@ import {
   Calendar,
   Users,
   FileText,
-  Camera,
   Rocket,
 } from "lucide-react";
 import { PulcrixLogo } from "@/components/PulcrixLogo";
-import { cn } from "@/lib/utils";
+
 import { logger } from "@/lib/logger";
 
 interface OnboardingStep {
@@ -66,7 +65,7 @@ const onboardingSteps: OnboardingStep[] = [
 export default function Onboarding() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { user, session, loading: authLoading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
   const [subscriptionStatus, setSubscriptionStatus] = useState<string | null>(null);
   const [trialEnd, setTrialEnd] = useState<Date | null>(null);
