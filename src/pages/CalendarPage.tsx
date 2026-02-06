@@ -71,7 +71,7 @@ interface CalendarEvent {
 export default function CalendarPage() {
   const { signOut } = useAuth();
   const navigate = useNavigate();
-  const [jobs, setJobs] = useState<Job[]>([]);
+  // const [jobs, setJobs] = useState<Job[]>([]); // Unused state, events are derived from jobs but jobs not used directly except in fetchData scope
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [clients, setClients] = useState<Client[]>([]);
@@ -180,7 +180,7 @@ export default function CalendarPage() {
           : null
       })) as Job[];
 
-      setJobs(typedJobs);
+      // setJobs(typedJobs); // Removed setJobs since jobs state is unused
       setEvents(transformJobsToEvents(typedJobs));
     } catch (err) {
       toast.error("Unexpected error loading jobs");

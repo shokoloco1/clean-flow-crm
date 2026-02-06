@@ -3,7 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Shield, Users, ClipboardCheck, Camera, MapPin, Building2, ArrowRight, CheckCircle, Star, Zap, Lock } from "lucide-react";
+import { Shield, Users, ClipboardCheck, Camera, MapPin, ArrowRight, CheckCircle, Star, Zap, Lock } from "lucide-react";
 import { PulcrixLogo } from "@/components/PulcrixLogo";
 
 export default function Index() {

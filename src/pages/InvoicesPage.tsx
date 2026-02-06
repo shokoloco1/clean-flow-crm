@@ -84,19 +84,8 @@ export default function InvoicesPage() {
     setLoading(false);
   };
 
-  const getStatusConfig = (status: string) => {
-    switch (status) {
-      case "paid":
-        return { label: "Paid", className: "bg-success/10 text-success border-success/30" };
-      case "sent":
-        return { label: "Sent", className: "bg-primary/10 text-primary border-primary/30" };
-      case "overdue":
-        return { label: "Overdue", className: "bg-destructive/10 text-destructive border-destructive/30" };
-      case "draft":
-      default:
-        return { label: "Draft", className: "bg-muted text-muted-foreground border-border" };
-    }
-  };
+  // getStatusConfig is unused in this component as it's likely used in child components or not at all
+  // const getStatusConfig = (status: string) => { ... }
 
   const filteredInvoices = invoices.filter((invoice) => {
     const matchesSearch =

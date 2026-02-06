@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useStaffAvailability, useAvailableStaff } from './useStaffAvailability';
 import { toast } from 'sonner';
-import React from 'react';
+
 
 // Mock useAuth
 vi.mock('./useAuth', () => ({
@@ -15,12 +15,11 @@ vi.mock('./useAuth', () => ({
 const mockSelect = vi.fn();
 const mockOrder = vi.fn();
 const mockEq = vi.fn();
-const mockIn = vi.fn();
 const mockUpsert = vi.fn();
 
 vi.mock('@/integrations/supabase/client', () => ({
   supabase: {
-    from: vi.fn((table: string) => ({
+    from: vi.fn(() => ({
       select: mockSelect,
       upsert: mockUpsert,
     })),

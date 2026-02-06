@@ -87,7 +87,7 @@ export function UploadPriceListDialog({
       setProgress(30);
 
       // Upload file to storage
-      const { data: uploadData, error: uploadError } = await supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from("price-lists")
         .upload(fileName, file, {
           cacheControl: "3600",

@@ -64,7 +64,7 @@ export default function AdminDashboard() {
   } = useJobDetail();
 
   // Duplicate job
-  const { duplicateJob, isDuplicating } = useDuplicateJob(refreshData);
+  useDuplicateJob(refreshData); // Using the hook without destructuring as they are currently unused in UI
 
   // Keyboard shortcuts
   useAdminShortcuts({

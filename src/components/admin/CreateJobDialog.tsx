@@ -57,7 +57,7 @@ export function CreateJobDialog({
   isOpen,
   onOpenChange,
   clients,
-  staffList,
+  // staffList, // Unused in this simplified component, but kept in interface for compatibility
   formData,
   onFormChange,
   onSubmit
