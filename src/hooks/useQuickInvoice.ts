@@ -174,7 +174,7 @@ export function useQuickInvoice() {
       }
 
       // Get hourly rates for all staff
-      const staffIds = [...new Set(jobs.map(j => j.assigned_staff_id).filter(Boolean))];
+      const staffIds = [...new Set(jobs.map(j => j.assigned_staff_id).filter((id): id is string => id !== null))];
       let ratesMap: Record<string, number> = {};
       
       if (staffIds.length > 0) {

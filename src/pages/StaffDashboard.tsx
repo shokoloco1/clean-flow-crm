@@ -150,7 +150,7 @@ export default function StaffDashboard() {
           state
         )
       `)
-      .eq("assigned_staff_id", user?.id)
+      .eq("assigned_staff_id", user?.id ?? "")
       .gte("scheduled_date", today)
       .lte("scheduled_date", nextWeek)
       .order("scheduled_date", { ascending: true })

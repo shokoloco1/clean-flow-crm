@@ -126,6 +126,7 @@ export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewPr
   }, [job.id, job.property_id]);
 
   const fetchProperty = async () => {
+    if (!job.property_id) return;
     const { data } = await supabase
       .from("properties")
       .select("*")
@@ -138,6 +139,7 @@ export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewPr
   };
 
   const fetchPropertyPhotos = async () => {
+    if (!job.property_id) return;
     const { data } = await supabase
       .from("property_photos")
       .select("*")

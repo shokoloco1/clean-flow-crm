@@ -35,7 +35,6 @@ import {
   Phone,
   Mail,
   Eye,
-  ExternalLink,
 } from "lucide-react";
 import { useGlobalSearch, SearchFilters } from "@/hooks/useGlobalSearch";
 import { supabase } from "@/integrations/supabase/client";
@@ -126,7 +125,7 @@ export function GlobalSearch() {
     [navigate, clearResults]
   );
 
-  const handleQuickAction = useCallback((e: React.MouseEvent, action: string, data: { phone?: string; email?: string }) => {
+  const handleQuickAction = useCallback((e: React.MouseEvent, action: string, data: { phone?: string; email?: string; type?: string }) => {
     e.stopPropagation();
     
     switch (action) {

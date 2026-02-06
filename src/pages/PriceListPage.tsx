@@ -37,7 +37,7 @@ interface PriceList {
   description: string | null;
   file_url: string;
   file_type: string;
-  is_active: boolean;
+  is_active: boolean | null;
   created_at: string;
   updated_at: string;
 }
@@ -274,9 +274,9 @@ export default function PriceListPage() {
                       </TableCell>
                       <TableCell>
                         <Switch
-                          checked={priceList.is_active}
+                          checked={priceList.is_active ?? false}
                           onCheckedChange={() =>
-                            handleToggleActive(priceList.id, priceList.is_active)
+                            handleToggleActive(priceList.id, priceList.is_active ?? false)
                           }
                           disabled={togglingId === priceList.id}
                         />

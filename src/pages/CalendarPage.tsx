@@ -157,7 +157,7 @@ export default function CalendarPage() {
       }
 
       // Get staff profiles separately to avoid join issues
-      const staffIds = [...new Set((jobsData || []).map(j => j.assigned_staff_id).filter(Boolean))];
+      const staffIds = [...new Set((jobsData || []).map(j => j.assigned_staff_id).filter((id): id is string => id !== null))];
       let staffMap: Record<string, string> = {};
       
       if (staffIds.length > 0) {

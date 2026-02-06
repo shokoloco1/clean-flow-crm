@@ -17,7 +17,7 @@ interface PriceList {
   description: string | null;
   file_url: string;
   file_type: string;
-  is_active: boolean;
+  is_active: boolean | null;
   created_at: string;
 }
 

@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import {
   Table,
@@ -13,12 +12,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
@@ -30,7 +23,6 @@ import {
   ArrowLeft, 
   Plus, 
   FileText, 
-  Download, 
   Eye,
   Search,
   DollarSign,
@@ -58,7 +50,7 @@ interface Invoice {
   total: number;
   notes: string | null;
   created_at: string;
-  clients?: { name: string; email?: string | null } | null;
+  clients?: { name: string; address?: string; email?: string; phone?: string; abn?: string } | null;
 }
 
 export default function InvoicesPage() {
@@ -273,7 +265,6 @@ export default function InvoicesPage() {
                 </TableHeader>
                 <TableBody>
                   {filteredInvoices.map((invoice) => {
-                    const statusConfig = getStatusConfig(invoice.status);
                     return (
                       <TableRow key={invoice.id}>
                         <TableCell className="font-medium">

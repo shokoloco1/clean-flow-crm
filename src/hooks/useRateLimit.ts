@@ -58,7 +58,7 @@ export function useRateLimit() {
         await supabase.rpc("record_login_attempt", {
           p_email: email.toLowerCase(),
           p_success: success,
-          p_ip_address: null, // IP is handled server-side if needed
+          p_ip_address: undefined, // IP is handled server-side if needed
         });
 
         // Refresh rate limit state after recording
