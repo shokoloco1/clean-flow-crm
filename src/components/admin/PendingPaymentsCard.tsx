@@ -8,6 +8,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { DollarSign, AlertTriangle, Clock, ArrowRight, Loader2 } from "lucide-react";
 import { formatAUD } from "@/lib/australian";
 import { differenceInDays, parseISO } from "date-fns";
+import { logger } from "@/lib/logger";
 
 interface PaymentStats {
   totalPending: number;
@@ -30,12 +31,12 @@ export function PendingPaymentsCard() {
       .neq("status", "paid");  // All invoices that are NOT paid
 
     if (error) {
-      console.error("[PendingPayments] Error fetching:", error);
+      logger.error("[PendingPayments] Error fetching", error);
       setLoading(false);
       return;
     }
 
-    console.log('[PendingPayments] Found unpaid invoices:', invoices?.length || 0);
+    logger.debug('[PendingPayments] Found unpaid invoices:', { count: invoices?.length || 0 });
 
     const today = new Date();
     let overdueCount = 0;
