@@ -2,6 +2,8 @@ import { useCallback, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { useFetchWithRetry } from "@/hooks/useFetchWithRetry";
+import { logger } from "@/lib/logger";
+import { CONFIG } from "@/lib/config";
 
 export interface Stats {
   todayJobs: number;
@@ -37,8 +39,7 @@ export function useDashboardData() {
     // Use local date for filtering
     const today = format(new Date(), "yyyy-MM-dd");
     
-    // Debug logging
-    console.log('[Dashboard] Fetching data for date:', today);
+    logger.debug('[Dashboard] Fetching data for date:', today);
     
     const [jobsRes, todayCountRes, completedCountRes] = await Promise.all([
       supabase
@@ -63,8 +64,7 @@ export function useDashboardData() {
 
     if (jobsRes.error) throw new Error(jobsRes.error.message);
 
-    // Debug logging
-    console.log('[Dashboard] Jobs found for today:', jobsRes.data?.length || 0, 'Date filter:', today);
+    logger.debug('[Dashboard] Jobs found for today:', { count: jobsRes.data?.length || 0, dateFilter: today });
 
     // Collect all staff IDs and fetch profiles in one query
     const allStaffIds = new Set<string>();
@@ -100,27 +100,27 @@ export function useDashboardData() {
     };
   }, []);
 
-  const { 
-    data: dashboardData, 
-    loading, 
-    error, 
+  const {
+    data: dashboardData,
+    loading,
+    error,
     isFromCache,
     retryCount,
     execute: refreshData,
-    retry 
+    retry
   } = useFetchWithRetry<DashboardData>(fetchDashboardData, {
     cacheKey: 'admin-dashboard-today',
-    timeout: 8000,
-    maxRetries: 2,
-    retryDelay: 1500,
+    timeout: CONFIG.api.defaultTimeout,
+    maxRetries: CONFIG.api.maxRetries,
+    retryDelay: CONFIG.api.retryDelay,
   });
 
-  // Auto-refresh every 30 seconds
+  // Auto-refresh at configured interval
   useEffect(() => {
     refreshIntervalRef.current = setInterval(() => {
-      console.log('[Dashboard] Auto-refreshing data...');
+      logger.debug('[Dashboard] Auto-refreshing data...');
       refreshData();
-    }, 30000);
+    }, CONFIG.refresh.dashboard);
 
     return () => {
       if (refreshIntervalRef.current) {
@@ -133,7 +133,7 @@ export function useDashboardData() {
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
-        console.log('[Dashboard] Tab became visible, refreshing...');
+        logger.debug('[Dashboard] Tab became visible, refreshing...');
         refreshData();
       }
     };

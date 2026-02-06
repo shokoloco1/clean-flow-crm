@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/collapsible";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
+import { logger } from "@/lib/logger";
 
 interface AreaPhoto {
   id: string;
@@ -31,9 +32,19 @@ interface AreaPhoto {
   service_type: string | null;
   before_photo_url: string | null;
   after_photo_url: string | null;
+  before_photo_id: string | null;
+  after_photo_id: string | null;
   notes: string | null;
   status: "pending" | "completed";
   uploaded_at: string;
+}
+
+interface JobPhotoRecord {
+  id: string;
+  job_id: string;
+  photo_type: string;
+  photo_url: string;
+  created_at: string;
 }
 
 interface RequiredArea {
@@ -113,8 +124,7 @@ export function AreaPhotoDocumentation({
   onPhotosUpdated,
   onAllAreasComplete
 }: AreaPhotoDocumentationProps) {
-  // Note: job_area_photos table doesn't exist yet
-  // This component uses local state as a placeholder until the table is created
+  // Area photos are stored in job_photos table with photo_type format: "area_before:AreaName" or "area_after:AreaName"
   const [areaPhotos, setAreaPhotos] = useState<AreaPhoto[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedArea, setExpandedArea] = useState<string | null>(null);
@@ -130,27 +140,74 @@ export function AreaPhotoDocumentation({
   const isInProgress = jobStatus === "in_progress";
   const isCompleted = jobStatus === "completed";
 
-  // Initialize with required areas as local state (no database table yet)
+  // Load area photos from database and merge with required areas
   useEffect(() => {
-    const initializeAreas = () => {
-      if (requiredAreas.length > 0) {
-        const initialAreas: AreaPhoto[] = requiredAreas.map((ra, idx) => ({
-          id: `local-${idx}`,
-          job_id: jobId,
-          area_name: ra.name,
-          service_type: ra.services.join(", "),
-          before_photo_url: null,
-          after_photo_url: null,
-          notes: null,
-          status: "pending",
-          uploaded_at: ""
-        }));
+    const loadAreaPhotos = async () => {
+      setLoading(true);
+
+      try {
+        // Fetch existing area photos from job_photos table
+        // Area photos are stored with photo_type format: "area_before:AreaName" or "area_after:AreaName"
+        const { data: existingPhotos, error } = await supabase
+          .from("job_photos")
+          .select("*")
+          .eq("job_id", jobId)
+          .like("photo_type", "area_%");
+
+        if (error) {
+          logger.error("Error loading area photos:", error);
+        }
+
+        // Build a map of area -> photos
+        const photoMap: Record<string, { before?: JobPhotoRecord; after?: JobPhotoRecord }> = {};
+
+        if (existingPhotos) {
+          for (const photo of existingPhotos as JobPhotoRecord[]) {
+            const match = photo.photo_type.match(/^area_(before|after):(.+)$/);
+            if (match) {
+              const [, type, areaName] = match;
+              if (!photoMap[areaName]) {
+                photoMap[areaName] = {};
+              }
+              photoMap[areaName][type as "before" | "after"] = photo;
+            }
+          }
+        }
+
+        // Merge required areas with existing photos
+        const initialAreas: AreaPhoto[] = requiredAreas.map((ra, idx) => {
+          const existing = photoMap[ra.name];
+          const hasBefore = !!existing?.before;
+          const hasAfter = !!existing?.after;
+
+          return {
+            id: `area-${idx}`,
+            job_id: jobId,
+            area_name: ra.name,
+            service_type: ra.services.join(", "),
+            before_photo_url: existing?.before?.photo_url || null,
+            after_photo_url: existing?.after?.photo_url || null,
+            before_photo_id: existing?.before?.id || null,
+            after_photo_id: existing?.after?.id || null,
+            notes: null, // Notes could be stored separately if needed
+            status: hasBefore && hasAfter ? "completed" : "pending",
+            uploaded_at: existing?.before?.created_at || existing?.after?.created_at || ""
+          };
+        });
+
         setAreaPhotos(initialAreas);
+      } catch (err) {
+        logger.error("Error in loadAreaPhotos:", err);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
-    initializeAreas();
+    if (requiredAreas.length > 0) {
+      loadAreaPhotos();
+    } else {
+      setLoading(false);
+    }
   }, [jobId, requiredAreas]);
 
   // Calculate completion stats
@@ -200,18 +257,37 @@ export function AreaPhotoDocumentation({
         .from("job-evidence")
         .getPublicUrl(uploadData.path);
 
-      // Update local state (since job_area_photos table doesn't exist)
+      // Save to database with area-prefixed photo_type
+      const photoType = `area_${type}:${areaName}`;
+      const { data: insertedPhoto, error: insertError } = await supabase
+        .from("job_photos")
+        .insert({
+          job_id: jobId,
+          photo_url: urlData.publicUrl,
+          photo_type: photoType
+        })
+        .select()
+        .single();
+
+      if (insertError) {
+        logger.error("Error saving photo to database:", insertError);
+        toast.error("Photo uploaded but failed to save record");
+        return;
+      }
+
+      // Update local state with the persisted data
       setAreaPhotos((prev) =>
         prev.map((area) => {
           if (area.area_name === areaName) {
             const updatedArea = {
               ...area,
-              [`${type}_photo_url`]: urlData.publicUrl
+              [`${type}_photo_url`]: urlData.publicUrl,
+              [`${type}_photo_id`]: insertedPhoto.id
             };
             // Check if both photos are now present
             const hasOtherType = type === "before" ? area.after_photo_url : area.before_photo_url;
             if (hasOtherType || urlData.publicUrl) {
-              const hasBoth = type === "before" 
+              const hasBoth = type === "before"
                 ? (urlData.publicUrl && area.after_photo_url)
                 : (area.before_photo_url && urlData.publicUrl);
               if (hasBoth) {
@@ -227,7 +303,7 @@ export function AreaPhotoDocumentation({
       toast.success(`📸 ${type === "before" ? "Before" : "After"} photo saved for ${areaName}!`);
       onPhotosUpdated?.();
     } catch (error) {
-      console.error("Photo upload error:", error);
+      logger.error("Photo upload error:", error);
       toast.error("Failed to upload photo");
     } finally {
       setUploadingArea(null);
@@ -248,11 +324,34 @@ export function AreaPhotoDocumentation({
   };
 
   const handleDeletePhoto = async (areaName: string, type: "before" | "after") => {
+    // Find the photo ID to delete
+    const area = areaPhotos.find((a) => a.area_name === areaName);
+    const photoId = type === "before" ? area?.before_photo_id : area?.after_photo_id;
+
+    if (photoId) {
+      // Delete from database
+      const { error } = await supabase
+        .from("job_photos")
+        .delete()
+        .eq("id", photoId);
+
+      if (error) {
+        logger.error("Error deleting photo:", error);
+        toast.error("Failed to delete photo");
+        return;
+      }
+    }
+
     // Update local state
     setAreaPhotos((prev) =>
       prev.map((area) =>
         area.area_name === areaName
-          ? { ...area, [`${type}_photo_url`]: null, status: "pending" as const }
+          ? {
+              ...area,
+              [`${type}_photo_url`]: null,
+              [`${type}_photo_id`]: null,
+              status: "pending" as const
+            }
           : area
       )
     );

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { logger } from "@/lib/logger";
 
 export interface BusinessSettings {
   company_name: string;
@@ -62,7 +63,7 @@ export function useBusinessSettings() {
         setSettings(newSettings);
       }
     } catch (err) {
-      console.error("Error fetching business settings:", err);
+      logger.error("Error fetching business settings:", err);
       setError("Failed to load business settings");
     } finally {
       setLoading(false);

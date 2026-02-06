@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { logger } from "@/lib/logger";
 
 const SIGNED_URL_EXPIRY = 3600; // 1 hour in seconds
 
@@ -18,13 +19,13 @@ export async function getSignedUrl(
       .createSignedUrl(filePath, SIGNED_URL_EXPIRY);
 
     if (error) {
-      console.error("Error creating signed URL:", error);
+      logger.error("Error creating signed URL:", error);
       return null;
     }
 
     return data.signedUrl;
   } catch (err) {
-    console.error("Failed to get signed URL:", err);
+    logger.error("Failed to get signed URL:", err);
     return null;
   }
 }
@@ -45,13 +46,13 @@ export async function getSignedUrls(
       .createSignedUrls(filePaths, SIGNED_URL_EXPIRY);
 
     if (error) {
-      console.error("Error creating signed URLs:", error);
+      logger.error("Error creating signed URLs:", error);
       return filePaths.map(() => null);
     }
 
     return data.map((item) => item.signedUrl);
   } catch (err) {
-    console.error("Failed to get signed URLs:", err);
+    logger.error("Failed to get signed URLs:", err);
     return filePaths.map(() => null);
   }
 }

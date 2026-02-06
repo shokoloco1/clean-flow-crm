@@ -82,11 +82,12 @@ const PWAInstallBannerComponent: ForwardRefRenderFunction<HTMLDivElement> = (_, 
             <span className="hidden sm:inline">Install</span>
           </Button>
           
-          <Button 
-            variant="ghost" 
-            size="icon" 
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={handleDismiss}
             className="h-10 w-10"
+            aria-label="Dismiss install banner"
           >
             <X className="h-5 w-5" />
           </Button>

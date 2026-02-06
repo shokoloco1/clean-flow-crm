@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import { format, subDays, startOfMonth, endOfMonth } from 'date-fns';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { logger } from "@/lib/logger";
 
 type ReportType = 'jobs' | 'staff' | 'alerts' | 'job-detail';
 
@@ -416,7 +417,7 @@ export function PDFReports() {
       doc.save(filename);
       toast.success('PDF report generated successfully');
     } catch (error) {
-      console.error('Error generating PDF:', error);
+      logger.error('Error generating PDF:', error);
       toast.error('Error generating PDF report');
     } finally {
       setIsGenerating(false);

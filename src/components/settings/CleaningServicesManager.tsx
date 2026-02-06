@@ -137,19 +137,21 @@ export function CleaningServicesManager({
                       <p className="text-xs text-muted-foreground truncate">{service.description}</p>
                     </div>
                     <div className="flex items-center gap-1">
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
+                      <Button
+                        variant="ghost"
+                        size="icon"
                         className="h-8 w-8"
                         onClick={() => handleEdit(service)}
+                        aria-label="Edit service"
                       >
                         <Pencil className="h-4 w-4" />
                       </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
+                      <Button
+                        variant="ghost"
+                        size="icon"
                         className="h-8 w-8 text-destructive hover:text-destructive"
                         onClick={() => handleDelete(service.id)}
+                        aria-label="Delete service"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>

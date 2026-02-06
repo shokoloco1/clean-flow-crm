@@ -123,7 +123,7 @@ export function NotificationCenter() {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative">
+        <Button variant="ghost" size="icon" className="relative" aria-label="Open notifications">
           <Bell className="h-5 w-5" />
           {unreadCount > 0 && (
             <Badge 

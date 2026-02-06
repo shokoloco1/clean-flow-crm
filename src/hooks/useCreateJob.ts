@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { toast } from "sonner";
+import { logger } from "@/lib/logger";
 
 export interface Client {
   id: string;
@@ -41,27 +42,58 @@ export function useCreateJob(onJobCreated?: () => void) {
   const [clients, setClients] = useState<Client[]>([]);
   const [staffList, setStaffList] = useState<Staff[]>([]);
   const [newJob, setNewJob] = useState<NewJobData>(initialJobData);
+  const [isLoading, setIsLoading] = useState(false);
+  const [fetchError, setFetchError] = useState<string | null>(null);
 
   const fetchClientsAndStaff = async () => {
-    const { data: clientsData } = await supabase
-      .from("clients")
-      .select("id, name, address, phone, email")
-      .order("name");
-    
-    const { data: staffRoles } = await supabase
-      .from("user_roles")
-      .select("user_id")
-      .eq("role", "staff");
-    
-    const staffIds = staffRoles?.map(r => r.user_id) || [];
-    
-    const { data: staffData } = await supabase
-      .from("profiles")
-      .select("user_id, full_name")
-      .in("user_id", staffIds);
+    setIsLoading(true);
+    setFetchError(null);
 
-    setClients((clientsData as Client[]) || []);
-    setStaffList((staffData as Staff[]) || []);
+    try {
+      const { data: clientsData, error: clientsError } = await supabase
+        .from("clients")
+        .select("id, name, address, phone, email")
+        .order("name");
+
+      if (clientsError) {
+        throw new Error(`Failed to load clients: ${clientsError.message}`);
+      }
+
+      const { data: staffRoles, error: rolesError } = await supabase
+        .from("user_roles")
+        .select("user_id")
+        .eq("role", "staff");
+
+      if (rolesError) {
+        throw new Error(`Failed to load staff roles: ${rolesError.message}`);
+      }
+
+      const staffIds = staffRoles?.map(r => r.user_id) || [];
+
+      if (staffIds.length > 0) {
+        const { data: staffData, error: staffError } = await supabase
+          .from("profiles")
+          .select("user_id, full_name")
+          .in("user_id", staffIds);
+
+        if (staffError) {
+          throw new Error(`Failed to load staff profiles: ${staffError.message}`);
+        }
+
+        setStaffList((staffData as Staff[]) || []);
+      } else {
+        setStaffList([]);
+      }
+
+      setClients((clientsData as Client[]) || []);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to load data';
+      logger.error("Error fetching clients/staff:", error);
+      setFetchError(errorMessage);
+      toast.error(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -108,5 +140,7 @@ export function useCreateJob(onJobCreated?: () => void) {
     setNewJob,
     handleCreateJob,
     fetchClientsAndStaff,
+    isLoading,
+    fetchError,
   };
 }

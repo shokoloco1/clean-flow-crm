@@ -32,6 +32,7 @@ import {
   isValidAUPhone,
   isValidABN,
 } from "@/lib/validation";
+import { logger } from "@/lib/logger";
 interface Client {
   id: string;
   name: string;
@@ -79,6 +80,8 @@ export default function ClientsPage() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [clientToDelete, setClientToDelete] = useState<Client | null>(null);
+  const [clientJobCount, setClientJobCount] = useState<number>(0);
+  const [isCheckingJobs, setIsCheckingJobs] = useState(false);
   const [formData, setFormData] = useState<Omit<Client, 'id' | 'created_at' | 'updated_at' | 'portal_token'>>(emptyClient);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
@@ -252,22 +255,62 @@ export default function ClientsPage() {
     onError: () => toast.error('Error updating client')
   });
 
+  // Check jobs before delete
+  const checkClientJobs = async (clientId: string): Promise<number> => {
+    const { count, error } = await supabase
+      .from('jobs')
+      .select('*', { count: 'exact', head: true })
+      .eq('client_id', clientId);
+
+    if (error) {
+      logger.error('Error checking jobs:', error);
+      return 0;
+    }
+    return count || 0;
+  };
+
+  // Open delete dialog with job validation
+  const handleDeleteClick = async (client: Client) => {
+    setClientToDelete(client);
+    setIsCheckingJobs(true);
+    setIsDeleteDialogOpen(true);
+
+    const jobCount = await checkClientJobs(client.id);
+    setClientJobCount(jobCount);
+    setIsCheckingJobs(false);
+  };
+
   // Delete client mutation
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
+      // First, update any associated jobs to remove client reference
+      if (clientJobCount > 0) {
+        const { error: updateError } = await supabase
+          .from('jobs')
+          .update({ client_id: null })
+          .eq('client_id', id);
+
+        if (updateError) {
+          logger.error('Error unlinking jobs:', updateError);
+          // Continue with deletion anyway - jobs will become orphaned but won't block
+        }
+      }
+
       const { error } = await supabase.from('clients').delete().eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clients'] });
-      toast.success('Client deleted');
+      queryClient.invalidateQueries({ queryKey: ['jobs'] });
+      toast.success('Client deleted successfully');
       setIsDeleteDialogOpen(false);
       setClientToDelete(null);
+      setClientJobCount(0);
       if (selectedClient && clientToDelete?.id === selectedClient.id) {
         setSelectedClient(null);
       }
     },
-    onError: () => toast.error('Error deleting client. It may have associated jobs.')
+    onError: () => toast.error('Error deleting client')
   });
 
   const filteredClients = clients.filter(client =>
@@ -359,7 +402,7 @@ export default function ClientsPage() {
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link to="/admin">
-              <Button variant="ghost" size="icon">
+              <Button variant="ghost" size="icon" aria-label="Go back to admin">
                 <ArrowLeft className="h-5 w-5" />
               </Button>
             </Link>
@@ -617,6 +660,7 @@ export default function ClientsPage() {
                         variant="ghost"
                         size="icon"
                         onClick={() => setSelectedClient(client)}
+                        aria-label="View client details"
                       >
                         <Eye className="h-4 w-4" />
                       </Button>
@@ -624,16 +668,15 @@ export default function ClientsPage() {
                         variant="ghost"
                         size="icon"
                         onClick={() => openEditDialog(client)}
+                        aria-label="Edit client"
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => {
-                          setClientToDelete(client);
-                          setIsDeleteDialogOpen(true);
-                        }}
+                        onClick={() => handleDeleteClick(client)}
+                        aria-label="Delete client"
                       >
                         <Trash2 className="h-4 w-4 text-destructive" />
                       </Button>
@@ -646,7 +689,13 @@ export default function ClientsPage() {
         </Card>
 
         {/* Delete Confirmation Dialog */}
-        <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <Dialog open={isDeleteDialogOpen} onOpenChange={(open) => {
+          setIsDeleteDialogOpen(open);
+          if (!open) {
+            setClientToDelete(null);
+            setClientJobCount(0);
+          }
+        }}>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Delete Client</DialogTitle>
@@ -654,6 +703,27 @@ export default function ClientsPage() {
                 Are you sure you want to delete "{clientToDelete?.name}"? This action cannot be undone.
               </DialogDescription>
             </DialogHeader>
+
+            {isCheckingJobs ? (
+              <div className="flex items-center gap-2 py-4">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span className="text-sm text-muted-foreground">Checking associated jobs...</span>
+              </div>
+            ) : clientJobCount > 0 ? (
+              <div className="py-4 px-4 bg-warning/10 border border-warning/30 rounded-lg">
+                <div className="flex items-start gap-3">
+                  <AlertCircle className="h-5 w-5 text-warning mt-0.5" />
+                  <div>
+                    <p className="font-medium text-warning">Warning: Associated Jobs Found</p>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      This client has <strong>{clientJobCount} job{clientJobCount !== 1 ? 's' : ''}</strong> associated.
+                      Deleting will unlink these jobs from the client (jobs will be preserved but marked as unassigned).
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ) : null}
+
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
                 Cancel
@@ -661,9 +731,18 @@ export default function ClientsPage() {
               <Button
                 variant="destructive"
                 onClick={() => clientToDelete && deleteMutation.mutate(clientToDelete.id)}
-                disabled={deleteMutation.isPending}
+                disabled={deleteMutation.isPending || isCheckingJobs}
               >
-                Delete
+                {deleteMutation.isPending ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Deleting...
+                  </>
+                ) : clientJobCount > 0 ? (
+                  'Delete Anyway'
+                ) : (
+                  'Delete'
+                )}
               </Button>
             </DialogFooter>
           </DialogContent>

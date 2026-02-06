@@ -122,6 +122,7 @@ function JobCard({
             }}
             disabled={isDuplicating}
             title="Duplicate job for tomorrow"
+            aria-label="Duplicate job for tomorrow"
           >
             <Copy className="h-3.5 w-3.5" />
           </Button>
@@ -136,6 +137,7 @@ function JobCard({
               }}
               disabled={isGeneratingInvoice}
               title="Generate Invoice"
+              aria-label="Generate invoice"
             >
               <Receipt className="h-3.5 w-3.5" />
             </Button>

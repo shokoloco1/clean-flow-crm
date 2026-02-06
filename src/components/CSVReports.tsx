@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Download, FileSpreadsheet, Users, AlertTriangle, Briefcase, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { format, subDays, startOfMonth, endOfMonth } from 'date-fns';
+import { logger } from "@/lib/logger";
 
 type ReportType = 'jobs' | 'staff' | 'alerts';
 
@@ -300,7 +301,7 @@ export function CSVReports() {
       downloadCSV(csvData, filename);
       toast.success('Report generated successfully');
     } catch (error) {
-      console.error('Error generating report:', error);
+      logger.error('Error generating report:', error);
       toast.error('Error generating report');
     } finally {
       setIsGenerating(false);

@@ -27,6 +27,7 @@ import { GSTSummary } from "./GSTSummary";
 import { format, differenceInMinutes } from "date-fns";
 import { toast } from "sonner";
 import { formatAUD, GST_RATE, calculateGST, formatABN } from "@/lib/australian";
+import { logger } from "@/lib/logger";
 
 interface Client {
   id: string;
@@ -73,6 +74,7 @@ export function CreateInvoiceDialog({
   const [lineItems, setLineItems] = useState<InvoiceLineItem[]>([]);
   const [applyGST, setApplyGST] = useState(true); // GST enabled by default for AU
   const [notes, setNotes] = useState("");
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const [dueDate, setDueDate] = useState(
     format(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), "yyyy-MM-dd")
   );
@@ -96,47 +98,75 @@ export function CreateInvoiceDialog({
   }, [selectedClientId, clients]);
 
   const fetchClients = async () => {
-    const { data } = await supabase
-      .from("clients")
-      .select("id, name, abn")
-      .order("name");
-    if (data) setClients(data);
+    setFetchError(null);
+    try {
+      const { data, error } = await supabase
+        .from("clients")
+        .select("id, name, abn")
+        .order("name");
+
+      if (error) {
+        throw new Error(`Failed to load clients: ${error.message}`);
+      }
+
+      setClients(data || []);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to load clients';
+      logger.error("Error fetching clients:", error);
+      setFetchError(message);
+      toast.error(message);
+    }
   };
 
   const fetchCompletedJobs = async (clientId: string) => {
-    const { data: jobsData } = await supabase
-      .from("jobs")
-      .select(`
-        id, location, scheduled_date, start_time, end_time, assigned_staff_id,
-        clients (name)
-      `)
-      .eq("client_id", clientId)
-      .eq("status", "completed")
-      .order("scheduled_date", { ascending: false })
-      .limit(50);
+    try {
+      const { data: jobsData, error: jobsError } = await supabase
+        .from("jobs")
+        .select(`
+          id, location, scheduled_date, start_time, end_time, assigned_staff_id,
+          clients (name)
+        `)
+        .eq("client_id", clientId)
+        .eq("status", "completed")
+        .order("scheduled_date", { ascending: false })
+        .limit(50);
 
-    if (jobsData && jobsData.length > 0) {
-      const staffIds = [...new Set(jobsData.map(j => j.assigned_staff_id).filter(Boolean))];
-      
-      const { data: profilesData } = await supabase
-        .from("profiles")
-        .select("user_id, full_name, hourly_rate")
-        .in("user_id", staffIds);
+      if (jobsError) {
+        throw new Error(`Failed to load jobs: ${jobsError.message}`);
+      }
 
-      const profilesMap = new Map(profilesData?.map(p => [p.user_id, p]) || []);
+      if (jobsData && jobsData.length > 0) {
+        const staffIds = [...new Set(jobsData.map(j => j.assigned_staff_id).filter(Boolean))];
 
-      const jobs: CompletedJob[] = jobsData.map(job => ({
-        id: job.id,
-        location: job.location,
-        scheduled_date: job.scheduled_date,
-        start_time: job.start_time,
-        end_time: job.end_time,
-        clients: job.clients,
-        profiles: job.assigned_staff_id ? profilesMap.get(job.assigned_staff_id) || null : null
-      }));
+        const { data: profilesData, error: profilesError } = await supabase
+          .from("profiles")
+          .select("user_id, full_name, hourly_rate")
+          .in("user_id", staffIds);
 
-      setCompletedJobs(jobs);
-    } else {
+        if (profilesError) {
+          logger.warn("Failed to load staff profiles:", profilesError);
+        }
+
+        const profilesMap = new Map(profilesData?.map(p => [p.user_id, p]) || []);
+
+        const jobs: CompletedJob[] = jobsData.map(job => ({
+          id: job.id,
+          location: job.location,
+          scheduled_date: job.scheduled_date,
+          start_time: job.start_time,
+          end_time: job.end_time,
+          clients: job.clients,
+          profiles: job.assigned_staff_id ? profilesMap.get(job.assigned_staff_id) || null : null
+        }));
+
+        setCompletedJobs(jobs);
+      } else {
+        setCompletedJobs([]);
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to load jobs';
+      logger.error("Error fetching completed jobs:", error);
+      toast.error(message);
       setCompletedJobs([]);
     }
   };
@@ -280,7 +310,7 @@ export function CreateInvoiceDialog({
       onCreated();
       resetForm();
     } catch (error) {
-      console.error(error);
+      logger.error(error);
       toast.error("Error creating invoice");
     }
 

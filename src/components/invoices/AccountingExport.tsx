@@ -16,10 +16,10 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { 
-  Download, 
-  FileSpreadsheet, 
-  Loader2, 
+import {
+  Download,
+  FileSpreadsheet,
+  Loader2,
   AlertCircle,
   Calendar,
   Building2,
@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import { format, parseISO, isWithinInterval, startOfMonth, endOfMonth, subMonths } from "date-fns";
 import { toast } from "sonner";
+import { logger } from "@/lib/logger";
 
 interface Invoice {
   id: string;
@@ -388,7 +389,7 @@ export function AccountingExport({ invoices }: AccountingExportProps) {
 
       setIsOpen(false);
     } catch (error: any) {
-      console.error("Error exporting:", error);
+      logger.error("Error exporting:", error);
       toast.error("Failed to export invoices", { description: error.message });
     } finally {
       setIsExporting(false);

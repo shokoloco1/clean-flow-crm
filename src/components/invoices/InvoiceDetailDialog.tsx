@@ -32,6 +32,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { formatAUD, formatABN, GST_RATE } from "@/lib/australian";
 import { useBusinessSettings } from "@/hooks/useBusinessSettings";
+import { logger } from "@/lib/logger";
 
 interface Invoice {
   id: string;
@@ -315,7 +316,7 @@ export function InvoiceDetailDialog({
       doc.save(`${invoice.invoice_number}.pdf`);
       toast.success("Tax Invoice PDF downloaded");
     } catch (error) {
-      console.error(error);
+      logger.error("Error generating PDF:", error);
       toast.error("Failed to generate PDF");
     }
 

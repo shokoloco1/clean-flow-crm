@@ -16,6 +16,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Download, FileSpreadsheet, Loader2, Check, AlertCircle } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { toast } from "sonner";
+import { logger } from "@/lib/logger";
 
 interface Invoice {
   id: string;
@@ -208,7 +209,7 @@ export function XeroExport({ invoices }: XeroExportProps) {
 
       setIsOpen(false);
     } catch (error: any) {
-      console.error("Error exporting to Xero:", error);
+      logger.error("Error exporting to Xero:", error);
       toast.error("Failed to export invoices", {
         description: error.message,
       });

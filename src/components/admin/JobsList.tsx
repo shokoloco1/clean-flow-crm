@@ -112,7 +112,7 @@ export function JobsList({ jobs, loading, error, isRetrying, onViewJob, onRetry,
                     isUpdating={updatingJobId === job.id}
                     onAdvance={() => advanceStatus(job.id, job.status)}
                   />
-                  <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); onViewJob(job); }}>
+                  <Button variant="ghost" size="icon" aria-label="View job details" onClick={(e) => { e.stopPropagation(); onViewJob(job); }}>
                     <Eye className="h-4 w-4" />
                   </Button>
                 </div>

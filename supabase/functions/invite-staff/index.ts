@@ -268,6 +268,25 @@ serve(async (req) => {
       throw new Error("Email and name are required");
     }
 
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      throw new Error("Invalid email format");
+    }
+
+    // Validate fullName is not just whitespace
+    if (fullName.trim().length < 2) {
+      throw new Error("Name must be at least 2 characters");
+    }
+
+    // Validate hourlyRate if provided
+    if (hourlyRate !== undefined && hourlyRate !== null) {
+      const rate = parseFloat(hourlyRate);
+      if (isNaN(rate) || rate < 0) {
+        throw new Error("Hourly rate must be a positive number");
+      }
+    }
+
     console.log(`[invite-staff] Admin ${user.email} inviting ${email}`);
 
     // Use admin client for user creation

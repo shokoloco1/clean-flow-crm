@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { logger } from "@/lib/logger";
 
 type JobStatus = "scheduled" | "pending" | "in_progress" | "completed" | "cancelled";
 
@@ -55,7 +56,7 @@ export function useJobStatusChange(onUpdate?: () => void) {
       toast.success(`Job moved to ${statusLabels[newStatus]}`);
       onUpdate?.();
     } catch (error) {
-      console.error("Error updating job status:", error);
+      logger.error("Error updating job status", error);
       toast.error("Failed to update job status");
     } finally {
       setUpdatingJobId(null);

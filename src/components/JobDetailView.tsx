@@ -301,11 +301,12 @@ export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewPr
       {/* Header */}
       <header className="bg-card border-b border-border sticky top-0 z-10 px-4 py-4 safe-area-inset-top">
         <div className="flex items-center gap-4">
-          <Button 
-            variant="ghost" 
-            size="icon" 
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={onBack}
             className="h-12 w-12"
+            aria-label="Go back"
           >
             <ArrowLeft className="h-6 w-6" />
           </Button>
@@ -643,6 +644,7 @@ export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewPr
             size="icon"
             className="absolute top-4 right-4 text-white"
             onClick={() => setSelectedPhoto(null)}
+            aria-label="Close photo"
           >
             <XCircle className="h-8 w-8" />
           </Button>

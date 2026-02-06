@@ -100,6 +100,18 @@ serve(async (req) => {
           }
 
           if (profileUserId) {
+            // Validate priceId is recognized
+            if (plan === "unknown") {
+              logStep("WARNING: Unknown price ID", { priceId });
+              // Continue anyway - we'll save the subscription but with unknown plan
+            }
+
+            // Validate customerId exists
+            if (!customerId) {
+              logStep("ERROR: No customer ID in session", { sessionId: session.id });
+              break;
+            }
+
             // Calculate trial dates
             const trialStart = subscription.trial_start
               ? new Date(subscription.trial_start * 1000).toISOString()

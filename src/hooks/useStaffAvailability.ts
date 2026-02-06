@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { toast } from 'sonner';
+import { logger } from "@/lib/logger";
 
 export interface StaffAvailability {
   id: string;
@@ -57,7 +58,7 @@ export function useStaffAvailability(staffId?: string) {
         setAvailability(defaults as StaffAvailability[]);
       }
     } catch (error) {
-      console.error('Error fetching availability:', error);
+      logger.error('Error fetching availability:', error);
     } finally {
       setLoading(false);
     }
@@ -92,14 +93,9 @@ export function useStaffAvailability(staffId?: string) {
 
     setSaving(true);
     try {
-      // Delete existing availability
-      await supabase
-        .from('staff_availability')
-        .delete()
-        .eq('user_id', targetUserId);
-
-      // Insert new availability
-      const toInsert = availability.map(({ day_of_week, start_time, end_time, is_available }) => ({
+      // Use upsert to safely update or insert availability records
+      // This prevents data loss if insert fails after delete
+      const toUpsert = availability.map(({ day_of_week, start_time, end_time, is_available }) => ({
         user_id: targetUserId,
         day_of_week,
         start_time,
@@ -109,14 +105,17 @@ export function useStaffAvailability(staffId?: string) {
 
       const { error } = await supabase
         .from('staff_availability')
-        .insert(toInsert);
+        .upsert(toUpsert, {
+          onConflict: 'user_id,day_of_week',
+          ignoreDuplicates: false
+        });
 
       if (error) throw error;
 
       toast.success('Availability saved');
       fetchAvailability();
     } catch (error) {
-      console.error('Error saving availability:', error);
+      logger.error('Error saving availability:', error);
       toast.error('Failed to save availability');
     } finally {
       setSaving(false);
@@ -231,7 +230,7 @@ export function useAvailableStaff(date: string, time: string) {
 
         setAvailableStaff(result);
       } catch (error) {
-        console.error('Error fetching available staff:', error);
+        logger.error('Error fetching available staff:', error);
       } finally {
         setLoading(false);
       }

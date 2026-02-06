@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Clock, Rocket, ArrowRight, Loader2 } from "lucide-react";
 import { PulcrixLogo } from "@/components/PulcrixLogo";
 import { TrialBanner } from "./TrialBanner";
+import { logger } from "@/lib/logger";
 
 interface SubscriptionGateProps {
   children: React.ReactNode;
@@ -79,7 +80,7 @@ export function SubscriptionGate({ children, trialDays = 14 }: SubscriptionGateP
           .maybeSingle();
 
         if (error) {
-          console.error("Error fetching trial info:", error);
+          logger.error("Error fetching trial info:", error);
           // Fall back to legacy behavior
           setTrialInfo(getLegacyTrialStatus());
         } else if (data?.status === "trialing" && data.current_period_end) {
@@ -109,7 +110,7 @@ export function SubscriptionGate({ children, trialDays = 14 }: SubscriptionGateP
           setTrialInfo(getLegacyTrialStatus());
         }
       } catch (err) {
-        console.error("Error fetching trial info:", err);
+        logger.error("Error fetching trial info:", err);
         setTrialInfo(getLegacyTrialStatus());
       } finally {
         setLoading(false);
