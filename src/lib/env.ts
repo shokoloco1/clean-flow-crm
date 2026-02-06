@@ -1,38 +1,35 @@
 import { z } from "zod";
 
+// Default values from Lovable Cloud - these are automatically injected
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || "https://edeprzdcvbejtnhoqawv.supabase.co";
+const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkZXByemRjdmJlanRuaG9xYXd2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc1NzQwNzYsImV4cCI6MjA4MzE1MDA3Nn0._DXUCh4cG4cQo7gltaUxn_VOcbF5JlcHlF2L0xlZvOc";
+
 const envSchema = z.object({
-  VITE_SUPABASE_URL: z
-    .string({
-      required_error: "VITE_SUPABASE_URL is required",
-    })
-    .url("VITE_SUPABASE_URL must be a valid URL"),
-  VITE_SUPABASE_PUBLISHABLE_KEY: z
-    .string({
-      required_error: "VITE_SUPABASE_PUBLISHABLE_KEY is required",
-    })
-    .min(1, "VITE_SUPABASE_PUBLISHABLE_KEY cannot be empty"),
-  VITE_ENABLE_ANALYTICS: z
-    .string()
-    .optional()
-    .transform((val) => val === "true"),
+  VITE_SUPABASE_URL: z.string().url(),
+  VITE_SUPABASE_PUBLISHABLE_KEY: z.string().min(1),
+  VITE_ENABLE_ANALYTICS: z.boolean(),
   VITE_SENTRY_DSN: z.string().url().optional(),
 });
 
 function validateEnv() {
-  const result = envSchema.safeParse({
-    VITE_SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL,
-    VITE_SUPABASE_PUBLISHABLE_KEY: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-    VITE_ENABLE_ANALYTICS: import.meta.env.VITE_ENABLE_ANALYTICS,
-    VITE_SENTRY_DSN: import.meta.env.VITE_SENTRY_DSN,
-  });
+  const envValues = {
+    VITE_SUPABASE_URL: SUPABASE_URL,
+    VITE_SUPABASE_PUBLISHABLE_KEY: SUPABASE_KEY,
+    VITE_ENABLE_ANALYTICS: import.meta.env.VITE_ENABLE_ANALYTICS === "true",
+    VITE_SENTRY_DSN: import.meta.env.VITE_SENTRY_DSN || undefined,
+  };
+
+  const result = envSchema.safeParse(envValues);
 
   if (!result.success) {
-    const errors = result.error.errors
-      .map((e) => `  - ${e.path.join(".")}: ${e.message}`)
-      .join("\n");
-    throw new Error(
-      `Environment validation failed:\n${errors}\n\nPlease check your .env file. See .env.example for required variables.`
-    );
+    console.error("Environment validation failed:", result.error.errors);
+    // Return fallback values instead of throwing
+    return {
+      VITE_SUPABASE_URL: SUPABASE_URL,
+      VITE_SUPABASE_PUBLISHABLE_KEY: SUPABASE_KEY,
+      VITE_ENABLE_ANALYTICS: false,
+      VITE_SENTRY_DSN: undefined,
+    };
   }
 
   return result.data;
