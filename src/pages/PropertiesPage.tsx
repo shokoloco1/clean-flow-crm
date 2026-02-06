@@ -16,6 +16,16 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -121,6 +131,9 @@ export default function PropertiesPage() {
   const [propertyPhotos, setPropertyPhotos] = useState<PropertyPhoto[]>([]);
   const [copiedLink, setCopiedLink] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [propertyToDelete, setPropertyToDelete] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -171,20 +184,36 @@ export default function PropertiesPage() {
   }, []);
 
   const fetchData = async () => {
-    const [propertiesRes, clientsRes] = await Promise.all([
-      supabase
-        .from("properties")
-        .select(`
-          *,
-          clients (name)
-        `)
-        .order("created_at", { ascending: false }),
-      supabase.from("clients").select("id, name").order("name"),
-    ]);
+    try {
+      const [propertiesRes, clientsRes] = await Promise.all([
+        supabase
+          .from("properties")
+          .select(`
+            *,
+            clients (name)
+          `)
+          .order("created_at", { ascending: false }),
+        supabase.from("clients").select("id, name").order("name"),
+      ]);
 
-    setProperties((propertiesRes.data as unknown as Property[]) || []);
-    setClients((clientsRes.data as Client[]) || []);
-    setLoading(false);
+      if (propertiesRes.error) {
+        throw new Error(`Failed to load properties: ${propertiesRes.error.message}`);
+      }
+
+      if (clientsRes.error) {
+        console.warn("Failed to load clients:", clientsRes.error);
+        // Don't throw - properties can still work without clients
+      }
+
+      setProperties((propertiesRes.data as unknown as Property[]) || []);
+      setClients((clientsRes.data as Client[]) || []);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to load data';
+      console.error("Error fetching data:", error);
+      toast.error(message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const resetForm = () => {
@@ -357,17 +386,27 @@ export default function PropertiesPage() {
     fetchData();
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this property?")) return;
+  const openDeleteDialog = (id: string) => {
+    setPropertyToDelete(id);
+    setDeleteDialogOpen(true);
+  };
 
-    const { error } = await supabase.from("properties").delete().eq("id", id);
+  const handleDelete = async () => {
+    if (!propertyToDelete) return;
+
+    setIsDeleting(true);
+    const { error } = await supabase.from("properties").delete().eq("id", propertyToDelete);
 
     if (error) {
       toast.error("Failed to delete property");
+      setIsDeleting(false);
       return;
     }
 
     toast.success("Property deleted!");
+    setDeleteDialogOpen(false);
+    setPropertyToDelete(null);
+    setIsDeleting(false);
     fetchData();
   };
 
@@ -1211,7 +1250,7 @@ export default function PropertiesPage() {
                         size="sm"
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleDelete(property.id);
+                          openDeleteDialog(property.id);
                         }}
                       >
                         <Trash2 className="h-4 w-4 text-destructive" />
@@ -1223,6 +1262,28 @@ export default function PropertiesPage() {
             })}
           </div>
         )}
+
+        {/* Delete Confirmation Dialog */}
+        <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Property</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete this property? This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleDelete}
+                disabled={isDeleting}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                {isDeleting ? "Deleting..." : "Delete"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </main>
     </div>
   );

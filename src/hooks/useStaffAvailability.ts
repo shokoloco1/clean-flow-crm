@@ -92,14 +92,9 @@ export function useStaffAvailability(staffId?: string) {
 
     setSaving(true);
     try {
-      // Delete existing availability
-      await supabase
-        .from('staff_availability')
-        .delete()
-        .eq('user_id', targetUserId);
-
-      // Insert new availability
-      const toInsert = availability.map(({ day_of_week, start_time, end_time, is_available }) => ({
+      // Use upsert to safely update or insert availability records
+      // This prevents data loss if insert fails after delete
+      const toUpsert = availability.map(({ day_of_week, start_time, end_time, is_available }) => ({
         user_id: targetUserId,
         day_of_week,
         start_time,
@@ -109,7 +104,10 @@ export function useStaffAvailability(staffId?: string) {
 
       const { error } = await supabase
         .from('staff_availability')
-        .insert(toInsert);
+        .upsert(toUpsert, {
+          onConflict: 'user_id,day_of_week',
+          ignoreDuplicates: false
+        });
 
       if (error) throw error;
 

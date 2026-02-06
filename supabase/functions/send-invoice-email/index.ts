@@ -86,6 +86,12 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error("Missing required fields: to, invoiceNumber, and pdfBase64 are required");
     }
 
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(to)) {
+      throw new Error(`Invalid email format: ${to}`);
+    }
+
     const fromEmail = Deno.env.get("RESEND_FROM_EMAIL") || "Pulcrix <onboarding@resend.dev>";
 
     // Convert base64 to Uint8Array for attachment
