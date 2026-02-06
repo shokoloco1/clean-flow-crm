@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { useFetchWithRetry } from "@/hooks/useFetchWithRetry";
 import { logger } from "@/lib/logger";
+import { CONFIG } from "@/lib/config";
 
 export interface Stats {
   todayJobs: number;
@@ -99,27 +100,27 @@ export function useDashboardData() {
     };
   }, []);
 
-  const { 
-    data: dashboardData, 
-    loading, 
-    error, 
+  const {
+    data: dashboardData,
+    loading,
+    error,
     isFromCache,
     retryCount,
     execute: refreshData,
-    retry 
+    retry
   } = useFetchWithRetry<DashboardData>(fetchDashboardData, {
     cacheKey: 'admin-dashboard-today',
-    timeout: 8000,
-    maxRetries: 2,
-    retryDelay: 1500,
+    timeout: CONFIG.api.defaultTimeout,
+    maxRetries: CONFIG.api.maxRetries,
+    retryDelay: CONFIG.api.retryDelay,
   });
 
-  // Auto-refresh every 30 seconds
+  // Auto-refresh at configured interval
   useEffect(() => {
     refreshIntervalRef.current = setInterval(() => {
       logger.debug('[Dashboard] Auto-refreshing data...');
       refreshData();
-    }, 30000);
+    }, CONFIG.refresh.dashboard);
 
     return () => {
       if (refreshIntervalRef.current) {
