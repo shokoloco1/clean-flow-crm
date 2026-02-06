@@ -277,7 +277,7 @@ export function CreateJobWizard({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-lg max-h-[85vh] sm:max-h-[90vh] overflow-y-auto flex flex-col p-4 sm:p-6">
+      <DialogContent className="sm:max-w-lg max-h-[85vh] sm:max-h-[90vh] flex flex-col p-4 sm:p-6 overflow-hidden">
         <DialogHeader>
           <DialogTitle className="text-xl">📋 New Job</DialogTitle>
           
@@ -310,8 +310,8 @@ export function CreateJobWizard({
           </div>
         </DialogHeader>
 
-        <ScrollArea className="flex-1 -mx-4 px-4 sm:-mx-6 sm:px-6">
-          <div className="space-y-4 py-4">
+        <ScrollArea className="flex-1 min-h-0 -mx-4 px-4 sm:-mx-6 sm:px-6">
+          <div className="space-y-4 py-4 pr-2">
             {/* Step 1: Select Client */}
             {currentStep === 1 && (
               <div className="space-y-4">
