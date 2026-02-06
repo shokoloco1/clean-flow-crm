@@ -367,6 +367,19 @@ export function InvoiceDetailDialog({
           </div>
         ) : (
           <div className="space-y-6 py-4">
+            {/* Business Info */}
+            {businessSettings.business_abn && (
+              <div className="p-3 bg-muted/50 rounded-lg">
+                <p className="text-sm font-medium">{businessSettings.company_name || "Pulcrix"}</p>
+                {businessSettings.business_address && (
+                  <p className="text-xs text-muted-foreground">{businessSettings.business_address}</p>
+                )}
+                <p className="text-xs text-muted-foreground mt-1">
+                  <span className="font-medium">ABN:</span> {formatABN(businessSettings.business_abn)}
+                </p>
+              </div>
+            )}
+
             {/* Client & Dates */}
             <div className="grid grid-cols-2 gap-6">
               <div>

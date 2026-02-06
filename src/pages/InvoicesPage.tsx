@@ -26,18 +26,29 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { 
-  ArrowLeft, 
-  Plus, 
-  FileText, 
-  Download, 
+import {
+  ArrowLeft,
+  Plus,
+  FileText,
+  Download,
   Eye,
   Search,
   DollarSign,
   Clock,
   CheckCircle,
-  Loader2
+  Loader2,
+  Trash2
 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { format, parseISO } from "date-fns";
 import { toast } from "sonner";
 import { CreateInvoiceDialog } from "@/components/invoices/CreateInvoiceDialog";
@@ -69,6 +80,8 @@ export default function InvoicesPage() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
+  const [invoiceToDelete, setInvoiceToDelete] = useState<Invoice | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     fetchInvoices();
@@ -90,6 +103,31 @@ export default function InvoicesPage() {
       setInvoices(data as Invoice[]);
     }
     setLoading(false);
+  };
+
+  const handleDeleteInvoice = async () => {
+    if (!invoiceToDelete) return;
+
+    setDeleting(true);
+    try {
+      // Invoice items will be deleted automatically via CASCADE
+      const { error } = await supabase
+        .from("invoices")
+        .delete()
+        .eq("id", invoiceToDelete.id);
+
+      if (error) throw error;
+
+      toast.success("Invoice deleted", {
+        description: `Invoice ${invoiceToDelete.invoice_number} has been deleted`,
+      });
+      setInvoiceToDelete(null);
+      fetchInvoices();
+    } catch (error) {
+      toast.error("Failed to delete invoice");
+    } finally {
+      setDeleting(false);
+    }
   };
 
   const getStatusConfig = (status: string) => {
@@ -298,13 +336,23 @@ export default function InvoicesPage() {
                           />
                         </TableCell>
                         <TableCell className="text-right">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setSelectedInvoice(invoice)}
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Button>
+                          <div className="flex items-center justify-end gap-1">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setSelectedInvoice(invoice)}
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setInvoiceToDelete(invoice)}
+                              className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     );
@@ -329,6 +377,37 @@ export default function InvoicesPage() {
         onClose={() => setSelectedInvoice(null)}
         onUpdated={fetchInvoices}
       />
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!invoiceToDelete} onOpenChange={() => setInvoiceToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Invoice</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete invoice{" "}
+              <span className="font-semibold">{invoiceToDelete?.invoice_number}</span>?
+              This action cannot be undone. The invoice number sequence will continue normally.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteInvoice}
+              disabled={deleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleting ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                "Delete Invoice"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

@@ -28,6 +28,7 @@ import { format, differenceInMinutes } from "date-fns";
 import { toast } from "sonner";
 import { formatAUD, GST_RATE, calculateGST, formatABN } from "@/lib/australian";
 import { logger } from "@/lib/logger";
+import { useBusinessSettings } from "@/hooks/useBusinessSettings";
 
 interface Client {
   id: string;
@@ -78,6 +79,8 @@ export function CreateInvoiceDialog({
   const [dueDate, setDueDate] = useState(
     format(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), "yyyy-MM-dd")
   );
+
+  const { settings: businessSettings } = useBusinessSettings();
 
   useEffect(() => {
     if (isOpen) {
@@ -337,8 +340,13 @@ export function CreateInvoiceDialog({
               <p className="text-sm text-muted-foreground mt-1">
                 Australian Tax Invoice with GST
               </p>
+              {businessSettings.business_abn && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  <span className="font-medium">ABN:</span> {formatABN(businessSettings.business_abn)}
+                </p>
+              )}
             </div>
-            <PriceListReference 
+            <PriceListReference
               trigger={
                 <Button variant="outline" size="sm" type="button">
                   <FileText className="h-4 w-4 mr-2" />
