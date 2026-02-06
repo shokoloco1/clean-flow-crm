@@ -1,6 +1,8 @@
 // Simple logging utility for debugging and error tracking
 // Only logs to console in development mode for production safety
-// Can be extended to integrate with services like Sentry, LogRocket, etc.
+// Integrates with Sentry for production error tracking
+
+import { captureError } from "./sentry";
 
 type LogLevel = "info" | "warn" | "error" | "debug";
 
@@ -57,9 +59,11 @@ export const logger = {
       console.error(`[ERROR] ${message}`, error ?? "");
     }
     persistLog(entry);
-    
-    // Here you could integrate with error tracking services
-    // Example: Sentry.captureException(error);
+
+    // Send to Sentry in production
+    if (error instanceof Error) {
+      captureError(error, { message });
+    }
   },
 
   debug: (message: string, data?: unknown) => {
