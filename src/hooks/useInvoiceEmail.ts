@@ -257,6 +257,10 @@ export function useInvoiceEmail() {
         throw new Error("Invoice not found");
       }
 
+      if (!invoice.client_id) {
+        throw new Error("Invoice has no client associated");
+      }
+
       // Fetch client
       const { data: client, error: clientError } = await supabase
         .from("clients")

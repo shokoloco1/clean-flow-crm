@@ -264,16 +264,17 @@ export default function StaffManagementPage() {
   const updateAvailabilityMutation = useMutation({
     mutationFn: async (avail: Partial<StaffAvailability>) => {
       if (!selectedStaff) throw new Error("No staff selected");
+      if (avail.day_of_week === undefined) throw new Error("Day of week is required");
 
       const { error } = await supabase
         .from("staff_availability")
-        .upsert({
+        .upsert([{
           user_id: selectedStaff.user_id,
           day_of_week: avail.day_of_week,
-          start_time: avail.start_time,
-          end_time: avail.end_time,
-          is_available: avail.is_available
-        }, {
+          start_time: avail.start_time ?? "09:00",
+          end_time: avail.end_time ?? "17:00",
+          is_available: avail.is_available ?? true
+        }], {
           onConflict: "user_id,day_of_week"
         });
 

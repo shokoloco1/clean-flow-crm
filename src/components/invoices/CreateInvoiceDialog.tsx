@@ -74,7 +74,6 @@ export function CreateInvoiceDialog({
   const [lineItems, setLineItems] = useState<InvoiceLineItem[]>([]);
   const [applyGST, setApplyGST] = useState(true); // GST enabled by default for AU
   const [notes, setNotes] = useState("");
-  const [fetchError, setFetchError] = useState<string | null>(null);
   const [dueDate, setDueDate] = useState(
     format(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), "yyyy-MM-dd")
   );
@@ -98,7 +97,6 @@ export function CreateInvoiceDialog({
   }, [selectedClientId, clients]);
 
   const fetchClients = async () => {
-    setFetchError(null);
     try {
       const { data, error } = await supabase
         .from("clients")
@@ -113,7 +111,6 @@ export function CreateInvoiceDialog({
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to load clients';
       logger.error("Error fetching clients:", error);
-      setFetchError(message);
       toast.error(message);
     }
   };
@@ -136,7 +133,7 @@ export function CreateInvoiceDialog({
       }
 
       if (jobsData && jobsData.length > 0) {
-        const staffIds = [...new Set(jobsData.map(j => j.assigned_staff_id).filter(Boolean))];
+        const staffIds = [...new Set(jobsData.map(j => j.assigned_staff_id).filter((id): id is string => id !== null))];
 
         const { data: profilesData, error: profilesError } = await supabase
           .from("profiles")
@@ -310,7 +307,7 @@ export function CreateInvoiceDialog({
       onCreated();
       resetForm();
     } catch (error) {
-      logger.error(error);
+      logger.error("Error creating invoice:", error);
       toast.error("Error creating invoice");
     }
 

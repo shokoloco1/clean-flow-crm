@@ -6,7 +6,7 @@ export interface SearchResult {
   type: "job" | "client" | "property" | "staff";
   title: string;
   subtitle: string;
-  metadata?: Record<string, string>;
+  metadata?: Record<string, string | undefined>;
 }
 
 export interface SearchFilters {
@@ -110,8 +110,8 @@ export function useGlobalSearch() {
             title: client.name,
             subtitle: client.email || client.phone || "No contact info",
             metadata: { 
-              phone: client.phone || undefined,
-              email: client.email || undefined 
+              phone: client.phone ?? undefined,
+              email: client.email ?? undefined 
             },
           });
         });
@@ -139,8 +139,8 @@ export function useGlobalSearch() {
             title: member.full_name,
             subtitle: member.email,
             metadata: {
-              phone: (member as any).phone || undefined,
-              email: member.email || undefined
+              phone: (member as any).phone ?? undefined,
+              email: member.email ?? undefined
             },
           });
         });

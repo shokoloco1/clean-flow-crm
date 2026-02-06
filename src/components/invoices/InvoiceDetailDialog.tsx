@@ -25,12 +25,12 @@ import {
 } from "@/components/ui/table";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Download, Loader2, Building2, Calendar, FileText, Receipt } from "lucide-react";
+import { Download, Loader2, Building2, Calendar, Receipt } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { toast } from "sonner";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import { formatAUD, formatABN, GST_RATE } from "@/lib/australian";
+import { formatAUD, formatABN } from "@/lib/australian";
 import { useBusinessSettings } from "@/hooks/useBusinessSettings";
 import { logger } from "@/lib/logger";
 
@@ -109,7 +109,13 @@ export function InvoiceDetailDialog({
       .single();
 
     if (clientData) {
-      setClientDetails(clientData);
+      setClientDetails({
+        name: clientData.name,
+        address: clientData.address ?? undefined,
+        email: clientData.email ?? undefined,
+        phone: clientData.phone ?? undefined,
+        abn: clientData.abn ?? undefined,
+      });
     }
 
     setLoading(false);

@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
 import { logger } from "@/lib/logger";
 
@@ -42,7 +41,7 @@ export function useAnalytics() {
       // Log to console for development/debugging
       // analytics_events table doesn't exist yet - log only
       if (import.meta.env.DEV || !import.meta.env.VITE_ENABLE_ANALYTICS) {
-        logger.debug("[Analytics]", event, data);
+        logger.debug("[Analytics]", { event, data });
       }
       // TODO: Implement database tracking when analytics_events table is created
     },

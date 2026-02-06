@@ -176,7 +176,7 @@ export default function ClientsPage() {
       if (error) throw error;
       
       // Fetch staff names separately
-      const staffIds = [...new Set(data.map(j => j.assigned_staff_id).filter(Boolean))];
+      const staffIds = [...new Set(data.map(j => j.assigned_staff_id).filter((id): id is string => id !== null))];
       let staffMap: Record<string, string> = {};
       if (staffIds.length > 0) {
         const { data: staffData } = await supabase
