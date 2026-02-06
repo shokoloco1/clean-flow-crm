@@ -208,10 +208,10 @@ export function XeroExport({ invoices }: XeroExportProps) {
       });
 
       setIsOpen(false);
-    } catch (error: any) {
+    } catch (error) {
       logger.error("Error exporting to Xero:", error);
       toast.error("Failed to export invoices", {
-        description: error.message,
+        description: error instanceof Error ? error.message : "Unknown error",
       });
     } finally {
       setIsExporting(false);

@@ -249,7 +249,7 @@ export function InvoiceDetailDialog({
       });
 
       // === TOTALS SECTION ===
-      const finalY = (doc as any).lastAutoTable.finalY + 10;
+      const finalY = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 10;
       
       // Box for totals
       doc.setDrawColor(200);

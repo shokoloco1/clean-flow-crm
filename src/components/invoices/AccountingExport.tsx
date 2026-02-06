@@ -388,9 +388,9 @@ export function AccountingExport({ invoices }: AccountingExportProps) {
       });
 
       setIsOpen(false);
-    } catch (error: any) {
+    } catch (error) {
       logger.error("Error exporting:", error);
-      toast.error("Failed to export invoices", { description: error.message });
+      toast.error("Failed to export invoices", { description: error instanceof Error ? error.message : "Unknown error" });
     } finally {
       setIsExporting(false);
     }

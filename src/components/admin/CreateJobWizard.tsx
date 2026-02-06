@@ -114,7 +114,7 @@ export function CreateJobWizard({
         // Check for time overlap (same time slot)
         const conflicts = existingJobs
           .filter(job => job.scheduled_time === formData.scheduled_time)
-          .map(job => `Already assigned to ${(job.clients as any)?.name || 'a job'} at ${job.scheduled_time}`);
+          .map(job => `Already assigned to ${(job.clients as { name?: string } | null)?.name || 'a job'} at ${job.scheduled_time}`);
         
         setStaffConflicts(conflicts);
       } else {
