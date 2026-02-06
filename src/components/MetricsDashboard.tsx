@@ -3,25 +3,26 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { 
-  BarChart, 
-  Bar, 
-  LineChart, 
-  Line, 
-  PieChart, 
-  Pie, 
-  Cell, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  ResponsiveContainer, 
+import {
+  BarChart,
+  Bar,
+  LineChart,
+  Line,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
   Legend,
   Area,
   AreaChart
 } from 'recharts';
 import { TrendingUp, Users, Clock, AlertTriangle, CheckCircle, BarChart3, Loader2 } from 'lucide-react';
 import { format, subDays, startOfDay, eachDayOfInterval, parseISO } from 'date-fns';
+import { logger } from "@/lib/logger";
 
 interface JobsPerDay {
   date: string;
@@ -225,7 +226,7 @@ export function MetricsDashboard() {
       setAlertDistribution(distribution);
 
     } catch (error) {
-      console.error('Error fetching metrics:', error);
+      logger.error('Error fetching metrics:', error);
     } finally {
       setLoading(false);
     }

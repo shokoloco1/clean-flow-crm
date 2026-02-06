@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/collapsible";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
+import { logger } from "@/lib/logger";
 
 interface AreaPhoto {
   id: string;
@@ -154,7 +155,7 @@ export function AreaPhotoDocumentation({
           .like("photo_type", "area_%");
 
         if (error) {
-          console.error("Error loading area photos:", error);
+          logger.error("Error loading area photos:", error);
         }
 
         // Build a map of area -> photos
@@ -196,7 +197,7 @@ export function AreaPhotoDocumentation({
 
         setAreaPhotos(initialAreas);
       } catch (err) {
-        console.error("Error in loadAreaPhotos:", err);
+        logger.error("Error in loadAreaPhotos:", err);
       } finally {
         setLoading(false);
       }
@@ -269,7 +270,7 @@ export function AreaPhotoDocumentation({
         .single();
 
       if (insertError) {
-        console.error("Error saving photo to database:", insertError);
+        logger.error("Error saving photo to database:", insertError);
         toast.error("Photo uploaded but failed to save record");
         return;
       }
@@ -302,7 +303,7 @@ export function AreaPhotoDocumentation({
       toast.success(`📸 ${type === "before" ? "Before" : "After"} photo saved for ${areaName}!`);
       onPhotosUpdated?.();
     } catch (error) {
-      console.error("Photo upload error:", error);
+      logger.error("Photo upload error:", error);
       toast.error("Failed to upload photo");
     } finally {
       setUploadingArea(null);
@@ -335,7 +336,7 @@ export function AreaPhotoDocumentation({
         .eq("id", photoId);
 
       if (error) {
-        console.error("Error deleting photo:", error);
+        logger.error("Error deleting photo:", error);
         toast.error("Failed to delete photo");
         return;
       }

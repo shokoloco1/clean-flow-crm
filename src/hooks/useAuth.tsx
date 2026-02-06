@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, useCallback, useMemo, ReactNode } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import { logger } from "@/lib/logger";
 
 type AppRole = "admin" | "staff" | null;
 
@@ -82,7 +83,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const { data, error } = await supabase.rpc("get_user_role", { _user_id: userId });
       if (error) {
-        console.error("Error fetching user role:", error);
+        logger.error("Error fetching user role:", error);
         return null;
       }
       const fetchedRole = (data as AppRole) || null;
@@ -90,7 +91,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setCachedRole(userId, fetchedRole);
       return fetchedRole;
     } catch (err) {
-      console.error("Exception fetching user role:", err);
+      logger.error("Exception fetching user role:", err);
       return null;
     }
   }, []);
@@ -218,7 +219,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { error } = await supabase.auth.signOut();
 
       if (error) {
-        console.error("Sign out error:", error);
+        logger.error("Sign out error:", error);
         throw error;
       }
 
@@ -226,7 +227,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // This ensures clean state for next login
       window.location.href = "/auth";
     } catch (error) {
-      console.error("Sign out failed:", error);
+      logger.error("Sign out failed:", error);
       // Even if sign out fails, try to clear local state
       clearCachedRole();
       setRole(null);

@@ -14,6 +14,7 @@ import { Progress } from "@/components/ui/progress";
 import { Upload, FileText, FileSpreadsheet, X, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
+import { logger } from "@/lib/logger";
 
 interface UploadPriceListDialogProps {
   isOpen: boolean;
@@ -123,7 +124,7 @@ export function UploadPriceListDialog({
       onOpenChange(false);
       onUploaded();
     } catch (error: any) {
-      console.error("Upload error:", error);
+      logger.error("Upload error:", error);
       toast({
         title: "Upload error",
         description: error.message || "Could not upload file",

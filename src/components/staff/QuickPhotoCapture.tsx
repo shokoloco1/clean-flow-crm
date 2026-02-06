@@ -3,6 +3,7 @@ import { Camera, CheckCircle2, Loader2, ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { logger } from "@/lib/logger";
 
 interface QuickPhotoCaptureProps {
   jobId: string;
@@ -62,7 +63,7 @@ export function QuickPhotoCapture({
       toast.success(`📸 ${photoType === 'before' ? 'Before' : 'After'} photo saved!`);
       onPhotoUploaded();
     } catch (error) {
-      console.error('Photo upload error:', error);
+      logger.error('Photo upload error:', error);
       toast.error('Failed to upload photo');
     } finally {
       setIsUploading(false);

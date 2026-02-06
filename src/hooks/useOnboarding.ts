@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { logger } from "@/lib/logger";
 
 export function useOnboarding() {
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -36,7 +37,7 @@ export function useOnboarding() {
       // Show onboarding only if no data exists
       setShowOnboarding(!hasClients && !hasJobs);
     } catch (err) {
-      console.error("Error checking onboarding status:", err);
+      logger.error("Error checking onboarding status:", err);
       setShowOnboarding(false);
     } finally {
       setIsLoading(false);
@@ -53,7 +54,7 @@ export function useOnboarding() {
       
       setShowOnboarding(false);
     } catch (err) {
-      console.error("Error completing onboarding:", err);
+      logger.error("Error completing onboarding:", err);
     }
   };
 

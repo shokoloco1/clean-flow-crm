@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
+import { logger } from "@/lib/logger";
 
 interface UseFetchWithRetryOptions {
   cacheKey: string;
@@ -52,7 +53,7 @@ export function useFetchWithRetry<T>(
         }
       }
     } catch (e) {
-      console.warn('Failed to load cached data:', e);
+      logger.warn('Failed to load cached data:', e);
     }
   }, [cacheKey]);
 
@@ -63,7 +64,7 @@ export function useFetchWithRetry<T>(
         timestamp: Date.now(),
       }));
     } catch (e) {
-      console.warn('Failed to cache data:', e);
+      logger.warn('Failed to cache data:', e);
     }
   }, [cacheKey]);
 

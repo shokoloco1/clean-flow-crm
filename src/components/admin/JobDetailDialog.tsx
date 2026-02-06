@@ -25,6 +25,7 @@ import { useQuickInvoice } from "@/hooks/useQuickInvoice";
 import { useInvoiceEmail } from "@/hooks/useInvoiceEmail";
 import { formatAUD } from "@/lib/australian";
 import type { Job } from "./JobsList";
+import { logger } from "@/lib/logger";
 
 export interface JobPhoto {
   id: string;
@@ -220,7 +221,7 @@ export function JobDetailDialog({ job, photos, onClose }: JobDetailDialogProps) 
       doc.save(`job_${job.clients?.name || 'job'}_${job.scheduled_date}.pdf`);
       toast.success('PDF generated successfully');
     } catch (error) {
-      console.error('Error generating PDF:', error);
+      logger.error('Error generating PDF:', error);
       toast.error('Error generating PDF');
     } finally {
       setIsGeneratingPDF(false);

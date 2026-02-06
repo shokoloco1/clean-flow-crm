@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { logger } from "@/lib/logger";
 
 export interface CleaningService {
   id: string;
@@ -44,7 +45,7 @@ export function useCleaningServices() {
         setServices(DEFAULT_SERVICES);
       }
     } catch (err) {
-      console.error("Error fetching cleaning services:", err);
+      logger.error("Error fetching cleaning services:", err);
       setError("Failed to load cleaning services");
       setServices(DEFAULT_SERVICES);
     } finally {

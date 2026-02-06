@@ -2,20 +2,21 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { 
-  BarChart, 
-  Bar, 
-  PieChart, 
-  Pie, 
-  Cell, 
-  XAxis, 
-  YAxis, 
-  Tooltip, 
+import {
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  Tooltip,
   ResponsiveContainer,
   Legend
 } from 'recharts';
 import { DollarSign, TrendingUp, Users, Award, Loader2 } from 'lucide-react';
 import { format, subDays, startOfMonth, endOfMonth } from 'date-fns';
+import { logger } from "@/lib/logger";
 
 interface RevenueData {
   totalRevenue: number;
@@ -183,7 +184,7 @@ export function BusinessMetricsDashboard() {
       setTopStaff(sortedStaff);
 
     } catch (error) {
-      console.error('Error fetching business metrics:', error);
+      logger.error('Error fetching business metrics:', error);
     } finally {
       setLoading(false);
     }

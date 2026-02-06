@@ -43,6 +43,11 @@ export const CONFIG = {
     maxPageSize: 100,
   },
 
+  // UI feedback timings
+  ui: {
+    feedbackDuration: 2000, // 2 seconds for "copied", "saved", etc.
+  },
+
   // Business defaults
   business: {
     defaultCompanyName: "Pulcrix",

@@ -11,10 +11,10 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { 
-  CheckSquare, 
-  Check, 
-  X, 
+import {
+  CheckSquare,
+  Check,
+  X,
   AlertTriangle,
   Camera,
   Loader2,
@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { logger } from "@/lib/logger";
 
 interface ChecklistItem {
   id: string;
@@ -69,7 +70,7 @@ export default function AdvancedChecklist({
       .order("sort_order");
 
     if (error) {
-      console.error("Error fetching checklist items:", error);
+      logger.error("Error fetching checklist items:", error);
       return;
     }
 

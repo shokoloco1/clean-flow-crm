@@ -233,6 +233,7 @@ export default function AlertsPanel() {
                     size="icon"
                     className="h-8 w-8 shrink-0"
                     onClick={() => resolveAlert(alert.id)}
+                    aria-label="Resolve alert"
                   >
                     <X className="h-4 w-4" />
                   </Button>

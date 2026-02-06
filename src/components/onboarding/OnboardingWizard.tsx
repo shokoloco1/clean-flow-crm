@@ -5,8 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Building2, Users, UserPlus, Briefcase, 
+import {
+  Building2, Users, UserPlus, Briefcase,
   ArrowRight, ArrowLeft, Check,
   Phone, Mail, MapPin
 } from "lucide-react";
@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 import { PulcrixLogo } from "@/components/PulcrixLogo";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { logger } from "@/lib/logger";
 
 interface OnboardingWizardProps {
   onComplete: () => void;
@@ -79,7 +80,7 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
       toast.success("Business info saved!");
       return true;
     } catch (err) {
-      console.error("Error saving business info:", err);
+      logger.error("Error saving business info:", err);
       toast.error("Failed to save business info");
       return false;
     } finally {
@@ -113,7 +114,7 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
       toast.success("Client created!");
       return true;
     } catch (err) {
-      console.error("Error creating client:", err);
+      logger.error("Error creating client:", err);
       toast.error("Failed to create client");
       return false;
     } finally {
@@ -144,7 +145,7 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
       toast.success("Staff invitation sent!");
       return true;
     } catch (err: any) {
-      console.error("Error inviting staff:", err);
+      logger.error("Error inviting staff:", err);
       toast.error(err.message || "Failed to invite staff");
       return false;
     } finally {
@@ -181,7 +182,7 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
       toast.success("Job created! Onboarding complete 🎉");
       return true;
     } catch (err) {
-      console.error("Error creating job:", err);
+      logger.error("Error creating job:", err);
       toast.error("Failed to create job");
       return false;
     } finally {

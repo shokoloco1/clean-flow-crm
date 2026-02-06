@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { toast } from 'sonner';
+import { logger } from "@/lib/logger";
 
 export interface StaffAvailability {
   id: string;
@@ -57,7 +58,7 @@ export function useStaffAvailability(staffId?: string) {
         setAvailability(defaults as StaffAvailability[]);
       }
     } catch (error) {
-      console.error('Error fetching availability:', error);
+      logger.error('Error fetching availability:', error);
     } finally {
       setLoading(false);
     }
@@ -114,7 +115,7 @@ export function useStaffAvailability(staffId?: string) {
       toast.success('Availability saved');
       fetchAvailability();
     } catch (error) {
-      console.error('Error saving availability:', error);
+      logger.error('Error saving availability:', error);
       toast.error('Failed to save availability');
     } finally {
       setSaving(false);
@@ -229,7 +230,7 @@ export function useAvailableStaff(date: string, time: string) {
 
         setAvailableStaff(result);
       } catch (error) {
-        console.error('Error fetching available staff:', error);
+        logger.error('Error fetching available staff:', error);
       } finally {
         setLoading(false);
       }

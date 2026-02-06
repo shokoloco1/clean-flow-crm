@@ -32,6 +32,7 @@ import {
   isValidAUPhone,
   isValidABN,
 } from "@/lib/validation";
+import { logger } from "@/lib/logger";
 interface Client {
   id: string;
   name: string;
@@ -262,7 +263,7 @@ export default function ClientsPage() {
       .eq('client_id', clientId);
 
     if (error) {
-      console.error('Error checking jobs:', error);
+      logger.error('Error checking jobs:', error);
       return 0;
     }
     return count || 0;
@@ -290,7 +291,7 @@ export default function ClientsPage() {
           .eq('client_id', id);
 
         if (updateError) {
-          console.error('Error unlinking jobs:', updateError);
+          logger.error('Error unlinking jobs:', updateError);
           // Continue with deletion anyway - jobs will become orphaned but won't block
         }
       }
@@ -401,7 +402,7 @@ export default function ClientsPage() {
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link to="/admin">
-              <Button variant="ghost" size="icon">
+              <Button variant="ghost" size="icon" aria-label="Go back to admin">
                 <ArrowLeft className="h-5 w-5" />
               </Button>
             </Link>
@@ -659,6 +660,7 @@ export default function ClientsPage() {
                         variant="ghost"
                         size="icon"
                         onClick={() => setSelectedClient(client)}
+                        aria-label="View client details"
                       >
                         <Eye className="h-4 w-4" />
                       </Button>
@@ -666,6 +668,7 @@ export default function ClientsPage() {
                         variant="ghost"
                         size="icon"
                         onClick={() => openEditDialog(client)}
+                        aria-label="Edit client"
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
@@ -673,6 +676,7 @@ export default function ClientsPage() {
                         variant="ghost"
                         size="icon"
                         onClick={() => handleDeleteClick(client)}
+                        aria-label="Delete client"
                       >
                         <Trash2 className="h-4 w-4 text-destructive" />
                       </Button>

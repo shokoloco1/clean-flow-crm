@@ -12,8 +12,8 @@ import {
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { 
-  Loader2, Search, Plus, User, MapPin, Clock, 
+import {
+  Loader2, Search, Plus, User, MapPin, Clock,
   Calendar as CalendarIcon, CheckCircle, ArrowLeft, ArrowRight,
   Phone, Building, AlertTriangle
 } from "lucide-react";
@@ -22,6 +22,7 @@ import { format, isBefore, startOfDay, parseISO } from "date-fns";
 import { useCleaningServices } from "@/hooks/useCleaningServices";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { logger } from "@/lib/logger";
 
 export interface Client {
   id: string;
@@ -218,7 +219,7 @@ export function CreateJobWizard({
       // Auto-select the new client
       handleClientSelect(data as Client);
     } catch (err) {
-      console.error("Error creating client:", err);
+      logger.error("Error creating client:", err);
       toast.error("Failed to create client");
     } finally {
       setIsCreatingClient(false);

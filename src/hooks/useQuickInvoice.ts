@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { format, differenceInMinutes } from "date-fns";
 import { calculateGST, formatAUD } from "@/lib/australian";
+import { logger } from "@/lib/logger";
 
 interface JobForInvoice {
   id: string;
@@ -129,7 +130,7 @@ export function useQuickInvoice() {
         total,
       };
     } catch (error: any) {
-      console.error("Error generating invoice:", error);
+      logger.error("Error generating invoice:", error);
       toast.error("Failed to generate invoice", {
         description: error.message,
       });
@@ -257,7 +258,7 @@ export function useQuickInvoice() {
         total,
       };
     } catch (error: any) {
-      console.error("Error generating invoice:", error);
+      logger.error("Error generating invoice:", error);
       toast.error("Failed to generate invoice", {
         description: error.message,
       });

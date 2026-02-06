@@ -17,6 +17,7 @@ import {
   Shield
 } from "lucide-react";
 import { PulcrixLogo } from "@/components/PulcrixLogo";
+import { logger } from "@/lib/logger";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -90,7 +91,7 @@ export default function InstallPage() {
       }
       setDeferredPrompt(null);
     } catch (error) {
-      console.error("Error installing PWA:", error);
+      logger.error("Error installing PWA:", error);
     }
   };
 

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { toast } from "sonner";
+import { logger } from "@/lib/logger";
 
 export interface Client {
   id: string;
@@ -87,7 +88,7 @@ export function useCreateJob(onJobCreated?: () => void) {
       setClients((clientsData as Client[]) || []);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to load data';
-      console.error("Error fetching clients/staff:", error);
+      logger.error("Error fetching clients/staff:", error);
       setFetchError(errorMessage);
       toast.error(errorMessage);
     } finally {

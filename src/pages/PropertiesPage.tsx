@@ -62,6 +62,8 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { logger } from "@/lib/logger";
+import { CONFIG } from "@/lib/config";
 
 interface Property {
   id: string;
@@ -201,7 +203,7 @@ export default function PropertiesPage() {
       }
 
       if (clientsRes.error) {
-        console.warn("Failed to load clients:", clientsRes.error);
+        logger.warn("Failed to load clients:", clientsRes.error);
         // Don't throw - properties can still work without clients
       }
 
@@ -209,7 +211,7 @@ export default function PropertiesPage() {
       setClients((clientsRes.data as Client[]) || []);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to load data';
-      console.error("Error fetching data:", error);
+      logger.error("Error fetching data:", error);
       toast.error(message);
     } finally {
       setLoading(false);
@@ -282,7 +284,7 @@ export default function PropertiesPage() {
       await navigator.clipboard.writeText(formData.google_maps_link);
       setCopiedLink(true);
       toast.success("Link copiado!");
-      setTimeout(() => setCopiedLink(false), 2000);
+      setTimeout(() => setCopiedLink(false), CONFIG.ui.feedbackDuration);
     }
   };
 

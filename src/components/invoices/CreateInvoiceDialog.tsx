@@ -27,6 +27,7 @@ import { GSTSummary } from "./GSTSummary";
 import { format, differenceInMinutes } from "date-fns";
 import { toast } from "sonner";
 import { formatAUD, GST_RATE, calculateGST, formatABN } from "@/lib/australian";
+import { logger } from "@/lib/logger";
 
 interface Client {
   id: string;
@@ -111,7 +112,7 @@ export function CreateInvoiceDialog({
       setClients(data || []);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to load clients';
-      console.error("Error fetching clients:", error);
+      logger.error("Error fetching clients:", error);
       setFetchError(message);
       toast.error(message);
     }
@@ -143,7 +144,7 @@ export function CreateInvoiceDialog({
           .in("user_id", staffIds);
 
         if (profilesError) {
-          console.warn("Failed to load staff profiles:", profilesError);
+          logger.warn("Failed to load staff profiles:", profilesError);
         }
 
         const profilesMap = new Map(profilesData?.map(p => [p.user_id, p]) || []);
@@ -164,7 +165,7 @@ export function CreateInvoiceDialog({
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to load jobs';
-      console.error("Error fetching completed jobs:", error);
+      logger.error("Error fetching completed jobs:", error);
       toast.error(message);
       setCompletedJobs([]);
     }
@@ -309,7 +310,7 @@ export function CreateInvoiceDialog({
       onCreated();
       resetForm();
     } catch (error) {
-      console.error(error);
+      logger.error(error);
       toast.error("Error creating invoice");
     }
 

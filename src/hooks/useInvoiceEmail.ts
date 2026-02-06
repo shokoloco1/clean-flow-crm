@@ -5,6 +5,7 @@ import { format, parseISO } from "date-fns";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { formatAUD, formatABN } from "@/lib/australian";
+import { logger } from "@/lib/logger";
 
 interface InvoiceForEmail {
   id: string;
@@ -321,7 +322,7 @@ export function useInvoiceEmail() {
 
       return true;
     } catch (error: any) {
-      console.error("Error sending invoice:", error);
+      logger.error("Error sending invoice:", error);
       toast.error("Failed to send invoice", {
         description: error.message,
       });

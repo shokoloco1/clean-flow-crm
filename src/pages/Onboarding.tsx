@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { PulcrixLogo } from "@/components/PulcrixLogo";
 import { cn } from "@/lib/utils";
+import { logger } from "@/lib/logger";
 
 interface OnboardingStep {
   id: string;
@@ -95,7 +96,7 @@ export default function Onboarding() {
           .maybeSingle();
 
         if (error) {
-          console.error("Error fetching subscription:", error);
+          logger.error("Error fetching subscription:", error);
         }
 
         if (data) {
@@ -106,7 +107,7 @@ export default function Onboarding() {
           }
         }
       } catch (error) {
-        console.error("Error checking subscription:", error);
+        logger.error("Error checking subscription:", error);
       } finally {
         setIsLoading(false);
       }

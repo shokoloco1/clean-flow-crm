@@ -17,6 +17,7 @@ import { PlanSelection, type PlanType } from "@/components/signup/PlanSelection"
 import { PaymentStep } from "@/components/signup/PaymentStep";
 import { PRICE_IDS } from "@/hooks/useSubscription";
 import { cn } from "@/lib/utils";
+import { logger } from "@/lib/logger";
 
 type Step = "account" | "plan" | "payment";
 
@@ -286,7 +287,7 @@ const SignupPage = () => {
         throw new Error("No checkout URL returned");
       }
     } catch (error) {
-      console.error("Checkout error:", error);
+      logger.error("Checkout error:", error);
       toast.error("Failed to start checkout. Please try again.");
       setIsSubmitting(false);
     }

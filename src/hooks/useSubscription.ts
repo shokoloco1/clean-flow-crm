@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
+import { CONFIG } from "@/lib/config";
 
 export interface SubscriptionState {
   subscribed: boolean;
@@ -137,7 +138,7 @@ export function useSubscription() {
   useEffect(() => {
     if (!user) return;
 
-    const interval = setInterval(checkSubscription, 60000);
+    const interval = setInterval(checkSubscription, CONFIG.refresh.subscription);
     return () => clearInterval(interval);
   }, [user, checkSubscription]);
 
