@@ -37,6 +37,7 @@ export function PriceListReference({ trigger }: PriceListReferenceProps) {
     if (isOpen) {
       fetchActivePriceLists();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
   const fetchActivePriceLists = async () => {

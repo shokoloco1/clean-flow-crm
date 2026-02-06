@@ -86,6 +86,7 @@ export function InvoiceDetailDialog({
     if (invoice) {
       fetchInvoiceDetails();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [invoice]);
 
   const fetchInvoiceDetails = async () => {

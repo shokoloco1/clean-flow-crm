@@ -61,6 +61,43 @@ export default function AdvancedChecklist({
 
   const isEditable = jobStatus === 'in_progress';
 
+  const initializeFromLegacy = useCallback(async () => {
+    // Convert legacy checklist (simple string array) to advanced format
+    // Group by room if format is "Room: Task" or put all in "General"
+    const newItems = legacyChecklist.map((task, index) => {
+      let roomName = "General";
+      let taskName = task;
+
+      // Check if task includes room prefix like "Kitchen: Clean sink"
+      if (task.includes(":")) {
+        const parts = task.split(":");
+        roomName = parts[0].trim();
+        taskName = parts.slice(1).join(":").trim();
+      }
+
+      return {
+        job_id: jobId,
+        room_name: roomName,
+        task_name: taskName,
+        status: 'pending' as const,
+        sort_order: index
+      };
+    });
+
+    if (newItems.length > 0) {
+      const { data, error } = await supabase
+        .from("checklist_items")
+        .insert(newItems)
+        .select();
+
+      if (!error && data) {
+        setItems(data as ChecklistItem[]);
+        const rooms = [...new Set(data.map(item => item.room_name))];
+        setExpandedRooms(new Set([rooms[0]]));
+      }
+    }
+  }, [jobId, legacyChecklist]);
+
   const fetchItems = useCallback(async () => {
     const { data, error } = await supabase
       .from("checklist_items")
@@ -83,46 +120,9 @@ export default function AdvancedChecklist({
       // Initialize from legacy checklist if no items exist
       await initializeFromLegacy();
     }
-    
+
     setLoading(false);
-  }, [jobId, legacyChecklist]);
-
-  const initializeFromLegacy = async () => {
-    // Convert legacy checklist (simple string array) to advanced format
-    // Group by room if format is "Room: Task" or put all in "General"
-    const newItems = legacyChecklist.map((task, index) => {
-      let roomName = "General";
-      let taskName = task;
-      
-      // Check if task includes room prefix like "Kitchen: Clean sink"
-      if (task.includes(":")) {
-        const parts = task.split(":");
-        roomName = parts[0].trim();
-        taskName = parts.slice(1).join(":").trim();
-      }
-      
-      return {
-        job_id: jobId,
-        room_name: roomName,
-        task_name: taskName,
-        status: 'pending' as const,
-        sort_order: index
-      };
-    });
-
-    if (newItems.length > 0) {
-      const { data, error } = await supabase
-        .from("checklist_items")
-        .insert(newItems)
-        .select();
-
-      if (!error && data) {
-        setItems(data as ChecklistItem[]);
-        const rooms = [...new Set(data.map(item => item.room_name))];
-        setExpandedRooms(new Set([rooms[0]]));
-      }
-    }
-  };
+  }, [jobId, legacyChecklist, initializeFromLegacy]);
 
   useEffect(() => {
     fetchItems();

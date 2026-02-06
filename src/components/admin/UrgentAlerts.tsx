@@ -19,9 +19,9 @@ interface Alert {
 
 export function UrgentAlerts({ jobs }: UrgentAlertsProps) {
   const today = format(new Date(), "yyyy-MM-dd");
-  const now = new Date();
 
   const alerts = useMemo(() => {
+    const now = new Date();
     const todayJobs = jobs.filter(job => job.scheduled_date === today);
     const alertsList: Alert[] = [];
 
@@ -62,7 +62,7 @@ export function UrgentAlerts({ jobs }: UrgentAlertsProps) {
     }
 
     return alertsList;
-  }, [jobs, today, now]);
+  }, [jobs, today]);
 
   if (alerts.length === 0) return null;
 

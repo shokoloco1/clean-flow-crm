@@ -36,6 +36,7 @@ export function PriceListViewer({ priceList, onClose }: PriceListViewerProps) {
     } else {
       setSignedUrl(null);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [priceList]);
 
   const loadSignedUrl = async () => {

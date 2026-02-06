@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -76,11 +76,7 @@ export function MetricsDashboard() {
     onTimeRate: 0
   });
 
-  useEffect(() => {
-    fetchMetrics();
-  }, [period]);
-
-  const fetchMetrics = async () => {
+  const fetchMetrics = useCallback(async () => {
     setLoading(true);
     const startDate = format(subDays(new Date(), parseInt(period)), 'yyyy-MM-dd');
     const endDate = format(new Date(), 'yyyy-MM-dd');
@@ -230,7 +226,11 @@ export function MetricsDashboard() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [period]);
+
+  useEffect(() => {
+    fetchMetrics();
+  }, [fetchMetrics]);
 
   const KPICard = ({ title, value, subtitle, icon: Icon, trend }: {
     title: string;

@@ -106,6 +106,7 @@ export function JobDetailDialog({ job, photos, onClose }: JobDetailDialogProps) 
       fetchGPSLocation();
       setGeneratedInvoice(null);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [job]);
 
   const fetchTimelineData = async () => {
