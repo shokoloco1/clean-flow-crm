@@ -126,7 +126,7 @@ export function GlobalSearch() {
     [navigate, clearResults]
   );
 
-  const handleQuickAction = useCallback((e: React.MouseEvent, action: string, data: any) => {
+  const handleQuickAction = useCallback((e: React.MouseEvent, action: string, data: { phone?: string; email?: string }) => {
     e.stopPropagation();
     
     switch (action) {

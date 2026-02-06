@@ -144,9 +144,9 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
       setCreatedStaffId(data.userId);
       toast.success("Staff invitation sent!");
       return true;
-    } catch (err: any) {
+    } catch (err) {
       logger.error("Error inviting staff:", err);
-      toast.error(err.message || "Failed to invite staff");
+      toast.error(err instanceof Error ? err.message : "Failed to invite staff");
       return false;
     } finally {
       setIsSubmitting(false);

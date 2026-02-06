@@ -123,11 +123,11 @@ export function UploadPriceListDialog({
       resetForm();
       onOpenChange(false);
       onUploaded();
-    } catch (error: any) {
+    } catch (error) {
       logger.error("Upload error:", error);
       toast({
         title: "Upload error",
-        description: error.message || "Could not upload file",
+        description: error instanceof Error ? error.message : "Could not upload file",
         variant: "destructive",
       });
     } finally {

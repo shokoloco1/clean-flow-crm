@@ -82,12 +82,21 @@ export default function AlertsPanel() {
 
     if (!error && data) {
       // Fetch staff names separately
+      type AlertData = {
+        id: string;
+        job_id: string;
+        alert_type: string;
+        message: string;
+        is_resolved: boolean;
+        created_at: string;
+        jobs: { location: string; scheduled_time: string; assigned_staff_id: string | null } | null;
+      };
       const staffIds = [...new Set(
-        data
-          .map((a: any) => a.jobs?.assigned_staff_id)
-          .filter(Boolean)
+        (data as AlertData[])
+          .map((a) => a.jobs?.assigned_staff_id)
+          .filter((id): id is string => Boolean(id))
       )];
-      
+
       let staffMap: Record<string, string> = {};
       if (staffIds.length > 0) {
         const { data: staffData } = await supabase
@@ -97,7 +106,7 @@ export default function AlertsPanel() {
         staffMap = Object.fromEntries((staffData || []).map(s => [s.user_id, s.full_name]));
       }
 
-      const alertsWithStaff = data.map((alert: any) => ({
+      const alertsWithStaff = (data as AlertData[]).map((alert) => ({
         ...alert,
         jobs: alert.jobs ? {
           ...alert.jobs,
