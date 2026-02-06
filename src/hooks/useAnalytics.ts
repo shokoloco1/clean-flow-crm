@@ -32,7 +32,7 @@ interface TrackEventOptions {
  */
 export function useAnalytics() {
   const location = useLocation();
-  const { user } = useAuth();
+  const { user: _user } = useAuth();
   const lastPageRef = useRef<string>("");
 
   // Track a custom event (stubbed - analytics_events table not yet created)
