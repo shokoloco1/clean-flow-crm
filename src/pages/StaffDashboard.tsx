@@ -110,6 +110,7 @@ export default function StaffDashboard() {
         supabase.removeChannel(channel);
       };
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const fetchMyJobs = async () => {

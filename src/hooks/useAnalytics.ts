@@ -45,7 +45,7 @@ export function useAnalytics() {
       }
       // TODO: Implement database tracking when analytics_events table is created
     },
-    [user?.id, location.pathname]
+    []
   );
 
   // Automatically track page views

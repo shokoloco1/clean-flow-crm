@@ -121,6 +121,7 @@ export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewPr
     if (job.property_id) {
       fetchPropertyPhotos();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [job.id, job.property_id]);
 
   const fetchProperty = async () => {

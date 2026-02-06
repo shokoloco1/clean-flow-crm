@@ -131,7 +131,7 @@ export function InviteStaffDialog({ open, onOpenChange }: InviteStaffDialogProps
         });
       }
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       if (error.message?.includes("already registered")) {
         setErrors({ email: "This email is already registered. Please use a different email address." });
         toast.error("Email already exists", {
@@ -158,7 +158,7 @@ export function InviteStaffDialog({ open, onOpenChange }: InviteStaffDialogProps
       });
       handleClose();
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error("Failed to resend invitation", {
         description: error.message
       });

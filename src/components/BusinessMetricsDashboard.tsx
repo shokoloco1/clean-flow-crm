@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -54,11 +54,7 @@ export function BusinessMetricsDashboard() {
   const [topClients, setTopClients] = useState<TopClient[]>([]);
   const [topStaff, setTopStaff] = useState<TopStaff[]>([]);
 
-  useEffect(() => {
-    fetchMetrics();
-  }, [period]);
-
-  const getDateRange = () => {
+  const getDateRange = useCallback(() => {
     const now = new Date();
     if (period === 'month') {
       return {
@@ -70,9 +66,9 @@ export function BusinessMetricsDashboard() {
       start: format(subDays(now, parseInt(period)), 'yyyy-MM-dd'),
       end: format(now, 'yyyy-MM-dd')
     };
-  };
+  }, [period]);
 
-  const fetchMetrics = async () => {
+  const fetchMetrics = useCallback(async () => {
     setLoading(true);
     const { start, end } = getDateRange();
 
@@ -188,7 +184,11 @@ export function BusinessMetricsDashboard() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [getDateRange]);
+
+  useEffect(() => {
+    fetchMetrics();
+  }, [fetchMetrics]);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD' }).format(amount);

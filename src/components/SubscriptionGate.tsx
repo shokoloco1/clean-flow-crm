@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useSubscription } from "@/hooks/useSubscription";
@@ -38,7 +38,7 @@ export function SubscriptionGate({ children, trialDays = 14 }: SubscriptionGateP
   const [loading, setLoading] = useState(true);
 
   // Legacy trial calculation based on account creation date
-  const getLegacyTrialStatus = (): TrialInfo => {
+  const getLegacyTrialStatus = useCallback((): TrialInfo => {
     if (!user?.created_at) {
       return { isInTrial: false, daysRemaining: 0, expired: true, trialEnd: null, plan: null };
     }
@@ -57,7 +57,7 @@ export function SubscriptionGate({ children, trialDays = 14 }: SubscriptionGateP
       trialEnd,
       plan: null,
     };
-  };
+  }, [user?.created_at, trialDays]);
 
   // Fetch trial info from subscriptions table
   useEffect(() => {
@@ -120,7 +120,7 @@ export function SubscriptionGate({ children, trialDays = 14 }: SubscriptionGateP
     if (!subscriptionLoading) {
       fetchTrialInfo();
     }
-  }, [user, subscriptionLoading, trialDays]);
+  }, [user, subscriptionLoading, DEMO_MODE, getLegacyTrialStatus]);
 
   // DEMO MODE - bypass all checks
   if (DEMO_MODE) {

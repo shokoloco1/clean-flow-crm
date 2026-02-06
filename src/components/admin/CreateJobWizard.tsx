@@ -155,6 +155,7 @@ export function CreateJobWizard({
     if (currentStep === 2 && !formData.assigned_staff_id && suggestedStaff) {
       onFormChange({ ...formData, assigned_staff_id: suggestedStaff.user_id });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentStep, suggestedStaff]);
 
   const handleClientSelect = (client: Client) => {
