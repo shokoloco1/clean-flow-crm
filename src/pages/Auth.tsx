@@ -190,25 +190,25 @@ export default function Auth() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-background via-background to-primary/5 p-4">
-      <div className="w-full max-w-md space-y-6">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-background via-background to-primary/5 p-4 safe-area-inset-top safe-area-inset-bottom">
+      <div className="w-full max-w-md space-y-4 sm:space-y-6">
         {/* Logo and branding */}
-        <div className="text-center space-y-3">
+        <div className="text-center space-y-2 sm:space-y-3">
           <Link to="/" className="flex items-center justify-center hover:opacity-80 transition-opacity">
             <PulcrixLogo variant="icon" size="lg" className="text-primary" />
           </Link>
-          <h1 className="text-3xl font-bold text-foreground">Pulcrix</h1>
-          <p className="text-muted-foreground">Clean Living. Pure Solutions.</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Pulcrix</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">Clean Living. Pure Solutions.</p>
         </div>
 
         <Card className="border-border shadow-xl">
-          <CardHeader className="pb-2 text-center">
-            <CardTitle className="text-xl">👋 Welcome Back</CardTitle>
-            <CardDescription>
+          <CardHeader className="pb-2 text-center px-4 sm:px-6">
+            <CardTitle className="text-lg sm:text-xl">👋 Welcome Back</CardTitle>
+            <CardDescription className="text-sm">
               Sign in to your account
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-4 sm:px-6">
             {/* Password Reset Form */}
             {showResetForm ? (
               <div className="space-y-4">
@@ -291,9 +291,9 @@ export default function Auth() {
                   </Alert>
                 )}
 
-                <form onSubmit={handleLogin} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="login-email">Email</Label>
+                <form onSubmit={handleLogin} className="space-y-3 sm:space-y-4">
+                  <div className="space-y-1.5 sm:space-y-2">
+                    <Label htmlFor="login-email" className="text-sm">Email</Label>
                     <Input
                       id="login-email"
                       type="email"
@@ -303,21 +303,22 @@ export default function Auth() {
                         setLoginEmail(e.target.value);
                         setFormErrors((prev) => ({ ...prev, login_email: "" }));
                       }}
-                      className={formErrors.login_email ? "border-destructive" : ""}
+                      className={`h-11 sm:h-10 text-base sm:text-sm ${formErrors.login_email ? "border-destructive" : ""}`}
                       disabled={rateLimitState.isBlocked}
                       required
+                      autoComplete="email"
                     />
                     {formErrors.login_email && (
                       <p className="text-xs text-destructive">{formErrors.login_email}</p>
                     )}
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-1.5 sm:space-y-2">
                     <div className="flex items-center justify-between">
-                      <Label htmlFor="login-password">Password</Label>
+                      <Label htmlFor="login-password" className="text-sm">Password</Label>
                       <button
                         type="button"
                         onClick={() => setShowResetForm(true)}
-                        className="text-xs text-primary hover:underline"
+                        className="text-xs text-primary hover:underline py-1"
                       >
                         Forgot password?
                       </button>
@@ -332,17 +333,18 @@ export default function Auth() {
                           setLoginPassword(e.target.value);
                           setFormErrors((prev) => ({ ...prev, login_password: "" }));
                         }}
-                        className={formErrors.login_password ? "border-destructive pr-10" : "pr-10"}
+                        className={`h-11 sm:h-10 text-base sm:text-sm pr-11 ${formErrors.login_password ? "border-destructive" : ""}`}
                         disabled={rateLimitState.isBlocked}
                         required
+                        autoComplete="current-password"
                       />
                       <button
                         type="button"
                         onClick={() => setShowLoginPassword(!showLoginPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-1"
                         disabled={rateLimitState.isBlocked}
                       >
-                        {showLoginPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        {showLoginPassword ? <EyeOff className="h-5 w-5 sm:h-4 sm:w-4" /> : <Eye className="h-5 w-5 sm:h-4 sm:w-4" />}
                       </button>
                     </div>
                     {formErrors.login_password && (
@@ -351,7 +353,7 @@ export default function Auth() {
                   </div>
                   <Button
                     type="submit"
-                    className="w-full h-12 text-base"
+                    className="w-full h-12 text-base mt-2"
                     disabled={isSubmitting || rateLimitState.isBlocked}
                   >
                     {isSubmitting ? "Signing in..." : "Sign In"}
@@ -359,13 +361,13 @@ export default function Auth() {
                 </form>
 
                 {/* Create account link */}
-                <div className="mt-6 pt-6 border-t border-border">
+                <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-border">
                   <p className="text-center text-sm text-muted-foreground mb-3">
                     Don't have an account yet?
                   </p>
                   <Button
                     variant="outline"
-                    className="w-full group"
+                    className="w-full h-11 sm:h-10 group"
                     asChild
                   >
                     <Link to="/signup">
@@ -379,7 +381,7 @@ export default function Auth() {
           </CardContent>
         </Card>
 
-        <p className="text-center text-sm text-muted-foreground">
+        <p className="text-center text-xs sm:text-sm text-muted-foreground">
           Pulcrix — Clean Living. Pure Solutions.
         </p>
       </div>

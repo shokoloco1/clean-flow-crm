@@ -56,13 +56,16 @@ export default function Index() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-sm border-b border-border">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <Link to="/" className="hover:opacity-80 transition-opacity">
-            <PulcrixLogo variant="full" size="sm" />
+      {/* Header - Mobile Optimized */}
+      <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border safe-area-inset-top">
+        <div className="container mx-auto px-3 sm:px-4 h-14 sm:h-16 flex items-center justify-between">
+          <Link to="/" className="hover:opacity-80 transition-opacity shrink-0">
+            <PulcrixLogo variant="icon" size="sm" className="sm:hidden" />
+            <PulcrixLogo variant="full" size="sm" className="hidden sm:block" />
           </Link>
-          <div className="flex items-center gap-2">
+          
+          {/* Desktop Navigation */}
+          <div className="hidden sm:flex items-center gap-2">
             <Button 
               variant="ghost" 
               size="sm"
@@ -84,47 +87,66 @@ export default function Index() {
               Start Free Trial
             </Button>
           </div>
+          
+          {/* Mobile Navigation */}
+          <div className="flex sm:hidden items-center gap-1">
+            <Button 
+              variant="ghost" 
+              size="sm"
+              className="h-9 px-2 text-sm"
+              onClick={() => navigate("/auth")}
+            >
+              Sign In
+            </Button>
+            <Button
+              size="sm"
+              className="h-9 px-3 text-sm"
+              onClick={() => navigate("/signup")}
+            >
+              Start Trial
+            </Button>
+          </div>
         </div>
       </header>
 
-      {/* Hero Section */}
-      <div className="relative overflow-hidden pt-16">
+      {/* Hero Section - Mobile Optimized */}
+      <div className="relative overflow-hidden pt-14 sm:pt-16">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background to-accent/20" />
         
-        <div className="relative container mx-auto px-4 py-12 md:py-20">
+        <div className="relative container mx-auto px-4 py-8 sm:py-12 md:py-20">
           <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-foreground mb-4 leading-tight">
+            <h1 className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-bold text-foreground mb-3 sm:mb-4 leading-tight px-2">
               Manage your cleaning business without the <span className="text-primary">stress</span>
             </h1>
             
-            <p className="text-lg md:text-xl text-muted-foreground mb-6 max-w-2xl mx-auto">
+            <p className="text-base sm:text-lg md:text-xl text-muted-foreground mb-5 sm:mb-6 max-w-2xl mx-auto px-2">
               100% specialised in cleaning. No features you don't need. No complications you don't want.
             </p>
 
-            {/* Benefits list */}
-            <div className="flex flex-wrap justify-center gap-3 mb-8">
+            {/* Benefits list - Scrollable on mobile */}
+            <div className="flex flex-wrap justify-center gap-2 sm:gap-3 mb-6 sm:mb-8 px-2">
               {benefits.map((benefit, index) => (
-                <div key={index} className="flex items-center gap-2 bg-success/10 text-success px-3 py-1.5 rounded-full text-sm font-medium">
-                  <CheckCircle className="h-4 w-4" />
+                <div key={index} className="flex items-center gap-1.5 sm:gap-2 bg-success/10 text-success px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm font-medium whitespace-nowrap">
+                  <CheckCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
                   <span>{benefit}</span>
                 </div>
               ))}
             </div>
 
-            {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
+            {/* CTA Buttons - Stacked on mobile */}
+            <div className="flex flex-col gap-3 sm:flex-row sm:gap-4 justify-center mb-6 sm:mb-8 px-4 sm:px-0">
               <Button
                 size="lg"
-                className="h-14 px-8 text-lg shadow-lg shadow-primary/30 hover:shadow-primary/50 transition-all group"
+                className="h-12 sm:h-14 px-6 sm:px-8 text-base sm:text-lg shadow-lg shadow-primary/30 hover:shadow-primary/50 transition-all group w-full sm:w-auto"
                 onClick={() => navigate("/signup")}
               >
                 Start Free Trial
-                <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5 group-hover:translate-x-1 transition-transform" />
               </Button>
               <Button 
                 size="lg" 
                 variant="outline"
-                className="h-14 px-8 text-lg"
+                className="h-12 sm:h-14 px-6 sm:px-8 text-base sm:text-lg w-full sm:w-auto"
                 onClick={() => navigate("/auth")}
               >
                 Already have an account
@@ -132,14 +154,14 @@ export default function Index() {
             </div>
 
             {/* Trust indicators */}
-            <div className="flex items-center justify-center gap-4 text-muted-foreground text-sm flex-wrap">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 text-muted-foreground text-xs sm:text-sm">
               <div className="flex items-center gap-1">
-                <Zap className="h-4 w-4 text-warning" />
+                <Zap className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-warning" />
                 <span>Setup in less than 2 minutes</span>
               </div>
               <span className="hidden sm:inline">•</span>
               <div className="flex items-center gap-1">
-                <Star className="h-4 w-4 text-warning" />
+                <Star className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-warning" />
                 <span>No credit card required</span>
               </div>
             </div>
@@ -148,36 +170,36 @@ export default function Index() {
       </div>
 
       {/* Trust Banner */}
-      <section className="py-6 bg-muted/30 border-y border-border">
+      <section className="py-4 sm:py-6 bg-muted/30 border-y border-border">
         <div className="container mx-auto px-4">
-          <p className="text-center text-muted-foreground">
+          <p className="text-center text-muted-foreground text-sm sm:text-base">
             Built specifically for Australian cleaning businesses. Start your 14-day free trial today.
           </p>
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="py-12 md:py-16 bg-card">
+      {/* Features Section - Mobile Grid */}
+      <section className="py-8 sm:py-12 md:py-16 bg-card">
         <div className="container mx-auto px-4">
-          <h2 className="text-2xl md:text-3xl font-bold text-center text-foreground mb-4">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-center text-foreground mb-3 sm:mb-4">
             Everything You Need for Your Business
           </h2>
-          <p className="text-center text-muted-foreground mb-10 max-w-xl mx-auto">
+          <p className="text-center text-muted-foreground mb-6 sm:mb-10 max-w-xl mx-auto text-sm sm:text-base">
             100% specialised in cleaning. No features you don't need. No complications you don't want.
           </p>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
             {features.map((feature, index) => (
               <Card 
                 key={index}
-                className="group p-6 border-border hover:border-primary/50 hover:shadow-lg transition-all cursor-pointer"
+                className="group p-4 sm:p-6 border-border hover:border-primary/50 hover:shadow-lg transition-all"
               >
                 <CardContent className="p-0">
-                  <div className={`h-14 w-14 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
-                    <feature.icon className={`h-7 w-7 ${feature.color}`} />
+                  <div className={`h-10 w-10 sm:h-14 sm:w-14 rounded-lg sm:rounded-xl bg-primary/10 flex items-center justify-center mb-3 sm:mb-4 group-hover:scale-110 transition-transform`}>
+                    <feature.icon className={`h-5 w-5 sm:h-7 sm:w-7 ${feature.color}`} />
                   </div>
-                  <h3 className="font-bold text-foreground mb-2 text-lg">{feature.title}</h3>
-                  <p className="text-muted-foreground">{feature.description}</p>
+                  <h3 className="font-bold text-foreground mb-1 sm:mb-2 text-sm sm:text-lg">{feature.title}</h3>
+                  <p className="text-muted-foreground text-xs sm:text-base">{feature.description}</p>
                 </CardContent>
               </Card>
             ))}
@@ -246,21 +268,21 @@ export default function Index() {
         </div>
       </section>
 
-      {/* Trust Badges */}
-      <section className="py-8 bg-muted/30">
+      {/* Trust Badges - Mobile Optimized */}
+      <section className="py-6 sm:py-8 bg-muted/30">
         <div className="container mx-auto px-4">
-          <div className="flex flex-wrap justify-center gap-6 md:gap-12">
+          <div className="flex flex-col sm:flex-row flex-wrap justify-center items-center gap-4 sm:gap-6 md:gap-12">
             <div className="flex items-center gap-2 text-muted-foreground">
-              <MapPin className="h-5 w-5 text-primary" />
-              <span className="font-medium">Made for Australia</span>
+              <MapPin className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+              <span className="font-medium text-sm sm:text-base">Made for Australia</span>
             </div>
             <div className="flex items-center gap-2 text-muted-foreground">
-              <Lock className="h-5 w-5 text-success" />
-              <span className="font-medium">Bank-level Security</span>
+              <Lock className="h-4 w-4 sm:h-5 sm:w-5 text-success" />
+              <span className="font-medium text-sm sm:text-base">Bank-level Security</span>
             </div>
             <div className="flex items-center gap-2 text-muted-foreground">
-              <Camera className="h-5 w-5 text-secondary" />
-              <span className="font-medium">Works on Any Device</span>
+              <Camera className="h-4 w-4 sm:h-5 sm:w-5 text-secondary" />
+              <span className="font-medium text-sm sm:text-base">Works on Any Device</span>
             </div>
           </div>
         </div>
