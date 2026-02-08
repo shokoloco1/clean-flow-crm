@@ -1,0 +1,87 @@
+{
+  "appName": "Pulcrix",
+  "tagline": "TODO: Traducir",
+  "loading": "TODO: Traducir",
+  "error": "TODO: Traducir",
+  "success": "TODO: Traducir",
+  "cancel": "TODO: Traducir",
+  "save": "TODO: Traducir",
+  "delete": "TODO: Traducir",
+  "edit": "TODO: Traducir",
+  "create": "TODO: Traducir",
+  "update": "TODO: Traducir",
+  "confirm": "TODO: Traducir",
+  "back": "TODO: Traducir",
+  "next": "TODO: Traducir",
+  "submit": "TODO: Traducir",
+  "search": "TODO: Traducir",
+  "filter": "TODO: Traducir",
+  "sortBy": "TODO: Traducir",
+  "noResults": "TODO: Traducir",
+  "viewAll": "TODO: Traducir",
+  "viewDetails": "TODO: Traducir",
+  "close": "TODO: Traducir",
+  "yes": "TODO: Traducir",
+  "no": "TODO: Traducir",
+  "or": "TODO: Traducir",
+  "and": "TODO: Traducir",
+  "optional": "TODO: Traducir",
+  "required": "TODO: Traducir",
+  "selectOption": "TODO: Traducir",
+  "all": "TODO: Traducir",
+  "none": "TODO: Traducir",
+
+  "nav": {
+    "home": "TODO: Traducir",
+    "dashboard": "TODO: Traducir",
+    "jobs": "TODO: Traducir",
+    "clients": "TODO: Traducir",
+    "staff": "TODO: Traducir",
+    "invoices": "TODO: Traducir",
+    "settings": "TODO: Traducir",
+    "calendar": "TODO: Traducir",
+    "reports": "TODO: Traducir",
+    "pricing": "TODO: Traducir"
+  },
+
+  "status": {
+    "pending": "TODO: Traducir",
+    "scheduled": "TODO: Traducir",
+    "inProgress": "TODO: Traducir",
+    "completed": "TODO: Traducir",
+    "cancelled": "TODO: Traducir"
+  },
+
+  "time": {
+    "today": "TODO: Traducir",
+    "tomorrow": "TODO: Traducir",
+    "yesterday": "TODO: Traducir",
+    "thisWeek": "TODO: Traducir",
+    "thisMonth": "TODO: Traducir",
+    "date": "TODO: Traducir",
+    "time": "TODO: Traducir"
+  },
+
+  "validation": {
+    "required": "TODO: Traducir",
+    "invalidEmail": "TODO: Traducir",
+    "invalidPhone": "TODO: Traducir",
+    "invalidABN": "TODO: Traducir",
+    "minLength": "TODO: Traducir",
+    "maxLength": "TODO: Traducir"
+  },
+
+  "toast": {
+    "savedSuccessfully": "TODO: Traducir",
+    "deletedSuccessfully": "TODO: Traducir",
+    "errorOccurred": "TODO: Traducir",
+    "pleaseWait": "TODO: Traducir",
+    "changesDiscarded": "TODO: Traducir"
+  },
+
+  "footer": {
+    "termsOfService": "TODO: Traducir",
+    "privacyPolicy": "TODO: Traducir",
+    "allRightsReserved": "TODO: Traducir"
+  }
+}

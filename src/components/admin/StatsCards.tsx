@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Calendar, Users, CheckCircle, TrendingUp } from "lucide-react";
@@ -14,34 +15,36 @@ interface StatsCardsProps {
 }
 
 export function StatsCards({ stats }: StatsCardsProps) {
+  const { t } = useTranslation('dashboard');
+
   const cards = [
     {
-      title: "Today's Jobs",
+      title: t('stats.todaysJobs'),
       value: stats.todayJobs,
       icon: Calendar,
       iconColor: "text-primary",
-      tooltip: "Total jobs scheduled for today",
+      tooltip: t('stats.todaysJobsTooltip'),
     },
     {
-      title: "Completed Today",
+      title: t('stats.completedToday'),
       value: stats.completedToday,
       icon: CheckCircle,
       iconColor: "text-success",
-      tooltip: "Jobs completed today",
+      tooltip: t('stats.completedTodayTooltip'),
     },
     {
-      title: "Completion Rate",
+      title: t('stats.completionRate'),
       value: `${stats.completionRate}%`,
       icon: TrendingUp,
       iconColor: "text-primary",
-      tooltip: "Percentage of jobs completed vs scheduled today",
+      tooltip: t('stats.completionRateTooltip'),
     },
     {
-      title: "Total Staff",
+      title: t('stats.totalStaff'),
       value: stats.activeStaff,
       icon: Users,
       iconColor: "text-primary",
-      tooltip: "Total active team members",
+      tooltip: t('stats.totalStaffTooltip'),
     },
   ];
 

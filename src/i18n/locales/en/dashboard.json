@@ -1,0 +1,48 @@
+{
+  "title": "Today's View",
+  "newJob": "New Job",
+
+  "stats": {
+    "todaysJobs": "Today's Jobs",
+    "todaysJobsTooltip": "Total jobs scheduled for today",
+    "completedToday": "Completed Today",
+    "completedTodayTooltip": "Jobs completed today",
+    "completionRate": "Completion Rate",
+    "completionRateTooltip": "Percentage of jobs completed vs scheduled today",
+    "totalStaff": "Total Staff",
+    "totalStaffTooltip": "Total active team members"
+  },
+
+  "kanban": {
+    "title": "Today's Jobs",
+    "scheduled": "Scheduled",
+    "inProgress": "In Progress",
+    "completed": "Completed",
+    "noJobs": "No jobs",
+    "unknownClient": "Unknown Client",
+    "unassigned": "Unassigned",
+    "duplicateJob": "Duplicate job for tomorrow",
+    "generateInvoice": "Generate Invoice"
+  },
+
+  "alerts": {
+    "title": "Urgent Alerts",
+    "lateArrival": "Late arrival",
+    "noShow": "No show",
+    "geofenceViolation": "Geofence violation"
+  },
+
+  "pendingPayments": {
+    "title": "Pending Payments",
+    "noPayments": "No pending payments",
+    "viewAll": "View all invoices"
+  },
+
+  "emptyState": {
+    "title": "No jobs scheduled for today",
+    "subtitle": "Create your first job to get started",
+    "createJob": "Create Job",
+    "addClient": "Add a Client First",
+    "inviteStaff": "Invite Staff"
+  }
+}

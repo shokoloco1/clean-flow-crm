@@ -7,6 +7,7 @@ import { NotificationCenter } from "@/components/NotificationCenter";
 import { GlobalSearch } from "@/components/GlobalSearch";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { PulcrixLogo } from "@/components/PulcrixLogo";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { Link } from "react-router-dom";
 
 interface AdminLayoutProps {
@@ -41,6 +42,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
               </div>
               <div className="flex items-center gap-2">
                 <GlobalSearch />
+                <LanguageSwitcher />
                 <KeyboardShortcutsHelp />
                 <NotificationCenter />
               </div>

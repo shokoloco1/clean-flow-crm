@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
 import { useRateLimit } from "@/hooks/useRateLimit";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,11 +14,13 @@ import { Eye, EyeOff, AlertTriangle, Lock, CheckCircle, ArrowRight, Chrome } fro
 import { lovable } from "@/integrations/lovable";
 import { loginSchema } from "@/lib/passwordSecurity";
 import { PulcrixLogo } from "@/components/PulcrixLogo";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 export default function Auth() {
   const navigate = useNavigate();
   const { user, session, role, loading, signIn, signOut, refreshRole } = useAuth();
   const { rateLimitState, checkRateLimit, recordAttempt, clearRateLimitState } = useRateLimit();
+  const { t } = useTranslation(['auth', 'common']);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showResetForm, setShowResetForm] = useState(false);
@@ -42,7 +45,7 @@ export default function Auth() {
     e.preventDefault();
 
     if (!resetEmail) {
-      toast.error("Please enter your email");
+      toast.error(t('auth:toast.enterEmail'));
       return;
     }
 
@@ -53,10 +56,10 @@ export default function Auth() {
     });
 
     if (error) {
-      toast.error(error.message || "Failed to send email");
+      toast.error(t('auth:toast.resetEmailFailed'));
     } else {
       setResetSent(true);
-      toast.success("Email sent. Check your inbox.");
+      toast.success(t('auth:toast.resetEmailSent'));
     }
 
     setIsSubmitting(false);
@@ -93,10 +96,10 @@ export default function Auth() {
     setIsBootstrapping(true);
     const { error } = await supabase.functions.invoke("bootstrap-role");
     if (error) {
-      toast.error("Your account has no role assigned. Please ask an admin to assign one.");
+      toast.error(t('auth:toast.noRoleAssigned'));
     } else {
       await refreshRole();
-      toast.success("Admin role assigned. Redirecting...");
+      toast.success(t('auth:toast.adminRoleAssigned'));
     }
     setIsBootstrapping(false);
   };
@@ -108,7 +111,7 @@ export default function Auth() {
     // Check rate limiting first
     const isBlocked = await checkRateLimit(loginEmail);
     if (isBlocked) {
-      toast.error(`Too many failed attempts. Please try again in ${rateLimitState.remainingMinutes} minutes.`);
+      toast.error(t('auth:rateLimit.blocked', { minutes: rateLimitState.remainingMinutes }));
       return;
     }
 
@@ -134,10 +137,10 @@ export default function Auth() {
 
     if (error) {
       await recordAttempt(loginEmail, false);
-      toast.error("Invalid credentials. Please check your email and password.");
+      toast.error(t('auth:toast.invalidCredentials'));
     } else {
       await recordAttempt(loginEmail, true);
-      toast.success("Welcome back!");
+      toast.success(t('auth:toast.welcomeBack'));
     }
 
     setIsSubmitting(false);
@@ -146,7 +149,7 @@ export default function Auth() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="animate-pulse text-primary">Loading...</div>
+        <div className="animate-pulse text-primary">{t('common:loading')}</div>
       </div>
     );
   }
@@ -161,14 +164,14 @@ export default function Auth() {
               <PulcrixLogo variant="icon" size="lg" className="text-primary" />
             </div>
             <h1 className="text-3xl font-bold text-foreground">Pulcrix</h1>
-            <p className="text-muted-foreground">Your account doesn't have a role assigned</p>
+            <p className="text-muted-foreground">{t('auth:noRole.subtitle')}</p>
           </div>
 
           <Card className="border-border shadow-lg">
             <CardHeader>
-              <CardTitle>Access pending</CardTitle>
+              <CardTitle>{t('auth:noRole.title')}</CardTitle>
               <CardDescription>
-                To access the system, an admin must assign you a role (admin or staff).
+                {t('auth:noRole.description')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
@@ -177,10 +180,10 @@ export default function Auth() {
                 onClick={handleBootstrapAdmin}
                 disabled={isBootstrapping}
               >
-                {isBootstrapping ? "Configuring..." : "Configure as Admin (first time only)"}
+                {isBootstrapping ? t('auth:noRole.configuring') : t('auth:noRole.configureAdmin')}
               </Button>
               <Button variant="outline" className="w-full" onClick={signOut}>
-                Sign Out
+                {t('auth:noRole.signOut')}
               </Button>
             </CardContent>
           </Card>
@@ -191,6 +194,9 @@ export default function Auth() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-background via-background to-primary/5 p-4">
+      <div className="absolute top-4 right-4">
+        <LanguageSwitcher />
+      </div>
       <div className="w-full max-w-md space-y-6">
         {/* Logo and branding */}
         <div className="text-center space-y-3">
@@ -198,14 +204,14 @@ export default function Auth() {
             <PulcrixLogo variant="icon" size="lg" className="text-primary" />
           </Link>
           <h1 className="text-3xl font-bold text-foreground">Pulcrix</h1>
-          <p className="text-muted-foreground">Clean Living. Pure Solutions.</p>
+          <p className="text-muted-foreground">{t('common:tagline')}</p>
         </div>
 
         <Card className="border-border shadow-xl">
           <CardHeader className="pb-2 text-center">
-            <CardTitle className="text-xl">👋 Welcome Back</CardTitle>
+            <CardTitle className="text-xl">{t('auth:signIn.title')}</CardTitle>
             <CardDescription>
-              Sign in to your account
+              {t('auth:signIn.subtitle')}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -217,9 +223,9 @@ export default function Auth() {
                     <div className="h-16 w-16 rounded-full bg-success/10 flex items-center justify-center mx-auto">
                       <CheckCircle className="h-8 w-8 text-success" />
                     </div>
-                    <h3 className="font-semibold text-foreground">Email sent!</h3>
+                    <h3 className="font-semibold text-foreground">{t('auth:passwordReset.successTitle')}</h3>
                     <p className="text-sm text-muted-foreground">
-                      Check your inbox at <strong>{resetEmail}</strong> and follow the instructions.
+                      {t('auth:passwordReset.successMessage', { email: resetEmail })}
                     </p>
                     <Button
                       variant="outline"
@@ -230,23 +236,23 @@ export default function Auth() {
                         setResetEmail("");
                       }}
                     >
-                      Back to sign in
+                      {t('auth:passwordReset.backToSignIn')}
                     </Button>
                   </div>
                 ) : (
                   <form onSubmit={handlePasswordReset} className="space-y-4">
                     <div className="text-center mb-4">
-                      <h3 className="font-semibold text-foreground">Forgot your password?</h3>
+                      <h3 className="font-semibold text-foreground">{t('auth:passwordReset.title')}</h3>
                       <p className="text-sm text-muted-foreground">
-                        Enter your email and we'll send you a reset link.
+                        {t('auth:passwordReset.subtitle')}
                       </p>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="reset-email">Email</Label>
+                      <Label htmlFor="reset-email">{t('auth:passwordReset.emailLabel')}</Label>
                       <Input
                         id="reset-email"
                         type="email"
-                        placeholder="you@example.com"
+                        placeholder={t('auth:signIn.emailPlaceholder')}
                         value={resetEmail}
                         onChange={(e) => setResetEmail(e.target.value)}
                         required
@@ -257,7 +263,7 @@ export default function Auth() {
                       className="w-full"
                       disabled={isSubmitting}
                     >
-                      {isSubmitting ? "Sending..." : "Send reset link"}
+                      {isSubmitting ? t('auth:passwordReset.submitting') : t('auth:passwordReset.submitButton')}
                     </Button>
                     <Button
                       type="button"
@@ -265,7 +271,7 @@ export default function Auth() {
                       className="w-full"
                       onClick={() => setShowResetForm(false)}
                     >
-                      Back to sign in
+                      {t('auth:passwordReset.backToSignIn')}
                     </Button>
                   </form>
                 )}
@@ -277,7 +283,7 @@ export default function Auth() {
                   <Alert variant="destructive" className="mb-4">
                     <Lock className="h-4 w-4" />
                     <AlertDescription>
-                      Account temporarily blocked. Please try again in {rateLimitState.remainingMinutes} minutes.
+                      {t('auth:rateLimit.blocked', { minutes: rateLimitState.remainingMinutes })}
                     </AlertDescription>
                   </Alert>
                 )}
@@ -286,18 +292,18 @@ export default function Auth() {
                   <Alert variant="default" className="mb-4 border-warning/50 bg-warning/10">
                     <AlertTriangle className="h-4 w-4 text-warning" />
                     <AlertDescription className="text-warning-foreground">
-                      {5 - rateLimitState.failedAttempts} attempts remaining before lockout.
+                      {t('auth:rateLimit.attemptsRemaining', { attempts: 5 - rateLimitState.failedAttempts })}
                     </AlertDescription>
                   </Alert>
                 )}
 
                 <form onSubmit={handleLogin} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="login-email">Email</Label>
+                    <Label htmlFor="login-email">{t('auth:signIn.emailLabel')}</Label>
                     <Input
                       id="login-email"
                       type="email"
-                      placeholder="you@example.com"
+                      placeholder={t('auth:signIn.emailPlaceholder')}
                       value={loginEmail}
                       onChange={(e) => {
                         setLoginEmail(e.target.value);
@@ -313,20 +319,20 @@ export default function Auth() {
                   </div>
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <Label htmlFor="login-password">Password</Label>
+                      <Label htmlFor="login-password">{t('auth:signIn.passwordLabel')}</Label>
                       <button
                         type="button"
                         onClick={() => setShowResetForm(true)}
                         className="text-xs text-primary hover:underline"
                       >
-                        Forgot password?
+                        {t('auth:signIn.forgotPassword')}
                       </button>
                     </div>
                     <div className="relative">
                       <Input
                         id="login-password"
                         type={showLoginPassword ? "text" : "password"}
-                        placeholder="••••••••"
+                        placeholder={t('auth:signIn.passwordPlaceholder')}
                         value={loginPassword}
                         onChange={(e) => {
                           setLoginPassword(e.target.value);
@@ -354,7 +360,7 @@ export default function Auth() {
                     className="w-full h-12 text-base"
                     disabled={isSubmitting || rateLimitState.isBlocked}
                   >
-                    {isSubmitting ? "Signing in..." : "Sign In"}
+                    {isSubmitting ? t('auth:signIn.submitting') : t('auth:signIn.submitButton')}
                   </Button>
                 </form>
 
@@ -364,7 +370,7 @@ export default function Auth() {
                     <span className="w-full border-t border-border" />
                   </div>
                   <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
+                    <span className="bg-card px-2 text-muted-foreground">{t('auth:signIn.orContinueWith')}</span>
                   </div>
                 </div>
 
@@ -379,20 +385,20 @@ export default function Auth() {
                       redirect_uri: window.location.origin,
                     });
                     if (error) {
-                      toast.error("Failed to sign in with Google");
+                      toast.error(t('auth:toast.googleSignInFailed'));
                       setIsSubmitting(false);
                     }
                   }}
                   disabled={isSubmitting || rateLimitState.isBlocked}
                 >
                   <Chrome className="mr-2 h-5 w-5" />
-                  Sign in with Google
+                  {t('auth:signIn.signInWithGoogle')}
                 </Button>
 
                 {/* Create account link */}
                 <div className="mt-6 pt-6 border-t border-border">
                   <p className="text-center text-sm text-muted-foreground mb-3">
-                    Don't have an account yet?
+                    {t('auth:signUp.noAccount')}
                   </p>
                   <Button
                     variant="outline"
@@ -400,7 +406,7 @@ export default function Auth() {
                     asChild
                   >
                     <Link to="/signup">
-                      Start your 14-day free trial
+                      {t('auth:signUp.startTrial')}
                       <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                     </Link>
                   </Button>
@@ -411,7 +417,7 @@ export default function Auth() {
         </Card>
 
         <p className="text-center text-sm text-muted-foreground">
-          Pulcrix — Clean Living. Pure Solutions.
+          Pulcrix — {t('common:tagline')}
         </p>
       </div>
     </div>

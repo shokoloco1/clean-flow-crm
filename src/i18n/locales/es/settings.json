@@ -1,0 +1,66 @@
+{
+  "title": "TODO: Traducir",
+
+  "sections": {
+    "profile": "TODO: Traducir",
+    "business": "TODO: Traducir",
+    "notifications": "TODO: Traducir",
+    "subscription": "TODO: Traducir",
+    "language": "TODO: Traducir"
+  },
+
+  "profile": {
+    "title": "TODO: Traducir",
+    "fullName": "TODO: Traducir",
+    "email": "TODO: Traducir",
+    "phone": "TODO: Traducir",
+    "avatar": "TODO: Traducir",
+    "changeAvatar": "TODO: Traducir",
+    "removeAvatar": "TODO: Traducir"
+  },
+
+  "business": {
+    "title": "TODO: Traducir",
+    "companyName": "TODO: Traducir",
+    "abn": "ABN",
+    "email": "TODO: Traducir",
+    "phone": "TODO: Traducir",
+    "address": "TODO: Traducir",
+    "logo": "TODO: Traducir",
+    "changeLogo": "TODO: Traducir"
+  },
+
+  "notifications": {
+    "title": "TODO: Traducir",
+    "emailNotifications": "TODO: Traducir",
+    "pushNotifications": "TODO: Traducir",
+    "jobReminders": "TODO: Traducir",
+    "paymentAlerts": "TODO: Traducir",
+    "staffUpdates": "TODO: Traducir"
+  },
+
+  "subscription": {
+    "title": "TODO: Traducir",
+    "currentPlan": "TODO: Traducir",
+    "status": "TODO: Traducir",
+    "active": "TODO: Traducir",
+    "trial": "TODO: Traducir",
+    "expired": "TODO: Traducir",
+    "nextBilling": "TODO: Traducir",
+    "manageBilling": "TODO: Traducir",
+    "upgradePlan": "TODO: Traducir",
+    "cancelSubscription": "TODO: Traducir"
+  },
+
+  "language": {
+    "title": "TODO: Traducir",
+    "selectLanguage": "TODO: Traducir",
+    "english": "English",
+    "spanish": "Español"
+  },
+
+  "toast": {
+    "saved": "TODO: Traducir",
+    "error": "TODO: Traducir"
+  }
+}

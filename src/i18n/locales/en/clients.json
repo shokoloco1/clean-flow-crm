@@ -1,0 +1,47 @@
+{
+  "title": "Clients",
+  "newClient": "New Client",
+  "editClient": "Edit Client",
+  "deleteClient": "Delete Client",
+  "searchPlaceholder": "Search clients...",
+
+  "form": {
+    "name": "Name",
+    "namePlaceholder": "Client name",
+    "email": "Email",
+    "emailPlaceholder": "client@example.com",
+    "phone": "Phone",
+    "phonePlaceholder": "04XX XXX XXX",
+    "address": "Address",
+    "addressPlaceholder": "Enter address",
+    "notes": "Notes",
+    "notesPlaceholder": "Additional notes about this client"
+  },
+
+  "details": {
+    "contactInfo": "Contact Information",
+    "address": "Address",
+    "jobHistory": "Job History",
+    "totalJobs": "Total Jobs",
+    "lastJob": "Last Job",
+    "upcomingJobs": "Upcoming Jobs"
+  },
+
+  "empty": {
+    "title": "No clients yet",
+    "subtitle": "Add your first client to get started",
+    "addClient": "Add Client"
+  },
+
+  "toast": {
+    "created": "Client created successfully",
+    "updated": "Client updated successfully",
+    "deleted": "Client deleted successfully"
+  },
+
+  "actions": {
+    "viewDetails": "View client details",
+    "edit": "Edit client",
+    "delete": "Delete client"
+  }
+}

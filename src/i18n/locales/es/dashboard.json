@@ -1,0 +1,48 @@
+{
+  "title": "TODO: Traducir",
+  "newJob": "TODO: Traducir",
+
+  "stats": {
+    "todaysJobs": "TODO: Traducir",
+    "todaysJobsTooltip": "TODO: Traducir",
+    "completedToday": "TODO: Traducir",
+    "completedTodayTooltip": "TODO: Traducir",
+    "completionRate": "TODO: Traducir",
+    "completionRateTooltip": "TODO: Traducir",
+    "totalStaff": "TODO: Traducir",
+    "totalStaffTooltip": "TODO: Traducir"
+  },
+
+  "kanban": {
+    "title": "TODO: Traducir",
+    "scheduled": "TODO: Traducir",
+    "inProgress": "TODO: Traducir",
+    "completed": "TODO: Traducir",
+    "noJobs": "TODO: Traducir",
+    "unknownClient": "TODO: Traducir",
+    "unassigned": "TODO: Traducir",
+    "duplicateJob": "TODO: Traducir",
+    "generateInvoice": "TODO: Traducir"
+  },
+
+  "alerts": {
+    "title": "TODO: Traducir",
+    "lateArrival": "TODO: Traducir",
+    "noShow": "TODO: Traducir",
+    "geofenceViolation": "TODO: Traducir"
+  },
+
+  "pendingPayments": {
+    "title": "TODO: Traducir",
+    "noPayments": "TODO: Traducir",
+    "viewAll": "TODO: Traducir"
+  },
+
+  "emptyState": {
+    "title": "TODO: Traducir",
+    "subtitle": "TODO: Traducir",
+    "createJob": "TODO: Traducir",
+    "addClient": "TODO: Traducir",
+    "inviteStaff": "TODO: Traducir"
+  }
+}

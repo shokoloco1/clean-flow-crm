@@ -1,14 +1,17 @@
 import { useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Shield, Users, ClipboardCheck, Camera, MapPin, Building2, ArrowRight, CheckCircle, Star, Zap, Lock } from "lucide-react";
 import { PulcrixLogo } from "@/components/PulcrixLogo";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 export default function Index() {
   const navigate = useNavigate();
   const { user, role, loading } = useAuth();
+  const { t } = useTranslation(['landing', 'common']);
 
   useEffect(() => {
     if (!loading && user && role) {
@@ -23,35 +26,35 @@ export default function Index() {
   const features = [
     {
       icon: ClipboardCheck,
-      title: "Job Management",
-      description: "Schedule and track jobs easily",
+      title: t('landing:features.jobManagement.title'),
+      description: t('landing:features.jobManagement.description'),
       color: "text-primary"
     },
     {
       icon: Camera,
-      title: "Proof of Work",
-      description: "Capture before & after photos for accountability",
+      title: t('landing:features.proofOfWork.title'),
+      description: t('landing:features.proofOfWork.description'),
       color: "text-success"
     },
     {
       icon: MapPin,
-      title: "Location Tracking",
-      description: "One-tap navigation to job site",
+      title: t('landing:features.locationTracking.title'),
+      description: t('landing:features.locationTracking.description'),
       color: "text-warning"
     },
     {
       icon: Users,
-      title: "Team Coordination",
-      description: "Assign jobs and monitor staff performance",
+      title: t('landing:features.teamCoordination.title'),
+      description: t('landing:features.teamCoordination.description'),
       color: "text-secondary"
     }
   ];
 
   const benefits = [
-    "Setup in 3 clicks",
-    "Made for Australia",
-    "GST & ABN ready",
-    "Mobile-first design"
+    t('landing:benefits.setupIn3Clicks'),
+    t('landing:benefits.madeForAustralia'),
+    t('landing:benefits.gstAbnReady'),
+    t('landing:benefits.mobileFirstDesign')
   ];
 
   return (
@@ -63,25 +66,26 @@ export default function Index() {
             <PulcrixLogo variant="full" size="sm" />
           </Link>
           <div className="flex items-center gap-2">
-            <Button 
-              variant="ghost" 
+            <LanguageSwitcher />
+            <Button
+              variant="ghost"
               size="sm"
               onClick={() => navigate("/pricing")}
             >
-              Pricing
+              {t('common:nav.pricing')}
             </Button>
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               size="sm"
               onClick={() => navigate("/auth")}
             >
-              Sign In
+              {t('landing:cta.signIn')}
             </Button>
             <Button
               size="sm"
               onClick={() => navigate("/signup")}
             >
-              Start Free Trial
+              {t('landing:cta.startTrial')}
             </Button>
           </div>
         </div>
@@ -90,15 +94,15 @@ export default function Index() {
       {/* Hero Section */}
       <div className="relative overflow-hidden pt-16">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background to-accent/20" />
-        
+
         <div className="relative container mx-auto px-4 py-12 md:py-20">
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-foreground mb-4 leading-tight">
-              Manage your cleaning business without the <span className="text-primary">stress</span>
+              {t('landing:hero.title')} <span className="text-primary">{t('landing:hero.titleHighlight')}</span>
             </h1>
-            
+
             <p className="text-lg md:text-xl text-muted-foreground mb-6 max-w-2xl mx-auto">
-              100% specialised in cleaning. No features you don't need. No complications you don't want.
+              {t('landing:hero.subtitle')}
             </p>
 
             {/* Benefits list */}
@@ -118,16 +122,16 @@ export default function Index() {
                 className="h-14 px-8 text-lg shadow-lg shadow-primary/30 hover:shadow-primary/50 transition-all group"
                 onClick={() => navigate("/signup")}
               >
-                Start Free Trial
+                {t('landing:cta.startTrial')}
                 <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
               </Button>
-              <Button 
-                size="lg" 
+              <Button
+                size="lg"
                 variant="outline"
                 className="h-14 px-8 text-lg"
                 onClick={() => navigate("/auth")}
               >
-                Already have an account
+                {t('landing:cta.alreadyHaveAccount')}
               </Button>
             </div>
 
@@ -135,12 +139,12 @@ export default function Index() {
             <div className="flex items-center justify-center gap-4 text-muted-foreground text-sm flex-wrap">
               <div className="flex items-center gap-1">
                 <Zap className="h-4 w-4 text-warning" />
-                <span>Setup in less than 2 minutes</span>
+                <span>{t('landing:trust.setupTime')}</span>
               </div>
               <span className="hidden sm:inline">•</span>
               <div className="flex items-center gap-1">
                 <Star className="h-4 w-4 text-warning" />
-                <span>No credit card required</span>
+                <span>{t('landing:trust.noCreditCard')}</span>
               </div>
             </div>
           </div>
@@ -151,7 +155,7 @@ export default function Index() {
       <section className="py-6 bg-muted/30 border-y border-border">
         <div className="container mx-auto px-4">
           <p className="text-center text-muted-foreground">
-            Built specifically for Australian cleaning businesses. Start your 14-day free trial today.
+            {t('landing:trust.builtForAustralia')}
           </p>
         </div>
       </section>
@@ -160,15 +164,15 @@ export default function Index() {
       <section className="py-12 md:py-16 bg-card">
         <div className="container mx-auto px-4">
           <h2 className="text-2xl md:text-3xl font-bold text-center text-foreground mb-4">
-            Everything You Need for Your Business
+            {t('landing:features.sectionTitle')}
           </h2>
           <p className="text-center text-muted-foreground mb-10 max-w-xl mx-auto">
-            100% specialised in cleaning. No features you don't need. No complications you don't want.
+            {t('landing:features.sectionSubtitle')}
           </p>
-          
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
             {features.map((feature, index) => (
-              <Card 
+              <Card
                 key={index}
                 className="group p-6 border-border hover:border-primary/50 hover:shadow-lg transition-all cursor-pointer"
               >
@@ -189,7 +193,7 @@ export default function Index() {
       <section className="py-12 md:py-16">
         <div className="container mx-auto px-4">
           <h2 className="text-2xl md:text-3xl font-bold text-center text-foreground mb-10">
-            Built for Two Roles
+            {t('landing:roles.sectionTitle')}
           </h2>
 
           <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
@@ -197,48 +201,48 @@ export default function Index() {
               <div className="h-14 w-14 rounded-xl bg-primary flex items-center justify-center mb-6 shadow-md">
                 <Shield className="h-7 w-7 text-primary-foreground" />
               </div>
-              <h3 className="text-xl font-bold text-foreground mb-3">For Business Owners</h3>
+              <h3 className="text-xl font-bold text-foreground mb-3">{t('landing:roles.businessOwners.title')}</h3>
               <ul className="space-y-3 text-muted-foreground">
                 <li className="flex items-start gap-2">
                   <CheckCircle className="h-5 w-5 text-success mt-0.5 shrink-0" />
-                  <span>Full dashboard with analytics</span>
+                  <span>{t('landing:roles.businessOwners.feature1')}</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <CheckCircle className="h-5 w-5 text-success mt-0.5 shrink-0" />
-                  <span>Create and schedule jobs</span>
+                  <span>{t('landing:roles.businessOwners.feature2')}</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <CheckCircle className="h-5 w-5 text-success mt-0.5 shrink-0" />
-                  <span>Manage clients and staff</span>
+                  <span>{t('landing:roles.businessOwners.feature3')}</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <CheckCircle className="h-5 w-5 text-success mt-0.5 shrink-0" />
-                  <span>Real-time job tracking</span>
+                  <span>{t('landing:roles.businessOwners.feature4')}</span>
                 </li>
               </ul>
             </Card>
-            
+
             <Card className="p-6 md:p-8 border-secondary/30 bg-gradient-to-br from-secondary/5 to-transparent hover:shadow-lg transition-shadow">
               <div className="h-14 w-14 rounded-xl bg-secondary flex items-center justify-center mb-6 shadow-md">
                 <Users className="h-7 w-7 text-secondary-foreground" />
               </div>
-              <h3 className="text-xl font-bold text-foreground mb-3">For Cleaning Staff</h3>
+              <h3 className="text-xl font-bold text-foreground mb-3">{t('landing:roles.cleaningStaff.title')}</h3>
               <ul className="space-y-3 text-muted-foreground">
                 <li className="flex items-start gap-2">
                   <CheckCircle className="h-5 w-5 text-success mt-0.5 shrink-0" />
-                  <span>Mobile-first interface</span>
+                  <span>{t('landing:roles.cleaningStaff.feature1')}</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <CheckCircle className="h-5 w-5 text-success mt-0.5 shrink-0" />
-                  <span>View assigned jobs for the day</span>
+                  <span>{t('landing:roles.cleaningStaff.feature2')}</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <CheckCircle className="h-5 w-5 text-success mt-0.5 shrink-0" />
-                  <span>One-tap navigation to sites</span>
+                  <span>{t('landing:roles.cleaningStaff.feature3')}</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <CheckCircle className="h-5 w-5 text-success mt-0.5 shrink-0" />
-                  <span>Upload before/after photos</span>
+                  <span>{t('landing:roles.cleaningStaff.feature4')}</span>
                 </li>
               </ul>
             </Card>
@@ -252,15 +256,15 @@ export default function Index() {
           <div className="flex flex-wrap justify-center gap-6 md:gap-12">
             <div className="flex items-center gap-2 text-muted-foreground">
               <MapPin className="h-5 w-5 text-primary" />
-              <span className="font-medium">Made for Australia</span>
+              <span className="font-medium">{t('landing:badges.madeForAustralia')}</span>
             </div>
             <div className="flex items-center gap-2 text-muted-foreground">
               <Lock className="h-5 w-5 text-success" />
-              <span className="font-medium">Bank-level Security</span>
+              <span className="font-medium">{t('landing:badges.bankLevelSecurity')}</span>
             </div>
             <div className="flex items-center gap-2 text-muted-foreground">
               <Camera className="h-5 w-5 text-secondary" />
-              <span className="font-medium">Works on Any Device</span>
+              <span className="font-medium">{t('landing:badges.worksOnAnyDevice')}</span>
             </div>
           </div>
         </div>
@@ -274,19 +278,19 @@ export default function Index() {
             <PulcrixLogo variant="full" size="sm" />
           </Link>
           <p className="text-sm text-muted-foreground mb-4">
-            Clean Living. Pure Solutions.
+            {t('common:tagline')}
           </p>
           <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground">
             <Link to="/terms" className="hover:text-foreground transition-colors">
-              Terms of Service
+              {t('common:footer.termsOfService')}
             </Link>
             <span>•</span>
             <Link to="/privacy" className="hover:text-foreground transition-colors">
-              Privacy Policy
+              {t('common:footer.privacyPolicy')}
             </Link>
           </div>
           <p className="text-xs text-muted-foreground mt-4">
-            © {new Date().getFullYear()} Pulcrix. All rights reserved.
+            © {new Date().getFullYear()} Pulcrix. {t('common:footer.allRightsReserved')}
           </p>
         </div>
       </footer>

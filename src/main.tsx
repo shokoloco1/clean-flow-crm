@@ -3,6 +3,9 @@ import App from "./App.tsx";
 import "./index.css";
 import { initSentry } from "./lib/sentry";
 
+// Initialize i18n (must be imported before App)
+import "./i18n";
+
 // Initialize error tracking
 initSentry();
 

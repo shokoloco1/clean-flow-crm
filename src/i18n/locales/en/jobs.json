@@ -1,0 +1,79 @@
+{
+  "title": "Jobs",
+  "newJob": "New Job",
+  "editJob": "Edit Job",
+  "deleteJob": "Delete Job",
+  "duplicateJob": "Duplicate Job",
+
+  "wizard": {
+    "title": "New Job",
+    "step1": "Select Client",
+    "step2": "Service & Schedule",
+    "step3": "Confirm",
+    "back": "Back",
+    "next": "Next",
+    "createJob": "Create Job"
+  },
+
+  "client": {
+    "searchPlaceholder": "Search by name, phone, or address...",
+    "quickAdd": "Quick Add Client",
+    "newClient": "New Client",
+    "clientName": "Client name",
+    "phone": "Phone (optional)",
+    "addClient": "Add Client",
+    "noClientsFound": "No clients found",
+    "tryDifferentSearch": "Try a different search or add a new client",
+    "jobLocation": "Job Location",
+    "enterJobAddress": "Enter job address"
+  },
+
+  "service": {
+    "selectServices": "Select Services",
+    "servicesSelected": "{{count}} service selected",
+    "servicesSelected_plural": "{{count}} services selected"
+  },
+
+  "schedule": {
+    "date": "Date",
+    "time": "Time",
+    "pastDateWarning": "Warning: Selected date is in the past"
+  },
+
+  "staff": {
+    "assignedStaff": "Assigned Staff",
+    "autoSuggested": "Auto-suggested",
+    "notAssigned": "Not assigned",
+    "conflictWarning": "Scheduling conflict: {{conflict}}"
+  },
+
+  "notes": {
+    "label": "Notes (optional)",
+    "placeholder": "Special instructions, access codes, etc..."
+  },
+
+  "confirmation": {
+    "client": "Client",
+    "location": "Location",
+    "noAddress": "No address",
+    "services": "Services",
+    "dateTime": "Date & Time",
+    "assignedTo": "Assigned To",
+    "notes": "Notes"
+  },
+
+  "toast": {
+    "created": "Job created successfully",
+    "updated": "Job updated successfully",
+    "deleted": "Job deleted successfully",
+    "duplicated": "Job duplicated for tomorrow",
+    "clientCreated": "Client created!"
+  },
+
+  "status": {
+    "advance": "Advance status",
+    "start": "Start",
+    "complete": "Complete",
+    "markComplete": "Mark Complete"
+  }
+}

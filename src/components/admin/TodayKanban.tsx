@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { Clock, MapPin, User, ChevronRight, Copy, Receipt } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -222,6 +223,7 @@ function KanbanColumnComponent({
 }
 
 export function TodayKanban({ jobs, loading, onViewJob, onJobsChange }: TodayKanbanProps) {
+  const { t } = useTranslation('dashboard');
   const { updatingJobId, advanceStatus } = useJobStatusChange(onJobsChange);
   const { duplicateJob, isDuplicating } = useDuplicateJob(onJobsChange);
   const { generateInvoiceFromJob, isGenerating: isGeneratingInvoice } = useQuickInvoice();
@@ -257,7 +259,7 @@ export function TodayKanban({ jobs, loading, onViewJob, onJobsChange }: TodayKan
     return (
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-lg">Today's Jobs</CardTitle>
+          <CardTitle className="text-lg">{t('kanban.title')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center py-12">
@@ -272,7 +274,7 @@ export function TodayKanban({ jobs, loading, onViewJob, onJobsChange }: TodayKan
     <Card>
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg">Today's Jobs</CardTitle>
+          <CardTitle className="text-lg">{t('kanban.title')}</CardTitle>
           <Badge variant="outline" className="font-normal">
             {format(new Date(), "EEEE, MMM d")}
           </Badge>

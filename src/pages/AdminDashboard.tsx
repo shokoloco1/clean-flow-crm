@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { Plus } from "lucide-react";
@@ -26,6 +27,7 @@ import {
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
+  const { t } = useTranslation(['dashboard', 'common']);
   
   // Onboarding
   const { showOnboarding, isLoading: onboardingLoading, completeOnboarding } = useOnboarding();
@@ -107,7 +109,7 @@ export default function AdminDashboard() {
         {/* Page Title with Mobile New Job Button */}
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Today's View</h1>
+            <h1 className="text-2xl font-bold text-foreground">{t('dashboard:title')}</h1>
             <p className="text-sm text-muted-foreground">
               {format(new Date(), "EEEE, MMMM d, yyyy")}
             </p>
@@ -119,7 +121,7 @@ export default function AdminDashboard() {
             className="md:hidden gap-1.5"
           >
             <Plus className="h-4 w-4" />
-            New Job
+            {t('dashboard:newJob')}
           </Button>
         </div>
 
@@ -165,9 +167,9 @@ export default function AdminDashboard() {
       </div>
 
       {/* Floating Action Button */}
-      <FloatingActionButton 
-        onClick={() => setIsCreateOpen(true)} 
-        label="New Job"
+      <FloatingActionButton
+        onClick={() => setIsCreateOpen(true)}
+        label={t('dashboard:newJob')}
       />
 
       {/* Create Job Wizard */}

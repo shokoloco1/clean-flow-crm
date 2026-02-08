@@ -1,0 +1,71 @@
+{
+  "hero": {
+    "title": "TODO: Traducir",
+    "titleHighlight": "TODO: Traducir",
+    "subtitle": "TODO: Traducir"
+  },
+
+  "cta": {
+    "startTrial": "TODO: Traducir",
+    "signIn": "TODO: Traducir",
+    "alreadyHaveAccount": "TODO: Traducir"
+  },
+
+  "benefits": {
+    "setupIn3Clicks": "TODO: Traducir",
+    "madeForAustralia": "TODO: Traducir",
+    "gstAbnReady": "TODO: Traducir",
+    "mobileFirstDesign": "TODO: Traducir"
+  },
+
+  "trust": {
+    "setupTime": "TODO: Traducir",
+    "noCreditCard": "TODO: Traducir",
+    "builtForAustralia": "TODO: Traducir"
+  },
+
+  "features": {
+    "sectionTitle": "TODO: Traducir",
+    "sectionSubtitle": "TODO: Traducir",
+    "jobManagement": {
+      "title": "TODO: Traducir",
+      "description": "TODO: Traducir"
+    },
+    "proofOfWork": {
+      "title": "TODO: Traducir",
+      "description": "TODO: Traducir"
+    },
+    "locationTracking": {
+      "title": "TODO: Traducir",
+      "description": "TODO: Traducir"
+    },
+    "teamCoordination": {
+      "title": "TODO: Traducir",
+      "description": "TODO: Traducir"
+    }
+  },
+
+  "roles": {
+    "sectionTitle": "TODO: Traducir",
+    "businessOwners": {
+      "title": "TODO: Traducir",
+      "feature1": "TODO: Traducir",
+      "feature2": "TODO: Traducir",
+      "feature3": "TODO: Traducir",
+      "feature4": "TODO: Traducir"
+    },
+    "cleaningStaff": {
+      "title": "TODO: Traducir",
+      "feature1": "TODO: Traducir",
+      "feature2": "TODO: Traducir",
+      "feature3": "TODO: Traducir",
+      "feature4": "TODO: Traducir"
+    }
+  },
+
+  "badges": {
+    "madeForAustralia": "TODO: Traducir",
+    "bankLevelSecurity": "TODO: Traducir",
+    "worksOnAnyDevice": "TODO: Traducir"
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "title": "Invoices",
+  "newInvoice": "New Invoice",
+  "editInvoice": "Edit Invoice",
+  "deleteInvoice": "Delete Invoice",
+  "sendInvoice": "Send Invoice",
+
+  "status": {
+    "draft": "Draft",
+    "sent": "Sent",
+    "paid": "Paid",
+    "overdue": "Overdue",
+    "cancelled": "Cancelled"
+  },
+
+  "form": {
+    "client": "Client",
+    "selectClient": "Select client",
+    "invoiceNumber": "Invoice Number",
+    "issueDate": "Issue Date",
+    "dueDate": "Due Date",
+    "items": "Items",
+    "addItem": "Add Item",
+    "description": "Description",
+    "quantity": "Quantity",
+    "unitPrice": "Unit Price",
+    "amount": "Amount",
+    "subtotal": "Subtotal",
+    "gst": "GST (10%)",
+    "total": "Total",
+    "notes": "Notes"
+  },
+
+  "details": {
+    "invoiceDetails": "Invoice Details",
+    "from": "From",
+    "to": "To",
+    "abn": "ABN"
+  },
+
+  "empty": {
+    "title": "No invoices yet",
+    "subtitle": "Create your first invoice",
+    "createInvoice": "Create Invoice"
+  },
+
+  "toast": {
+    "created": "Invoice created successfully",
+    "updated": "Invoice updated successfully",
+    "deleted": "Invoice deleted successfully",
+    "sent": "Invoice sent successfully",
+    "markedPaid": "Invoice marked as paid"
+  },
+
+  "actions": {
+    "download": "Download PDF",
+    "print": "Print",
+    "markPaid": "Mark as Paid",
+    "sendReminder": "Send Reminder"
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "title": "Settings",
+
+  "sections": {
+    "profile": "Profile",
+    "business": "Business",
+    "notifications": "Notifications",
+    "subscription": "Subscription",
+    "language": "Language"
+  },
+
+  "profile": {
+    "title": "Profile Settings",
+    "fullName": "Full Name",
+    "email": "Email",
+    "phone": "Phone",
+    "avatar": "Profile Picture",
+    "changeAvatar": "Change Picture",
+    "removeAvatar": "Remove Picture"
+  },
+
+  "business": {
+    "title": "Business Settings",
+    "companyName": "Company Name",
+    "abn": "ABN",
+    "email": "Business Email",
+    "phone": "Business Phone",
+    "address": "Business Address",
+    "logo": "Company Logo",
+    "changeLogo": "Change Logo"
+  },
+
+  "notifications": {
+    "title": "Notification Preferences",
+    "emailNotifications": "Email Notifications",
+    "pushNotifications": "Push Notifications",
+    "jobReminders": "Job Reminders",
+    "paymentAlerts": "Payment Alerts",
+    "staffUpdates": "Staff Updates"
+  },
+
+  "subscription": {
+    "title": "Subscription",
+    "currentPlan": "Current Plan",
+    "status": "Status",
+    "active": "Active",
+    "trial": "Trial",
+    "expired": "Expired",
+    "nextBilling": "Next Billing",
+    "manageBilling": "Manage Billing",
+    "upgradePlan": "Upgrade Plan",
+    "cancelSubscription": "Cancel Subscription"
+  },
+
+  "language": {
+    "title": "Language",
+    "selectLanguage": "Select Language",
+    "english": "English",
+    "spanish": "Spanish"
+  },
+
+  "toast": {
+    "saved": "Settings saved successfully",
+    "error": "Failed to save settings"
+  }
+}

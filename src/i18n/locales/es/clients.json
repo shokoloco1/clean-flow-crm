@@ -1,0 +1,47 @@
+{
+  "title": "TODO: Traducir",
+  "newClient": "TODO: Traducir",
+  "editClient": "TODO: Traducir",
+  "deleteClient": "TODO: Traducir",
+  "searchPlaceholder": "TODO: Traducir",
+
+  "form": {
+    "name": "TODO: Traducir",
+    "namePlaceholder": "TODO: Traducir",
+    "email": "TODO: Traducir",
+    "emailPlaceholder": "cliente@ejemplo.com",
+    "phone": "TODO: Traducir",
+    "phonePlaceholder": "TODO: Traducir",
+    "address": "TODO: Traducir",
+    "addressPlaceholder": "TODO: Traducir",
+    "notes": "TODO: Traducir",
+    "notesPlaceholder": "TODO: Traducir"
+  },
+
+  "details": {
+    "contactInfo": "TODO: Traducir",
+    "address": "TODO: Traducir",
+    "jobHistory": "TODO: Traducir",
+    "totalJobs": "TODO: Traducir",
+    "lastJob": "TODO: Traducir",
+    "upcomingJobs": "TODO: Traducir"
+  },
+
+  "empty": {
+    "title": "TODO: Traducir",
+    "subtitle": "TODO: Traducir",
+    "addClient": "TODO: Traducir"
+  },
+
+  "toast": {
+    "created": "TODO: Traducir",
+    "updated": "TODO: Traducir",
+    "deleted": "TODO: Traducir"
+  },
+
+  "actions": {
+    "viewDetails": "TODO: Traducir",
+    "edit": "TODO: Traducir",
+    "delete": "TODO: Traducir"
+  }
+}

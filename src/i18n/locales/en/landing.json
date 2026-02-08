@@ -1,0 +1,71 @@
+{
+  "hero": {
+    "title": "Manage your cleaning business without the",
+    "titleHighlight": "stress",
+    "subtitle": "100% specialised in cleaning. No features you don't need. No complications you don't want."
+  },
+
+  "cta": {
+    "startTrial": "Start Free Trial",
+    "signIn": "Sign In",
+    "alreadyHaveAccount": "Already have an account"
+  },
+
+  "benefits": {
+    "setupIn3Clicks": "Setup in 3 clicks",
+    "madeForAustralia": "Made for Australia",
+    "gstAbnReady": "GST & ABN ready",
+    "mobileFirstDesign": "Mobile-first design"
+  },
+
+  "trust": {
+    "setupTime": "Setup in less than 2 minutes",
+    "noCreditCard": "No credit card required",
+    "builtForAustralia": "Built specifically for Australian cleaning businesses. Start your 14-day free trial today."
+  },
+
+  "features": {
+    "sectionTitle": "Everything You Need for Your Business",
+    "sectionSubtitle": "100% specialised in cleaning. No features you don't need. No complications you don't want.",
+    "jobManagement": {
+      "title": "Job Management",
+      "description": "Schedule and track jobs easily"
+    },
+    "proofOfWork": {
+      "title": "Proof of Work",
+      "description": "Capture before & after photos for accountability"
+    },
+    "locationTracking": {
+      "title": "Location Tracking",
+      "description": "One-tap navigation to job site"
+    },
+    "teamCoordination": {
+      "title": "Team Coordination",
+      "description": "Assign jobs and monitor staff performance"
+    }
+  },
+
+  "roles": {
+    "sectionTitle": "Built for Two Roles",
+    "businessOwners": {
+      "title": "For Business Owners",
+      "feature1": "Full dashboard with analytics",
+      "feature2": "Create and schedule jobs",
+      "feature3": "Manage clients and staff",
+      "feature4": "Real-time job tracking"
+    },
+    "cleaningStaff": {
+      "title": "For Cleaning Staff",
+      "feature1": "Mobile-first interface",
+      "feature2": "View assigned jobs for the day",
+      "feature3": "One-tap navigation to sites",
+      "feature4": "Upload before/after photos"
+    }
+  },
+
+  "badges": {
+    "madeForAustralia": "Made for Australia",
+    "bankLevelSecurity": "Bank-level Security",
+    "worksOnAnyDevice": "Works on Any Device"
+  }
+}

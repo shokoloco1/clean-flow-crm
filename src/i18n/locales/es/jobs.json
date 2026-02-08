@@ -1,0 +1,79 @@
+{
+  "title": "TODO: Traducir",
+  "newJob": "TODO: Traducir",
+  "editJob": "TODO: Traducir",
+  "deleteJob": "TODO: Traducir",
+  "duplicateJob": "TODO: Traducir",
+
+  "wizard": {
+    "title": "TODO: Traducir",
+    "step1": "TODO: Traducir",
+    "step2": "TODO: Traducir",
+    "step3": "TODO: Traducir",
+    "back": "TODO: Traducir",
+    "next": "TODO: Traducir",
+    "createJob": "TODO: Traducir"
+  },
+
+  "client": {
+    "searchPlaceholder": "TODO: Traducir",
+    "quickAdd": "TODO: Traducir",
+    "newClient": "TODO: Traducir",
+    "clientName": "TODO: Traducir",
+    "phone": "TODO: Traducir",
+    "addClient": "TODO: Traducir",
+    "noClientsFound": "TODO: Traducir",
+    "tryDifferentSearch": "TODO: Traducir",
+    "jobLocation": "TODO: Traducir",
+    "enterJobAddress": "TODO: Traducir"
+  },
+
+  "service": {
+    "selectServices": "TODO: Traducir",
+    "servicesSelected": "TODO: Traducir",
+    "servicesSelected_plural": "TODO: Traducir"
+  },
+
+  "schedule": {
+    "date": "TODO: Traducir",
+    "time": "TODO: Traducir",
+    "pastDateWarning": "TODO: Traducir"
+  },
+
+  "staff": {
+    "assignedStaff": "TODO: Traducir",
+    "autoSuggested": "TODO: Traducir",
+    "notAssigned": "TODO: Traducir",
+    "conflictWarning": "TODO: Traducir"
+  },
+
+  "notes": {
+    "label": "TODO: Traducir",
+    "placeholder": "TODO: Traducir"
+  },
+
+  "confirmation": {
+    "client": "TODO: Traducir",
+    "location": "TODO: Traducir",
+    "noAddress": "TODO: Traducir",
+    "services": "TODO: Traducir",
+    "dateTime": "TODO: Traducir",
+    "assignedTo": "TODO: Traducir",
+    "notes": "TODO: Traducir"
+  },
+
+  "toast": {
+    "created": "TODO: Traducir",
+    "updated": "TODO: Traducir",
+    "deleted": "TODO: Traducir",
+    "duplicated": "TODO: Traducir",
+    "clientCreated": "TODO: Traducir"
+  },
+
+  "status": {
+    "advance": "TODO: Traducir",
+    "start": "TODO: Traducir",
+    "complete": "TODO: Traducir",
+    "markComplete": "TODO: Traducir"
+  }
+}

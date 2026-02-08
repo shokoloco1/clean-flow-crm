@@ -1,0 +1,61 @@
+{
+  "title": "TODO: Traducir",
+  "newInvoice": "TODO: Traducir",
+  "editInvoice": "TODO: Traducir",
+  "deleteInvoice": "TODO: Traducir",
+  "sendInvoice": "TODO: Traducir",
+
+  "status": {
+    "draft": "TODO: Traducir",
+    "sent": "TODO: Traducir",
+    "paid": "TODO: Traducir",
+    "overdue": "TODO: Traducir",
+    "cancelled": "TODO: Traducir"
+  },
+
+  "form": {
+    "client": "TODO: Traducir",
+    "selectClient": "TODO: Traducir",
+    "invoiceNumber": "TODO: Traducir",
+    "issueDate": "TODO: Traducir",
+    "dueDate": "TODO: Traducir",
+    "items": "TODO: Traducir",
+    "addItem": "TODO: Traducir",
+    "description": "TODO: Traducir",
+    "quantity": "TODO: Traducir",
+    "unitPrice": "TODO: Traducir",
+    "amount": "TODO: Traducir",
+    "subtotal": "TODO: Traducir",
+    "gst": "TODO: Traducir",
+    "total": "TODO: Traducir",
+    "notes": "TODO: Traducir"
+  },
+
+  "details": {
+    "invoiceDetails": "TODO: Traducir",
+    "from": "TODO: Traducir",
+    "to": "TODO: Traducir",
+    "abn": "ABN"
+  },
+
+  "empty": {
+    "title": "TODO: Traducir",
+    "subtitle": "TODO: Traducir",
+    "createInvoice": "TODO: Traducir"
+  },
+
+  "toast": {
+    "created": "TODO: Traducir",
+    "updated": "TODO: Traducir",
+    "deleted": "TODO: Traducir",
+    "sent": "TODO: Traducir",
+    "markedPaid": "TODO: Traducir"
+  },
+
+  "actions": {
+    "download": "TODO: Traducir",
+    "print": "TODO: Traducir",
+    "markPaid": "TODO: Traducir",
+    "sendReminder": "TODO: Traducir"
+  }
+}
