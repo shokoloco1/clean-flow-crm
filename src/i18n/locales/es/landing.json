@@ -1,71 +1,71 @@
 {
   "hero": {
-    "title": "TODO: Traducir",
-    "titleHighlight": "TODO: Traducir",
-    "subtitle": "TODO: Traducir"
+    "title": "Gestiona tu negocio de limpieza sin",
+    "titleHighlight": "estrés",
+    "subtitle": "100% especializado en limpieza. Sin funciones que no necesitas. Sin complicaciones que no quieres."
   },
 
   "cta": {
-    "startTrial": "TODO: Traducir",
-    "signIn": "TODO: Traducir",
-    "alreadyHaveAccount": "TODO: Traducir"
+    "startTrial": "Comenzar Prueba Gratis",
+    "signIn": "Iniciar Sesión",
+    "alreadyHaveAccount": "¿Ya tienes una cuenta?"
   },
 
   "benefits": {
-    "setupIn3Clicks": "TODO: Traducir",
-    "madeForAustralia": "TODO: Traducir",
-    "gstAbnReady": "TODO: Traducir",
-    "mobileFirstDesign": "TODO: Traducir"
+    "setupIn3Clicks": "Configura en 3 clics",
+    "madeForAustralia": "Hecho para Australia",
+    "gstAbnReady": "GST y ABN listos",
+    "mobileFirstDesign": "Diseño mobile-first"
   },
 
   "trust": {
-    "setupTime": "TODO: Traducir",
-    "noCreditCard": "TODO: Traducir",
-    "builtForAustralia": "TODO: Traducir"
+    "setupTime": "Configura en menos de 2 minutos",
+    "noCreditCard": "No requiere tarjeta de crédito",
+    "builtForAustralia": "Diseñado específicamente para empresas de limpieza australianas. Comienza tu prueba gratis de 14 días hoy."
   },
 
   "features": {
-    "sectionTitle": "TODO: Traducir",
-    "sectionSubtitle": "TODO: Traducir",
+    "sectionTitle": "Todo lo que Necesitas para tu Negocio",
+    "sectionSubtitle": "100% especializado en limpieza. Sin funciones que no necesitas. Sin complicaciones que no quieres.",
     "jobManagement": {
-      "title": "TODO: Traducir",
-      "description": "TODO: Traducir"
+      "title": "Gestión de Trabajos",
+      "description": "Programa y rastrea trabajos fácilmente"
     },
     "proofOfWork": {
-      "title": "TODO: Traducir",
-      "description": "TODO: Traducir"
+      "title": "Prueba de Trabajo",
+      "description": "Captura fotos antes y después para respaldo"
     },
     "locationTracking": {
-      "title": "TODO: Traducir",
-      "description": "TODO: Traducir"
+      "title": "Rastreo de Ubicación",
+      "description": "Navegación con un toque al sitio de trabajo"
     },
     "teamCoordination": {
-      "title": "TODO: Traducir",
-      "description": "TODO: Traducir"
+      "title": "Coordinación de Equipo",
+      "description": "Asigna trabajos y monitorea el rendimiento del personal"
     }
   },
 
   "roles": {
-    "sectionTitle": "TODO: Traducir",
+    "sectionTitle": "Diseñado para Dos Roles",
     "businessOwners": {
-      "title": "TODO: Traducir",
-      "feature1": "TODO: Traducir",
-      "feature2": "TODO: Traducir",
-      "feature3": "TODO: Traducir",
-      "feature4": "TODO: Traducir"
+      "title": "Para Dueños de Negocio",
+      "feature1": "Panel completo con analíticas",
+      "feature2": "Crea y programa trabajos",
+      "feature3": "Gestiona clientes y personal",
+      "feature4": "Seguimiento de trabajos en tiempo real"
     },
     "cleaningStaff": {
-      "title": "TODO: Traducir",
-      "feature1": "TODO: Traducir",
-      "feature2": "TODO: Traducir",
-      "feature3": "TODO: Traducir",
-      "feature4": "TODO: Traducir"
+      "title": "Para Personal de Limpieza",
+      "feature1": "Interfaz mobile-first",
+      "feature2": "Ve los trabajos asignados del día",
+      "feature3": "Navegación con un toque a los sitios",
+      "feature4": "Sube fotos antes/después"
     }
   },
 
   "badges": {
-    "madeForAustralia": "TODO: Traducir",
-    "bankLevelSecurity": "TODO: Traducir",
-    "worksOnAnyDevice": "TODO: Traducir"
+    "madeForAustralia": "Hecho para Australia",
+    "bankLevelSecurity": "Seguridad Nivel Bancario",
+    "worksOnAnyDevice": "Funciona en Cualquier Dispositivo"
   }
 }

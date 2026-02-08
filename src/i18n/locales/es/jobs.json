@@ -1,79 +1,79 @@
 {
-  "title": "TODO: Traducir",
-  "newJob": "TODO: Traducir",
-  "editJob": "TODO: Traducir",
-  "deleteJob": "TODO: Traducir",
-  "duplicateJob": "TODO: Traducir",
+  "title": "Trabajos",
+  "newJob": "Nuevo Trabajo",
+  "editJob": "Editar Trabajo",
+  "deleteJob": "Eliminar Trabajo",
+  "duplicateJob": "Duplicar Trabajo",
 
   "wizard": {
-    "title": "TODO: Traducir",
-    "step1": "TODO: Traducir",
-    "step2": "TODO: Traducir",
-    "step3": "TODO: Traducir",
-    "back": "TODO: Traducir",
-    "next": "TODO: Traducir",
-    "createJob": "TODO: Traducir"
+    "title": "Nuevo Trabajo",
+    "step1": "Seleccionar Cliente",
+    "step2": "Servicio y Horario",
+    "step3": "Confirmar",
+    "back": "Atrás",
+    "next": "Siguiente",
+    "createJob": "Crear Trabajo"
   },
 
   "client": {
-    "searchPlaceholder": "TODO: Traducir",
-    "quickAdd": "TODO: Traducir",
-    "newClient": "TODO: Traducir",
-    "clientName": "TODO: Traducir",
-    "phone": "TODO: Traducir",
-    "addClient": "TODO: Traducir",
-    "noClientsFound": "TODO: Traducir",
-    "tryDifferentSearch": "TODO: Traducir",
-    "jobLocation": "TODO: Traducir",
-    "enterJobAddress": "TODO: Traducir"
+    "searchPlaceholder": "Buscar por nombre, teléfono o dirección...",
+    "quickAdd": "Agregar Cliente Rápido",
+    "newClient": "Nuevo Cliente",
+    "clientName": "Nombre del cliente",
+    "phone": "Teléfono (opcional)",
+    "addClient": "Agregar Cliente",
+    "noClientsFound": "No se encontraron clientes",
+    "tryDifferentSearch": "Intente una búsqueda diferente o agregue un nuevo cliente",
+    "jobLocation": "Ubicación del Trabajo",
+    "enterJobAddress": "Ingrese la dirección del trabajo"
   },
 
   "service": {
-    "selectServices": "TODO: Traducir",
-    "servicesSelected": "TODO: Traducir",
-    "servicesSelected_plural": "TODO: Traducir"
+    "selectServices": "Seleccionar Servicios",
+    "servicesSelected": "{{count}} servicio seleccionado",
+    "servicesSelected_plural": "{{count}} servicios seleccionados"
   },
 
   "schedule": {
-    "date": "TODO: Traducir",
-    "time": "TODO: Traducir",
-    "pastDateWarning": "TODO: Traducir"
+    "date": "Fecha",
+    "time": "Hora",
+    "pastDateWarning": "Advertencia: La fecha seleccionada está en el pasado"
   },
 
   "staff": {
-    "assignedStaff": "TODO: Traducir",
-    "autoSuggested": "TODO: Traducir",
-    "notAssigned": "TODO: Traducir",
-    "conflictWarning": "TODO: Traducir"
+    "assignedStaff": "Personal Asignado",
+    "autoSuggested": "Sugerido automáticamente",
+    "notAssigned": "Sin asignar",
+    "conflictWarning": "Conflicto de horario: {{conflict}}"
   },
 
   "notes": {
-    "label": "TODO: Traducir",
-    "placeholder": "TODO: Traducir"
+    "label": "Notas (opcional)",
+    "placeholder": "Instrucciones especiales, códigos de acceso, etc..."
   },
 
   "confirmation": {
-    "client": "TODO: Traducir",
-    "location": "TODO: Traducir",
-    "noAddress": "TODO: Traducir",
-    "services": "TODO: Traducir",
-    "dateTime": "TODO: Traducir",
-    "assignedTo": "TODO: Traducir",
-    "notes": "TODO: Traducir"
+    "client": "Cliente",
+    "location": "Ubicación",
+    "noAddress": "Sin dirección",
+    "services": "Servicios",
+    "dateTime": "Fecha y Hora",
+    "assignedTo": "Asignado A",
+    "notes": "Notas"
   },
 
   "toast": {
-    "created": "TODO: Traducir",
-    "updated": "TODO: Traducir",
-    "deleted": "TODO: Traducir",
-    "duplicated": "TODO: Traducir",
-    "clientCreated": "TODO: Traducir"
+    "created": "Trabajo creado exitosamente",
+    "updated": "Trabajo actualizado exitosamente",
+    "deleted": "Trabajo eliminado exitosamente",
+    "duplicated": "Trabajo duplicado para mañana",
+    "clientCreated": "¡Cliente creado!"
   },
 
   "status": {
-    "advance": "TODO: Traducir",
-    "start": "TODO: Traducir",
-    "complete": "TODO: Traducir",
-    "markComplete": "TODO: Traducir"
+    "advance": "Avanzar estado",
+    "start": "Iniciar",
+    "complete": "Completar",
+    "markComplete": "Marcar Completado"
   }
 }

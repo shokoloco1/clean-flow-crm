@@ -1,61 +1,61 @@
 {
-  "title": "TODO: Traducir",
-  "newInvoice": "TODO: Traducir",
-  "editInvoice": "TODO: Traducir",
-  "deleteInvoice": "TODO: Traducir",
-  "sendInvoice": "TODO: Traducir",
+  "title": "Facturas",
+  "newInvoice": "Nueva Factura",
+  "editInvoice": "Editar Factura",
+  "deleteInvoice": "Eliminar Factura",
+  "sendInvoice": "Enviar Factura",
 
   "status": {
-    "draft": "TODO: Traducir",
-    "sent": "TODO: Traducir",
-    "paid": "TODO: Traducir",
-    "overdue": "TODO: Traducir",
-    "cancelled": "TODO: Traducir"
+    "draft": "Borrador",
+    "sent": "Enviada",
+    "paid": "Pagada",
+    "overdue": "Vencida",
+    "cancelled": "Cancelada"
   },
 
   "form": {
-    "client": "TODO: Traducir",
-    "selectClient": "TODO: Traducir",
-    "invoiceNumber": "TODO: Traducir",
-    "issueDate": "TODO: Traducir",
-    "dueDate": "TODO: Traducir",
-    "items": "TODO: Traducir",
-    "addItem": "TODO: Traducir",
-    "description": "TODO: Traducir",
-    "quantity": "TODO: Traducir",
-    "unitPrice": "TODO: Traducir",
-    "amount": "TODO: Traducir",
-    "subtotal": "TODO: Traducir",
-    "gst": "TODO: Traducir",
-    "total": "TODO: Traducir",
-    "notes": "TODO: Traducir"
+    "client": "Cliente",
+    "selectClient": "Seleccionar cliente",
+    "invoiceNumber": "Número de Factura",
+    "issueDate": "Fecha de Emisión",
+    "dueDate": "Fecha de Vencimiento",
+    "items": "Ítems",
+    "addItem": "Agregar Ítem",
+    "description": "Descripción",
+    "quantity": "Cantidad",
+    "unitPrice": "Precio Unitario",
+    "amount": "Monto",
+    "subtotal": "Subtotal",
+    "gst": "GST (10%)",
+    "total": "Total",
+    "notes": "Notas"
   },
 
   "details": {
-    "invoiceDetails": "TODO: Traducir",
-    "from": "TODO: Traducir",
-    "to": "TODO: Traducir",
+    "invoiceDetails": "Detalles de Factura",
+    "from": "De",
+    "to": "Para",
     "abn": "ABN"
   },
 
   "empty": {
-    "title": "TODO: Traducir",
-    "subtitle": "TODO: Traducir",
-    "createInvoice": "TODO: Traducir"
+    "title": "Aún no hay facturas",
+    "subtitle": "Cree su primera factura",
+    "createInvoice": "Crear Factura"
   },
 
   "toast": {
-    "created": "TODO: Traducir",
-    "updated": "TODO: Traducir",
-    "deleted": "TODO: Traducir",
-    "sent": "TODO: Traducir",
-    "markedPaid": "TODO: Traducir"
+    "created": "Factura creada exitosamente",
+    "updated": "Factura actualizada exitosamente",
+    "deleted": "Factura eliminada exitosamente",
+    "sent": "Factura enviada exitosamente",
+    "markedPaid": "Factura marcada como pagada"
   },
 
   "actions": {
-    "download": "TODO: Traducir",
-    "print": "TODO: Traducir",
-    "markPaid": "TODO: Traducir",
-    "sendReminder": "TODO: Traducir"
+    "download": "Descargar PDF",
+    "print": "Imprimir",
+    "markPaid": "Marcar como Pagada",
+    "sendReminder": "Enviar Recordatorio"
   }
 }

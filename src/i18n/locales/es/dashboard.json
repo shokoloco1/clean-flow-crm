@@ -1,48 +1,48 @@
 {
-  "title": "TODO: Traducir",
-  "newJob": "TODO: Traducir",
+  "title": "Vista de Hoy",
+  "newJob": "Nuevo Trabajo",
 
   "stats": {
-    "todaysJobs": "TODO: Traducir",
-    "todaysJobsTooltip": "TODO: Traducir",
-    "completedToday": "TODO: Traducir",
-    "completedTodayTooltip": "TODO: Traducir",
-    "completionRate": "TODO: Traducir",
-    "completionRateTooltip": "TODO: Traducir",
-    "totalStaff": "TODO: Traducir",
-    "totalStaffTooltip": "TODO: Traducir"
+    "todaysJobs": "Trabajos de Hoy",
+    "todaysJobsTooltip": "Total de trabajos programados para hoy",
+    "completedToday": "Completados Hoy",
+    "completedTodayTooltip": "Trabajos completados hoy",
+    "completionRate": "Tasa de Completado",
+    "completionRateTooltip": "Porcentaje de trabajos completados vs programados hoy",
+    "totalStaff": "Total Personal",
+    "totalStaffTooltip": "Total de miembros activos del equipo"
   },
 
   "kanban": {
-    "title": "TODO: Traducir",
-    "scheduled": "TODO: Traducir",
-    "inProgress": "TODO: Traducir",
-    "completed": "TODO: Traducir",
-    "noJobs": "TODO: Traducir",
-    "unknownClient": "TODO: Traducir",
-    "unassigned": "TODO: Traducir",
-    "duplicateJob": "TODO: Traducir",
-    "generateInvoice": "TODO: Traducir"
+    "title": "Trabajos de Hoy",
+    "scheduled": "Programados",
+    "inProgress": "En Progreso",
+    "completed": "Completados",
+    "noJobs": "Sin trabajos",
+    "unknownClient": "Cliente Desconocido",
+    "unassigned": "Sin asignar",
+    "duplicateJob": "Duplicar trabajo para mañana",
+    "generateInvoice": "Generar Factura"
   },
 
   "alerts": {
-    "title": "TODO: Traducir",
-    "lateArrival": "TODO: Traducir",
-    "noShow": "TODO: Traducir",
-    "geofenceViolation": "TODO: Traducir"
+    "title": "Alertas Urgentes",
+    "lateArrival": "Llegada tardía",
+    "noShow": "No presentación",
+    "geofenceViolation": "Violación de geocerca"
   },
 
   "pendingPayments": {
-    "title": "TODO: Traducir",
-    "noPayments": "TODO: Traducir",
-    "viewAll": "TODO: Traducir"
+    "title": "Pagos Pendientes",
+    "noPayments": "Sin pagos pendientes",
+    "viewAll": "Ver todas las facturas"
   },
 
   "emptyState": {
-    "title": "TODO: Traducir",
-    "subtitle": "TODO: Traducir",
-    "createJob": "TODO: Traducir",
-    "addClient": "TODO: Traducir",
-    "inviteStaff": "TODO: Traducir"
+    "title": "No hay trabajos programados para hoy",
+    "subtitle": "Cree su primer trabajo para comenzar",
+    "createJob": "Crear Trabajo",
+    "addClient": "Agregue un Cliente Primero",
+    "inviteStaff": "Invitar Personal"
   }
 }

@@ -1,66 +1,66 @@
 {
-  "title": "TODO: Traducir",
+  "title": "Configuración",
 
   "sections": {
-    "profile": "TODO: Traducir",
-    "business": "TODO: Traducir",
-    "notifications": "TODO: Traducir",
-    "subscription": "TODO: Traducir",
-    "language": "TODO: Traducir"
+    "profile": "Perfil",
+    "business": "Negocio",
+    "notifications": "Notificaciones",
+    "subscription": "Suscripción",
+    "language": "Idioma"
   },
 
   "profile": {
-    "title": "TODO: Traducir",
-    "fullName": "TODO: Traducir",
-    "email": "TODO: Traducir",
-    "phone": "TODO: Traducir",
-    "avatar": "TODO: Traducir",
-    "changeAvatar": "TODO: Traducir",
-    "removeAvatar": "TODO: Traducir"
+    "title": "Configuración de Perfil",
+    "fullName": "Nombre Completo",
+    "email": "Correo electrónico",
+    "phone": "Teléfono",
+    "avatar": "Foto de Perfil",
+    "changeAvatar": "Cambiar Foto",
+    "removeAvatar": "Eliminar Foto"
   },
 
   "business": {
-    "title": "TODO: Traducir",
-    "companyName": "TODO: Traducir",
+    "title": "Configuración del Negocio",
+    "companyName": "Nombre de la Empresa",
     "abn": "ABN",
-    "email": "TODO: Traducir",
-    "phone": "TODO: Traducir",
-    "address": "TODO: Traducir",
-    "logo": "TODO: Traducir",
-    "changeLogo": "TODO: Traducir"
+    "email": "Correo del Negocio",
+    "phone": "Teléfono del Negocio",
+    "address": "Dirección del Negocio",
+    "logo": "Logo de la Empresa",
+    "changeLogo": "Cambiar Logo"
   },
 
   "notifications": {
-    "title": "TODO: Traducir",
-    "emailNotifications": "TODO: Traducir",
-    "pushNotifications": "TODO: Traducir",
-    "jobReminders": "TODO: Traducir",
-    "paymentAlerts": "TODO: Traducir",
-    "staffUpdates": "TODO: Traducir"
+    "title": "Preferencias de Notificaciones",
+    "emailNotifications": "Notificaciones por Correo",
+    "pushNotifications": "Notificaciones Push",
+    "jobReminders": "Recordatorios de Trabajos",
+    "paymentAlerts": "Alertas de Pagos",
+    "staffUpdates": "Actualizaciones de Personal"
   },
 
   "subscription": {
-    "title": "TODO: Traducir",
-    "currentPlan": "TODO: Traducir",
-    "status": "TODO: Traducir",
-    "active": "TODO: Traducir",
-    "trial": "TODO: Traducir",
-    "expired": "TODO: Traducir",
-    "nextBilling": "TODO: Traducir",
-    "manageBilling": "TODO: Traducir",
-    "upgradePlan": "TODO: Traducir",
-    "cancelSubscription": "TODO: Traducir"
+    "title": "Suscripción",
+    "currentPlan": "Plan Actual",
+    "status": "Estado",
+    "active": "Activo",
+    "trial": "Prueba",
+    "expired": "Expirado",
+    "nextBilling": "Próxima Facturación",
+    "manageBilling": "Gestionar Facturación",
+    "upgradePlan": "Mejorar Plan",
+    "cancelSubscription": "Cancelar Suscripción"
   },
 
   "language": {
-    "title": "TODO: Traducir",
-    "selectLanguage": "TODO: Traducir",
+    "title": "Idioma",
+    "selectLanguage": "Seleccionar Idioma",
     "english": "English",
     "spanish": "Español"
   },
 
   "toast": {
-    "saved": "TODO: Traducir",
-    "error": "TODO: Traducir"
+    "saved": "Configuración guardada exitosamente",
+    "error": "Error al guardar la configuración"
   }
 }

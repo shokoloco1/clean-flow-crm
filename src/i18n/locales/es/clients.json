@@ -1,47 +1,47 @@
 {
-  "title": "TODO: Traducir",
-  "newClient": "TODO: Traducir",
-  "editClient": "TODO: Traducir",
-  "deleteClient": "TODO: Traducir",
-  "searchPlaceholder": "TODO: Traducir",
+  "title": "Clientes",
+  "newClient": "Nuevo Cliente",
+  "editClient": "Editar Cliente",
+  "deleteClient": "Eliminar Cliente",
+  "searchPlaceholder": "Buscar clientes...",
 
   "form": {
-    "name": "TODO: Traducir",
-    "namePlaceholder": "TODO: Traducir",
-    "email": "TODO: Traducir",
+    "name": "Nombre",
+    "namePlaceholder": "Nombre del cliente",
+    "email": "Correo electrónico",
     "emailPlaceholder": "cliente@ejemplo.com",
-    "phone": "TODO: Traducir",
-    "phonePlaceholder": "TODO: Traducir",
-    "address": "TODO: Traducir",
-    "addressPlaceholder": "TODO: Traducir",
-    "notes": "TODO: Traducir",
-    "notesPlaceholder": "TODO: Traducir"
+    "phone": "Teléfono",
+    "phonePlaceholder": "04XX XXX XXX",
+    "address": "Dirección",
+    "addressPlaceholder": "Ingrese la dirección",
+    "notes": "Notas",
+    "notesPlaceholder": "Notas adicionales sobre este cliente"
   },
 
   "details": {
-    "contactInfo": "TODO: Traducir",
-    "address": "TODO: Traducir",
-    "jobHistory": "TODO: Traducir",
-    "totalJobs": "TODO: Traducir",
-    "lastJob": "TODO: Traducir",
-    "upcomingJobs": "TODO: Traducir"
+    "contactInfo": "Información de Contacto",
+    "address": "Dirección",
+    "jobHistory": "Historial de Trabajos",
+    "totalJobs": "Total de Trabajos",
+    "lastJob": "Último Trabajo",
+    "upcomingJobs": "Próximos Trabajos"
   },
 
   "empty": {
-    "title": "TODO: Traducir",
-    "subtitle": "TODO: Traducir",
-    "addClient": "TODO: Traducir"
+    "title": "Aún no hay clientes",
+    "subtitle": "Agregue su primer cliente para comenzar",
+    "addClient": "Agregar Cliente"
   },
 
   "toast": {
-    "created": "TODO: Traducir",
-    "updated": "TODO: Traducir",
-    "deleted": "TODO: Traducir"
+    "created": "Cliente creado exitosamente",
+    "updated": "Cliente actualizado exitosamente",
+    "deleted": "Cliente eliminado exitosamente"
   },
 
   "actions": {
-    "viewDetails": "TODO: Traducir",
-    "edit": "TODO: Traducir",
-    "delete": "TODO: Traducir"
+    "viewDetails": "Ver detalles del cliente",
+    "edit": "Editar cliente",
+    "delete": "Eliminar cliente"
   }
 }
