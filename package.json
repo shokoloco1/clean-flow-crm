@@ -12,7 +12,10 @@
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "deploy:functions": "supabase functions deploy",
+    "db:push": "supabase db push",
+    "verify": "npx tsx scripts/verify-deployment.ts"
   },
   "dependencies": {
     "@fullcalendar/core": "^6.1.20",
