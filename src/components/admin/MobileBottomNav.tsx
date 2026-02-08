@@ -5,8 +5,12 @@ import {
   Users,
   UserCog,
   FileText,
+  LogOut,
+  Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/hooks/useAuth";
+import { useState } from "react";
 
 const navItems = [
   { title: "Dashboard", url: "/admin", icon: LayoutDashboard },
@@ -18,12 +22,20 @@ const navItems = [
 
 export function MobileBottomNav() {
   const location = useLocation();
+  const { signOut } = useAuth();
+  const [isSigningOut, setIsSigningOut] = useState(false);
 
   const isActive = (url: string) => {
     if (url === "/admin") {
       return location.pathname === "/admin";
     }
     return location.pathname.startsWith(url);
+  };
+
+  const handleSignOut = async () => {
+    if (isSigningOut) return;
+    setIsSigningOut(true);
+    await signOut();
   };
 
   return (
@@ -36,7 +48,7 @@ export function MobileBottomNav() {
               key={item.title}
               to={item.url}
               className={cn(
-                "flex flex-col items-center justify-center gap-0.5 px-2 py-2 min-w-[56px] rounded-lg transition-all active:scale-95",
+                "flex flex-col items-center justify-center gap-0.5 px-2 py-2 min-w-[48px] rounded-lg transition-all active:scale-95",
                 active
                   ? "text-primary bg-primary/10"
                   : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
@@ -52,6 +64,25 @@ export function MobileBottomNav() {
             </Link>
           );
         })}
+        
+        {/* Logout Button */}
+        <button
+          onClick={handleSignOut}
+          disabled={isSigningOut}
+          className={cn(
+            "flex flex-col items-center justify-center gap-0.5 px-2 py-2 min-w-[48px] rounded-lg transition-all active:scale-95",
+            "text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+          )}
+        >
+          {isSigningOut ? (
+            <Loader2 className="h-5 w-5 animate-spin" />
+          ) : (
+            <LogOut className="h-5 w-5" />
+          )}
+          <span className="text-[10px] font-medium leading-tight">
+            {isSigningOut ? "..." : "Logout"}
+          </span>
+        </button>
       </div>
     </nav>
   );
