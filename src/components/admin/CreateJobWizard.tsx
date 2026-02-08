@@ -277,8 +277,8 @@ export function CreateJobWizard({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-lg max-h-[85vh] sm:max-h-[90vh] overflow-y-auto flex flex-col p-4 sm:p-6">
-        <DialogHeader>
+      <DialogContent className="sm:max-w-lg max-h-[85vh] sm:max-h-[90vh] flex flex-col p-0">
+        <DialogHeader className="px-4 sm:px-6 pt-4 sm:pt-6 pb-0">
           <DialogTitle className="text-xl">📋 New Job</DialogTitle>
           
           {/* Step Indicator */}
@@ -310,8 +310,8 @@ export function CreateJobWizard({
           </div>
         </DialogHeader>
 
-        <ScrollArea className="flex-1 -mx-4 px-4 sm:-mx-6 sm:px-6">
-          <div className="space-y-4 py-4">
+        <ScrollArea className="flex-1 min-h-0 max-h-[calc(85vh-180px)] sm:max-h-[calc(90vh-180px)]">
+          <div className="space-y-4 py-4 px-4 sm:px-6">
             {/* Step 1: Select Client */}
             {currentStep === 1 && (
               <div className="space-y-4">
@@ -658,7 +658,7 @@ export function CreateJobWizard({
         </ScrollArea>
 
         {/* Footer Navigation */}
-        <div className="flex items-center justify-between pt-4 border-t">
+        <div className="flex items-center justify-between p-4 sm:p-6 pt-4 border-t bg-background">
           <Button
             variant="ghost"
             onClick={handleBack}
