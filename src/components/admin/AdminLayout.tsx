@@ -20,12 +20,12 @@ export function AdminLayout({ children }: AdminLayoutProps) {
         <AdminSidebar />
         <SidebarInset className="flex flex-col">
           {/* Mobile Header */}
-          <header className="md:hidden sticky top-0 z-40 bg-card border-b border-border">
-            <div className="flex items-center justify-between px-4 h-14">
-              <Link to="/" className="flex items-center gap-2">
+          <header className="md:hidden sticky top-0 z-40 bg-card/95 backdrop-blur-md border-b border-border safe-area-inset-top">
+            <div className="flex items-center justify-between px-3 h-14">
+              <Link to="/" className="flex items-center gap-2 shrink-0">
                 <PulcrixLogo size="sm" />
               </Link>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1">
                 <GlobalSearch />
                 <NotificationCenter />
               </div>
@@ -47,7 +47,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
             </div>
           </header>
 
-          {/* Main Content */}
+          {/* Main Content - Extra bottom padding for mobile nav */}
           <main className="flex-1 pb-20 md:pb-0">
             {children}
           </main>
