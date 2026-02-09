@@ -37,6 +37,7 @@ const PrivacyPage = lazy(() => import("./pages/PrivacyPage"));
 
 // Staff workflow pages
 const JobStartPage = lazy(() => import("./pages/staff/JobStartPage"));
+const JobPhotosBeforePage = lazy(() => import("./pages/staff/JobPhotosBeforePage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -178,6 +179,14 @@ const App = () => (
                     element={
                       <ProtectedRoute allowedRoles={["staff"]}>
                         <JobStartPage />
+                      </ProtectedRoute>
+                    } 
+                  />
+                  <Route 
+                    path="/staff/job/:id/photos-before"
+                    element={
+                      <ProtectedRoute allowedRoles={["staff"]}>
+                        <JobPhotosBeforePage />
                       </ProtectedRoute>
                     } 
                   />
