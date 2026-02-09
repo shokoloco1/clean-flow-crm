@@ -578,7 +578,7 @@ export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewPr
                 onClick={() => navigate(`/staff/job/${currentJob.id}/checklist`)}
               >
                 <Play className="h-5 w-5 mr-2" />
-                Continue Workflow
+                {t("continue_workflow")}
               </Button>
               <Button
                 className="w-full h-16 text-xl font-bold bg-success hover:bg-success/90"
