@@ -1,201 +1,288 @@
 
-# Plan: Soporte de Idioma Español para Staff
+# Plan: Flujo Completo del Staff Panel para Gestión de Trabajos
 
-## Valor de Negocio
-Este feature permite que los trabajadores hispanohablantes cambien toda la interfaz de staff a español con **un solo clic**, removiendo barreras de idioma y mejorando la experiencia del personal latino en Australia.
+## Resumen Ejecutivo
 
-## Decisiones de Diseño
+Implementar un flujo de trabajo paso a paso para que los trabajadores de limpieza gestionen sus trabajos de manera guiada, desde la llegada hasta la finalización, con captura de fotos, checklist y reporte final.
 
-### Por qué NO usar react-i18next u otra librería:
-1. **Simplicidad**: El proyecto eliminó previamente i18n para evitar complejidad innecesaria
-2. **Foco específico**: Solo necesitamos traducir la interfaz de STAFF (no admin)
-3. **Rendimiento**: Una solución con React Context puro es más ligera (~2KB vs ~40KB de i18next)
-4. **Mantenibilidad**: Traducciones en un solo archivo JSON es fácil de actualizar
-
-### Arquitectura propuesta:
+## Arquitectura Propuesta
 
 ```text
-┌─────────────────────────────────────────────────────┐
-│                    App.tsx                          │
-│  ┌────────────────────────────────────────────┐    │
-│  │           LanguageProvider                  │    │
-│  │  ┌──────────────────────────────────────┐  │    │
-│  │  │         AuthProvider                  │  │    │
-│  │  │   ┌────────────────────────────────┐ │  │    │
-│  │  │   │      StaffDashboard            │ │  │    │
-│  │  │   │  useLanguage() → t("key")      │ │  │    │
-│  │  │   └────────────────────────────────┘ │  │    │
-│  │  └──────────────────────────────────────┘  │    │
-│  └────────────────────────────────────────────┘    │
-└─────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────┐
+│                         FLUJO DEL STAFF                             │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│   Dashboard ──► /job/:id/start ──► /job/:id/photos-before ──►      │
+│                      │                     │                        │
+│               Confirmar llegada      Fotos del ANTES                │
+│               Capturar GPS           (mín. 3 fotos)                 │
+│                      │                     │                        │
+│                      ▼                     ▼                        │
+│              /job/:id/checklist ──► /job/:id/photos-after ──►      │
+│                      │                     │                        │
+│               Tareas por área        Fotos del DESPUÉS              │
+│               (80% para avanzar)     (comparación lado a lado)      │
+│                      │                     │                        │
+│                      ▼                     ▼                        │
+│                              /job/:id/complete                      │
+│                                    │                                │
+│                             Resumen final                           │
+│                             Notas y problemas                       │
+│                             Enviar reporte                          │
+│                                    │                                │
+│                                    ▼                                │
+│                              Dashboard ✓                            │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
 ```
 
-## Cambios a Implementar
+## Alcance de Primera Iteración (Según instrucciones del usuario)
 
-### FASE 1: Infraestructura de Idioma
+Como el usuario solicitó NO implementar todo de una vez, comenzaremos con:
 
-**Archivo 1: `src/lib/translations/staff.ts`**
-- Diccionario de traducciones inglés/español para la interfaz de staff
-- ~100 strings organizados por contexto (dashboard, jobs, checklist, photos, etc.)
-- Fácil de expandir en el futuro
+1. Página `/staff/job/:id/start` - Confirmación de llegada
+2. Componente `JobTimer` - Timer de tiempo transcurrido
+3. Modificaciones a la base de datos necesarias
 
-**Archivo 2: `src/hooks/useLanguage.tsx`**
-- Context Provider para estado de idioma
-- Hook `useLanguage()` que expone:
-  - `language`: 'en' | 'es'
-  - `setLanguage(lang)`: cambiar idioma
-  - `t(key)`: función de traducción
-- Persiste preferencia en localStorage
-- Patrón idéntico al existente `useAuth.tsx`
+## Fase 1: Modificaciones a la Base de Datos
 
-### FASE 2: Selector de Idioma
+### Campos Faltantes en tabla `jobs`
 
-**Archivo 3: `src/components/staff/LanguageSwitcher.tsx`**
-- Botón compacto con banderas (🇬🇧/🇪🇸) o "EN/ES"
-- Un solo tap para cambiar
-- Ubicado en el header del StaffDashboard junto al botón de logout
+| Campo | Tipo | Propósito |
+|-------|------|-----------|
+| `staff_notes` | `text` | Notas del staff al completar |
+| `issue_reported` | `text` | Tipo de problema reportado |
+| `actual_duration_minutes` | `integer` | Duración real calculada |
 
-### FASE 3: Integrar en Componentes de Staff
+### Campos Faltantes en tabla `job_photos`
 
-**Archivos a modificar** (reemplazar strings hardcodeados por `t("key")`):
+| Campo | Tipo | Propósito |
+|-------|------|-----------|
+| `area` | `text` | Área fotografiada (Sala, Cocina, etc.) |
+| `taken_at` | `timestamptz` | Momento exacto de la foto |
 
-| Archivo | Strings a traducir |
-|---------|---------------------|
-| `StaffDashboard.tsx` | ~15 (headers, estados, botones) |
-| `NextJobCard.tsx` | ~10 (labels, acciones) |
-| `TodayJobsList.tsx` | ~8 (estados, títulos) |
-| `JobDetailView.tsx` | ~30 (secciones, botones, mensajes) |
-| `BeforeAfterPhotos.tsx` | ~8 (labels, estados) |
-| `AdvancedChecklist.tsx` | ~12 (títulos, botones, estados) |
-| `StaffAvailabilityCalendar.tsx` | ~10 (días, labels) |
+**Nota**: La tabla `checklist_items` ya tiene todos los campos necesarios.
 
-**Total**: ~93 strings traducibles
+### Migración SQL
 
-### FASE 4: Integración en App.tsx
+```sql
+-- Agregar campos faltantes a jobs
+ALTER TABLE public.jobs ADD COLUMN IF NOT EXISTS staff_notes text;
+ALTER TABLE public.jobs ADD COLUMN IF NOT EXISTS issue_reported text;
+ALTER TABLE public.jobs ADD COLUMN IF NOT EXISTS actual_duration_minutes integer;
 
-**Modificar `App.tsx`**:
-- Envolver la aplicación con `LanguageProvider`
-- El provider debe estar DENTRO de `AuthProvider` para que pueda acceder al usuario si se desea guardar preferencia en DB en el futuro
+-- Agregar campos faltantes a job_photos
+ALTER TABLE public.job_photos ADD COLUMN IF NOT EXISTS area text;
+ALTER TABLE public.job_photos ADD COLUMN IF NOT EXISTS taken_at timestamptz DEFAULT now();
 
-## Ejemplo de Uso
+-- Crear índice para búsqueda por área
+CREATE INDEX IF NOT EXISTS idx_job_photos_area ON public.job_photos(job_id, area);
+```
 
+## Fase 2: Componente JobTimer
+
+### Archivo: `src/components/staff/JobTimer.tsx`
+
+**Características:**
+- Recibe `startedAt: Date` como prop
+- Actualiza cada segundo mostrando HH:MM:SS
+- Cambia de color según tiempo estimado:
+  - Verde: Dentro del tiempo estimado
+  - Amarillo: Pasado el tiempo estimado
+- Versión compacta para headers
+
+**Props:**
+```typescript
+interface JobTimerProps {
+  startedAt: Date;
+  estimatedHours?: number;
+  compact?: boolean;
+}
+```
+
+## Fase 3: Página de Inicio de Trabajo
+
+### Archivo: `src/pages/staff/JobStartPage.tsx`
+
+**Características:**
+- Recibe `jobId` desde la URL (`/staff/job/:id/start`)
+- Muestra resumen del trabajo:
+  - Nombre del cliente
+  - Dirección con botón de Maps
+  - Hora programada
+  - Notas del cliente y del servicio
+  - Detalles de la propiedad (habitaciones, baños, mascotas)
+  - Instrucciones especiales
+- Botón grande "COMENZAR TRABAJO" que:
+  1. Registra `start_time` = timestamp actual
+  2. Solicita permiso de GPS y captura ubicación
+  3. Guarda `checkin_lat/lng` en la base de datos
+  4. Cambia status a 'in_progress'
+  5. Redirige a `/staff/job/:id/photos-before`
+
+**Estructura:**
 ```tsx
-// En cualquier componente de staff:
-import { useLanguage } from "@/hooks/useLanguage";
-
-function MyComponent() {
-  const { t, language } = useLanguage();
+export default function JobStartPage() {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const { t } = useLanguage();
+  
+  // Fetch job data
+  // Handle GPS capture
+  // Handle start job
   
   return (
-    <button>{t("start_job")}</button>
-    // Renderiza "Start Job" o "Iniciar Trabajo" según idioma
+    <div className="min-h-screen bg-background">
+      {/* Header con botón volver */}
+      {/* Card de resumen */}
+      {/* Card de ubicación con Maps */}
+      {/* Card de propiedad (si existe) */}
+      {/* Card de instrucciones especiales */}
+      {/* Botón grande COMENZAR */}
+    </div>
   );
 }
 ```
 
-## Muestra de Traducciones
+## Fase 4: Nuevas Rutas en App.tsx
 
-```typescript
-// src/lib/translations/staff.ts
-export const staffTranslations = {
-  en: {
-    // Dashboard
-    my_jobs: "My Jobs",
-    day_off: "Day Off!",
-    no_jobs_scheduled: "No jobs scheduled. Enjoy your day!",
-    loading_jobs: "Loading your jobs...",
-    
-    // Job Card
-    next_job: "Next Job", 
-    start_job: "Start Job",
-    complete_job: "Complete Job",
-    view_details: "Details",
-    
-    // Status
-    status_pending: "Pending",
-    status_active: "Active", 
-    status_done: "Done",
-    
-    // Availability
-    weekly_availability: "Weekly Availability",
-    save_availability: "Save Availability",
-    not_available: "Not available",
-    
-    // Photos
-    before_after_photos: "Before & After Photos",
-    take_before: "Before",
-    take_after: "After",
-    
-    // etc...
-  },
-  es: {
-    // Dashboard
-    my_jobs: "Mis Trabajos",
-    day_off: "¡Día Libre!",
-    no_jobs_scheduled: "No hay trabajos programados. ¡Disfruta tu día!",
-    loading_jobs: "Cargando tus trabajos...",
-    
-    // Job Card
-    next_job: "Próximo Trabajo",
-    start_job: "Iniciar",
-    complete_job: "Completar",
-    view_details: "Detalles",
-    
-    // Status
-    status_pending: "Pendiente",
-    status_active: "Activo",
-    status_done: "Listo",
-    
-    // Availability
-    weekly_availability: "Disponibilidad Semanal",
-    save_availability: "Guardar Disponibilidad",
-    not_available: "No disponible",
-    
-    // Photos
-    before_after_photos: "Fotos Antes y Después",
-    take_before: "Antes",
-    take_after: "Después",
-    
-    // etc...
-  }
-};
+### Rutas a agregar:
+
+```tsx
+// Flujo de trabajo del staff
+<Route 
+  path="/staff/job/:id/start"
+  element={
+    <ProtectedRoute allowedRoles={["staff"]}>
+      <JobStartPage />
+    </ProtectedRoute>
+  } 
+/>
+<Route 
+  path="/staff/job/:id/photos-before"
+  element={
+    <ProtectedRoute allowedRoles={["staff"]}>
+      <JobPhotosBeforePage />
+    </ProtectedRoute>
+  } 
+/>
+<Route 
+  path="/staff/job/:id/checklist"
+  element={
+    <ProtectedRoute allowedRoles={["staff"]}>
+      <JobChecklistPage />
+    </ProtectedRoute>
+  } 
+/>
+<Route 
+  path="/staff/job/:id/photos-after"
+  element={
+    <ProtectedRoute allowedRoles={["staff"]}>
+      <JobPhotosAfterPage />
+    </ProtectedRoute>
+  } 
+/>
+<Route 
+  path="/staff/job/:id/complete"
+  element={
+    <ProtectedRoute allowedRoles={["staff"]}>
+      <JobCompletePage />
+    </ProtectedRoute>
+  } 
+/>
 ```
 
-## Archivos Nuevos
+## Fase 5: Traducciones Nuevas
 
-| Archivo | Propósito |
-|---------|-----------|
-| `src/lib/translations/staff.ts` | Diccionario EN/ES |
-| `src/hooks/useLanguage.tsx` | Context + Hook |
-| `src/components/staff/LanguageSwitcher.tsx` | UI selector |
+### Agregar a `src/lib/translations/staff.ts`:
+
+```typescript
+// Job Start Page
+job_start_title: "Confirm Arrival",
+ready_to_start: "Ready to start?",
+confirm_location: "You're at the right location",
+begin_work: "BEGIN WORK",
+starting_job: "Starting job...",
+client_notes: "Client Notes",
+service_notes: "Service Notes",
+
+// Timer
+time_elapsed: "Time Elapsed",
+on_track: "On Track",
+over_time: "Over Time",
+
+// Photos Before
+photos_before_title: "Before Photos",
+capture_before_state: "Capture the current state before cleaning",
+minimum_photos: "Minimum 3 photos required",
+photos_progress: "photos",
+continue_to_checklist: "Continue to Checklist",
+take_photo: "Take Photo",
+retake: "Retake",
+
+// Photos After  
+photos_after_title: "After Photos",
+capture_after_state: "Capture the result after cleaning",
+compare_with_before: "Compare with before photo",
+finish_job: "Finish Job",
+
+// Completion
+great_work: "Great Work!",
+job_summary: "Job Summary",
+total_time: "Total Time",
+tasks_completed: "Tasks Completed",
+photos_taken: "Photos Taken",
+additional_notes: "Additional Notes (optional)",
+report_issues: "Report Issues",
+no_issues: "No Issues",
+missing_supplies: "Missing Supplies",
+property_damage: "Property Damage Found",
+access_issues: "Access Issues",
+other_issue: "Other",
+confirm_and_send: "CONFIRM & SEND REPORT",
+sending_report: "Sending report...",
+```
+
+## Archivos a Crear
+
+| Archivo | Descripción |
+|---------|-------------|
+| `src/pages/staff/JobStartPage.tsx` | Pantalla de inicio de trabajo |
+| `src/components/staff/JobTimer.tsx` | Componente de timer |
+| `src/hooks/useJobWorkflow.ts` | Hook para manejar el flujo de trabajo |
 
 ## Archivos a Modificar
 
-| Archivo | Tipo de Cambio |
-|---------|----------------|
-| `src/App.tsx` | Agregar LanguageProvider |
-| `src/pages/StaffDashboard.tsx` | Usar t() + agregar LanguageSwitcher |
-| `src/components/staff/NextJobCard.tsx` | Usar t() |
-| `src/components/staff/TodayJobsList.tsx` | Usar t() |
-| `src/components/JobDetailView.tsx` | Usar t() |
-| `src/components/staff/BeforeAfterPhotos.tsx` | Usar t() |
-| `src/components/AdvancedChecklist.tsx` | Usar t() |
-| `src/components/staff/StaffAvailabilityCalendar.tsx` | Usar t() |
-| `src/components/staff/QuickPhotoCapture.tsx` | Usar t() |
-| `src/components/staff/AreaPhotoDocumentation.tsx` | Usar t() |
+| Archivo | Cambio |
+|---------|--------|
+| `src/App.tsx` | Agregar nuevas rutas del flujo |
+| `src/lib/translations/staff.ts` | Agregar traducciones EN/ES |
+| `src/components/staff/NextJobCard.tsx` | Cambiar botón "Start" para navegar a `/staff/job/:id/start` |
 
-## Beneficios
+## Consideraciones de UX
 
-1. **Cero dependencias nuevas**: Usa solo React Context (ya incluido)
-2. **Cambio instantáneo**: Un tap cambia todo sin recargar página
-3. **Persistente**: Recuerda preferencia del usuario en localStorage
-4. **Escalable**: Fácil agregar más idiomas (portugués, etc.) en el futuro
-5. **Aislado**: Solo afecta interfaz de staff, no contamina admin
-6. **~3KB total**: Muy ligero comparado con librerías i18n completas
+1. **Mobile-first**: Botones grandes (min 48px altura), táctiles
+2. **Colores de marca**: Verde #0FA573 para acciones principales (como en el sistema existente usa `bg-success`)
+3. **Feedback visual**: Animaciones sutiles al completar acciones
+4. **i18n**: Todo el texto usa el sistema existente `useLanguage()`
+5. **Offline-friendly**: Guardar estado local en caso de pérdida de conexión (futuro)
 
-## Consideraciones Técnicas
+## Próximos Pasos (Fases Siguientes)
 
-- Los días de la semana en `StaffAvailabilityCalendar` se traducirán dinámicamente
-- Las fechas (format de date-fns) usarán locale español cuando corresponda
-- Los mensajes de toast también se traducirán
-- Los datos de la base de datos (nombres de clientes, direcciones) NO se traducen - son datos reales
+Una vez confirmado que la primera iteración funciona:
+
+1. **Fase 2**: Página `/photos-before` con grid de áreas
+2. **Fase 3**: Página `/checklist` con tareas agrupadas
+3. **Fase 4**: Página `/photos-after` con comparación lado a lado
+4. **Fase 5**: Página `/complete` con resumen y envío
+5. **Fase 6**: Panel Admin - Vista de reporte completado
+
+## Estimación de Complejidad
+
+| Componente | Complejidad | Tiempo Estimado |
+|------------|-------------|-----------------|
+| Migración DB | Baja | 5 min |
+| JobTimer | Baja | 15 min |
+| JobStartPage | Media | 30 min |
+| Rutas + Traducciones | Baja | 15 min |
+| **Total Fase 1** | | **~1 hora** |
