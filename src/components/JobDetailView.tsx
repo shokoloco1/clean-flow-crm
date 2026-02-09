@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -102,6 +103,7 @@ interface JobDetailViewProps {
 
 export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewProps) {
   const { t } = useLanguage();
+  const navigate = useNavigate();
   const [currentJob, setCurrentJob] = useState(job);
   const [property, setProperty] = useState<Property | null>(job.properties || null);
   const [propertyPhotos, setPropertyPhotos] = useState<PropertyPhoto[]>([]);
@@ -193,40 +195,9 @@ export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewPr
     });
   };
 
-  const handleStartJob = async () => {
-    setIsUpdating(true);
-    
-    const location = await captureGPSLocation();
-    
-    const updateData: Record<string, unknown> = {
-      status: "in_progress",
-      start_time: new Date().toISOString()
-    };
-    
-    if (location) {
-      updateData.checkin_lat = location.lat;
-      updateData.checkin_lng = location.lng;
-      updateData.location_lat = location.lat;
-      updateData.location_lng = location.lng;
-    }
-
-    const { error } = await supabase
-      .from("jobs")
-      .update(updateData)
-      .eq("id", currentJob.id);
-
-    if (error) {
-      toast.error(t("error_starting"));
-    } else {
-      setCurrentJob({ 
-        ...currentJob, 
-        status: "in_progress", 
-        start_time: new Date().toISOString() 
-      });
-      toast.success(t("job_started"));
-      onUpdate();
-    }
-    setIsUpdating(false);
+  const handleStartJob = () => {
+    // Navigate to the new guided workflow
+    navigate(`/staff/job/${currentJob.id}/start`);
   };
 
   const handleCompleteJob = async () => {
@@ -593,13 +564,8 @@ export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewPr
             <Button 
               className="w-full h-16 text-xl font-bold"
               onClick={handleStartJob}
-              disabled={isUpdating}
             >
-              {isUpdating ? (
-                <Loader2 className="h-6 w-6 mr-2 animate-spin" />
-              ) : (
-                <Play className="h-6 w-6 mr-2" />
-              )}
+              <Play className="h-6 w-6 mr-2" />
               ▶ {t("start_job").toUpperCase()}
             </Button>
           )}
