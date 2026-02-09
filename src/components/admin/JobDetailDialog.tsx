@@ -10,10 +10,12 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   MapPin, Clock, Image as ImageIcon, FileText, Loader2, History,
-  Phone, MessageSquare, User, CheckCircle, Circle,
-  Receipt, Mail, Send, Navigation, MapPinned
+  Phone, MessageSquare, User, CheckCircle, Circle, ClipboardCheck,
+  Receipt, Mail, Send, Navigation, MapPinned, AlertCircle, XCircle,
+  StickyNote, Camera
 } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
@@ -90,11 +92,20 @@ function getStatusColor(status: string) {
 export function JobDetailDialog({ job, photos, onClose }: JobDetailDialogProps) {
   const navigate = useNavigate();
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
-  const [checklistItems, setChecklistItems] = useState<{ completed_at: string | null; task_name: string }[]>([]);
+  const [checklistItems, setChecklistItems] = useState<{ 
+    completed_at: string | null; 
+    task_name: string; 
+    room_name: string;
+    status: string;
+    issue_note: string | null;
+    issue_photo_url: string | null;
+  }[]>([]);
   const [alerts, setAlerts] = useState<{ created_at: string; message: string; is_resolved: boolean }[]>([]);
   const [clientInfo, setClientInfo] = useState<ClientInfo | null>(null);
   const [generatedInvoice, setGeneratedInvoice] = useState<{ id: string; total: number } | null>(null);
   const [gpsLocation, setGpsLocation] = useState<GPSLocation | null>(null);
+  const [staffNotes, setStaffNotes] = useState<string | null>(null);
+  const [issueReported, setIssueReported] = useState<string | null>(null);
 
   const { generateInvoiceFromJob, isGenerating: isGeneratingInvoice } = useQuickInvoice();
   const { sendInvoiceEmail, isSending: isSendingEmail } = useInvoiceEmail();
@@ -104,6 +115,7 @@ export function JobDetailDialog({ job, photos, onClose }: JobDetailDialogProps) 
       fetchTimelineData();
       fetchClientInfo();
       fetchGPSLocation();
+      fetchStaffNotes();
       setGeneratedInvoice(null);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -115,8 +127,10 @@ export function JobDetailDialog({ job, photos, onClose }: JobDetailDialogProps) 
     const [checklistRes, alertsRes] = await Promise.all([
       supabase
         .from('checklist_items')
-        .select('completed_at, task_name')
-        .eq('job_id', job.id),
+        .select('completed_at, task_name, room_name, status, issue_note, issue_photo_url')
+        .eq('job_id', job.id)
+        .order('room_name')
+        .order('sort_order'),
       supabase
         .from('job_alerts')
         .select('created_at, message, is_resolved')
@@ -153,6 +167,21 @@ export function JobDetailDialog({ job, photos, onClose }: JobDetailDialogProps) 
 
     if (jobData) {
       setGpsLocation(jobData as GPSLocation);
+    }
+  };
+
+  const fetchStaffNotes = async () => {
+    if (!job) return;
+
+    const { data: jobData } = await supabase
+      .from('jobs')
+      .select('staff_notes, issue_reported')
+      .eq('id', job.id)
+      .single();
+
+    if (jobData) {
+      setStaffNotes(jobData.staff_notes);
+      setIssueReported(jobData.issue_reported);
     }
   };
 
@@ -288,12 +317,16 @@ export function JobDetailDialog({ job, photos, onClose }: JobDetailDialogProps) 
 
         <Separator />
         
-        <Tabs defaultValue="details" className="mt-4">
-          <TabsList className="grid w-full grid-cols-3">
+        <Tabs defaultValue={job.status === 'completed' ? 'report' : 'details'} className="mt-4">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="details">Details</TabsTrigger>
             <TabsTrigger value="photos">
               <ImageIcon className="h-4 w-4 mr-2" />
               Photos
+            </TabsTrigger>
+            <TabsTrigger value="report" className={job.status === 'completed' ? 'text-primary' : ''}>
+              <ClipboardCheck className="h-4 w-4 mr-2" />
+              Report
             </TabsTrigger>
             <TabsTrigger value="timeline">
               <History className="h-4 w-4 mr-2" />
@@ -523,6 +556,210 @@ export function JobDetailDialog({ job, photos, onClose }: JobDetailDialogProps) 
             )}
           </TabsContent>
 
+          {/* Report Tab - Comprehensive job completion report */}
+          <TabsContent value="report" className="space-y-6 mt-4">
+            {job.status !== 'completed' ? (
+              <div className="text-center py-12 bg-muted/50 rounded-lg">
+                <ClipboardCheck className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+                <p className="text-muted-foreground font-medium">Report not available</p>
+                <p className="text-sm text-muted-foreground">The job report will be available once the job is completed</p>
+              </div>
+            ) : (
+              <>
+                {/* Before/After Comparison */}
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <Camera className="h-4 w-4" />
+                      Before & After Photos
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {beforePhotos.length > 0 || afterPhotos.length > 0 ? (
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Badge variant="outline" className="mb-2 bg-orange-500/10 text-orange-600 border-orange-500/20">
+                            Before ({beforePhotos.length})
+                          </Badge>
+                          <div className="grid grid-cols-2 gap-2">
+                            {beforePhotos.map((photo) => (
+                              <a 
+                                key={photo.id} 
+                                href={photo.photo_url} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="aspect-square rounded-lg bg-muted overflow-hidden hover:opacity-80 transition-opacity ring-1 ring-orange-500/30"
+                              >
+                                <img 
+                                  src={photo.photo_url} 
+                                  alt="Before"
+                                  className="w-full h-full object-cover"
+                                />
+                              </a>
+                            ))}
+                          </div>
+                        </div>
+                        <div>
+                          <Badge variant="outline" className="mb-2 bg-green-500/10 text-green-600 border-green-500/20">
+                            After ({afterPhotos.length})
+                          </Badge>
+                          <div className="grid grid-cols-2 gap-2">
+                            {afterPhotos.map((photo) => (
+                              <a 
+                                key={photo.id} 
+                                href={photo.photo_url} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="aspect-square rounded-lg bg-muted overflow-hidden hover:opacity-80 transition-opacity ring-1 ring-green-500/30"
+                              >
+                                <img 
+                                  src={photo.photo_url} 
+                                  alt="After"
+                                  className="w-full h-full object-cover"
+                                />
+                              </a>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-sm text-muted-foreground text-center py-4">No photos uploaded</p>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Checklist Summary */}
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <ClipboardCheck className="h-4 w-4" />
+                      Checklist Summary
+                      <Badge variant="secondary" className="ml-auto">
+                        {checklistItems.filter(i => i.status === 'completed').length}/{checklistItems.length} completed
+                      </Badge>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {checklistItems.length > 0 ? (
+                      <div className="space-y-3">
+                        {/* Group by room */}
+                        {Object.entries(
+                          checklistItems.reduce((acc, item) => {
+                            if (!acc[item.room_name]) acc[item.room_name] = [];
+                            acc[item.room_name].push(item);
+                            return acc;
+                          }, {} as Record<string, typeof checklistItems>)
+                        ).map(([roomName, items]) => (
+                          <div key={roomName} className="border rounded-lg p-3">
+                            <p className="font-medium text-sm mb-2">{roomName}</p>
+                            <div className="space-y-1.5">
+                              {items.map((item, idx) => (
+                                <div key={idx} className="flex items-start gap-2 text-sm">
+                                  {item.status === 'completed' && (
+                                    <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                                  )}
+                                  {item.status === 'skipped' && (
+                                    <XCircle className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                                  )}
+                                  {item.status === 'issue' && (
+                                    <AlertCircle className="h-4 w-4 text-destructive mt-0.5 flex-shrink-0" />
+                                  )}
+                                  {item.status === 'pending' && (
+                                    <Circle className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                                  )}
+                                  <div className="flex-1">
+                                    <span className={cn(
+                                      item.status === 'completed' && 'text-foreground',
+                                      item.status === 'skipped' && 'text-muted-foreground line-through',
+                                      item.status === 'issue' && 'text-destructive',
+                                      item.status === 'pending' && 'text-muted-foreground'
+                                    )}>
+                                      {item.task_name}
+                                    </span>
+                                    {item.issue_note && (
+                                      <p className="text-xs text-destructive mt-0.5">Issue: {item.issue_note}</p>
+                                    )}
+                                    {item.issue_photo_url && (
+                                      <a 
+                                        href={item.issue_photo_url} 
+                                        target="_blank" 
+                                        rel="noopener noreferrer"
+                                        className="text-xs text-primary hover:underline"
+                                      >
+                                        View issue photo
+                                      </a>
+                                    )}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-muted-foreground text-center py-4">No checklist items</p>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Staff Notes & Issues */}
+                {(staffNotes || issueReported) && (
+                  <Card>
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-base flex items-center gap-2">
+                        <StickyNote className="h-4 w-4" />
+                        Staff Notes & Issues
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      {staffNotes && (
+                        <div className="p-3 rounded-lg bg-muted/50">
+                          <p className="text-xs text-muted-foreground mb-1">Staff Notes</p>
+                          <p className="text-sm">{staffNotes}</p>
+                        </div>
+                      )}
+                      {issueReported && (
+                        <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20">
+                          <div className="flex items-center gap-2 mb-1">
+                            <AlertCircle className="h-4 w-4 text-destructive" />
+                            <p className="text-xs text-destructive font-medium">Issue Reported</p>
+                          </div>
+                          <p className="text-sm text-destructive">{issueReported}</p>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Summary Stats */}
+                <Card>
+                  <CardContent className="pt-4">
+                    <div className="grid grid-cols-3 gap-4 text-center">
+                      <div>
+                        <p className="text-2xl font-bold text-primary">
+                          {calculateDuration(job.start_time, job.end_time) || '--'}
+                        </p>
+                        <p className="text-xs text-muted-foreground">Duration</p>
+                      </div>
+                      <div>
+                        <p className="text-2xl font-bold text-primary">{photos.length}</p>
+                        <p className="text-xs text-muted-foreground">Photos</p>
+                      </div>
+                      <div>
+                        <p className="text-2xl font-bold text-green-500">
+                          {checklistItems.length > 0 
+                            ? Math.round((checklistItems.filter(i => i.status === 'completed').length / checklistItems.length) * 100)
+                            : 0}%
+                        </p>
+                        <p className="text-xs text-muted-foreground">Completion</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </>
+            )}
+          </TabsContent>
+
           <TabsContent value="timeline" className="mt-4">
             <JobTimeline
               job={{
@@ -535,7 +772,7 @@ export function JobDetailDialog({ job, photos, onClose }: JobDetailDialogProps) 
                 scheduled_time: job.scheduled_time,
               }}
               photos={photos.map(p => ({ created_at: p.created_at, photo_type: p.photo_type }))}
-              checklistItems={checklistItems}
+              checklistItems={checklistItems.map(i => ({ completed_at: i.completed_at, task_name: i.task_name }))}
               alerts={alerts}
             />
           </TabsContent>
