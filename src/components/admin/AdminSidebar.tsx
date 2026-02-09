@@ -13,6 +13,7 @@ import {
   RefreshCw,
   DollarSign,
   Loader2,
+  Globe,
 } from "lucide-react";
 import {
   Sidebar,
@@ -29,29 +30,37 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { PulcrixLogo } from "@/components/PulcrixLogo";
 import { useAuth } from "@/hooks/useAuth";
+import { useLanguage } from "@/hooks/useLanguage";
 
-const mainNavItems = [
-  { title: "Dashboard", url: "/admin", icon: LayoutDashboard },
+type NavItem = {
+  titleKey: string;
+  url: string;
+  icon: typeof LayoutDashboard;
+};
+
+const mainNavItems: NavItem[] = [
+  { titleKey: "todays_view", url: "/admin", icon: LayoutDashboard },
 ];
 
-const operationsNavItems = [
-  { title: "Jobs", url: "/admin/calendar", icon: Calendar },
-  { title: "Clients", url: "/admin/clients", icon: Users },
-  { title: "Properties", url: "/admin/properties", icon: Building2 },
-  { title: "Staff", url: "/admin/staff", icon: UserCog },
-  { title: "Invoices", url: "/admin/invoices", icon: FileText },
-  { title: "Recurring Jobs", url: "/admin/recurring", icon: RefreshCw },
-  { title: "Pricing", url: "/admin/price-lists", icon: DollarSign },
+const operationsNavItems: NavItem[] = [
+  { titleKey: "calendar", url: "/admin/calendar", icon: Calendar },
+  { titleKey: "clients", url: "/admin/clients", icon: Users },
+  { titleKey: "properties", url: "/admin/properties", icon: Building2 },
+  { titleKey: "staff", url: "/admin/staff", icon: UserCog },
+  { titleKey: "invoices", url: "/admin/invoices", icon: FileText },
+  { titleKey: "recurring_jobs", url: "/admin/recurring", icon: RefreshCw },
+  { titleKey: "pricing", url: "/admin/price-lists", icon: DollarSign },
 ];
 
-const insightsNavItems = [
-  { title: "Reports", url: "/admin/reports", icon: BarChart3 },
-  { title: "Settings", url: "/admin/settings", icon: Settings },
+const insightsNavItems: NavItem[] = [
+  { titleKey: "reports", url: "/admin/reports", icon: BarChart3 },
+  { titleKey: "settings", url: "/admin/settings", icon: Settings },
 ];
 
 export function AdminSidebar() {
   const location = useLocation();
   const { signOut } = useAuth();
+  const { language, setLanguage, tAdmin } = useLanguage();
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
   const [isSigningOut, setIsSigningOut] = useState(false);
@@ -63,6 +72,10 @@ export function AdminSidebar() {
     // signOut handles navigation, no need to reset state
   };
 
+  const toggleLanguage = () => {
+    setLanguage(language === "en" ? "es" : "en");
+  };
+
   const isActive = (url: string) => {
     if (url === "/admin") {
       return location.pathname === "/admin";
@@ -70,22 +83,26 @@ export function AdminSidebar() {
     return location.pathname.startsWith(url);
   };
 
-  const renderNavItems = (items: typeof mainNavItems) => (
+  const renderNavItems = (items: NavItem[]) => (
     <SidebarMenu>
-      {items.map((item) => (
-        <SidebarMenuItem key={item.title}>
-          <SidebarMenuButton
-            asChild
-            isActive={isActive(item.url)}
-            tooltip={item.title}
-          >
-            <Link to={item.url}>
-              <item.icon className="h-4 w-4" />
-              <span>{item.title}</span>
-            </Link>
-          </SidebarMenuButton>
-        </SidebarMenuItem>
-      ))}
+      {items.map((item) => {
+        // Type assertion for admin translation keys
+        const title = tAdmin(item.titleKey as Parameters<typeof tAdmin>[0]);
+        return (
+          <SidebarMenuItem key={item.titleKey}>
+            <SidebarMenuButton
+              asChild
+              isActive={isActive(item.url)}
+              tooltip={title}
+            >
+              <Link to={item.url}>
+                <item.icon className="h-4 w-4" />
+                <span>{title}</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        );
+      })}
     </SidebarMenu>
   );
 
@@ -132,8 +149,18 @@ export function AdminSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
+              onClick={toggleLanguage}
+              tooltip={language === "en" ? "Español" : "English"}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              <Globe className="h-4 w-4" />
+              <span>{language === "en" ? "Español" : "English"}</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton
               onClick={handleSignOut}
-              tooltip="Sign Out"
+              tooltip={tAdmin("loading")}
               disabled={isSigningOut}
               className="text-muted-foreground hover:text-foreground disabled:opacity-50"
             >
@@ -142,7 +169,7 @@ export function AdminSidebar() {
               ) : (
                 <LogOut className="h-4 w-4" />
               )}
-              <span>{isSigningOut ? "Signing out..." : "Sign Out"}</span>
+              <span>{isSigningOut ? tAdmin("loading") : "Sign Out"}</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

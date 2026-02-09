@@ -9,6 +9,7 @@ import { format } from "date-fns";
 import { useJobStatusChange } from "@/hooks/useJobStatusChange";
 import { useDuplicateJob } from "@/hooks/useDuplicateJob";
 import { useQuickInvoice } from "@/hooks/useQuickInvoice";
+import { useLanguage } from "@/hooks/useLanguage";
 import { QuickStatusChip } from "./QuickStatusButton";
 import type { Job } from "./JobsList";
 
@@ -64,6 +65,7 @@ function JobCard({
   isDuplicating,
   onGenerateInvoice,
   isGeneratingInvoice,
+  translations,
 }: { 
   job: Job; 
   onViewJob: (job: Job) => void;
@@ -73,6 +75,12 @@ function JobCard({
   isDuplicating: boolean;
   onGenerateInvoice: (jobId: string) => void;
   isGeneratingInvoice: boolean;
+  translations: {
+    unknownClient: string;
+    unassigned: string;
+    duplicateJobTomorrow: string;
+    generateInvoice: string;
+  };
 }) {
   return (
     <button
@@ -81,7 +89,7 @@ function JobCard({
     >
       <div className="flex items-start justify-between gap-2 mb-2">
         <h4 className="font-medium text-sm text-foreground line-clamp-1">
-          {job.clients?.name || "Unknown Client"}
+          {job.clients?.name || translations.unknownClient}
         </h4>
         <ChevronRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
       </div>
@@ -109,7 +117,7 @@ function JobCard({
         <div className="flex items-center gap-1">
           {!job.assigned_staff_id && (
             <Badge variant="destructive" className="text-[10px]">
-              Unassigned
+              {translations.unassigned}
             </Badge>
           )}
           <Button
@@ -121,8 +129,8 @@ function JobCard({
               onDuplicate(job.id);
             }}
             disabled={isDuplicating}
-            title="Duplicate job for tomorrow"
-            aria-label="Duplicate job for tomorrow"
+            title={translations.duplicateJobTomorrow}
+            aria-label={translations.duplicateJobTomorrow}
           >
             <Copy className="h-3.5 w-3.5" />
           </Button>
@@ -136,8 +144,8 @@ function JobCard({
                 onGenerateInvoice(job.id);
               }}
               disabled={isGeneratingInvoice}
-              title="Generate Invoice"
-              aria-label="Generate invoice"
+              title={translations.generateInvoice}
+              aria-label={translations.generateInvoice}
             >
               <Receipt className="h-3.5 w-3.5" />
             </Button>
@@ -164,6 +172,7 @@ function KanbanColumnComponent({
   isDuplicating,
   onGenerateInvoice,
   isGeneratingInvoice,
+  translations,
 }: { 
   column: KanbanColumn; 
   jobs: Job[];
@@ -174,6 +183,13 @@ function KanbanColumnComponent({
   isDuplicating: boolean;
   onGenerateInvoice: (jobId: string) => void;
   isGeneratingInvoice: boolean;
+  translations: {
+    noJobs: string;
+    unknownClient: string;
+    unassigned: string;
+    duplicateJobTomorrow: string;
+    generateInvoice: string;
+  };
 }) {
   const isCompleted = column.id === "completed";
   
@@ -188,7 +204,7 @@ function KanbanColumnComponent({
             variant={isCompleted ? "default" : "secondary"} 
             className={cn(
               "text-xs",
-              isCompleted && "bg-emerald-600 hover:bg-emerald-600"
+              isCompleted && "bg-success hover:bg-success"
             )}
           >
             {jobs.length}
@@ -198,7 +214,7 @@ function KanbanColumnComponent({
         <div className="space-y-2 min-h-[100px] md:min-h-[200px]">
           {jobs.length === 0 ? (
             <p className="text-xs text-muted-foreground text-center py-8">
-              No jobs
+              {translations.noJobs}
             </p>
           ) : (
             jobs.map((job) => (
@@ -212,6 +228,7 @@ function KanbanColumnComponent({
                 isDuplicating={isDuplicating}
                 onGenerateInvoice={onGenerateInvoice}
                 isGeneratingInvoice={isGeneratingInvoice}
+                translations={translations}
               />
             ))
           )}
@@ -222,11 +239,21 @@ function KanbanColumnComponent({
 }
 
 export function TodayKanban({ jobs, loading, onViewJob, onJobsChange }: TodayKanbanProps) {
+  const { tAdmin } = useLanguage();
   const { updatingJobId, advanceStatus } = useJobStatusChange(onJobsChange);
   const { duplicateJob, isDuplicating } = useDuplicateJob(onJobsChange);
   const { generateInvoiceFromJob, isGenerating: isGeneratingInvoice } = useQuickInvoice();
   const today = format(new Date(), "yyyy-MM-dd");
   
+  const translations = useMemo(() => ({
+    noJobs: tAdmin("no_jobs"),
+    unknownClient: tAdmin("unknown_client"),
+    unassigned: tAdmin("unassigned"),
+    duplicateJobTomorrow: tAdmin("duplicate_job_tomorrow"),
+    generateInvoice: tAdmin("generate_invoice"),
+    todaysJobs: tAdmin("todays_jobs"),
+  }), [tAdmin]);
+
   const todayJobs = useMemo(() => 
     jobs.filter(job => job.scheduled_date === today),
     [jobs, today]
@@ -257,7 +284,7 @@ export function TodayKanban({ jobs, loading, onViewJob, onJobsChange }: TodayKan
     return (
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-lg">Today's Jobs</CardTitle>
+          <CardTitle className="text-lg">{translations.todaysJobs}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center py-12">
@@ -272,7 +299,7 @@ export function TodayKanban({ jobs, loading, onViewJob, onJobsChange }: TodayKan
     <Card>
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg">Today's Jobs</CardTitle>
+          <CardTitle className="text-lg">{translations.todaysJobs}</CardTitle>
           <Badge variant="outline" className="font-normal">
             {format(new Date(), "EEEE, MMM d")}
           </Badge>
@@ -293,6 +320,7 @@ export function TodayKanban({ jobs, loading, onViewJob, onJobsChange }: TodayKan
               isDuplicating={isDuplicating}
               onGenerateInvoice={handleGenerateInvoice}
               isGeneratingInvoice={isGeneratingInvoice}
+              translations={translations}
             />
           ))}
         </div>
@@ -313,6 +341,7 @@ export function TodayKanban({ jobs, loading, onViewJob, onJobsChange }: TodayKan
                   isDuplicating={isDuplicating}
                   onGenerateInvoice={handleGenerateInvoice}
                   isGeneratingInvoice={isGeneratingInvoice}
+                  translations={translations}
                 />
               ))}
             </div>

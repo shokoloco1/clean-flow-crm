@@ -1,10 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { CheckCircle2, Clock, ClipboardList, TrendingUp } from "lucide-react";
+import { useLanguage } from "@/hooks/useLanguage";
 import type { Stats } from "./StatsCards";
-
-interface TodayStatsProps {
-  stats: Stats;
-}
 
 function AnimatedNumber({ value, suffix = "" }: { value: number | string; suffix?: string }) {
   const [displayValue, setDisplayValue] = useState(0);
@@ -47,11 +44,12 @@ interface TodayStatsProps {
 }
 
 export function TodayStats({ stats, hasNoJobsToday = false }: TodayStatsProps) {
+  const { tAdmin } = useLanguage();
   const inProgressCount = Math.max(0, stats.todayJobs - stats.completedToday);
   
   const statItems = [
     {
-      label: "Total",
+      label: tAdmin("total"),
       value: stats.todayJobs,
       icon: ClipboardList,
       color: "text-blue-600 dark:text-blue-400",
@@ -59,7 +57,7 @@ export function TodayStats({ stats, hasNoJobsToday = false }: TodayStatsProps) {
       isPercent: false,
     },
     {
-      label: "In Progress",
+      label: tAdmin("in_progress"),
       value: inProgressCount,
       icon: Clock,
       color: "text-amber-600 dark:text-amber-400",
@@ -67,7 +65,7 @@ export function TodayStats({ stats, hasNoJobsToday = false }: TodayStatsProps) {
       isPercent: false,
     },
     {
-      label: "Completed",
+      label: tAdmin("completed"),
       value: stats.completedToday,
       icon: CheckCircle2,
       color: "text-emerald-600 dark:text-emerald-400",
@@ -75,7 +73,7 @@ export function TodayStats({ stats, hasNoJobsToday = false }: TodayStatsProps) {
       isPercent: false,
     },
     {
-      label: "Rate",
+      label: tAdmin("rate"),
       value: stats.completionRate,
       icon: TrendingUp,
       color: "text-primary",
@@ -89,7 +87,7 @@ export function TodayStats({ stats, hasNoJobsToday = false }: TodayStatsProps) {
       {hasNoJobsToday && (
         <div className="bg-muted/50 border border-border rounded-lg p-3 text-center">
           <p className="text-sm text-muted-foreground">
-            📅 No jobs scheduled for today
+            📅 {tAdmin("no_jobs_scheduled_today")}
           </p>
         </div>
       )}

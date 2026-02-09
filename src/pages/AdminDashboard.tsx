@@ -9,6 +9,7 @@ import { useDashboardData } from "@/hooks/useDashboardData";
 import { useCreateJob } from "@/hooks/useCreateJob";
 import { useJobDetail } from "@/hooks/useJobDetail";
 import { useOnboarding } from "@/hooks/useOnboarding";
+import { useLanguage } from "@/hooks/useLanguage";
 import { Button } from "@/components/ui/button";
 import { DashboardErrorState } from "@/components/admin/DashboardErrorState";
 import { PendingPaymentsCard } from "@/components/admin/PendingPaymentsCard";
@@ -26,7 +27,7 @@ import {
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
-  
+  const { tAdmin } = useLanguage();
   // Onboarding
   const { showOnboarding, isLoading: onboardingLoading, completeOnboarding } = useOnboarding();
   
@@ -107,7 +108,7 @@ export default function AdminDashboard() {
         {/* Page Title with Mobile New Job Button */}
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Today's View</h1>
+            <h1 className="text-2xl font-bold text-foreground">{tAdmin("todays_view")}</h1>
             <p className="text-sm text-muted-foreground">
               {format(new Date(), "EEEE, MMMM d, yyyy")}
             </p>
@@ -119,7 +120,7 @@ export default function AdminDashboard() {
             className="md:hidden gap-1.5"
           >
             <Plus className="h-4 w-4" />
-            New Job
+            {tAdmin("new_job")}
           </Button>
         </div>
 
@@ -167,7 +168,7 @@ export default function AdminDashboard() {
       {/* Floating Action Button */}
       <FloatingActionButton 
         onClick={() => setIsCreateOpen(true)} 
-        label="New Job"
+        label={tAdmin("new_job")}
       />
 
       {/* Create Job Wizard */}

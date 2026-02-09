@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useCallback, useEffect, ReactNode } from "react";
 import { staffTranslations, TranslationKey } from "@/lib/translations/staff";
+import { adminTranslations, AdminTranslationKey } from "@/lib/translations/admin";
 
 type Language = "en" | "es";
 
@@ -7,6 +8,7 @@ interface LanguageContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
   t: (key: TranslationKey) => string;
+  tAdmin: (key: AdminTranslationKey) => string;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
@@ -39,14 +41,20 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  // Translation function
+  // Translation function for staff
   const t = useCallback((key: TranslationKey): string => {
     const translations = staffTranslations[language];
     return translations[key] || staffTranslations.en[key] || key;
   }, [language]);
 
+  // Translation function for admin
+  const tAdmin = useCallback((key: AdminTranslationKey): string => {
+    const translations = adminTranslations[language];
+    return translations[key] || adminTranslations.en[key] || key;
+  }, [language]);
+
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, t }}>
+    <LanguageContext.Provider value={{ language, setLanguage, t, tAdmin }}>
       {children}
     </LanguageContext.Provider>
   );

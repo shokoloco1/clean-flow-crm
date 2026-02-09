@@ -1,0 +1,250 @@
+export type AdminTranslationKey = keyof typeof adminTranslations.en;
+
+export const adminTranslations = {
+  en: {
+    // Dashboard
+    todays_view: "Today's View",
+    new_job: "New Job",
+    todays_jobs: "Today's Jobs",
+    no_jobs_scheduled_today: "No jobs scheduled for today",
+    
+    // Stats
+    total: "Total",
+    in_progress: "In Progress",
+    completed: "Completed",
+    rate: "Rate",
+    
+    // Kanban
+    scheduled: "Scheduled",
+    no_jobs: "No jobs",
+    unknown_client: "Unknown Client",
+    unassigned: "Unassigned",
+    duplicate_job_tomorrow: "Duplicate job for tomorrow",
+    generate_invoice: "Generate Invoice",
+    
+    // Job Detail
+    job_details: "Job Details",
+    client: "Client",
+    location: "Location",
+    scheduled_date: "Scheduled Date",
+    scheduled_time: "Scheduled Time",
+    assigned_staff: "Assigned Staff",
+    status: "Status",
+    notes: "Notes",
+    photos: "Photos",
+    before: "Before",
+    after: "After",
+    timeline: "Timeline",
+    no_photos: "No photos",
+    
+    // Create Job Wizard
+    select_client: "Select Client",
+    service_schedule: "Service & Schedule",
+    confirm: "Confirm",
+    search_placeholder: "Search by name, phone, or address...",
+    quick_add_client: "Quick Add Client",
+    new_client: "New Client",
+    client_name: "Client name *",
+    phone_optional: "Phone (optional)",
+    add_client: "Add Client",
+    no_clients_found: "No clients found",
+    try_different_search: "Try a different search or add a new client",
+    job_location: "Job Location",
+    enter_job_address: "Enter job address",
+    select_services: "Select Services",
+    services_selected: "service(s) selected",
+    date: "Date",
+    time: "Time",
+    select_time: "Select time",
+    assign_staff: "Assign Staff",
+    staff_suggested: "Staff (suggested based on availability)",
+    not_assigned: "Not assigned",
+    additional_notes: "Additional Notes",
+    any_special_instructions: "Any special instructions...",
+    date_in_past_warning: "Selected date is in the past",
+    staff_conflict_warning: "Staff conflict detected",
+    review_job: "Review Job",
+    services: "Services",
+    back: "Back",
+    next: "Next",
+    create_job: "Create Job",
+    creating: "Creating...",
+    
+    // Quick Status
+    start: "Start",
+    complete: "Complete",
+    
+    // Alerts
+    urgent_alerts: "Urgent Alerts",
+    late_arrival: "Late Arrival",
+    issue_reported: "Issue Reported",
+    staff_unavailable: "Staff Unavailable",
+    
+    // Pending Payments
+    pending_payments: "Pending Payments",
+    awaiting_payment: "awaiting payment",
+    view_all: "View All",
+    no_pending_invoices: "No pending invoices",
+    all_caught_up: "All caught up!",
+    overdue: "Overdue",
+    days_overdue: "days overdue",
+    
+    // Empty State
+    welcome_to_pulcrix: "Welcome to Pulcrix! 👋",
+    lets_get_started: "Let's get you set up for success",
+    setup_progress: "Setup Progress",
+    add_your_first_client: "Add your first client",
+    create_a_job: "Create a job",
+    invite_team_member: "Invite team member",
+    create_first_job: "Create First Job",
+    add_client_first: "Add a client first to create jobs",
+    
+    // Navigation & General
+    calendar: "Calendar",
+    clients: "Clients",
+    staff: "Staff",
+    invoices: "Invoices",
+    settings: "Settings",
+    reports: "Reports",
+    properties: "Properties",
+    recurring_jobs: "Recurring Jobs",
+    pricing: "Pricing",
+    
+    // Common Actions
+    save: "Save",
+    cancel: "Cancel",
+    delete: "Delete",
+    edit: "Edit",
+    close: "Close",
+    search: "Search",
+    filter: "Filter",
+    export: "Export",
+    refresh: "Refresh",
+    loading: "Loading...",
+    error: "Error",
+    success: "Success",
+  },
+  es: {
+    // Dashboard
+    todays_view: "Vista de Hoy",
+    new_job: "Nuevo Trabajo",
+    todays_jobs: "Trabajos de Hoy",
+    no_jobs_scheduled_today: "No hay trabajos programados para hoy",
+    
+    // Stats
+    total: "Total",
+    in_progress: "En Progreso",
+    completed: "Completados",
+    rate: "Tasa",
+    
+    // Kanban
+    scheduled: "Programados",
+    no_jobs: "Sin trabajos",
+    unknown_client: "Cliente Desconocido",
+    unassigned: "Sin Asignar",
+    duplicate_job_tomorrow: "Duplicar trabajo para mañana",
+    generate_invoice: "Generar Factura",
+    
+    // Job Detail
+    job_details: "Detalles del Trabajo",
+    client: "Cliente",
+    location: "Ubicación",
+    scheduled_date: "Fecha Programada",
+    scheduled_time: "Hora Programada",
+    assigned_staff: "Personal Asignado",
+    status: "Estado",
+    notes: "Notas",
+    photos: "Fotos",
+    before: "Antes",
+    after: "Después",
+    timeline: "Cronología",
+    no_photos: "Sin fotos",
+    
+    // Create Job Wizard
+    select_client: "Seleccionar Cliente",
+    service_schedule: "Servicio y Horario",
+    confirm: "Confirmar",
+    search_placeholder: "Buscar por nombre, teléfono o dirección...",
+    quick_add_client: "Agregar Cliente Rápido",
+    new_client: "Nuevo Cliente",
+    client_name: "Nombre del cliente *",
+    phone_optional: "Teléfono (opcional)",
+    add_client: "Agregar Cliente",
+    no_clients_found: "No se encontraron clientes",
+    try_different_search: "Intenta otra búsqueda o agrega un cliente nuevo",
+    job_location: "Ubicación del Trabajo",
+    enter_job_address: "Ingresa la dirección del trabajo",
+    select_services: "Seleccionar Servicios",
+    services_selected: "servicio(s) seleccionado(s)",
+    date: "Fecha",
+    time: "Hora",
+    select_time: "Seleccionar hora",
+    assign_staff: "Asignar Personal",
+    staff_suggested: "Personal (sugerido según disponibilidad)",
+    not_assigned: "Sin asignar",
+    additional_notes: "Notas Adicionales",
+    any_special_instructions: "Instrucciones especiales...",
+    date_in_past_warning: "La fecha seleccionada está en el pasado",
+    staff_conflict_warning: "Conflicto de personal detectado",
+    review_job: "Revisar Trabajo",
+    services: "Servicios",
+    back: "Atrás",
+    next: "Siguiente",
+    create_job: "Crear Trabajo",
+    creating: "Creando...",
+    
+    // Quick Status
+    start: "Iniciar",
+    complete: "Completar",
+    
+    // Alerts
+    urgent_alerts: "Alertas Urgentes",
+    late_arrival: "Llegada Tardía",
+    issue_reported: "Problema Reportado",
+    staff_unavailable: "Personal No Disponible",
+    
+    // Pending Payments
+    pending_payments: "Pagos Pendientes",
+    awaiting_payment: "esperando pago",
+    view_all: "Ver Todo",
+    no_pending_invoices: "No hay facturas pendientes",
+    all_caught_up: "¡Todo al día!",
+    overdue: "Vencida",
+    days_overdue: "días de atraso",
+    
+    // Empty State
+    welcome_to_pulcrix: "¡Bienvenido a Pulcrix! 👋",
+    lets_get_started: "Vamos a configurarte para el éxito",
+    setup_progress: "Progreso de Configuración",
+    add_your_first_client: "Agrega tu primer cliente",
+    create_a_job: "Crea un trabajo",
+    invite_team_member: "Invita a un miembro del equipo",
+    create_first_job: "Crear Primer Trabajo",
+    add_client_first: "Agrega un cliente primero para crear trabajos",
+    
+    // Navigation & General
+    calendar: "Calendario",
+    clients: "Clientes",
+    staff: "Personal",
+    invoices: "Facturas",
+    settings: "Configuración",
+    reports: "Reportes",
+    properties: "Propiedades",
+    recurring_jobs: "Trabajos Recurrentes",
+    pricing: "Precios",
+    
+    // Common Actions
+    save: "Guardar",
+    cancel: "Cancelar",
+    delete: "Eliminar",
+    edit: "Editar",
+    close: "Cerrar",
+    search: "Buscar",
+    filter: "Filtrar",
+    export: "Exportar",
+    refresh: "Actualizar",
+    loading: "Cargando...",
+    error: "Error",
+    success: "Éxito",
+  }
+} as const;
