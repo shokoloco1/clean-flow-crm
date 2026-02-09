@@ -2,15 +2,25 @@ import { useRef, useState } from "react";
 import { Camera, RefreshCw, Check, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/hooks/useLanguage";
+import { Button } from "@/components/ui/button";
 
 interface PhotoCaptureProps {
   area: string;
   existingPhoto?: string;
   onCapture: (file: File) => Promise<void>;
   disabled?: boolean;
+  compact?: boolean;
+  retakeMode?: boolean;
 }
 
-export function PhotoCapture({ area, existingPhoto, onCapture, disabled }: PhotoCaptureProps) {
+export function PhotoCapture({ 
+  area, 
+  existingPhoto, 
+  onCapture, 
+  disabled,
+  compact = false,
+  retakeMode = false
+}: PhotoCaptureProps) {
   const { t } = useLanguage();
   const inputRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string | null>(existingPhoto || null);
@@ -43,6 +53,88 @@ export function PhotoCapture({ area, existingPhoto, onCapture, disabled }: Photo
 
   const hasPhoto = !!preview;
 
+  // Retake mode - just a small button
+  if (retakeMode) {
+    return (
+      <>
+        <input
+          ref={inputRef}
+          type="file"
+          accept="image/*"
+          capture="environment"
+          className="hidden"
+          onChange={handleCapture}
+          disabled={disabled || isUploading}
+        />
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => inputRef.current?.click()}
+          disabled={disabled || isUploading}
+          className="w-full gap-2"
+        >
+          {isUploading ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <RefreshCw className="h-4 w-4" />
+          )}
+          {t("retake")}
+        </Button>
+      </>
+    );
+  }
+
+  // Compact mode - square aspect ratio for grid layouts
+  if (compact) {
+    return (
+      <>
+        <input
+          ref={inputRef}
+          type="file"
+          accept="image/*"
+          capture="environment"
+          className="hidden"
+          onChange={handleCapture}
+          disabled={disabled || isUploading}
+        />
+        <button
+          type="button"
+          onClick={() => inputRef.current?.click()}
+          disabled={disabled || isUploading}
+          className={cn(
+            "w-full aspect-square rounded-lg border-2 border-dashed flex flex-col items-center justify-center gap-1 transition-all",
+            hasPhoto 
+              ? "border-success bg-success/5" 
+              : "border-border hover:border-primary hover:bg-primary/5",
+            (disabled || isUploading) && "opacity-50 cursor-not-allowed"
+          )}
+        >
+          {isUploading ? (
+            <Loader2 className="h-6 w-6 text-primary animate-spin" />
+          ) : hasPhoto ? (
+            <div className="relative w-full h-full">
+              <img 
+                src={preview!} 
+                alt={area}
+                className="w-full h-full object-cover rounded-md"
+              />
+              <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center opacity-0 hover:opacity-100 transition-opacity rounded-md">
+                <RefreshCw className="h-5 w-5 text-white" />
+              </div>
+            </div>
+          ) : (
+            <>
+              <Camera className="h-6 w-6 text-muted-foreground" />
+              <span className="text-[10px] text-muted-foreground">{t("take_photo")}</span>
+            </>
+          )}
+        </button>
+      </>
+    );
+  }
+
+  // Default mode
   return (
     <div className="relative">
       <input

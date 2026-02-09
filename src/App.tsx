@@ -39,6 +39,8 @@ const PrivacyPage = lazy(() => import("./pages/PrivacyPage"));
 const JobStartPage = lazy(() => import("./pages/staff/JobStartPage"));
 const JobPhotosBeforePage = lazy(() => import("./pages/staff/JobPhotosBeforePage"));
 const JobChecklistPage = lazy(() => import("./pages/staff/JobChecklistPage"));
+const JobPhotosAfterPage = lazy(() => import("./pages/staff/JobPhotosAfterPage"));
+const JobCompletePage = lazy(() => import("./pages/staff/JobCompletePage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -196,6 +198,22 @@ const App = () => (
                     element={
                       <ProtectedRoute allowedRoles={["staff"]}>
                         <JobChecklistPage />
+                      </ProtectedRoute>
+                    } 
+                  />
+                  <Route 
+                    path="/staff/job/:id/photos-after"
+                    element={
+                      <ProtectedRoute allowedRoles={["staff"]}>
+                        <JobPhotosAfterPage />
+                      </ProtectedRoute>
+                    } 
+                  />
+                  <Route 
+                    path="/staff/job/:id/complete"
+                    element={
+                      <ProtectedRoute allowedRoles={["staff"]}>
+                        <JobCompletePage />
                       </ProtectedRoute>
                     } 
                   />
