@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Users, Briefcase, UserPlus, ChevronRight, CheckCircle2 } from "lucide-react";
+import { useLanguage } from "@/hooks/useLanguage";
 
 interface EmptyStateOnboardingProps {
   onCreateJob: () => void;
@@ -18,6 +19,7 @@ export function EmptyStateOnboarding({
   hasStaff = false
 }: EmptyStateOnboardingProps) {
   const navigate = useNavigate();
+  const { tAdmin } = useLanguage();
 
   const completedSteps = [hasClients, hasJobs, hasStaff].filter(Boolean).length;
   const progressPercent = (completedSteps / 3) * 100;
@@ -25,24 +27,21 @@ export function EmptyStateOnboarding({
   const steps = [
     {
       id: 1,
-      title: "Add your first client",
-      description: "Register your first client's details",
+      title: tAdmin("add_your_first_client"),
       icon: Users,
       completed: hasClients,
       action: () => navigate("/admin/clients"),
     },
     {
       id: 2,
-      title: "Create your first job",
-      description: "Schedule your first cleaning",
+      title: tAdmin("create_a_job"),
       icon: Briefcase,
       completed: hasJobs,
       action: onCreateJob,
     },
     {
       id: 3,
-      title: "Invite your team",
-      description: "Add members to your staff",
+      title: tAdmin("invite_team_member"),
       icon: UserPlus,
       completed: hasStaff,
       action: () => navigate("/admin/staff"),
@@ -54,19 +53,19 @@ export function EmptyStateOnboarding({
       {/* Header */}
       <div className="text-center mb-8">
         <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
-          Welcome to Pulcrix!
+          {tAdmin("welcome_to_pulcrix")}
         </h2>
         <p className="text-muted-foreground text-lg">
-          Set up your business in 3 steps
+          {tAdmin("lets_get_started")}
         </p>
       </div>
 
       {/* Progress */}
       <div className="w-full max-w-md mb-8">
         <div className="flex justify-between items-center mb-2">
-          <span className="text-sm text-muted-foreground">Progress</span>
+          <span className="text-sm text-muted-foreground">{tAdmin("setup_progress")}</span>
           <span className="text-sm font-medium text-foreground">
-            {completedSteps}/3 completed
+            {completedSteps}/3 {tAdmin("completed")}
           </span>
         </div>
         <Progress value={progressPercent} className="h-2" />
@@ -101,9 +100,6 @@ export function EmptyStateOnboarding({
                   <h3 className="font-semibold text-foreground mb-1">
                     {step.title}
                   </h3>
-                  <p className="text-sm text-muted-foreground line-clamp-1">
-                    {step.description}
-                  </p>
                 </div>
               </div>
               <div className="mt-4">
@@ -112,7 +108,7 @@ export function EmptyStateOnboarding({
                   size="sm"
                   className="w-full gap-2"
                 >
-                  {step.completed ? "Completed" : "Get Started"}
+                  {step.completed ? tAdmin("completed") : tAdmin("next")}
                   {!step.completed && <ChevronRight className="h-4 w-4" />}
                 </Button>
               </div>

@@ -9,6 +9,7 @@ import { DollarSign, AlertTriangle, Clock, ArrowRight, Loader2 } from "lucide-re
 import { formatAUD } from "@/lib/australian";
 import { differenceInDays, parseISO } from "date-fns";
 import { logger } from "@/lib/logger";
+import { useLanguage } from "@/hooks/useLanguage";
 
 interface PaymentStats {
   totalPending: number;
@@ -20,6 +21,7 @@ interface PaymentStats {
 
 export function PendingPaymentsCard() {
   const navigate = useNavigate();
+  const { tAdmin } = useLanguage();
   const [stats, setStats] = useState<PaymentStats | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -98,7 +100,7 @@ export function PendingPaymentsCard() {
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
           <DollarSign className="h-4 w-4 text-primary" />
-          Pending Payments
+          {tAdmin("pending_payments")}
         </CardTitle>
         <Tooltip>
           <TooltipTrigger asChild>
@@ -108,11 +110,11 @@ export function PendingPaymentsCard() {
               className="h-7 text-xs"
               onClick={() => navigate("/admin/invoices")}
             >
-              View All
+              {tAdmin("view_all")}
               <ArrowRight className="h-3 w-3 ml-1" />
             </Button>
           </TooltipTrigger>
-          <TooltipContent>Go to Invoices</TooltipContent>
+          <TooltipContent>{tAdmin("invoices")}</TooltipContent>
         </Tooltip>
       </CardHeader>
       <CardContent className="space-y-3">
@@ -134,7 +136,7 @@ export function PendingPaymentsCard() {
               <div className="flex items-center gap-2">
                 <AlertTriangle className="h-3.5 w-3.5 text-destructive" />
                 <span className="text-sm text-destructive font-medium">
-                  Overdue ({stats.overdueCount})
+                  {tAdmin("overdue")} ({stats.overdueCount})
                 </span>
               </div>
               <Badge variant="destructive" className="text-xs">
@@ -149,7 +151,7 @@ export function PendingPaymentsCard() {
               <div className="flex items-center gap-2">
                 <Clock className="h-3.5 w-3.5 text-warning" />
                 <span className="text-sm text-muted-foreground">
-                  Awaiting ({stats.sentCount})
+                  {tAdmin("awaiting_payment")} ({stats.sentCount})
                 </span>
               </div>
               <span className="text-sm font-medium">
@@ -161,7 +163,7 @@ export function PendingPaymentsCard() {
           {/* No pending */}
           {stats.totalPending === 0 && (
             <p className="text-sm text-muted-foreground text-center py-2">
-              ✓ All invoices paid
+              ✓ {tAdmin("all_caught_up")}
             </p>
           )}
         </div>
