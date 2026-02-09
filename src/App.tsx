@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
+import { LanguageProvider } from "@/hooks/useLanguage";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { PWAInstallBanner } from "@/components/PWAInstallBanner";
 import { OfflineIndicator } from "@/components/OfflineIndicator";
@@ -63,9 +64,10 @@ const App = () => (
         <Sonner />
         <OfflineIndicator />
         <BrowserRouter>
-          <AuthProvider>
-            <AnalyticsProvider>
-              <ErrorBoundary>
+          <LanguageProvider>
+            <AuthProvider>
+              <AnalyticsProvider>
+                <ErrorBoundary>
                 <Suspense fallback={<PageLoader />}>
                   <Routes>
                   <Route path="/" element={<Index />} />
@@ -173,11 +175,12 @@ const App = () => (
                   <Route path="/privacy" element={<PrivacyPage />} />
                   <Route path="*" element={<NotFound />} />
                   </Routes>
-                </Suspense>
-              </ErrorBoundary>
-              <PWAInstallBanner />
-            </AnalyticsProvider>
-          </AuthProvider>
+                  </Suspense>
+                </ErrorBoundary>
+                <PWAInstallBanner />
+              </AnalyticsProvider>
+            </AuthProvider>
+          </LanguageProvider>
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>

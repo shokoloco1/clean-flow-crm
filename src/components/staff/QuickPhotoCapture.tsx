@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { logger } from "@/lib/logger";
+import { useLanguage } from "@/hooks/useLanguage";
 
 interface QuickPhotoCaptureProps {
   jobId: string;
@@ -22,6 +23,7 @@ export function QuickPhotoCapture({
 }: QuickPhotoCaptureProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const { t } = useLanguage();
 
   const handleCapture = () => {
     inputRef.current?.click();
@@ -60,11 +62,12 @@ export function QuickPhotoCapture({
 
       if (dbError) throw dbError;
 
-      toast.success(`📸 ${photoType === 'before' ? 'Before' : 'After'} photo saved!`);
+      const typeLabel = photoType === 'before' ? t('before') : t('after');
+      toast.success(`📸 ${typeLabel} ${t('photo_saved')}`);
       onPhotoUploaded();
     } catch (error) {
       logger.error('Photo upload error:', error);
-      toast.error('Failed to upload photo');
+      toast.error(t('failed_upload'));
     } finally {
       setIsUploading(false);
       if (inputRef.current) inputRef.current.value = '';
@@ -108,12 +111,12 @@ export function QuickPhotoCapture({
               <CheckCircle2 className="h-5 w-5" />
               <span>{existingCount}</span>
             </div>
-            <span className="text-xs font-normal">+ Add more</span>
+            <span className="text-xs font-normal">{t('add_more')}</span>
           </>
         ) : (
           <>
             <Camera className="h-6 w-6" />
-            <span>{isBefore ? "📷 BEFORE" : "📷 AFTER"}</span>
+            <span>📷 {isBefore ? t('before').toUpperCase() : t('after').toUpperCase()}</span>
           </>
         )}
       </Button>

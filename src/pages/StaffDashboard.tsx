@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useLanguage } from "@/hooks/useLanguage";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -14,6 +15,7 @@ import { useJobStatusChange } from "@/hooks/useJobStatusChange";
 import { NextJobCard } from "@/components/staff/NextJobCard";
 import { TodayJobsList } from "@/components/staff/TodayJobsList";
 import { StaffAvailabilityCalendar } from "@/components/staff/StaffAvailabilityCalendar";
+import { LanguageSwitcher } from "@/components/staff/LanguageSwitcher";
 
 interface PropertyPhotos {
   id: string;
@@ -69,10 +71,10 @@ interface ChecklistProgress {
 
 export default function StaffDashboard() {
   const { user, signOut } = useAuth();
+  const { t } = useLanguage();
   const [jobs, setJobs] = useState<Job[]>([]);
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [loading, setLoading] = useState(true);
-  // const [propertyPhotos, setPropertyPhotos] = useState<Record<string, PropertyPhotos[]>>({}); // Unused in this component
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_propertyPhotos, _setPropertyPhotos] = useState<Record<string, PropertyPhotos[]>>({});
   const [checklistProgressMap, setChecklistProgressMap] = useState<Record<string, ChecklistProgress>>({});
@@ -214,9 +216,6 @@ export default function StaffDashboard() {
     setLoading(false);
   };
 
-  // getStatusConfig is unused locally
-  // const getStatusConfig = (status: string) => { ... }
-
   // Group jobs by date
   const todayStr = format(new Date(), "yyyy-MM-dd");
   const todayJobs = jobs.filter(j => j.scheduled_date === todayStr);
@@ -244,10 +243,11 @@ export default function StaffDashboard() {
             <PulcrixLogo />
             <div>
               <h1 className="text-xl font-bold text-foreground">Pulcrix</h1>
-              <p className="text-sm text-muted-foreground">My Jobs</p>
+              <p className="text-sm text-muted-foreground">{t("my_jobs")}</p>
             </div>
           </Link>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
+            <LanguageSwitcher />
             <NotificationCenter />
             <Button
               variant="ghost"
@@ -280,7 +280,7 @@ export default function StaffDashboard() {
         {loading ? (
           <div className="flex flex-col items-center justify-center py-16">
             <div className="h-12 w-12 rounded-full border-4 border-primary border-t-transparent animate-spin mb-4" />
-            <p className="text-muted-foreground">Loading your jobs...</p>
+            <p className="text-muted-foreground">{t("loading_jobs")}</p>
           </div>
         ) : todayJobs.length === 0 && upcomingJobs.length === 0 ? (
           /* Empty State - Friendly message */
@@ -289,9 +289,9 @@ export default function StaffDashboard() {
               <div className="h-20 w-20 rounded-full bg-success/10 flex items-center justify-center mb-6">
                 <Smile className="h-10 w-10 text-success" />
               </div>
-              <h3 className="text-2xl font-bold text-foreground mb-3">🎉 Day Off!</h3>
+              <h3 className="text-2xl font-bold text-foreground mb-3">🎉 {t("day_off")}</h3>
               <p className="text-muted-foreground text-lg">
-                No jobs scheduled. Enjoy your day!
+                {t("no_jobs_scheduled")}
               </p>
             </CardContent>
           </Card>
@@ -330,7 +330,7 @@ export default function StaffDashboard() {
               <Collapsible>
                 <CollapsibleTrigger className="flex items-center gap-2 text-sm font-semibold text-muted-foreground px-1 mb-2 hover:text-foreground transition-colors">
                   <ChevronDown className="h-4 w-4" />
-                  📅 Upcoming ({upcomingJobs.length})
+                  📅 {t("upcoming")} ({upcomingJobs.length})
                 </CollapsibleTrigger>
                 <CollapsibleContent>
                   <div className="space-y-2">
@@ -347,7 +347,7 @@ export default function StaffDashboard() {
                                 {format(new Date(job.scheduled_date), "EEE, MMM d")} • {job.scheduled_time}
                               </p>
                               <p className="font-medium text-foreground truncate">
-                                {job.clients?.name || "Unknown"}
+                                {job.clients?.name || t("unknown_client")}
                               </p>
                             </div>
                           </div>
@@ -369,7 +369,7 @@ export default function StaffDashboard() {
               <CollapsibleTrigger className="flex items-center gap-2 text-sm font-semibold text-muted-foreground px-1 mb-2 hover:text-foreground transition-colors w-full">
                 <ChevronDown className="h-4 w-4" />
                 <Clock className="h-4 w-4" />
-                My Availability
+                {t("my_availability")}
               </CollapsibleTrigger>
               <CollapsibleContent>
                 <StaffAvailabilityCalendar compact />
