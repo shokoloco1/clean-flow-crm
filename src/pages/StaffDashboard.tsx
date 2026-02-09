@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/hooks/useLanguage";
 import { supabase } from "@/integrations/supabase/client";
@@ -72,6 +72,7 @@ interface ChecklistProgress {
 export default function StaffDashboard() {
   const { user, signOut } = useAuth();
   const { t } = useLanguage();
+  const navigate = useNavigate();
   const [jobs, setJobs] = useState<Job[]>([]);
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [loading, setLoading] = useState(true);
@@ -305,7 +306,12 @@ export default function StaffDashboard() {
                   isUpdating={updatingJobId === (todayJobs.find(j => j.status !== "completed") || todayJobs[0]).id}
                   onStartComplete={() => {
                     const nextJob = todayJobs.find(j => j.status !== "completed") || todayJobs[0];
-                    advanceStatus(nextJob.id, nextJob.status);
+                    // Use new workflow for pending jobs, legacy flow for in_progress
+                    if (nextJob.status === "pending") {
+                      navigate(`/staff/job/${nextJob.id}/start`);
+                    } else {
+                      advanceStatus(nextJob.id, nextJob.status);
+                    }
                   }}
                   onViewDetails={() => {
                     const nextJob = todayJobs.find(j => j.status !== "completed") || todayJobs[0];
