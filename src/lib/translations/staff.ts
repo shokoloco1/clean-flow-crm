@@ -63,6 +63,11 @@ export const staffTranslations = {
     upload_at_least_one: "Please upload at least one photo before completing",
     gps_not_available: "GPS not available on this device",
     gps_capture_failed: "Could not capture GPS location",
+    no_job_id: "No job ID provided",
+    job_not_found: "Job not found",
+    could_not_load: "Could not load job details",
+    error_loading_job: "Error loading job",
+    error_loading_photos: "Error loading photos",
 
     // Availability
     weekly_availability: "Weekly Availability",
@@ -155,6 +160,8 @@ export const staffTranslations = {
     continue_to_checklist: "Continue to Checklist",
     take_photo: "Take Photo",
     retake: "Retake",
+    complete_tasks_required: "Complete tasks required",
+    minimum_required: "minimum required",
 
     // Photos After
     photos_after_title: "After Photos",
@@ -240,6 +247,11 @@ export const staffTranslations = {
     upload_at_least_one: "Por favor sube al menos una foto antes de completar",
     gps_not_available: "GPS no disponible en este dispositivo",
     gps_capture_failed: "No se pudo capturar la ubicación GPS",
+    no_job_id: "No se proporcionó ID del trabajo",
+    job_not_found: "Trabajo no encontrado",
+    could_not_load: "No se pudieron cargar los detalles del trabajo",
+    error_loading_job: "Error al cargar el trabajo",
+    error_loading_photos: "Error al cargar las fotos",
 
     // Availability
     weekly_availability: "Disponibilidad Semanal",
@@ -332,6 +344,8 @@ export const staffTranslations = {
     continue_to_checklist: "Continuar al Checklist",
     take_photo: "Tomar Foto",
     retake: "Repetir",
+    complete_tasks_required: "Completar tareas requeridas",
+    minimum_required: "mínimo requerido",
 
     // Photos After
     photos_after_title: "Fotos del Después",
