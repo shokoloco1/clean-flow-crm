@@ -571,24 +571,34 @@ export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewPr
           )}
 
           {currentJob.status === "in_progress" && (
-            <Button
-              className="w-full h-16 text-xl font-bold bg-success hover:bg-success/90"
-              onClick={handleCompleteJob}
-              disabled={isUpdating || (hasRequiredAreas ? !allAreasComplete : photos.length === 0)}
-            >
-              {isUpdating ? (
-                <Loader2 className="h-6 w-6 mr-2 animate-spin" />
-              ) : (
-                <CheckCircle2 className="h-6 w-6 mr-2" />
-              )}
-              ✓ {t("complete_job").toUpperCase()}
-              {hasRequiredAreas && !allAreasComplete && (
-                <span className="ml-2 text-sm font-normal">({t("complete_all_photos")})</span>
-              )}
-              {!hasRequiredAreas && photos.length === 0 && (
-                <span className="ml-2 text-sm font-normal">({t("upload_photo_first")})</span>
-              )}
-            </Button>
+            <div className="flex flex-col gap-3">
+              <Button
+                className="w-full h-14 text-lg font-bold"
+                variant="outline"
+                onClick={() => navigate(`/staff/job/${currentJob.id}/checklist`)}
+              >
+                <Play className="h-5 w-5 mr-2" />
+                Continue Workflow
+              </Button>
+              <Button
+                className="w-full h-16 text-xl font-bold bg-success hover:bg-success/90"
+                onClick={handleCompleteJob}
+                disabled={isUpdating || (hasRequiredAreas ? !allAreasComplete : photos.length === 0)}
+              >
+                {isUpdating ? (
+                  <Loader2 className="h-6 w-6 mr-2 animate-spin" />
+                ) : (
+                  <CheckCircle2 className="h-6 w-6 mr-2" />
+                )}
+                ✓ {t("complete_job").toUpperCase()}
+                {hasRequiredAreas && !allAreasComplete && (
+                  <span className="ml-2 text-sm font-normal">({t("complete_all_photos")})</span>
+                )}
+                {!hasRequiredAreas && photos.length === 0 && (
+                  <span className="ml-2 text-sm font-normal">({t("upload_photo_first")})</span>
+                )}
+              </Button>
+            </div>
           )}
 
           {currentJob.status === "completed" && (
