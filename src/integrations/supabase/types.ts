@@ -296,25 +296,31 @@ export type Database = {
       }
       job_photos: {
         Row: {
+          area: string | null
           created_at: string
           id: string
           job_id: string
           photo_type: string
           photo_url: string
+          taken_at: string | null
         }
         Insert: {
+          area?: string | null
           created_at?: string
           id?: string
           job_id: string
           photo_type?: string
           photo_url: string
+          taken_at?: string | null
         }
         Update: {
+          area?: string | null
           created_at?: string
           id?: string
           job_id?: string
           photo_type?: string
           photo_url?: string
+          taken_at?: string | null
         }
         Relationships: [
           {
@@ -328,6 +334,7 @@ export type Database = {
       }
       jobs: {
         Row: {
+          actual_duration_minutes: number | null
           assigned_staff_id: string | null
           checkin_distance_meters: number | null
           checkin_lat: number | null
@@ -341,6 +348,7 @@ export type Database = {
           end_time: string | null
           geofence_validated: boolean | null
           id: string
+          issue_reported: string | null
           location: string
           location_lat: number | null
           location_lng: number | null
@@ -350,11 +358,13 @@ export type Database = {
           quality_score: number | null
           scheduled_date: string
           scheduled_time: string
+          staff_notes: string | null
           start_time: string | null
           status: string
           updated_at: string
         }
         Insert: {
+          actual_duration_minutes?: number | null
           assigned_staff_id?: string | null
           checkin_distance_meters?: number | null
           checkin_lat?: number | null
@@ -368,6 +378,7 @@ export type Database = {
           end_time?: string | null
           geofence_validated?: boolean | null
           id?: string
+          issue_reported?: string | null
           location: string
           location_lat?: number | null
           location_lng?: number | null
@@ -377,11 +388,13 @@ export type Database = {
           quality_score?: number | null
           scheduled_date: string
           scheduled_time: string
+          staff_notes?: string | null
           start_time?: string | null
           status?: string
           updated_at?: string
         }
         Update: {
+          actual_duration_minutes?: number | null
           assigned_staff_id?: string | null
           checkin_distance_meters?: number | null
           checkin_lat?: number | null
@@ -395,6 +408,7 @@ export type Database = {
           end_time?: string | null
           geofence_validated?: boolean | null
           id?: string
+          issue_reported?: string | null
           location?: string
           location_lat?: number | null
           location_lng?: number | null
@@ -404,6 +418,7 @@ export type Database = {
           quality_score?: number | null
           scheduled_date?: string
           scheduled_time?: string
+          staff_notes?: string | null
           start_time?: string | null
           status?: string
           updated_at?: string

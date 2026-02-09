@@ -131,6 +131,51 @@ export const staffTranslations = {
     success: "Success",
     close: "Close",
     go_back: "Go back",
+
+    // Job Start Page
+    job_start_title: "Confirm Arrival",
+    ready_to_start: "Ready to start?",
+    confirm_location: "You're at the right location",
+    begin_work: "BEGIN WORK",
+    starting_job: "Starting...",
+    client_notes: "Client Notes",
+    service_notes: "Service Notes",
+
+    // Timer
+    time_elapsed: "Time Elapsed",
+    on_track: "On Track",
+    over_time: "Over Time",
+
+    // Photos Before
+    photos_before_title: "Before Photos",
+    capture_before_state: "Capture the current state before cleaning",
+    minimum_photos: "Minimum 3 photos required",
+    photos_progress: "photos",
+    continue_to_checklist: "Continue to Checklist",
+    take_photo: "Take Photo",
+    retake: "Retake",
+
+    // Photos After
+    photos_after_title: "After Photos",
+    capture_after_state: "Capture the result after cleaning",
+    compare_with_before: "Compare with before photo",
+    finish_job: "Finish Job",
+
+    // Completion
+    great_work: "Great Work!",
+    job_summary: "Job Summary",
+    total_time: "Total Time",
+    tasks_completed: "Tasks Completed",
+    photos_taken: "Photos Taken",
+    additional_notes: "Additional Notes (optional)",
+    report_issues: "Report Issues",
+    no_issues: "No Issues",
+    missing_supplies: "Missing Supplies",
+    property_damage: "Property Damage Found",
+    access_issues: "Access Issues",
+    other_issue: "Other",
+    confirm_and_send: "CONFIRM & SEND REPORT",
+    sending_report: "Sending...",
   },
   es: {
     // Dashboard
@@ -262,5 +307,50 @@ export const staffTranslations = {
     success: "Éxito",
     close: "Cerrar",
     go_back: "Volver",
+
+    // Job Start Page
+    job_start_title: "Confirmar Llegada",
+    ready_to_start: "¿Listo para comenzar?",
+    confirm_location: "Estás en la ubicación correcta",
+    begin_work: "COMENZAR TRABAJO",
+    starting_job: "Iniciando...",
+    client_notes: "Notas del Cliente",
+    service_notes: "Notas del Servicio",
+
+    // Timer
+    time_elapsed: "Tiempo Transcurrido",
+    on_track: "A Tiempo",
+    over_time: "Excedido",
+
+    // Photos Before
+    photos_before_title: "Fotos del Antes",
+    capture_before_state: "Captura el estado actual antes de limpiar",
+    minimum_photos: "Mínimo 3 fotos requeridas",
+    photos_progress: "fotos",
+    continue_to_checklist: "Continuar al Checklist",
+    take_photo: "Tomar Foto",
+    retake: "Repetir",
+
+    // Photos After
+    photos_after_title: "Fotos del Después",
+    capture_after_state: "Captura el resultado después de limpiar",
+    compare_with_before: "Comparar con foto anterior",
+    finish_job: "Finalizar Trabajo",
+
+    // Completion
+    great_work: "¡Buen Trabajo!",
+    job_summary: "Resumen del Trabajo",
+    total_time: "Tiempo Total",
+    tasks_completed: "Tareas Completadas",
+    photos_taken: "Fotos Tomadas",
+    additional_notes: "Notas Adicionales (opcional)",
+    report_issues: "Reportar Problemas",
+    no_issues: "Sin Problemas",
+    missing_supplies: "Faltaban Suministros",
+    property_damage: "Daño Encontrado",
+    access_issues: "Problemas de Acceso",
+    other_issue: "Otro",
+    confirm_and_send: "CONFIRMAR Y ENVIAR REPORTE",
+    sending_report: "Enviando...",
   }
 } as const;

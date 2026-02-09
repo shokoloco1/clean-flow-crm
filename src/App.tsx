@@ -35,6 +35,9 @@ const OnboardingPage = lazy(() => import("./pages/Onboarding"));
 const TermsPage = lazy(() => import("./pages/TermsPage"));
 const PrivacyPage = lazy(() => import("./pages/PrivacyPage"));
 
+// Staff workflow pages
+const JobStartPage = lazy(() => import("./pages/staff/JobStartPage"));
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -167,6 +170,14 @@ const App = () => (
                     element={
                       <ProtectedRoute allowedRoles={["staff"]}>
                         <StaffDashboard />
+                      </ProtectedRoute>
+                    } 
+                  />
+                  <Route 
+                    path="/staff/job/:id/start"
+                    element={
+                      <ProtectedRoute allowedRoles={["staff"]}>
+                        <JobStartPage />
                       </ProtectedRoute>
                     } 
                   />
