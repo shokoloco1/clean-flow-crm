@@ -2,6 +2,7 @@ import { MapPin, Navigation, Clock, Bed, Bath, PawPrint, Timer, Play, CheckCircl
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { useLanguage } from "@/hooks/useLanguage";
 
 interface Property {
   bedrooms?: number | null;
@@ -28,6 +29,7 @@ interface NextJobCardProps<T extends { id: string; location: string; scheduled_t
 export function NextJobCard<T extends { id: string; location: string; scheduled_time: string; status: string; clients: { name: string } | null; properties: Property | null }>({
   job, isUpdating, onStartComplete, onViewDetails, checklistProgress
 }: NextJobCardProps<T>) {
+  const { t } = useLanguage();
   const isInProgress = job.status === "in_progress";
   const isCompleted = job.status === "completed";
   const progressPercent = checklistProgress && checklistProgress.total > 0
@@ -47,7 +49,7 @@ export function NextJobCard<T extends { id: string; location: string; scheduled_
         {/* Header */}
         <div className="flex items-center justify-between mb-3">
           <span className="text-xs font-medium text-primary uppercase tracking-wide">
-            📍 Next Job
+            📍 {t("next_job")}
           </span>
           <span className="text-sm font-semibold text-foreground flex items-center gap-1">
             <Clock className="h-4 w-4" />
@@ -57,7 +59,7 @@ export function NextJobCard<T extends { id: string; location: string; scheduled_
 
         {/* Client Name */}
         <h2 className="text-xl font-bold text-foreground mb-2 truncate">
-          {job.clients?.name || "Unknown Client"}
+          {job.clients?.name || t("unknown_client")}
         </h2>
 
         {/* Property Quick Stats */}
@@ -75,7 +77,7 @@ export function NextJobCard<T extends { id: string; location: string; scheduled_
             )}
             {job.properties.has_pets && (
               <span className="flex items-center gap-1 text-warning">
-                <PawPrint className="h-4 w-4" /> Pets
+                <PawPrint className="h-4 w-4" /> {t("pets")}
               </span>
             )}
             {job.properties.estimated_hours && (
@@ -92,7 +94,7 @@ export function NextJobCard<T extends { id: string; location: string; scheduled_
             <div className="flex items-center justify-between mb-1">
               <span className="text-xs font-medium text-muted-foreground flex items-center gap-1">
                 <ListChecks className="h-3 w-3" />
-                Tasks
+                {t("tasks")}
               </span>
               <span className="text-xs font-semibold text-foreground">
                 {checklistProgress.completed}/{checklistProgress.total}
@@ -113,7 +115,7 @@ export function NextJobCard<T extends { id: string; location: string; scheduled_
             onClick={openMaps}
           >
             <Navigation className="h-4 w-4" />
-            Maps
+            {t("maps")}
           </Button>
         </div>
 
@@ -138,12 +140,12 @@ export function NextJobCard<T extends { id: string; location: string; scheduled_
               ) : isInProgress ? (
                 <>
                   <CheckCircle2 className="h-6 w-6 mr-2" />
-                  Complete Job
+                  {t("complete_job")}
                 </>
               ) : (
                 <>
                   <Play className="h-6 w-6 mr-2" />
-                  Start Job
+                  {t("start_job")}
                 </>
               )}
             </Button>
@@ -152,7 +154,7 @@ export function NextJobCard<T extends { id: string; location: string; scheduled_
           {isCompleted && (
             <div className="flex-1 h-14 flex items-center justify-center bg-success/20 rounded-lg">
               <CheckCircle2 className="h-6 w-6 text-success mr-2" />
-              <span className="text-lg font-semibold text-success">Completed</span>
+              <span className="text-lg font-semibold text-success">{t("status_completed")}</span>
             </div>
           )}
           
@@ -165,7 +167,7 @@ export function NextJobCard<T extends { id: string; location: string; scheduled_
               onViewDetails();
             }}
           >
-            Details
+            {t("view_details")}
           </Button>
         </div>
       </CardContent>

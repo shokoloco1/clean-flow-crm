@@ -1,6 +1,7 @@
 import { Clock, CheckCircle2, Play, MapPin } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { useLanguage } from "@/hooks/useLanguage";
 
 interface TodayJobsListProps<T extends { id: string; location: string; scheduled_time: string; status: string; clients: { name: string } | null }> {
   jobs: T[];
@@ -11,6 +12,8 @@ interface TodayJobsListProps<T extends { id: string; location: string; scheduled
 export function TodayJobsList<T extends { id: string; location: string; scheduled_time: string; status: string; clients: { name: string } | null }>({ 
   jobs, currentJobId, onSelectJob 
 }: TodayJobsListProps<T>) {
+  const { t } = useLanguage();
+  
   if (jobs.length === 0) return null;
 
   const getStatusIcon = (status: string) => {
@@ -27,18 +30,18 @@ export function TodayJobsList<T extends { id: string; location: string; schedule
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "completed":
-        return <Badge variant="secondary" className="bg-success/20 text-success text-xs">Done</Badge>;
+        return <Badge variant="secondary" className="bg-success/20 text-success text-xs">{t("status_done")}</Badge>;
       case "in_progress":
-        return <Badge variant="secondary" className="bg-warning/20 text-warning text-xs">Active</Badge>;
+        return <Badge variant="secondary" className="bg-warning/20 text-warning text-xs">{t("status_active")}</Badge>;
       default:
-        return <Badge variant="outline" className="text-xs">Pending</Badge>;
+        return <Badge variant="outline" className="text-xs">{t("status_pending")}</Badge>;
     }
   };
 
   return (
     <div className="space-y-2">
       <h3 className="text-sm font-semibold text-muted-foreground px-1">
-        📋 Today's Schedule ({jobs.length} jobs)
+        📋 {t("todays_schedule")} ({jobs.length} {t("jobs_count")})
       </h3>
       
       <div className="space-y-2">
@@ -66,7 +69,7 @@ export function TodayJobsList<T extends { id: string; location: string; schedule
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-0.5">
                       <span className="font-semibold text-foreground truncate">
-                        {job.clients?.name || "Unknown"}
+                        {job.clients?.name || t("unknown_client")}
                       </span>
                       {getStatusBadge(job.status)}
                     </div>

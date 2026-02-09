@@ -1,0 +1,26 @@
+import { useLanguage } from "@/hooks/useLanguage";
+import { Button } from "@/components/ui/button";
+import { Globe } from "lucide-react";
+
+export function LanguageSwitcher() {
+  const { language, setLanguage } = useLanguage();
+
+  const toggleLanguage = () => {
+    setLanguage(language === "en" ? "es" : "en");
+  };
+
+  return (
+    <Button
+      variant="ghost"
+      size="icon"
+      onClick={toggleLanguage}
+      className="h-12 w-12 relative"
+      title={language === "en" ? "Cambiar a Español" : "Switch to English"}
+    >
+      <Globe className="h-5 w-5" />
+      <span className="absolute -bottom-0.5 -right-0.5 text-[10px] font-bold bg-primary text-primary-foreground rounded px-1">
+        {language === "en" ? "ES" : "EN"}
+      </span>
+    </Button>
+  );
+}

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Camera, XCircle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { QuickPhotoCapture } from "./QuickPhotoCapture";
+import { useLanguage } from "@/hooks/useLanguage";
 
 interface JobPhoto {
   id: string;
@@ -23,6 +24,7 @@ export function BeforeAfterPhotos({
   jobStatus,
   onPhotosUpdated 
 }: BeforeAfterPhotosProps) {
+  const { t } = useLanguage();
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
   
   const beforePhotos = photos.filter(p => p.photo_type === 'before');
@@ -37,7 +39,7 @@ export function BeforeAfterPhotos({
           {/* Header */}
           <div className="flex items-center gap-2">
             <Camera className="h-5 w-5 text-primary" />
-            <span className="font-semibold text-foreground">Before & After Photos</span>
+            <span className="font-semibold text-foreground">{t("before_after_photos")}</span>
           </div>
 
           {/* Quick Capture Buttons - Show when in progress or completed */}
@@ -65,7 +67,7 @@ export function BeforeAfterPhotos({
               {beforePhotos.length > 0 && (
                 <div>
                   <p className="text-xs font-medium text-muted-foreground mb-2">
-                    Before ({beforePhotos.length})
+                    {t("before")} ({beforePhotos.length})
                   </p>
                   <div className="flex gap-2 overflow-x-auto pb-1">
                     {beforePhotos.map((photo) => (
@@ -76,7 +78,7 @@ export function BeforeAfterPhotos({
                       >
                         <img 
                           src={photo.photo_url} 
-                          alt="Before"
+                          alt={t("before")}
                           className="w-full h-full object-cover"
                         />
                       </div>
@@ -89,7 +91,7 @@ export function BeforeAfterPhotos({
               {afterPhotos.length > 0 && (
                 <div>
                   <p className="text-xs font-medium text-muted-foreground mb-2">
-                    After ({afterPhotos.length})
+                    {t("after")} ({afterPhotos.length})
                   </p>
                   <div className="flex gap-2 overflow-x-auto pb-1">
                     {afterPhotos.map((photo) => (
@@ -100,7 +102,7 @@ export function BeforeAfterPhotos({
                       >
                         <img 
                           src={photo.photo_url} 
-                          alt="After"
+                          alt={t("after")}
                           className="w-full h-full object-cover"
                         />
                       </div>
@@ -114,7 +116,7 @@ export function BeforeAfterPhotos({
           {/* Empty State - only show if pending (not started yet) */}
           {photos.length === 0 && !isInProgress && !isCompleted && (
             <p className="text-sm text-muted-foreground text-center py-4">
-              No photos uploaded yet
+              {t("no_photos_yet")}
             </p>
           )}
 
@@ -122,10 +124,10 @@ export function BeforeAfterPhotos({
           {isCompleted && photos.length > 0 && (
             <div className="text-center py-2 bg-success/10 rounded-lg">
               <p className="text-sm font-medium text-success">
-                ✓ {beforePhotos.length} before, {afterPhotos.length} after photos
+                ✓ {beforePhotos.length} {t("before").toLowerCase()}, {afterPhotos.length} {t("after").toLowerCase()} photos
               </p>
               <p className="text-xs text-muted-foreground mt-1">
-                You can still add more photos if needed
+                {t("you_can_still_add")}
               </p>
             </div>
           )}

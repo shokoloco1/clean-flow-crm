@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
+import { useLanguage } from "@/hooks/useLanguage";
 import AdvancedChecklist from "@/components/AdvancedChecklist";
 import { BeforeAfterPhotos } from "@/components/staff/BeforeAfterPhotos";
 import { AreaPhotoDocumentation } from "@/components/staff/AreaPhotoDocumentation";
@@ -100,6 +101,7 @@ interface JobDetailViewProps {
 }
 
 export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewProps) {
+  const { t } = useLanguage();
   const [currentJob, setCurrentJob] = useState(job);
   const [property, setProperty] = useState<Property | null>(job.properties || null);
   const [propertyPhotos, setPropertyPhotos] = useState<PropertyPhoto[]>([]);
@@ -170,7 +172,7 @@ export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewPr
   const captureGPSLocation = (): Promise<{ lat: number; lng: number } | null> => {
     return new Promise((resolve) => {
       if (!navigator.geolocation) {
-        toast.warning("GPS not available on this device");
+        toast.warning(t("gps_not_available"));
         resolve(null);
         return;
       }
@@ -183,7 +185,7 @@ export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewPr
           });
         },
         () => {
-          toast.warning("Could not capture GPS location");
+          toast.warning(t("gps_capture_failed"));
           resolve(null);
         },
         { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
@@ -214,14 +216,14 @@ export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewPr
       .eq("id", currentJob.id);
 
     if (error) {
-      toast.error("Error starting job");
+      toast.error(t("error_starting"));
     } else {
       setCurrentJob({ 
         ...currentJob, 
         status: "in_progress", 
         start_time: new Date().toISOString() 
       });
-      toast.success("Job started!");
+      toast.success(t("job_started"));
       onUpdate();
     }
     setIsUpdating(false);
@@ -230,13 +232,13 @@ export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewPr
   const handleCompleteJob = async () => {
     // Check if all required areas have photos
     if (hasRequiredAreas && !allAreasComplete) {
-      toast.error("Please complete photo documentation for all areas before completing the job");
+      toast.error(t("complete_area_photos"));
       return;
     }
 
     // For jobs without required areas, check for at least one photo
     if (!hasRequiredAreas && photos.length === 0) {
-      toast.error("Please upload at least one photo before completing");
+      toast.error(t("upload_at_least_one"));
       return;
     }
     
@@ -260,20 +262,18 @@ export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewPr
       .eq("id", currentJob.id);
 
     if (error) {
-      toast.error("Error completing job");
+      toast.error(t("error_completing"));
     } else {
       setCurrentJob({ 
         ...currentJob, 
         status: "completed", 
         end_time: new Date().toISOString() 
       });
-      toast.success("Job completed! Great work!");
+      toast.success(t("job_completed"));
       onUpdate();
     }
     setIsUpdating(false);
   };
-
-  // Removed old handlePhotoUpload - now handled by BeforeAfterPhotos component
 
   const openInMaps = () => {
     if (property?.google_maps_link) {
@@ -307,13 +307,13 @@ export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewPr
             size="icon"
             onClick={onBack}
             className="h-12 w-12"
-            aria-label="Go back"
+            aria-label={t("go_back")}
           >
             <ArrowLeft className="h-6 w-6" />
           </Button>
           <div className="flex-1">
             <h1 className="text-xl font-bold text-foreground truncate">
-              {currentJob.clients?.name || "Job Details"}
+              {currentJob.clients?.name || t("job_details")}
             </h1>
             <p className="text-sm text-muted-foreground">
               {format(new Date(currentJob.scheduled_date), "MMMM d, yyyy")}
@@ -330,7 +330,7 @@ export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewPr
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-2">
                   <MapPin className="h-5 w-5 text-primary" />
-                  <span className="font-semibold text-foreground">Location</span>
+                  <span className="font-semibold text-foreground">{t("location")}</span>
                 </div>
                 <p className="text-muted-foreground ml-7 text-base">{currentJob.location}</p>
                 {property && (property.suburb || property.state) && (
@@ -344,7 +344,7 @@ export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewPr
                 className="h-14 px-5"
               >
                 <Navigation className="h-5 w-5 mr-2" />
-                Maps
+                {t("maps")}
               </Button>
             </div>
           </CardContent>
@@ -356,10 +356,10 @@ export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewPr
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2 text-lg">
                 <Home className="h-5 w-5 text-primary" />
-                Property Details
+                {t("property_details")}
               </CardTitle>
               <CardDescription>
-                Reference information for this cleaning job
+                {t("reference_info")}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -368,7 +368,7 @@ export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewPr
                 <div>
                   <p className="text-sm font-medium mb-2 flex items-center gap-2">
                     <Camera className="h-4 w-4" />
-                    Reference Photos from Client ({propertyPhotos.length})
+                    {t("reference_photos")} ({propertyPhotos.length})
                   </p>
                   <div className="grid grid-cols-3 gap-2">
                     {propertyPhotos.map((photo) => (
@@ -386,7 +386,7 @@ export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewPr
                     ))}
                   </div>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Tap photos to enlarge. Use these as cleaning reference.
+                    {t("tap_to_enlarge")}
                   </p>
                 </div>
               )}
@@ -397,28 +397,28 @@ export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewPr
                   <div className="p-2 bg-background rounded-lg">
                     <Bed className="h-5 w-5 mx-auto mb-1 text-primary" />
                     <p className="text-xl font-bold">{property.bedrooms}</p>
-                    <p className="text-xs text-muted-foreground">Bedrooms</p>
+                    <p className="text-xs text-muted-foreground">{t("bedrooms")}</p>
                   </div>
                 )}
                 {(property.bathrooms ?? 0) > 0 && (
                   <div className="p-2 bg-background rounded-lg">
                     <Bath className="h-5 w-5 mx-auto mb-1 text-primary" />
                     <p className="text-xl font-bold">{property.bathrooms}</p>
-                    <p className="text-xs text-muted-foreground">Bathrooms</p>
+                    <p className="text-xs text-muted-foreground">{t("bathrooms")}</p>
                   </div>
                 )}
                 {(property.living_areas ?? 0) > 0 && (
                   <div className="p-2 bg-background rounded-lg">
                     <Sofa className="h-5 w-5 mx-auto mb-1 text-primary" />
                     <p className="text-xl font-bold">{property.living_areas}</p>
-                    <p className="text-xs text-muted-foreground">Living</p>
+                    <p className="text-xs text-muted-foreground">{t("living")}</p>
                   </div>
                 )}
                 {(property.floors ?? 0) > 1 && (
                   <div className="p-2 bg-background rounded-lg">
                     <Layers className="h-5 w-5 mx-auto mb-1 text-primary" />
                     <p className="text-xl font-bold">{property.floors}</p>
-                    <p className="text-xs text-muted-foreground">Floors</p>
+                    <p className="text-xs text-muted-foreground">{t("floors")}</p>
                   </div>
                 )}
               </div>
@@ -428,19 +428,19 @@ export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewPr
                 {property.has_pets && (
                   <Badge variant="outline" className="gap-1">
                     <PawPrint className="h-3 w-3" />
-                    Pets: {property.pet_details || 'Yes'}
+                    {t("pets")}: {property.pet_details || 'Yes'}
                   </Badge>
                 )}
                 {property.has_pool && (
                   <Badge variant="outline" className="gap-1">
                     <Waves className="h-3 w-3" />
-                    Pool
+                    {t("pool")}
                   </Badge>
                 )}
                 {property.has_garage && (
                   <Badge variant="outline" className="gap-1">
                     <Car className="h-3 w-3" />
-                    Garage
+                    {t("garage")}
                   </Badge>
                 )}
                 {property.floor_type && (
@@ -452,7 +452,7 @@ export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewPr
                 {property.estimated_hours && (
                   <Badge variant="outline" className="gap-1">
                     <Timer className="h-3 w-3" />
-                    ~{property.estimated_hours}h estimated
+                    ~{property.estimated_hours}h {t("estimated")}
                   </Badge>
                 )}
               </div>
@@ -463,7 +463,7 @@ export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewPr
                   <div className="flex items-start gap-2">
                     <AlertTriangle className="h-4 w-4 text-warning mt-0.5" />
                     <div>
-                      <p className="text-sm font-medium text-warning">Special Instructions</p>
+                      <p className="text-sm font-medium text-warning">{t("special_instructions")}</p>
                       <p className="text-sm text-muted-foreground mt-1">{property.special_instructions}</p>
                     </div>
                   </div>
@@ -475,7 +475,7 @@ export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewPr
                 <div className="p-3 bg-primary/10 border border-primary/30 rounded-lg">
                   <div className="flex items-center gap-2">
                     <Key className="h-4 w-4 text-primary" />
-                    <p className="text-sm font-medium">Access Code: <span className="font-mono text-lg">{accessCode}</span></p>
+                    <p className="text-sm font-medium">{t("access_code")}: <span className="font-mono text-lg">{accessCode}</span></p>
                   </div>
                 </div>
               )}
@@ -488,7 +488,7 @@ export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewPr
                   onClick={() => window.open(property.google_maps_link!, '_blank')}
                 >
                   <ExternalLink className="h-4 w-4 mr-2" />
-                  Open in Google Maps
+                  {t("open_google_maps")}
                 </Button>
               )}
             </CardContent>
@@ -501,7 +501,7 @@ export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewPr
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <Clock className="h-5 w-5 text-primary" />
-                <span className="font-semibold text-foreground">Schedule</span>
+                <span className="font-semibold text-foreground">{t("schedule")}</span>
               </div>
               <Badge 
                 variant={currentJob.status === 'completed' ? 'default' : 'secondary'}
@@ -513,13 +513,13 @@ export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewPr
             
             <div className="space-y-3">
               <div className="flex justify-between text-base">
-                <span className="text-muted-foreground">Scheduled Time:</span>
+                <span className="text-muted-foreground">{t("scheduled_time")}:</span>
                 <span className="font-medium text-foreground">{currentJob.scheduled_time}</span>
               </div>
               
               {currentJob.start_time && (
                 <div className="flex justify-between text-base">
-                  <span className="text-muted-foreground">Started:</span>
+                  <span className="text-muted-foreground">{t("started")}:</span>
                   <span className="font-medium text-success">
                     {format(new Date(currentJob.start_time), "h:mm a")}
                   </span>
@@ -528,7 +528,7 @@ export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewPr
               
               {currentJob.end_time && (
                 <div className="flex justify-between text-base">
-                  <span className="text-muted-foreground">Completed:</span>
+                  <span className="text-muted-foreground">{t("completed")}:</span>
                   <span className="font-medium text-success">
                     {format(new Date(currentJob.end_time), "h:mm a")}
                   </span>
@@ -537,7 +537,7 @@ export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewPr
 
               {currentJob.start_time && (
                 <div className="flex justify-between text-base border-t border-border pt-3 mt-3">
-                  <span className="text-muted-foreground">Duration:</span>
+                  <span className="text-muted-foreground">{t("duration")}:</span>
                   <span className="font-bold text-primary text-lg">{calculateDuration()}</span>
                 </div>
               )}
@@ -551,7 +551,7 @@ export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewPr
             <CardContent className="p-5">
               <div className="flex items-center gap-2 mb-3">
                 <AlertTriangle className="h-5 w-5 text-warning" />
-                <span className="font-semibold text-foreground">Notes</span>
+                <span className="font-semibold text-foreground">{t("notes")}</span>
               </div>
               <p className="text-muted-foreground ml-7 text-base">{currentJob.notes}</p>
             </CardContent>
@@ -600,7 +600,7 @@ export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewPr
               ) : (
                 <Play className="h-6 w-6 mr-2" />
               )}
-              ▶ START JOB
+              ▶ {t("start_job").toUpperCase()}
             </Button>
           )}
 
@@ -615,12 +615,12 @@ export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewPr
               ) : (
                 <CheckCircle2 className="h-6 w-6 mr-2" />
               )}
-              ✓ COMPLETE JOB
+              ✓ {t("complete_job").toUpperCase()}
               {hasRequiredAreas && !allAreasComplete && (
-                <span className="ml-2 text-sm font-normal">(Complete all area photos)</span>
+                <span className="ml-2 text-sm font-normal">({t("complete_all_photos")})</span>
               )}
               {!hasRequiredAreas && photos.length === 0 && (
-                <span className="ml-2 text-sm font-normal">(Upload photo first)</span>
+                <span className="ml-2 text-sm font-normal">({t("upload_photo_first")})</span>
               )}
             </Button>
           )}
@@ -628,7 +628,7 @@ export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewPr
           {currentJob.status === "completed" && (
             <div className="flex items-center justify-center gap-3 py-4 text-success">
               <CheckCircle2 className="h-8 w-8" />
-              <span className="text-xl font-bold">Job Completed!</span>
+              <span className="text-xl font-bold">{t("job_completed")}</span>
             </div>
           )}
         </div>
@@ -645,7 +645,7 @@ export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewPr
             size="icon"
             className="absolute top-4 right-4 text-white"
             onClick={() => setSelectedPhoto(null)}
-            aria-label="Close photo"
+            aria-label={t("close")}
           >
             <XCircle className="h-8 w-8" />
           </Button>

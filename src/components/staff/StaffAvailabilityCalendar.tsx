@@ -1,20 +1,11 @@
 import { useStaffAvailability } from '@/hooks/useStaffAvailability';
+import { useLanguage } from '@/hooks/useLanguage';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Loader2, Save, Calendar } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
-const DAYS = [
-  { value: 0, label: 'Sun', fullLabel: 'Sunday' },
-  { value: 1, label: 'Mon', fullLabel: 'Monday' },
-  { value: 2, label: 'Tue', fullLabel: 'Tuesday' },
-  { value: 3, label: 'Wed', fullLabel: 'Wednesday' },
-  { value: 4, label: 'Thu', fullLabel: 'Thursday' },
-  { value: 5, label: 'Fri', fullLabel: 'Friday' },
-  { value: 6, label: 'Sat', fullLabel: 'Saturday' },
-];
 
 interface StaffAvailabilityCalendarProps {
   staffId?: string;
@@ -23,6 +14,17 @@ interface StaffAvailabilityCalendarProps {
 
 export function StaffAvailabilityCalendar({ staffId, compact = false }: StaffAvailabilityCalendarProps) {
   const { availability, loading, saving, toggleDay, updateHours, saveAvailability } = useStaffAvailability(staffId);
+  const { t } = useLanguage();
+
+  const DAYS = [
+    { value: 0, label: t('sun'), fullLabel: t('sunday') },
+    { value: 1, label: t('mon'), fullLabel: t('monday') },
+    { value: 2, label: t('tue'), fullLabel: t('tuesday') },
+    { value: 3, label: t('wed'), fullLabel: t('wednesday') },
+    { value: 4, label: t('thu'), fullLabel: t('thursday') },
+    { value: 5, label: t('fri'), fullLabel: t('friday') },
+    { value: 6, label: t('sat'), fullLabel: t('saturday') },
+  ];
 
   if (loading) {
     return (
@@ -44,7 +46,7 @@ export function StaffAvailabilityCalendar({ staffId, compact = false }: StaffAva
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
             <Calendar className="h-4 w-4 text-primary" />
-            Weekly Availability
+            {t('weekly_availability')}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -107,7 +109,7 @@ export function StaffAvailabilityCalendar({ staffId, compact = false }: StaffAva
             ) : (
               <Save className="h-4 w-4 mr-2" />
             )}
-            Save Availability
+            {t('save_availability')}
           </Button>
         </CardContent>
       </Card>
@@ -119,10 +121,10 @@ export function StaffAvailabilityCalendar({ staffId, compact = false }: StaffAva
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Calendar className="h-5 w-5 text-primary" />
-          Weekly Availability
+          {t('weekly_availability')}
         </CardTitle>
         <CardDescription>
-          Set which days and hours you're available to work
+          {t('set_availability')}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -153,7 +155,7 @@ export function StaffAvailabilityCalendar({ staffId, compact = false }: StaffAva
                       onChange={(e) => updateHours(day.value, e.target.value, avail.end_time)}
                       className="w-28"
                     />
-                    <span className="text-muted-foreground">to</span>
+                    <span className="text-muted-foreground">{t('to')}</span>
                     <Input
                       type="time"
                       value={avail.end_time}
@@ -164,7 +166,7 @@ export function StaffAvailabilityCalendar({ staffId, compact = false }: StaffAva
                 )}
                 
                 {!isAvailable && (
-                  <span className="text-sm text-muted-foreground ml-auto">Not available</span>
+                  <span className="text-sm text-muted-foreground ml-auto">{t('not_available')}</span>
                 )}
               </div>
             );
@@ -181,7 +183,7 @@ export function StaffAvailabilityCalendar({ staffId, compact = false }: StaffAva
           ) : (
             <Save className="h-4 w-4 mr-2" />
           )}
-          Save Availability
+          {t('save_availability')}
         </Button>
       </CardContent>
     </Card>

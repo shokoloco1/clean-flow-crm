@@ -24,6 +24,7 @@ import {
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { logger } from "@/lib/logger";
+import { useLanguage } from "@/hooks/useLanguage";
 
 interface ChecklistItem {
   id: string;
@@ -50,6 +51,7 @@ export default function AdvancedChecklist({
   legacyChecklist = [],
   onProgressUpdate 
 }: AdvancedChecklistProps) {
+  const { t } = useLanguage();
   const [items, setItems] = useState<ChecklistItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedRooms, setExpandedRooms] = useState<Set<string>>(new Set());
@@ -62,13 +64,10 @@ export default function AdvancedChecklist({
   const isEditable = jobStatus === 'in_progress';
 
   const initializeFromLegacy = useCallback(async () => {
-    // Convert legacy checklist (simple string array) to advanced format
-    // Group by room if format is "Room: Task" or put all in "General"
     const newItems = legacyChecklist.map((task, index) => {
       let roomName = "General";
       let taskName = task;
 
-      // Check if task includes room prefix like "Kitchen: Clean sink"
       if (task.includes(":")) {
         const parts = task.split(":");
         roomName = parts[0].trim();
@@ -113,11 +112,9 @@ export default function AdvancedChecklist({
 
     if (data && data.length > 0) {
       setItems(data as ChecklistItem[]);
-      // Auto-expand first room
       const rooms = [...new Set(data.map(item => item.room_name))];
       setExpandedRooms(new Set([rooms[0]]));
     } else if (legacyChecklist.length > 0) {
-      // Initialize from legacy checklist if no items exist
       await initializeFromLegacy();
     }
 
@@ -127,7 +124,6 @@ export default function AdvancedChecklist({
   useEffect(() => {
     fetchItems();
 
-    // Subscribe to real-time updates
     const channel = supabase
       .channel(`checklist-${jobId}`)
       .on(
@@ -142,7 +138,6 @@ export default function AdvancedChecklist({
     };
   }, [jobId, fetchItems]);
 
-  // Calculate and report progress
   useEffect(() => {
     if (items.length > 0) {
       const completedCount = items.filter(item => 
@@ -165,7 +160,7 @@ export default function AdvancedChecklist({
       .eq("id", item.id);
 
     if (error) {
-      toast.error("Error updating task");
+      toast.error(t("error_updating_task"));
     }
   };
 
@@ -191,7 +186,7 @@ export default function AdvancedChecklist({
       .upload(fileName, file, { cacheControl: '3600' });
 
     if (error) {
-      toast.error("Error uploading photo");
+      toast.error(t("error_uploading_photo"));
       setIsUploadingPhoto(false);
       return;
     }
@@ -219,9 +214,9 @@ export default function AdvancedChecklist({
       .eq("id", selectedItem.id);
 
     if (error) {
-      toast.error("Error saving issue");
+      toast.error(t("error_saving_issue"));
     } else {
-      toast.success("Issue reported");
+      toast.success(t("issue_reported"));
       setIssueDialogOpen(false);
       setSelectedItem(null);
       setIssueNote("");
@@ -241,7 +236,6 @@ export default function AdvancedChecklist({
     });
   };
 
-  // Group items by room
   const groupedItems = items.reduce((acc, item) => {
     if (!acc[item.room_name]) {
       acc[item.room_name] = [];
@@ -295,13 +289,13 @@ export default function AdvancedChecklist({
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2 text-lg">
               <CheckSquare className="h-5 w-5 text-primary" />
-              Checklist
+              {t("checklist")}
             </CardTitle>
             <div className="flex items-center gap-2">
               {issueCount > 0 && (
                 <span className="flex items-center gap-1 text-sm text-destructive bg-destructive/10 px-2 py-1 rounded-full">
                   <AlertTriangle className="h-3 w-3" />
-                  {issueCount} issue{issueCount > 1 ? 's' : ''}
+                  {issueCount} {issueCount > 1 ? t("issues") : t("issue")}
                 </span>
               )}
               <span className="text-sm font-medium text-foreground">
@@ -319,7 +313,6 @@ export default function AdvancedChecklist({
 
             return (
               <div key={roomName} className="border border-border rounded-lg overflow-hidden">
-                {/* Room Header */}
                 <button
                   onClick={() => toggleRoom(roomName)}
                   className="w-full flex items-center justify-between p-4 bg-muted/30 hover:bg-muted/50 transition-colors"
@@ -333,7 +326,7 @@ export default function AdvancedChecklist({
                     <span className="font-medium text-foreground">{roomName}</span>
                     {roomIssues > 0 && (
                       <span className="text-xs text-destructive bg-destructive/10 px-1.5 py-0.5 rounded">
-                        {roomIssues} issue{roomIssues > 1 ? 's' : ''}
+                        {roomIssues} {roomIssues > 1 ? t("issues") : t("issue")}
                       </span>
                     )}
                   </div>
@@ -350,7 +343,6 @@ export default function AdvancedChecklist({
                   </div>
                 </button>
 
-                {/* Room Tasks */}
                 {isExpanded && (
                   <div className="divide-y divide-border">
                     {roomItems.map((item) => (
@@ -410,7 +402,7 @@ export default function AdvancedChecklist({
                             size="sm"
                             onClick={() => handleIssueClick(item)}
                           >
-                            View Issue
+                            {t("view_issue")}
                           </Button>
                         )}
                       </div>
@@ -423,20 +415,19 @@ export default function AdvancedChecklist({
         </CardContent>
       </Card>
 
-      {/* Issue Dialog */}
       <Dialog open={issueDialogOpen} onOpenChange={setIssueDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-destructive" />
-              {isEditable ? "Report Issue" : "Issue Details"}
+              {isEditable ? t("report_issue") : t("issue_details")}
             </DialogTitle>
           </DialogHeader>
           
           <div className="space-y-4">
             {selectedItem && (
               <div className="p-3 bg-muted rounded-lg">
-                <p className="text-sm text-muted-foreground">Task:</p>
+                <p className="text-sm text-muted-foreground">{t("task")}:</p>
                 <p className="font-medium text-foreground">{selectedItem.task_name}</p>
               </div>
             )}
@@ -445,19 +436,19 @@ export default function AdvancedChecklist({
               <>
                 <div>
                   <label className="text-sm font-medium text-foreground mb-2 block">
-                    Describe the issue
+                    {t("describe_issue")}
                   </label>
                   <Textarea
                     value={issueNote}
                     onChange={(e) => setIssueNote(e.target.value)}
-                    placeholder="What's the problem?"
+                    placeholder={t("whats_problem")}
                     rows={3}
                   />
                 </div>
 
                 <div>
                   <label className="text-sm font-medium text-foreground mb-2 block">
-                    Photo Evidence
+                    {t("photo_evidence")}
                   </label>
                   {issuePhotoUrl ? (
                     <div className="relative">
@@ -490,7 +481,7 @@ export default function AdvancedChecklist({
                       ) : (
                         <>
                           <Camera className="h-8 w-8 text-muted-foreground mb-2" />
-                          <span className="text-sm text-muted-foreground">Take or upload photo</span>
+                          <span className="text-sm text-muted-foreground">{t("take_upload_photo")}</span>
                         </>
                       )}
                     </label>
@@ -501,31 +492,34 @@ export default function AdvancedChecklist({
               <>
                 {selectedItem?.issue_note && (
                   <div>
-                    <p className="text-sm font-medium text-foreground mb-1">Description:</p>
+                    <p className="text-sm font-medium text-foreground mb-1">{t("notes")}:</p>
                     <p className="text-muted-foreground">{selectedItem.issue_note}</p>
                   </div>
                 )}
                 {selectedItem?.issue_photo_url && (
-                  <div>
-                    <p className="text-sm font-medium text-foreground mb-2">Photo:</p>
-                    <img 
-                      src={selectedItem.issue_photo_url} 
-                      alt="Issue" 
-                      className="w-full rounded-lg"
-                    />
-                  </div>
+                  <img 
+                    src={selectedItem.issue_photo_url} 
+                    alt="Issue" 
+                    className="w-full h-48 object-cover rounded-lg"
+                  />
                 )}
               </>
             )}
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIssueDialogOpen(false)}>
-              {isEditable ? "Cancel" : "Close"}
-            </Button>
-            {isEditable && (
-              <Button variant="destructive" onClick={saveIssue}>
-                Report Issue
+            {isEditable ? (
+              <>
+                <Button variant="outline" onClick={() => setIssueDialogOpen(false)}>
+                  {t("cancel")}
+                </Button>
+                <Button onClick={saveIssue}>
+                  {t("save_issue")}
+                </Button>
+              </>
+            ) : (
+              <Button onClick={() => setIssueDialogOpen(false)}>
+                {t("close")}
               </Button>
             )}
           </DialogFooter>
