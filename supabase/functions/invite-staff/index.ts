@@ -295,7 +295,10 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
-    // 1. Create user with admin API
+    // 1. Try to create user with admin API
+    let userId: string;
+    let isExistingUser = false;
+
     const { data: userData, error: userError } = await supabaseAdmin.auth.admin.createUser({
       email,
       email_confirm: false,
@@ -303,72 +306,119 @@ serve(async (req) => {
     });
 
     if (userError) {
-      console.error("[invite-staff] User creation error:", userError);
-      if (userError.message.includes("already been registered")) {
-        throw new Error("This email is already registered");
+      // If user already exists, look them up and reuse
+      if (userError.message.includes("already been registered") || userError.code === "email_exists") {
+        console.log(`[invite-staff] User ${email} already exists, checking if already staff...`);
+        
+        // Find existing user
+        const { data: existingUsers, error: listError } = await supabaseAdmin.auth.admin.listUsers();
+        if (listError) throw listError;
+        
+        const existingUser = existingUsers.users.find(u => u.email === email);
+        if (!existingUser) {
+          throw new Error("Could not find existing user. Please try again.");
+        }
+        
+        userId = existingUser.id;
+        isExistingUser = true;
+
+        // Check if they already have a staff role
+        const { data: existingRole } = await supabaseAdmin
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", userId)
+          .single();
+
+        if (existingRole) {
+          // User exists and already has a role - update their profile instead
+          console.log(`[invite-staff] User ${email} already has role: ${existingRole.role}. Updating profile.`);
+          
+          await supabaseAdmin
+            .from("profiles")
+            .update({
+              full_name: fullName,
+              phone: phone || null,
+              certifications: certifications || [],
+              is_active: true
+            })
+            .eq("user_id", userId);
+
+          if (hourlyRate) {
+            await supabaseAdmin
+              .from("profiles_sensitive")
+              .upsert({
+                user_id: userId,
+                hourly_rate: parseFloat(hourlyRate)
+              }, { onConflict: "user_id" });
+          }
+        }
+      } else {
+        console.error("[invite-staff] User creation error:", userError);
+        throw userError;
       }
-      throw userError;
+    } else {
+      userId = userData.user.id;
     }
 
-    const userId = userData.user.id;
-    console.log(`[invite-staff] User created with ID: ${userId}`);
+    console.log(`[invite-staff] User ID: ${userId}, existing: ${isExistingUser}`);
 
-    // 2. Create profile (without sensitive data)
-    const { error: profileError } = await supabaseAdmin
-      .from("profiles")
-      .insert({
-        user_id: userId,
-        email,
-        full_name: fullName,
-        phone: phone || null,
-        certifications: certifications || [],
-        hire_date: new Date().toISOString().split('T')[0],
-        is_active: true
-      });
-
-    if (profileError) {
-      console.error("[invite-staff] Profile creation error:", profileError);
-      throw profileError;
-    }
-
-    // 2b. Create sensitive profile data (hourly rate)
-    if (hourlyRate) {
-      const { error: sensitiveError } = await supabaseAdmin
-        .from("profiles_sensitive")
+    // 2. Create profile if new user
+    if (!isExistingUser) {
+      const { error: profileError } = await supabaseAdmin
+        .from("profiles")
         .insert({
           user_id: userId,
-          hourly_rate: parseFloat(hourlyRate)
+          email,
+          full_name: fullName,
+          phone: phone || null,
+          certifications: certifications || [],
+          hire_date: new Date().toISOString().split('T')[0],
+          is_active: true
         });
 
-      if (sensitiveError) {
-        console.error("[invite-staff] Sensitive profile error:", sensitiveError);
-        // Don't throw - profile was created, just log the error
+      if (profileError) {
+        console.error("[invite-staff] Profile creation error:", profileError);
+        throw profileError;
       }
+
+      // 2b. Create sensitive profile data (hourly rate)
+      if (hourlyRate) {
+        const { error: sensitiveError } = await supabaseAdmin
+          .from("profiles_sensitive")
+          .insert({
+            user_id: userId,
+            hourly_rate: parseFloat(hourlyRate)
+          });
+
+        if (sensitiveError) {
+          console.error("[invite-staff] Sensitive profile error:", sensitiveError);
+        }
+      }
+
+      // 3. Assign staff role
+      const { error: roleError } = await supabaseAdmin
+        .from("user_roles")
+        .insert({ user_id: userId, role: "staff" });
+
+      if (roleError) {
+        console.error("[invite-staff] Role assignment error:", roleError);
+        throw roleError;
+      }
+
+      // 4. Create default availability (Mon-Fri 8am-5pm)
+      const availabilityRecords = [1, 2, 3, 4, 5].map(day => ({
+        user_id: userId,
+        day_of_week: day,
+        start_time: "08:00",
+        end_time: "17:00",
+        is_available: true
+      }));
+      availabilityRecords.push(
+        { user_id: userId, day_of_week: 0, start_time: "08:00", end_time: "17:00", is_available: false },
+        { user_id: userId, day_of_week: 6, start_time: "08:00", end_time: "17:00", is_available: false }
+      );
+      await supabaseAdmin.from("staff_availability").insert(availabilityRecords);
     }
-
-    // 3. Assign staff role
-    const { error: roleError } = await supabaseAdmin
-      .from("user_roles")
-      .insert({ user_id: userId, role: "staff" });
-
-    if (roleError) {
-      console.error("[invite-staff] Role assignment error:", roleError);
-      throw roleError;
-    }
-
-    // 4. Create default availability (Mon-Fri 8am-5pm)
-    const availabilityRecords = [1, 2, 3, 4, 5].map(day => ({
-      user_id: userId,
-      day_of_week: day,
-      start_time: "08:00",
-      end_time: "17:00",
-      is_available: true
-    }));
-    availabilityRecords.push(
-      { user_id: userId, day_of_week: 0, start_time: "08:00", end_time: "17:00", is_available: false },
-      { user_id: userId, day_of_week: 6, start_time: "08:00", end_time: "17:00", is_available: false }
-    );
-    await supabaseAdmin.from("staff_availability").insert(availabilityRecords);
 
     // 5. Generate magic link for password setup
     const origin = req.headers.get("origin");
