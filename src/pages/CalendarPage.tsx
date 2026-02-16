@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback, useMemo } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/queries/keys";
-import { fetchCalendarJobs, type CalendarJob as CalendarJobRecord } from "@/lib/queries/calendar";
+import { fetchCalendarJobs } from "@/lib/queries/calendar";
 import { fetchClientsDropdown } from "@/lib/queries/reference";
 import { fetchStaffDropdown } from "@/lib/queries/reference";
 import { supabase } from "@/integrations/supabase/client";
@@ -47,17 +47,6 @@ interface Job {
   assigned_staff_id: string | null;
   clients: { name: string } | null;
   profiles: { full_name: string } | null;
-}
-
-interface Client {
-  id: string;
-  name: string;
-  address: string | null;
-}
-
-interface Staff {
-  user_id: string;
-  full_name: string;
 }
 
 interface CalendarEvent {
@@ -153,7 +142,10 @@ export default function CalendarPage() {
     });
   }, []);
 
-  const events = useMemo(() => transformJobsToEvents(calendarJobs as Job[]), [calendarJobs, transformJobsToEvents]);
+  const events = useMemo(
+    () => transformJobsToEvents(calendarJobs as Job[]),
+    [calendarJobs, transformJobsToEvents],
+  );
 
   // Real-time subscription: invalidate calendar query on any jobs table change
   useEffect(() => {

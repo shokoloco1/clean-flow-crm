@@ -20,7 +20,8 @@ vi.mock("@/integrations/supabase/client", () => ({
       signUp: (...args: unknown[]) => mockSignUp(...args),
       signOut: (...args: unknown[]) => mockSignOut(...args),
       getSession: () => mockGetSession(),
-      onAuthStateChange: (callback: Function) => mockOnAuthStateChange(callback),
+      onAuthStateChange: (callback: (...args: unknown[]) => void) =>
+        mockOnAuthStateChange(callback),
       resend: (...args: unknown[]) => mockResend(...args),
     },
     rpc: (...args: unknown[]) => mockRpc(...args),

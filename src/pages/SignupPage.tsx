@@ -79,7 +79,9 @@ const SignupPage = () => {
   useEffect(() => {
     try {
       isSigningUpRef.current = sessionStorage.getItem(SIGNUP_FLOW_KEY) === "true";
-    } catch {}
+    } catch {
+      /* storage may be unavailable */
+    }
   }, []);
 
   // Persist signup flag to ALL layers (ref + sessionStorage + state)
@@ -87,14 +89,18 @@ const SignupPage = () => {
     isSigningUpRef.current = true;
     try {
       sessionStorage.setItem(SIGNUP_FLOW_KEY, "true");
-    } catch {}
+    } catch {
+      /* storage may be unavailable */
+    }
     setIsSigningUp(true);
   };
   const clearSignupFlag = () => {
     isSigningUpRef.current = false;
     try {
       sessionStorage.removeItem(SIGNUP_FLOW_KEY);
-    } catch {}
+    } catch {
+      /* storage may be unavailable */
+    }
     setIsSigningUp(false);
   };
 
@@ -221,7 +227,9 @@ const SignupPage = () => {
     try {
       localStorage.removeItem("pulcrix_user_role");
       localStorage.removeItem("pulcrix_user_id");
-    } catch {}
+    } catch {
+      /* storage may be unavailable */
+    }
 
     // For invited staff, role should be "staff"
     const userRole = isInvitedStaff ? "staff" : "admin";
@@ -710,7 +718,9 @@ const SignupPage = () => {
                     try {
                       localStorage.removeItem("pulcrix_user_role");
                       localStorage.removeItem("pulcrix_user_id");
-                    } catch {}
+                    } catch {
+                      /* storage may be unavailable */
+                    }
                     markSignupStarted();
                     // Use /signup without query params - sessionStorage handles the flow tracking
                     const { error } = await lovable.auth.signInWithOAuth("google", {

@@ -19,7 +19,7 @@ export function usePWA() {
     // Check if already installed/standalone
     const checkInstalled = () => {
       const standalone = window.matchMedia("(display-mode: standalone)").matches;
-      // @ts-ignore - navigator.standalone is iOS-specific
+      // @ts-expect-error -- navigator.standalone is iOS-specific, not in standard TS DOM types
       const iosStandalone = window.navigator.standalone === true;
       setIsStandalone(standalone || iosStandalone);
       setIsInstalled(standalone || iosStandalone);

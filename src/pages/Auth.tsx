@@ -37,7 +37,9 @@ export default function Auth() {
   useEffect(() => {
     try {
       sessionStorage.removeItem("pulcrix_signup_in_progress");
-    } catch {}
+    } catch {
+      /* sessionStorage may be unavailable */
+    }
   }, []);
 
   const handlePasswordReset = async (e: React.FormEvent) => {

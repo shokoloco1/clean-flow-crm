@@ -2,7 +2,7 @@ import { useState, useMemo, useCallback, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { queryKeys } from "@/lib/queries/keys";
-import { fetchProperties, fetchPropertyPhotos, fetchPropertiesPaginated } from "@/lib/queries/properties";
+import { fetchPropertyPhotos, fetchPropertiesPaginated } from "@/lib/queries/properties";
 import { fetchClientsDropdown } from "@/lib/queries/reference";
 import { DEFAULT_PAGE_SIZE } from "@/lib/queries/pagination";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
@@ -108,18 +108,6 @@ interface Property {
   beds?: number;
   rugs?: number;
   estimated_hours?: number;
-}
-
-interface Client {
-  id: string;
-  name: string;
-}
-
-interface PropertyPhoto {
-  id: string;
-  photo_url: string;
-  room_area: string | null;
-  description: string | null;
 }
 
 const propertyTypeConfig = {

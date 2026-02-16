@@ -18,39 +18,11 @@ import { TodayJobsList } from "@/components/staff/TodayJobsList";
 import { StaffAvailabilityCalendar } from "@/components/staff/StaffAvailabilityCalendar";
 import { LanguageSwitcher } from "@/components/staff/LanguageSwitcher";
 import { queryKeys } from "@/lib/queries/keys";
-import { fetchMyJobs, fetchChecklistProgress } from "@/lib/queries/staff-dashboard";
-
-interface PropertyPhotos {
-  id: string;
-  photo_url: string;
-  room_area: string | null;
-}
-
-interface Property {
-  id: string;
-  name: string;
-  address: string;
-  bedrooms: number | null;
-  bathrooms: number | null;
-  living_areas: number | null;
-  floors: number | null;
-  floor_type: string | null;
-  has_pets: boolean | null;
-  pet_details: string | null;
-  has_pool: boolean | null;
-  has_garage: boolean | null;
-  special_instructions: string | null;
-  access_codes: string | null;
-  estimated_hours: number | null;
-  google_maps_link: string | null;
-  suburb: string | null;
-  post_code: string | null;
-  state: string | null;
-  sofas: number | null;
-  beds: number | null;
-  dining_chairs: number | null;
-  rugs: number | null;
-}
+import {
+  fetchMyJobs,
+  fetchChecklistProgress,
+  type StaffProperty,
+} from "@/lib/queries/staff-dashboard";
 
 interface Job {
   id: string;
@@ -64,12 +36,7 @@ interface Job {
   notes: string | null;
   property_id: string | null;
   clients: { name: string } | null;
-  properties: Property | null;
-}
-
-interface ChecklistProgress {
-  completed: number;
-  total: number;
+  properties: StaffProperty | null;
 }
 
 export default function StaffDashboard() {
@@ -138,8 +105,14 @@ export default function StaffDashboard() {
 
   // Group jobs by date
   const todayStr = format(new Date(), "yyyy-MM-dd");
-  const todayJobs = useMemo(() => jobs.filter((j) => j.scheduled_date === todayStr), [jobs, todayStr]);
-  const upcomingJobs = useMemo(() => jobs.filter((j) => j.scheduled_date !== todayStr), [jobs, todayStr]);
+  const todayJobs = useMemo(
+    () => jobs.filter((j) => j.scheduled_date === todayStr),
+    [jobs, todayStr],
+  );
+  const upcomingJobs = useMemo(
+    () => jobs.filter((j) => j.scheduled_date !== todayStr),
+    [jobs, todayStr],
+  );
 
   if (selectedJob) {
     return (

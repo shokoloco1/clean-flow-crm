@@ -41,8 +41,12 @@ import {
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { queryKeys } from "@/lib/queries/keys";
-import { fetchRecurringSchedules, fetchRecurringSchedulesPaginated } from "@/lib/queries/recurring";
-import { fetchClientsDropdown, fetchPropertiesDropdown, fetchStaffDropdown } from "@/lib/queries/reference";
+import { fetchRecurringSchedulesPaginated } from "@/lib/queries/recurring";
+import {
+  fetchClientsDropdown,
+  fetchPropertiesDropdown,
+  fetchStaffDropdown,
+} from "@/lib/queries/reference";
 import { DEFAULT_PAGE_SIZE } from "@/lib/queries/pagination";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import {
@@ -74,24 +78,6 @@ interface RecurringSchedule {
   clients: { name: string } | null;
   properties: { name: string } | null;
   profiles: { full_name: string } | null;
-}
-
-interface Client {
-  id: string;
-  name: string;
-  address: string | null;
-}
-
-interface Property {
-  id: string;
-  name: string;
-  address: string;
-  client_id: string | null;
-}
-
-interface Staff {
-  user_id: string;
-  full_name: string;
 }
 
 const DAYS_OF_WEEK = [
@@ -140,7 +126,11 @@ export default function RecurringJobsPage() {
   const { data: schedulesResult, isLoading: loading } = useQuery({
     queryKey: queryKeys.recurring.list({ page, search: debouncedSearch }),
     queryFn: () =>
-      fetchRecurringSchedulesPaginated({ page, pageSize: DEFAULT_PAGE_SIZE, search: debouncedSearch }),
+      fetchRecurringSchedulesPaginated({
+        page,
+        pageSize: DEFAULT_PAGE_SIZE,
+        search: debouncedSearch,
+      }),
   });
   const schedules = schedulesResult?.data ?? [];
   const totalCount = schedulesResult?.count ?? 0;
@@ -336,8 +326,14 @@ export default function RecurringJobsPage() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="outline" onClick={handleGenerateNow} disabled={generateMutation.isPending}>
-              <RefreshCw className={`mr-2 h-4 w-4 ${generateMutation.isPending ? "animate-spin" : ""}`} />
+            <Button
+              variant="outline"
+              onClick={handleGenerateNow}
+              disabled={generateMutation.isPending}
+            >
+              <RefreshCw
+                className={`mr-2 h-4 w-4 ${generateMutation.isPending ? "animate-spin" : ""}`}
+              />
               Generate Now
             </Button>
             <Button
