@@ -2,8 +2,7 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { format, parseISO } from "date-fns";
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
+import { loadPdfLibs } from "@/lib/pdf-loader";
 import { formatAUD, formatABN } from "@/lib/australian";
 import { logger } from "@/lib/logger";
 
@@ -84,6 +83,7 @@ export function useInvoiceEmail() {
     items: InvoiceItem[],
     businessSettings: BusinessSettings,
   ): Promise<string> => {
+    const { jsPDF, autoTable } = await loadPdfLibs();
     const doc = new jsPDF();
     const hasGST = invoice.tax_rate > 0;
 

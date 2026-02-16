@@ -261,7 +261,7 @@ export function JobDetailDialog({ job, photos, onClose }: JobDetailDialogProps) 
         .eq("job_id", job.id)
         .order("sort_order");
 
-      const doc = generateSingleJobPDF(
+      const doc = await generateSingleJobPDF(
         job as Parameters<typeof generateSingleJobPDF>[0],
         photos,
         items || [],

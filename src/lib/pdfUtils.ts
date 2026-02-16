@@ -1,5 +1,4 @@
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
+import { loadPdfLibs } from "./pdf-loader";
 import { format } from "date-fns";
 import { formatDateAU } from "./australian";
 
@@ -34,11 +33,12 @@ interface ChecklistItem {
   issue_note: string | null;
 }
 
-export function generateSingleJobPDF(
+export async function generateSingleJobPDF(
   job: JobData,
   photos: PhotoData[] = [],
   checklist: ChecklistItem[] = [],
-): jsPDF {
+) {
+  const { jsPDF, autoTable } = await loadPdfLibs();
   const doc = new jsPDF();
 
   // Header

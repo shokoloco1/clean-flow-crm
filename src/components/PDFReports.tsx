@@ -15,8 +15,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { format, subDays, startOfMonth, endOfMonth } from "date-fns";
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
+import { loadPdfLibs } from "@/lib/pdf-loader";
 import { logger } from "@/lib/logger";
 
 type ReportType = "jobs" | "staff" | "alerts" | "job-detail";
@@ -56,7 +55,8 @@ export function PDFReports() {
     });
   };
 
-  const createPDFHeader = (doc: jsPDF, title: string, dateRange: DateRange) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- jsPDF type not available at import time due to dynamic loading
+  const createPDFHeader = (doc: any, title: string, dateRange: DateRange) => {
     // Title
     doc.setFontSize(20);
     doc.setTextColor(40, 40, 40);
@@ -78,6 +78,7 @@ export function PDFReports() {
   };
 
   const generateJobsPDF = async () => {
+    const { jsPDF, autoTable } = await loadPdfLibs();
     const { data: jobs, error } = await supabase
       .from("jobs")
       .select("*")
@@ -180,6 +181,7 @@ export function PDFReports() {
   };
 
   const generateStaffPDF = async () => {
+    const { jsPDF, autoTable } = await loadPdfLibs();
     const { data: profiles, error: profilesError } = await supabase
       .from("profiles")
       .select("user_id, full_name, email, phone, hire_date")
@@ -258,6 +260,7 @@ export function PDFReports() {
   };
 
   const generateAlertsPDF = async () => {
+    const { jsPDF, autoTable } = await loadPdfLibs();
     const { data: alerts, error } = await supabase
       .from("job_alerts")
       .select("*")
@@ -339,6 +342,7 @@ export function PDFReports() {
   };
 
   const generateJobDetailPDF = async () => {
+    const { jsPDF } = await loadPdfLibs();
     // Get completed jobs with all details
     const { data: jobs, error } = await supabase
       .from("jobs")
@@ -446,7 +450,7 @@ export function PDFReports() {
   const handleGenerateReport = async () => {
     setIsGenerating(true);
     try {
-      let doc: jsPDF;
+      let doc: { save: (filename: string) => void };
       let filename: string;
 
       switch (reportType) {

@@ -163,7 +163,7 @@ describe("useRateLimit", () => {
       expect(mockRpc).toHaveBeenCalledWith("record_login_attempt", {
         p_email: "test@example.com",
         p_success: false,
-        p_ip_address: null,
+        p_ip_address: undefined,
       });
     });
 
@@ -179,7 +179,7 @@ describe("useRateLimit", () => {
       expect(mockRpc).toHaveBeenCalledWith("record_login_attempt", {
         p_email: "test@example.com",
         p_success: true,
-        p_ip_address: null,
+        p_ip_address: undefined,
       });
     });
 

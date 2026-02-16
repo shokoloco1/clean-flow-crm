@@ -23,8 +23,7 @@ import { Separator } from "@/components/ui/separator";
 import { Download, Loader2, Building2, Calendar, Receipt } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { toast } from "sonner";
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
+import { loadPdfLibs } from "@/lib/pdf-loader";
 import { formatAUD, formatABN } from "@/lib/australian";
 import { useBusinessSettings } from "@/hooks/useBusinessSettings";
 import { logger } from "@/lib/logger";
@@ -137,6 +136,7 @@ export function InvoiceDetailDialog({ invoice, onClose, onUpdated }: InvoiceDeta
     setGeneratingPDF(true);
 
     try {
+      const { jsPDF, autoTable } = await loadPdfLibs();
       const doc = new jsPDF();
       const hasGST = invoice.tax_rate > 0;
 

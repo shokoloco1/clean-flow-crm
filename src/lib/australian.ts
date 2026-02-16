@@ -145,7 +145,7 @@ export function formatAUPhone(phone: string): string {
   const clean = phone.replace(/[\s\-()]/g, "");
 
   // Convert +61 to 0 for display
-  let formatted = clean.replace(/^\+61/, "0");
+  const formatted = clean.replace(/^\+61/, "0");
 
   if (formatted.length === 10) {
     // Mobile: 0XXX XXX XXX
