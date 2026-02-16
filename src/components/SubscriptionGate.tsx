@@ -130,7 +130,7 @@ export function SubscriptionGate({ children, trialDays = 14 }: SubscriptionGateP
   // Show loading while checking subscription
   if (loading || subscriptionLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-3">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
           <span className="text-sm text-muted-foreground">Checking subscription...</span>
@@ -150,28 +150,26 @@ export function SubscriptionGate({ children, trialDays = 14 }: SubscriptionGateP
       <div className="relative">
         <TrialBanner />
         {/* Add padding to account for banner */}
-        <div className="pt-10">
-          {children}
-        </div>
+        <div className="pt-10">{children}</div>
       </div>
     );
   }
 
   // Trial expired and no subscription - show upgrade screen
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-background via-background to-primary/5 p-4">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-background via-background to-primary/5 p-4">
       <div className="w-full max-w-lg space-y-6">
         {/* Logo */}
-        <div className="text-center space-y-3">
+        <div className="space-y-3 text-center">
           <div className="flex items-center justify-center">
             <PulcrixLogo size="lg" />
           </div>
         </div>
 
         <Card className="border-border shadow-xl">
-          <CardHeader className="text-center pb-2">
-            <Badge variant="secondary" className="w-fit mx-auto mb-4">
-              <Clock className="h-3 w-3 mr-1" />
+          <CardHeader className="pb-2 text-center">
+            <Badge variant="secondary" className="mx-auto mb-4 w-fit">
+              <Clock className="mr-1 h-3 w-3" />
               Trial Ended
             </Badge>
             <CardTitle className="text-xl">Your Free Trial Has Expired</CardTitle>
@@ -182,9 +180,9 @@ export function SubscriptionGate({ children, trialDays = 14 }: SubscriptionGateP
 
           <CardContent className="space-y-6">
             {/* Benefits reminder */}
-            <div className="bg-muted/50 rounded-lg p-4 space-y-2">
-              <p className="font-medium text-sm text-foreground">With Pulcrix you get:</p>
-              <ul className="text-sm text-muted-foreground space-y-1">
+            <div className="space-y-2 rounded-lg bg-muted/50 p-4">
+              <p className="text-sm font-medium text-foreground">With Pulcrix you get:</p>
+              <ul className="space-y-1 text-sm text-muted-foreground">
                 <li className="flex items-center gap-2">
                   <span className="text-success">✓</span> Unlimited job scheduling
                 </li>
@@ -204,13 +202,10 @@ export function SubscriptionGate({ children, trialDays = 14 }: SubscriptionGateP
             </div>
 
             {/* CTA */}
-            <Button
-              className="w-full h-12 text-base group"
-              onClick={() => navigate("/pricing")}
-            >
+            <Button className="group h-12 w-full text-base" onClick={() => navigate("/pricing")}>
               <Rocket className="mr-2 h-5 w-5" />
               View Plans & Upgrade
-              <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+              <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Button>
 
             {/* Pricing hint */}

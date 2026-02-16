@@ -55,9 +55,9 @@ const queryClient = new QueryClient({
 
 // Loading fallback component
 const PageLoader = () => (
-  <div className="min-h-screen flex items-center justify-center bg-background">
+  <div className="flex min-h-screen items-center justify-center bg-background">
     <div className="flex flex-col items-center gap-4">
-      <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary" />
+      <div className="h-10 w-10 animate-spin rounded-full border-b-2 border-primary" />
       <p className="text-sm text-muted-foreground">Loading...</p>
     </div>
   </div>
@@ -75,153 +75,153 @@ const App = () => (
             <AuthProvider>
               <AnalyticsProvider>
                 <ErrorBoundary>
-                <Suspense fallback={<PageLoader />}>
-                  <Routes>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/auth" element={<Auth />} />
-                  <Route path="/pricing" element={<PricingPage />} />
-                  <Route path="/signup" element={<SignupPage />} />
-                  <Route
-                    path="/onboarding"
-                    element={
-                      <ProtectedRoute allowedRoles={["admin"]}>
-                        <OnboardingPage />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route 
-                    path="/admin" 
-                    element={
-                      <ProtectedRoute allowedRoles={["admin"]}>
-                        <AdminDashboard />
-                      </ProtectedRoute>
-                    } 
-                  />
-                  <Route 
-                    path="/admin/properties" 
-                    element={
-                      <ProtectedRoute allowedRoles={["admin"]}>
-                        <PropertiesPage />
-                      </ProtectedRoute>
-                    } 
-                  />
-                  <Route 
-                    path="/admin/staff" 
-                    element={
-                      <ProtectedRoute allowedRoles={["admin"]}>
-                        <StaffManagementPage />
-                      </ProtectedRoute>
-                    } 
-                  />
-                  <Route 
-                    path="/admin/calendar" 
-                    element={
-                      <ProtectedRoute allowedRoles={["admin"]}>
-                        <CalendarPage />
-                      </ProtectedRoute>
-                    } 
-                  />
-                  <Route 
-                    path="/admin/clients" 
-                    element={
-                      <ProtectedRoute allowedRoles={["admin"]}>
-                        <ClientsPage />
-                      </ProtectedRoute>
-                    } 
-                  />
-                  <Route 
-                    path="/admin/recurring" 
-                    element={
-                      <ProtectedRoute allowedRoles={["admin"]}>
-                        <RecurringJobsPage />
-                      </ProtectedRoute>
-                    } 
-                  />
-                  <Route 
-                    path="/admin/settings" 
-                    element={
-                      <ProtectedRoute allowedRoles={["admin"]}>
-                        <SettingsPage />
-                      </ProtectedRoute>
-                    } 
-                  />
-                  <Route 
-                    path="/admin/invoices" 
-                    element={
-                      <ProtectedRoute allowedRoles={["admin"]}>
-                        <InvoicesPage />
-                      </ProtectedRoute>
-                    } 
-                  />
-                  <Route 
-                    path="/admin/price-lists" 
-                    element={
-                      <ProtectedRoute allowedRoles={["admin"]}>
-                        <PriceListPage />
-                      </ProtectedRoute>
-                    } 
-                  />
-                  <Route 
-                    path="/admin/reports" 
-                    element={
-                      <ProtectedRoute allowedRoles={["admin"]}>
-                        <ReportsPage />
-                      </ProtectedRoute>
-                    } 
-                  />
-                  <Route 
-                    path="/staff"
-                    element={
-                      <ProtectedRoute allowedRoles={["staff"]}>
-                        <StaffDashboard />
-                      </ProtectedRoute>
-                    } 
-                  />
-                  <Route 
-                    path="/staff/job/:id/start"
-                    element={
-                      <ProtectedRoute allowedRoles={["staff"]}>
-                        <JobStartPage />
-                      </ProtectedRoute>
-                    } 
-                  />
-                  <Route 
-                    path="/staff/job/:id/photos-before"
-                    element={
-                      <ProtectedRoute allowedRoles={["staff"]}>
-                        <JobPhotosBeforePage />
-                      </ProtectedRoute>
-                    } 
-                  />
-                  <Route 
-                    path="/staff/job/:id/checklist"
-                    element={
-                      <ProtectedRoute allowedRoles={["staff"]}>
-                        <JobChecklistPage />
-                      </ProtectedRoute>
-                    } 
-                  />
-                  <Route 
-                    path="/staff/job/:id/photos-after"
-                    element={
-                      <ProtectedRoute allowedRoles={["staff"]}>
-                        <JobPhotosAfterPage />
-                      </ProtectedRoute>
-                    } 
-                  />
-                  <Route 
-                    path="/staff/job/:id/complete"
-                    element={
-                      <ProtectedRoute allowedRoles={["staff"]}>
-                        <JobCompletePage />
-                      </ProtectedRoute>
-                    } 
-                  />
-                  <Route path="/install" element={<InstallPage />} />
-                  <Route path="/terms" element={<TermsPage />} />
-                  <Route path="/privacy" element={<PrivacyPage />} />
-                  <Route path="*" element={<NotFound />} />
-                  </Routes>
+                  <Suspense fallback={<PageLoader />}>
+                    <Routes>
+                      <Route path="/" element={<Index />} />
+                      <Route path="/auth" element={<Auth />} />
+                      <Route path="/pricing" element={<PricingPage />} />
+                      <Route path="/signup" element={<SignupPage />} />
+                      <Route
+                        path="/onboarding"
+                        element={
+                          <ProtectedRoute allowedRoles={["admin"]}>
+                            <OnboardingPage />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/admin"
+                        element={
+                          <ProtectedRoute allowedRoles={["admin"]}>
+                            <AdminDashboard />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/admin/properties"
+                        element={
+                          <ProtectedRoute allowedRoles={["admin"]}>
+                            <PropertiesPage />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/admin/staff"
+                        element={
+                          <ProtectedRoute allowedRoles={["admin"]}>
+                            <StaffManagementPage />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/admin/calendar"
+                        element={
+                          <ProtectedRoute allowedRoles={["admin"]}>
+                            <CalendarPage />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/admin/clients"
+                        element={
+                          <ProtectedRoute allowedRoles={["admin"]}>
+                            <ClientsPage />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/admin/recurring"
+                        element={
+                          <ProtectedRoute allowedRoles={["admin"]}>
+                            <RecurringJobsPage />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/admin/settings"
+                        element={
+                          <ProtectedRoute allowedRoles={["admin"]}>
+                            <SettingsPage />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/admin/invoices"
+                        element={
+                          <ProtectedRoute allowedRoles={["admin"]}>
+                            <InvoicesPage />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/admin/price-lists"
+                        element={
+                          <ProtectedRoute allowedRoles={["admin"]}>
+                            <PriceListPage />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/admin/reports"
+                        element={
+                          <ProtectedRoute allowedRoles={["admin"]}>
+                            <ReportsPage />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/staff"
+                        element={
+                          <ProtectedRoute allowedRoles={["staff"]}>
+                            <StaffDashboard />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/staff/job/:id/start"
+                        element={
+                          <ProtectedRoute allowedRoles={["staff"]}>
+                            <JobStartPage />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/staff/job/:id/photos-before"
+                        element={
+                          <ProtectedRoute allowedRoles={["staff"]}>
+                            <JobPhotosBeforePage />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/staff/job/:id/checklist"
+                        element={
+                          <ProtectedRoute allowedRoles={["staff"]}>
+                            <JobChecklistPage />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/staff/job/:id/photos-after"
+                        element={
+                          <ProtectedRoute allowedRoles={["staff"]}>
+                            <JobPhotosAfterPage />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/staff/job/:id/complete"
+                        element={
+                          <ProtectedRoute allowedRoles={["staff"]}>
+                            <JobCompletePage />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route path="/install" element={<InstallPage />} />
+                      <Route path="/terms" element={<TermsPage />} />
+                      <Route path="/privacy" element={<PrivacyPage />} />
+                      <Route path="*" element={<NotFound />} />
+                    </Routes>
                   </Suspense>
                 </ErrorBoundary>
                 <PWAInstallBanner />

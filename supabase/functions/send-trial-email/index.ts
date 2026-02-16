@@ -1,10 +1,18 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+function getCorsHeaders(req: Request) {
+  const origin = req.headers.get("origin") ?? "";
+  const isAllowed =
+    origin === "https://pulcrix.com" ||
+    origin === "http://localhost:8080" ||
+    origin === "http://localhost:3000" ||
+    origin.endsWith(".lovable.app");
+  return {
+    "Access-Control-Allow-Origin": isAllowed ? origin : "https://pulcrix.com",
+    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  };
+}
 
 const logStep = (step: string, details?: Record<string, unknown>) => {
   const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
@@ -225,6 +233,7 @@ async function sendEmailWithResend(to: string, subject: string, html: string): P
 }
 
 serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }

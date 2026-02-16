@@ -24,9 +24,9 @@ const NotFound = () => {
   // Don't render 404 for OAuth routes
   if (location.pathname.startsWith("/~oauth")) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
-          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary" />
+          <div className="h-10 w-10 animate-spin rounded-full border-b-2 border-primary" />
           <p className="text-sm text-muted-foreground">Authenticating...</p>
         </div>
       </div>
@@ -35,59 +35,55 @@ const NotFound = () => {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-background via-background to-primary/5 p-4">
-      <div className="max-w-md w-full text-center space-y-8">
+      <div className="w-full max-w-md space-y-8 text-center">
         {/* Branding */}
-        <Link to="/" className="inline-flex items-center gap-2 hover:opacity-80 transition-opacity">
+        <Link to="/" className="inline-flex items-center gap-2 transition-opacity hover:opacity-80">
           <PulcrixLogo />
-          <span className="font-bold text-lg text-foreground">Pulcrix</span>
+          <span className="text-lg font-bold text-foreground">Pulcrix</span>
         </Link>
 
         {/* 404 Display */}
         <div className="relative">
-          <div className="text-[120px] font-bold text-primary/10 leading-none select-none">
-            404
-          </div>
+          <div className="select-none text-[120px] font-bold leading-none text-primary/10">404</div>
         </div>
 
         {/* Message */}
         <div className="space-y-2">
-          <h1 className="text-2xl font-bold text-foreground">
-            Page not found
-          </h1>
+          <h1 className="text-2xl font-bold text-foreground">Page not found</h1>
           <p className="text-muted-foreground">
-            Sorry, the page <code className="px-2 py-1 rounded bg-muted text-sm">{location.pathname}</code> does not exist or has been moved.
+            Sorry, the page{" "}
+            <code className="rounded bg-muted px-2 py-1 text-sm">{location.pathname}</code> does not
+            exist or has been moved.
           </p>
         </div>
 
         {/* Actions */}
-        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+        <div className="flex flex-col justify-center gap-3 sm:flex-row">
           <Button asChild variant="default">
             <Link to="/">
-              <Home className="h-4 w-4 mr-2" />
+              <Home className="mr-2 h-4 w-4" />
               Go to Home
             </Link>
           </Button>
           <Button asChild variant="outline" onClick={() => window.history.back()}>
             <button onClick={() => window.history.back()}>
-              <ArrowLeft className="h-4 w-4 mr-2" />
+              <ArrowLeft className="mr-2 h-4 w-4" />
               Go Back
             </button>
           </Button>
         </div>
 
         {/* Suggested pages */}
-        <div className="pt-6 border-t border-border">
-          <p className="text-sm text-muted-foreground mb-4">
-            Try one of these instead:
-          </p>
+        <div className="border-t border-border pt-6">
+          <p className="mb-4 text-sm text-muted-foreground">Try one of these instead:</p>
           <div className="grid gap-2">
             {SUGGESTED_PAGES.map((page) => (
               <Link
                 key={page.path}
                 to={page.path}
-                className="flex items-center gap-3 p-3 rounded-lg border border-border hover:border-primary/50 hover:bg-primary/5 transition-all text-left"
+                className="flex items-center gap-3 rounded-lg border border-border p-3 text-left transition-all hover:border-primary/50 hover:bg-primary/5"
               >
-                <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
                   <page.icon className="h-5 w-5 text-primary" />
                 </div>
                 <div className="min-w-0">

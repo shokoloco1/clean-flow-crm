@@ -99,9 +99,7 @@ export function UploadPriceListDialog({
       setProgress(70);
 
       // Get the public URL (we'll use signed URLs for access)
-      const { data: urlData } = supabase.storage
-        .from("price-lists")
-        .getPublicUrl(fileName);
+      const { data: urlData } = supabase.storage.from("price-lists").getPublicUrl(fileName);
 
       // Create database record
       const { error: dbError } = await supabase.from("price_lists").insert({
@@ -144,10 +142,13 @@ export function UploadPriceListDialog({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => {
-      if (!open) resetForm();
-      onOpenChange(open);
-    }}>
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) resetForm();
+        onOpenChange(open);
+      }}
+    >
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Upload Price List</DialogTitle>
@@ -167,21 +168,19 @@ export function UploadPriceListDialog({
             {!file ? (
               <div
                 onClick={() => fileInputRef.current?.click()}
-                className="mt-2 border-2 border-dashed border-border rounded-lg p-8 text-center cursor-pointer hover:border-primary/50 hover:bg-muted/50 transition-colors"
+                className="mt-2 cursor-pointer rounded-lg border-2 border-dashed border-border p-8 text-center transition-colors hover:border-primary/50 hover:bg-muted/50"
               >
-                <Upload className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
-                <p className="text-sm font-medium text-foreground">
-                  Click to select a file
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">
+                <Upload className="mx-auto mb-3 h-10 w-10 text-muted-foreground" />
+                <p className="text-sm font-medium text-foreground">Click to select a file</p>
+                <p className="mt-1 text-xs text-muted-foreground">
                   PDF, Excel (.xlsx, .xls) or CSV
                 </p>
               </div>
             ) : (
-              <div className="mt-2 border border-border rounded-lg p-4 flex items-center gap-3">
+              <div className="mt-2 flex items-center gap-3 rounded-lg border border-border p-4">
                 {getFileIcon()}
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-sm truncate">{file.name}</p>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-medium">{file.name}</p>
                   <p className="text-xs text-muted-foreground">
                     {(file.size / 1024 / 1024).toFixed(2)} MB
                   </p>
@@ -229,30 +228,24 @@ export function UploadPriceListDialog({
           {uploading && (
             <div className="space-y-2">
               <Progress value={progress} />
-              <p className="text-xs text-muted-foreground text-center">
-                Uploading file...
-              </p>
+              <p className="text-center text-xs text-muted-foreground">Uploading file...</p>
             </div>
           )}
         </div>
 
         <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            disabled={uploading}
-          >
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={uploading}>
             Cancel
           </Button>
           <Button onClick={handleUpload} disabled={uploading || !file}>
             {uploading ? (
               <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Uploading...
               </>
             ) : (
               <>
-                <Upload className="h-4 w-4 mr-2" />
+                <Upload className="mr-2 h-4 w-4" />
                 Upload
               </>
             )}

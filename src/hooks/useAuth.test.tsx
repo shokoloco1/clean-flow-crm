@@ -1,8 +1,8 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { waitFor, act } from '@testing-library/react';
-import { renderHook } from '@testing-library/react';
-import { ReactNode } from 'react';
-import { AuthProvider, useAuth } from './useAuth';
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { waitFor, act } from "@testing-library/react";
+import { renderHook } from "@testing-library/react";
+import { ReactNode } from "react";
+import { AuthProvider, useAuth } from "./useAuth";
 
 // Mock supabase auth
 const mockSignInWithPassword = vi.fn();
@@ -13,7 +13,7 @@ const mockOnAuthStateChange = vi.fn();
 const mockResend = vi.fn();
 const mockRpc = vi.fn();
 
-vi.mock('@/integrations/supabase/client', () => ({
+vi.mock("@/integrations/supabase/client", () => ({
   supabase: {
     auth: {
       signInWithPassword: (...args: unknown[]) => mockSignInWithPassword(...args),
@@ -29,15 +29,15 @@ vi.mock('@/integrations/supabase/client', () => ({
 
 // Mock window.location
 const mockLocation = {
-  origin: 'http://localhost:3000',
-  href: '',
+  origin: "http://localhost:3000",
+  href: "",
 };
-Object.defineProperty(window, 'location', {
+Object.defineProperty(window, "location", {
   value: mockLocation,
   writable: true,
 });
 
-describe('useAuth', () => {
+describe("useAuth", () => {
   const wrapper = ({ children }: { children: ReactNode }) => (
     <AuthProvider>{children}</AuthProvider>
   );
@@ -59,8 +59,8 @@ describe('useAuth', () => {
     localStorage.clear();
   });
 
-  describe('initial state', () => {
-    it('should start with loading true', async () => {
+  describe("initial state", () => {
+    it("should start with loading true", async () => {
       const { result } = renderHook(() => useAuth(), { wrapper });
 
       expect(result.current.loading).toBe(true);
@@ -70,7 +70,7 @@ describe('useAuth', () => {
       });
     });
 
-    it('should have null user when not authenticated', async () => {
+    it("should have null user when not authenticated", async () => {
       const { result } = renderHook(() => useAuth(), { wrapper });
 
       await waitFor(() => {
@@ -83,8 +83,8 @@ describe('useAuth', () => {
     });
   });
 
-  describe('signIn', () => {
-    it('should call supabase signInWithPassword', async () => {
+  describe("signIn", () => {
+    it("should call supabase signInWithPassword", async () => {
       mockSignInWithPassword.mockResolvedValue({ error: null });
 
       const { result } = renderHook(() => useAuth(), { wrapper });
@@ -94,17 +94,17 @@ describe('useAuth', () => {
       });
 
       await act(async () => {
-        await result.current.signIn('test@example.com', 'password123');
+        await result.current.signIn("test@example.com", "password123");
       });
 
       expect(mockSignInWithPassword).toHaveBeenCalledWith({
-        email: 'test@example.com',
-        password: 'password123',
+        email: "test@example.com",
+        password: "password123",
       });
     });
 
-    it('should return error on failed sign in', async () => {
-      const mockError = new Error('Invalid credentials');
+    it("should return error on failed sign in", async () => {
+      const mockError = new Error("Invalid credentials");
       mockSignInWithPassword.mockResolvedValue({ error: mockError });
 
       const { result } = renderHook(() => useAuth(), { wrapper });
@@ -115,15 +115,15 @@ describe('useAuth', () => {
 
       let signInResult: any;
       await act(async () => {
-        signInResult = await result.current.signIn('test@example.com', 'wrong');
+        signInResult = await result.current.signIn("test@example.com", "wrong");
       });
 
       expect(signInResult.error).toBe(mockError);
     });
 
-    it('should set loading state during sign in', async () => {
+    it("should set loading state during sign in", async () => {
       mockSignInWithPassword.mockImplementation(
-        () => new Promise((resolve) => setTimeout(() => resolve({ error: null }), 100))
+        () => new Promise((resolve) => setTimeout(() => resolve({ error: null }), 100)),
       );
 
       const { result } = renderHook(() => useAuth(), { wrapper });
@@ -133,15 +133,15 @@ describe('useAuth', () => {
       });
 
       act(() => {
-        result.current.signIn('test@example.com', 'password123');
+        result.current.signIn("test@example.com", "password123");
       });
 
       expect(result.current.loading).toBe(true);
     });
   });
 
-  describe('signUp', () => {
-    it('should call supabase signUp with email redirect', async () => {
+  describe("signUp", () => {
+    it("should call supabase signUp with email redirect", async () => {
       mockSignUp.mockResolvedValue({ error: null });
 
       const { result } = renderHook(() => useAuth(), { wrapper });
@@ -151,23 +151,23 @@ describe('useAuth', () => {
       });
 
       await act(async () => {
-        await result.current.signUp('test@example.com', 'password123', 'John Doe', 'staff');
+        await result.current.signUp("test@example.com", "password123", "John Doe", "staff");
       });
 
       expect(mockSignUp).toHaveBeenCalledWith({
-        email: 'test@example.com',
-        password: 'password123',
+        email: "test@example.com",
+        password: "password123",
         options: {
-          emailRedirectTo: 'http://localhost:3000/',
+          emailRedirectTo: "http://localhost:3000/",
           data: {
-            full_name: 'John Doe',
-            intended_role: 'staff',
+            full_name: "John Doe",
+            intended_role: "staff",
           },
         },
       });
     });
 
-    it('should include intended role in user metadata', async () => {
+    it("should include intended role in user metadata", async () => {
       mockSignUp.mockResolvedValue({ error: null });
 
       const { result } = renderHook(() => useAuth(), { wrapper });
@@ -177,21 +177,21 @@ describe('useAuth', () => {
       });
 
       await act(async () => {
-        await result.current.signUp('test@example.com', 'password123', 'John Doe', 'admin');
+        await result.current.signUp("test@example.com", "password123", "John Doe", "admin");
       });
 
       expect(mockSignUp).toHaveBeenCalledWith(
         expect.objectContaining({
           options: expect.objectContaining({
             data: expect.objectContaining({
-              intended_role: 'admin',
+              intended_role: "admin",
             }),
           }),
-        })
+        }),
       );
     });
 
-    it('should default to staff role when not specified', async () => {
+    it("should default to staff role when not specified", async () => {
       mockSignUp.mockResolvedValue({ error: null });
 
       const { result } = renderHook(() => useAuth(), { wrapper });
@@ -201,23 +201,23 @@ describe('useAuth', () => {
       });
 
       await act(async () => {
-        await result.current.signUp('test@example.com', 'password123', 'John Doe', null);
+        await result.current.signUp("test@example.com", "password123", "John Doe", null);
       });
 
       expect(mockSignUp).toHaveBeenCalledWith(
         expect.objectContaining({
           options: expect.objectContaining({
             data: expect.objectContaining({
-              intended_role: 'staff',
+              intended_role: "staff",
             }),
           }),
-        })
+        }),
       );
     });
   });
 
-  describe('signOut', () => {
-    it('should call supabase signOut', async () => {
+  describe("signOut", () => {
+    it("should call supabase signOut", async () => {
       mockSignOut.mockResolvedValue({ error: null });
 
       const { result } = renderHook(() => useAuth(), { wrapper });
@@ -233,7 +233,7 @@ describe('useAuth', () => {
       expect(mockSignOut).toHaveBeenCalled();
     });
 
-    it('should redirect to auth page', async () => {
+    it("should redirect to auth page", async () => {
       mockSignOut.mockResolvedValue({ error: null });
 
       const { result } = renderHook(() => useAuth(), { wrapper });
@@ -246,10 +246,10 @@ describe('useAuth', () => {
         await result.current.signOut();
       });
 
-      expect(window.location.href).toBe('/auth');
+      expect(window.location.href).toBe("/auth");
     });
 
-    it('should clear cached role', async () => {
+    it("should clear cached role", async () => {
       mockSignOut.mockResolvedValue({ error: null });
 
       const { result } = renderHook(() => useAuth(), { wrapper });
@@ -263,16 +263,16 @@ describe('useAuth', () => {
       });
 
       // Verify removeItem was called for the cache keys
-      expect(localStorage.removeItem).toHaveBeenCalledWith('pulcrix_user_role');
-      expect(localStorage.removeItem).toHaveBeenCalledWith('pulcrix_user_id');
+      expect(localStorage.removeItem).toHaveBeenCalledWith("pulcrix_user_role");
+      expect(localStorage.removeItem).toHaveBeenCalledWith("pulcrix_user_id");
     });
 
-    it('should clear user and session state', async () => {
-      const mockUser = { id: 'user-123', email: 'test@example.com' };
-      const mockSession = { user: mockUser, access_token: 'token' };
+    it("should clear user and session state", async () => {
+      const mockUser = { id: "user-123", email: "test@example.com" };
+      const mockSession = { user: mockUser, access_token: "token" };
 
       mockGetSession.mockResolvedValue({ data: { session: mockSession } });
-      mockRpc.mockResolvedValue({ data: 'admin', error: null });
+      mockRpc.mockResolvedValue({ data: "admin", error: null });
       mockSignOut.mockResolvedValue({ error: null });
 
       const { result } = renderHook(() => useAuth(), { wrapper });
@@ -291,8 +291,8 @@ describe('useAuth', () => {
     });
   });
 
-  describe('refreshRole', () => {
-    it('should do nothing when no user', async () => {
+  describe("refreshRole", () => {
+    it("should do nothing when no user", async () => {
       const { result } = renderHook(() => useAuth(), { wrapper });
 
       await waitFor(() => {
@@ -304,15 +304,15 @@ describe('useAuth', () => {
       });
 
       // RPC should not be called when there's no user
-      expect(mockRpc).not.toHaveBeenCalledWith('get_user_role', expect.anything());
+      expect(mockRpc).not.toHaveBeenCalledWith("get_user_role", expect.anything());
     });
 
-    it('should fetch fresh role from database', async () => {
-      const mockUser = { id: 'user-123', email: 'test@example.com', email_confirmed_at: null };
-      const mockSession = { user: mockUser, access_token: 'token' };
+    it("should fetch fresh role from database", async () => {
+      const mockUser = { id: "user-123", email: "test@example.com", email_confirmed_at: null };
+      const mockSession = { user: mockUser, access_token: "token" };
 
       mockGetSession.mockResolvedValue({ data: { session: mockSession } });
-      mockRpc.mockResolvedValue({ data: 'staff', error: null });
+      mockRpc.mockResolvedValue({ data: "staff", error: null });
 
       const { result } = renderHook(() => useAuth(), { wrapper });
 
@@ -322,18 +322,18 @@ describe('useAuth', () => {
 
       // Clear the initial RPC call count
       mockRpc.mockClear();
-      mockRpc.mockResolvedValue({ data: 'admin', error: null });
+      mockRpc.mockResolvedValue({ data: "admin", error: null });
 
       await act(async () => {
         await result.current.refreshRole();
       });
 
-      expect(mockRpc).toHaveBeenCalledWith('get_user_role', { _user_id: 'user-123' });
+      expect(mockRpc).toHaveBeenCalledWith("get_user_role", { _user_id: "user-123" });
     });
   });
 
-  describe('emailVerified', () => {
-    it('should return false when no user', async () => {
+  describe("emailVerified", () => {
+    it("should return false when no user", async () => {
       const { result } = renderHook(() => useAuth(), { wrapper });
 
       await waitFor(() => {
@@ -343,12 +343,12 @@ describe('useAuth', () => {
       expect(result.current.emailVerified).toBe(false);
     });
 
-    it('should return false when email_confirmed_at is null', async () => {
-      const mockUser = { id: 'user-123', email: 'test@example.com', email_confirmed_at: null };
-      const mockSession = { user: mockUser, access_token: 'token' };
+    it("should return false when email_confirmed_at is null", async () => {
+      const mockUser = { id: "user-123", email: "test@example.com", email_confirmed_at: null };
+      const mockSession = { user: mockUser, access_token: "token" };
 
       mockGetSession.mockResolvedValue({ data: { session: mockSession } });
-      mockRpc.mockResolvedValue({ data: 'staff', error: null });
+      mockRpc.mockResolvedValue({ data: "staff", error: null });
 
       const { result } = renderHook(() => useAuth(), { wrapper });
 
@@ -359,16 +359,16 @@ describe('useAuth', () => {
       expect(result.current.emailVerified).toBe(false);
     });
 
-    it('should return true when email_confirmed_at is set', async () => {
+    it("should return true when email_confirmed_at is set", async () => {
       const mockUser = {
-        id: 'user-123',
-        email: 'test@example.com',
-        email_confirmed_at: '2024-01-15T10:00:00Z',
+        id: "user-123",
+        email: "test@example.com",
+        email_confirmed_at: "2024-01-15T10:00:00Z",
       };
-      const mockSession = { user: mockUser, access_token: 'token' };
+      const mockSession = { user: mockUser, access_token: "token" };
 
       mockGetSession.mockResolvedValue({ data: { session: mockSession } });
-      mockRpc.mockResolvedValue({ data: 'staff', error: null });
+      mockRpc.mockResolvedValue({ data: "staff", error: null });
 
       const { result } = renderHook(() => useAuth(), { wrapper });
 
@@ -380,18 +380,17 @@ describe('useAuth', () => {
     });
   });
 
-  describe('role caching', () => {
-    it('should attempt to get cached role from localStorage', async () => {
+  describe("role caching", () => {
+    it("should attempt to get cached role from localStorage", async () => {
       // Mock localStorage.getItem to return cached values
-      (localStorage.getItem as ReturnType<typeof vi.fn>)
-        .mockImplementation((key: string) => {
-          if (key === 'pulcrix_user_id') return 'user-123';
-          if (key === 'pulcrix_user_role') return 'admin';
-          return null;
-        });
+      (localStorage.getItem as ReturnType<typeof vi.fn>).mockImplementation((key: string) => {
+        if (key === "pulcrix_user_id") return "user-123";
+        if (key === "pulcrix_user_role") return "admin";
+        return null;
+      });
 
-      const mockUser = { id: 'user-123', email: 'test@example.com', email_confirmed_at: null };
-      const mockSession = { user: mockUser, access_token: 'token' };
+      const mockUser = { id: "user-123", email: "test@example.com", email_confirmed_at: null };
+      const mockSession = { user: mockUser, access_token: "token" };
 
       mockGetSession.mockResolvedValue({ data: { session: mockSession } });
 
@@ -402,26 +401,25 @@ describe('useAuth', () => {
       });
 
       // Should have attempted to read from localStorage
-      expect(localStorage.getItem).toHaveBeenCalledWith('pulcrix_user_id');
-      expect(localStorage.getItem).toHaveBeenCalledWith('pulcrix_user_role');
+      expect(localStorage.getItem).toHaveBeenCalledWith("pulcrix_user_id");
+      expect(localStorage.getItem).toHaveBeenCalledWith("pulcrix_user_role");
       // Role should be cached admin
-      expect(result.current.role).toBe('admin');
+      expect(result.current.role).toBe("admin");
     });
 
-    it('should not use cache if user ID does not match', async () => {
+    it("should not use cache if user ID does not match", async () => {
       // Mock localStorage.getItem to return different user
-      (localStorage.getItem as ReturnType<typeof vi.fn>)
-        .mockImplementation((key: string) => {
-          if (key === 'pulcrix_user_id') return 'different-user';
-          if (key === 'pulcrix_user_role') return 'admin';
-          return null;
-        });
+      (localStorage.getItem as ReturnType<typeof vi.fn>).mockImplementation((key: string) => {
+        if (key === "pulcrix_user_id") return "different-user";
+        if (key === "pulcrix_user_role") return "admin";
+        return null;
+      });
 
-      const mockUser = { id: 'user-123', email: 'test@example.com', email_confirmed_at: null };
-      const mockSession = { user: mockUser, access_token: 'token' };
+      const mockUser = { id: "user-123", email: "test@example.com", email_confirmed_at: null };
+      const mockSession = { user: mockUser, access_token: "token" };
 
       mockGetSession.mockResolvedValue({ data: { session: mockSession } });
-      mockRpc.mockResolvedValue({ data: 'staff', error: null });
+      mockRpc.mockResolvedValue({ data: "staff", error: null });
 
       const { result } = renderHook(() => useAuth(), { wrapper });
 
@@ -430,18 +428,18 @@ describe('useAuth', () => {
       });
 
       // Should fetch fresh role since user ID doesn't match
-      expect(mockRpc).toHaveBeenCalledWith('get_user_role', { _user_id: 'user-123' });
+      expect(mockRpc).toHaveBeenCalledWith("get_user_role", { _user_id: "user-123" });
     });
 
-    it('should save role to localStorage after fetch', async () => {
+    it("should save role to localStorage after fetch", async () => {
       // Reset localStorage mock to default (returns null)
       (localStorage.getItem as ReturnType<typeof vi.fn>).mockReturnValue(null);
 
-      const mockUser = { id: 'user-123', email: 'test@example.com', email_confirmed_at: null };
-      const mockSession = { user: mockUser, access_token: 'token' };
+      const mockUser = { id: "user-123", email: "test@example.com", email_confirmed_at: null };
+      const mockSession = { user: mockUser, access_token: "token" };
 
       mockGetSession.mockResolvedValue({ data: { session: mockSession } });
-      mockRpc.mockResolvedValue({ data: 'staff', error: null });
+      mockRpc.mockResolvedValue({ data: "staff", error: null });
 
       const { result } = renderHook(() => useAuth(), { wrapper });
 
@@ -450,13 +448,13 @@ describe('useAuth', () => {
       });
 
       // Verify setItem was called with the role data
-      expect(localStorage.setItem).toHaveBeenCalledWith('pulcrix_user_role', 'staff');
-      expect(localStorage.setItem).toHaveBeenCalledWith('pulcrix_user_id', 'user-123');
+      expect(localStorage.setItem).toHaveBeenCalledWith("pulcrix_user_role", "staff");
+      expect(localStorage.setItem).toHaveBeenCalledWith("pulcrix_user_id", "user-123");
     });
   });
 
-  describe('resendVerificationEmail', () => {
-    it('should return error when no user email', async () => {
+  describe("resendVerificationEmail", () => {
+    it("should return error when no user email", async () => {
       const { result } = renderHook(() => useAuth(), { wrapper });
 
       await waitFor(() => {
@@ -469,15 +467,15 @@ describe('useAuth', () => {
       });
 
       expect(resendResult.error).toBeDefined();
-      expect(resendResult.error.message).toBe('No email found');
+      expect(resendResult.error.message).toBe("No email found");
     });
 
-    it('should call supabase resend when user has email', async () => {
-      const mockUser = { id: 'user-123', email: 'test@example.com', email_confirmed_at: null };
-      const mockSession = { user: mockUser, access_token: 'token' };
+    it("should call supabase resend when user has email", async () => {
+      const mockUser = { id: "user-123", email: "test@example.com", email_confirmed_at: null };
+      const mockSession = { user: mockUser, access_token: "token" };
 
       mockGetSession.mockResolvedValue({ data: { session: mockSession } });
-      mockRpc.mockResolvedValue({ data: 'staff', error: null });
+      mockRpc.mockResolvedValue({ data: "staff", error: null });
       mockResend.mockResolvedValue({ error: null });
 
       const { result } = renderHook(() => useAuth(), { wrapper });
@@ -491,19 +489,19 @@ describe('useAuth', () => {
       });
 
       expect(mockResend).toHaveBeenCalledWith({
-        type: 'signup',
-        email: 'test@example.com',
+        type: "signup",
+        email: "test@example.com",
         options: {
-          emailRedirectTo: 'http://localhost:3000/auth',
+          emailRedirectTo: "http://localhost:3000/auth",
         },
       });
     });
   });
 
-  describe('useAuth outside provider', () => {
-    it('should throw error when used outside AuthProvider', () => {
+  describe("useAuth outside provider", () => {
+    it("should throw error when used outside AuthProvider", () => {
       // Suppress console.error for this test
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
       // Use a try-catch since renderHook doesn't propagate errors the same way
       let thrownError: Error | null = null;
@@ -514,7 +512,7 @@ describe('useAuth', () => {
       }
 
       expect(thrownError).not.toBeNull();
-      expect(thrownError?.message).toContain('useAuth must be used within an AuthProvider');
+      expect(thrownError?.message).toContain("useAuth must be used within an AuthProvider");
 
       consoleSpy.mockRestore();
     });

@@ -14,7 +14,7 @@ import {
   WifiOff,
   Zap,
   Bell,
-  Shield
+  Shield,
 } from "lucide-react";
 import { PulcrixLogo } from "@/components/PulcrixLogo";
 import { logger } from "@/lib/logger";
@@ -85,7 +85,7 @@ export default function InstallPage() {
     try {
       await deferredPrompt.prompt();
       const { outcome } = await deferredPrompt.userChoice;
-      
+
       if (outcome === "accepted") {
         setIsInstalled(true);
       }
@@ -99,30 +99,30 @@ export default function InstallPage() {
     {
       icon: WifiOff,
       title: "Works Offline",
-      description: "Access your data even without internet connection"
+      description: "Access your data even without internet connection",
     },
     {
       icon: Zap,
       title: "Instant Loading",
-      description: "The app loads quickly from your device"
+      description: "The app loads quickly from your device",
     },
     {
       icon: Bell,
       title: "Notifications",
-      description: "Receive alerts for new jobs and updates"
+      description: "Receive alerts for new jobs and updates",
     },
     {
       icon: Shield,
       title: "Secure",
-      description: "Your data is protected and encrypted"
-    }
+      description: "Your data is protected and encrypted",
+    },
   ];
 
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-card border-b border-border sticky top-0 z-10 safe-area-inset-top">
-        <div className="container mx-auto px-4 py-4 flex items-center gap-4">
+      <header className="safe-area-inset-top sticky top-0 z-10 border-b border-border bg-card">
+        <div className="container mx-auto flex items-center gap-4 px-4 py-4">
           <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="h-12 w-12">
             <ArrowLeft className="h-5 w-5" />
           </Button>
@@ -136,11 +136,13 @@ export default function InstallPage() {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8 max-w-2xl pb-24">
+      <main className="container mx-auto max-w-2xl px-4 py-8 pb-24">
         {/* Online Status */}
-        <div className={`flex items-center gap-2 mb-6 px-4 py-3 rounded-xl ${
-          isOnline ? "bg-success/10 text-success" : "bg-warning/10 text-warning"
-        }`}>
+        <div
+          className={`mb-6 flex items-center gap-2 rounded-xl px-4 py-3 ${
+            isOnline ? "bg-success/10 text-success" : "bg-warning/10 text-warning"
+          }`}
+        >
           {isOnline ? (
             <>
               <Wifi className="h-5 w-5" />
@@ -158,14 +160,14 @@ export default function InstallPage() {
         {isStandalone ? (
           <Card className="mb-8 border-success/30 bg-success/5">
             <CardContent className="pt-6">
-              <div className="flex flex-col items-center text-center py-8">
-                <div className="h-20 w-20 rounded-full bg-success/20 flex items-center justify-center mb-4">
+              <div className="flex flex-col items-center py-8 text-center">
+                <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-success/20">
                   <CheckCircle2 className="h-10 w-10 text-success" />
                 </div>
-                <h2 className="text-2xl font-bold text-foreground mb-2">
+                <h2 className="mb-2 text-2xl font-bold text-foreground">
                   You're already using the app!
                 </h2>
-                <p className="text-muted-foreground mb-6 text-lg">
+                <p className="mb-6 text-lg text-muted-foreground">
                   Pulcrix is installed and running as a native app.
                 </p>
                 <Button onClick={() => navigate("/")} size="lg" className="h-14 px-8">
@@ -177,14 +179,12 @@ export default function InstallPage() {
         ) : isInstalled ? (
           <Card className="mb-8 border-success/30 bg-success/5">
             <CardContent className="pt-6">
-              <div className="flex flex-col items-center text-center py-8">
-                <div className="h-20 w-20 rounded-full bg-success/20 flex items-center justify-center mb-4">
+              <div className="flex flex-col items-center py-8 text-center">
+                <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-success/20">
                   <CheckCircle2 className="h-10 w-10 text-success" />
                 </div>
-                <h2 className="text-2xl font-bold text-foreground mb-2">
-                  App Installed!
-                </h2>
-                <p className="text-muted-foreground text-lg">
+                <h2 className="mb-2 text-2xl font-bold text-foreground">App Installed!</h2>
+                <p className="text-lg text-muted-foreground">
                   Find Pulcrix on your home screen to use it.
                 </p>
               </div>
@@ -195,7 +195,7 @@ export default function InstallPage() {
             {/* Install Card */}
             <Card className="mb-8">
               <CardHeader className="text-center">
-                <div className="h-24 w-24 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                <div className="mx-auto mb-4 flex h-24 w-24 items-center justify-center rounded-2xl bg-primary/10">
                   <Smartphone className="h-12 w-12 text-primary" />
                 </div>
                 <CardTitle className="text-2xl">Install Pulcrix</CardTitle>
@@ -205,19 +205,19 @@ export default function InstallPage() {
               </CardHeader>
               <CardContent>
                 {deferredPrompt ? (
-                  <Button onClick={handleInstall} className="w-full h-14" size="lg">
-                    <Download className="h-6 w-6 mr-2" />
+                  <Button onClick={handleInstall} className="h-14 w-full" size="lg">
+                    <Download className="mr-2 h-6 w-6" />
                     Install Now
                   </Button>
                 ) : isIOS ? (
                   <div className="space-y-4">
-                    <p className="text-center text-muted-foreground text-lg">
+                    <p className="text-center text-lg text-muted-foreground">
                       To install on iPhone/iPad:
                     </p>
-                    <div className="bg-muted rounded-xl p-5 space-y-4">
+                    <div className="space-y-4 rounded-xl bg-muted p-5">
                       <div className="flex items-center gap-4">
-                        <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                          <span className="text-primary font-bold text-lg">1</span>
+                        <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-primary/10">
+                          <span className="text-lg font-bold text-primary">1</span>
                         </div>
                         <div className="flex items-center gap-2 text-lg">
                           <span>Tap</span>
@@ -226,8 +226,8 @@ export default function InstallPage() {
                         </div>
                       </div>
                       <div className="flex items-center gap-4">
-                        <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                          <span className="text-primary font-bold text-lg">2</span>
+                        <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-primary/10">
+                          <span className="text-lg font-bold text-primary">2</span>
                         </div>
                         <div className="flex items-center gap-2 text-lg">
                           <span>Select</span>
@@ -236,8 +236,8 @@ export default function InstallPage() {
                         </div>
                       </div>
                       <div className="flex items-center gap-4">
-                        <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                          <span className="text-primary font-bold text-lg">3</span>
+                        <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-primary/10">
+                          <span className="text-lg font-bold text-primary">3</span>
                         </div>
                         <span className="text-lg">Confirm by tapping "Add"</span>
                       </div>
@@ -245,13 +245,13 @@ export default function InstallPage() {
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    <p className="text-center text-muted-foreground text-lg">
+                    <p className="text-center text-lg text-muted-foreground">
                       To install on Android:
                     </p>
-                    <div className="bg-muted rounded-xl p-5 space-y-4">
+                    <div className="space-y-4 rounded-xl bg-muted p-5">
                       <div className="flex items-center gap-4">
-                        <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                          <span className="text-primary font-bold text-lg">1</span>
+                        <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-primary/10">
+                          <span className="text-lg font-bold text-primary">1</span>
                         </div>
                         <div className="flex items-center gap-2 text-lg">
                           <span>Tap the menu</span>
@@ -259,14 +259,14 @@ export default function InstallPage() {
                         </div>
                       </div>
                       <div className="flex items-center gap-4">
-                        <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                          <span className="text-primary font-bold text-lg">2</span>
+                        <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-primary/10">
+                          <span className="text-lg font-bold text-primary">2</span>
                         </div>
                         <span className="text-lg">Select "Install app"</span>
                       </div>
                       <div className="flex items-center gap-4">
-                        <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                          <span className="text-primary font-bold text-lg">3</span>
+                        <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-primary/10">
+                          <span className="text-lg font-bold text-primary">3</span>
                         </div>
                         <span className="text-lg">Confirm installation</span>
                       </div>
@@ -279,13 +279,13 @@ export default function InstallPage() {
         )}
 
         {/* Features */}
-        <h3 className="text-lg font-semibold text-foreground mb-4">App Benefits</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <h3 className="mb-4 text-lg font-semibold text-foreground">App Benefits</h3>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {features.map((feature, index) => (
             <Card key={index}>
               <CardContent className="pt-6">
                 <div className="flex items-start gap-4">
-                  <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-primary/10">
                     <feature.icon className="h-6 w-6 text-primary" />
                   </div>
                   <div>
@@ -301,7 +301,7 @@ export default function InstallPage() {
         {/* Back Button */}
         <div className="mt-8 text-center">
           <Button variant="outline" onClick={() => navigate("/")} size="lg" className="h-14 px-8">
-            <ArrowLeft className="h-5 w-5 mr-2" />
+            <ArrowLeft className="mr-2 h-5 w-5" />
             Back to Home
           </Button>
         </div>

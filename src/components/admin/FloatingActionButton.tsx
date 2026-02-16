@@ -8,22 +8,22 @@ interface FloatingActionButtonProps {
   className?: string;
 }
 
-export function FloatingActionButton({ 
-  onClick, 
+export function FloatingActionButton({
+  onClick,
   label = "New Job",
-  className 
+  className,
 }: FloatingActionButtonProps) {
   return (
     <Button
       onClick={onClick}
       size="lg"
       className={cn(
-        "fixed z-50 shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 transition-all",
-        "rounded-full h-14 px-5 gap-2",
+        "fixed z-50 shadow-lg shadow-primary/30 transition-all hover:shadow-xl hover:shadow-primary/40",
+        "h-14 gap-2 rounded-full px-5",
         // Position: bottom-right, accounting for mobile bottom nav
         // Hidden on mobile (< 768px) - use header button instead
-        "hidden md:flex bottom-8 right-8",
-        className
+        "bottom-8 right-8 hidden md:flex",
+        className,
       )}
     >
       <Plus className="h-5 w-5" />

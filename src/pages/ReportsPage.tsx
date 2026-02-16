@@ -18,7 +18,7 @@ export default function ReportsPage() {
         </div>
 
         <Tabs defaultValue="business" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-4 max-w-lg">
+          <TabsList className="grid w-full max-w-lg grid-cols-4">
             <TabsTrigger value="business" className="gap-2">
               <TrendingUp className="h-4 w-4" />
               <span className="hidden sm:inline">Business</span>

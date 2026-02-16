@@ -13,13 +13,13 @@ interface PhotoCaptureProps {
   retakeMode?: boolean;
 }
 
-export function PhotoCapture({ 
-  area, 
-  existingPhoto, 
-  onCapture, 
+export function PhotoCapture({
+  area,
+  existingPhoto,
+  onCapture,
   disabled,
   compact = false,
-  retakeMode = false
+  retakeMode = false,
 }: PhotoCaptureProps) {
   const { t } = useLanguage();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -103,23 +103,19 @@ export function PhotoCapture({
           onClick={() => inputRef.current?.click()}
           disabled={disabled || isUploading}
           className={cn(
-            "w-full aspect-square rounded-lg border-2 border-dashed flex flex-col items-center justify-center gap-1 transition-all",
-            hasPhoto 
-              ? "border-success bg-success/5" 
+            "flex aspect-square w-full flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed transition-all",
+            hasPhoto
+              ? "border-success bg-success/5"
               : "border-border hover:border-primary hover:bg-primary/5",
-            (disabled || isUploading) && "opacity-50 cursor-not-allowed"
+            (disabled || isUploading) && "cursor-not-allowed opacity-50",
           )}
         >
           {isUploading ? (
-            <Loader2 className="h-6 w-6 text-primary animate-spin" />
+            <Loader2 className="h-6 w-6 animate-spin text-primary" />
           ) : hasPhoto ? (
-            <div className="relative w-full h-full">
-              <img 
-                src={preview!} 
-                alt={area}
-                className="w-full h-full object-cover rounded-md"
-              />
-              <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center opacity-0 hover:opacity-100 transition-opacity rounded-md">
+            <div className="relative h-full w-full">
+              <img src={preview!} alt={area} className="h-full w-full rounded-md object-cover" />
+              <div className="absolute inset-0 flex flex-col items-center justify-center rounded-md bg-black/40 opacity-0 transition-opacity hover:opacity-100">
                 <RefreshCw className="h-5 w-5 text-white" />
               </div>
             </div>
@@ -146,50 +142,44 @@ export function PhotoCapture({
         onChange={handleCapture}
         disabled={disabled || isUploading}
       />
-      
+
       <button
         type="button"
         onClick={() => inputRef.current?.click()}
         disabled={disabled || isUploading}
         className={cn(
-          "w-full aspect-[4/3] rounded-xl border-2 border-dashed flex flex-col items-center justify-center gap-2 transition-all",
-          hasPhoto 
-            ? "border-success bg-success/5" 
+          "flex aspect-[4/3] w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed transition-all",
+          hasPhoto
+            ? "border-success bg-success/5"
             : "border-border hover:border-primary hover:bg-primary/5",
-          (disabled || isUploading) && "opacity-50 cursor-not-allowed"
+          (disabled || isUploading) && "cursor-not-allowed opacity-50",
         )}
       >
         {isUploading ? (
           <>
-            <Loader2 className="h-8 w-8 text-primary animate-spin" />
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
             <span className="text-xs text-muted-foreground">Uploading...</span>
           </>
         ) : hasPhoto ? (
-          <div className="relative w-full h-full">
-            <img 
-              src={preview!} 
-              alt={area}
-              className="w-full h-full object-cover rounded-lg"
-            />
-            <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center gap-1 opacity-0 hover:opacity-100 transition-opacity rounded-lg">
+          <div className="relative h-full w-full">
+            <img src={preview!} alt={area} className="h-full w-full rounded-lg object-cover" />
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 rounded-lg bg-black/40 opacity-0 transition-opacity hover:opacity-100">
               <RefreshCw className="h-6 w-6 text-white" />
-              <span className="text-xs text-white font-medium">{t("retake")}</span>
+              <span className="text-xs font-medium text-white">{t("retake")}</span>
             </div>
-            <div className="absolute top-2 right-2 h-6 w-6 rounded-full bg-success flex items-center justify-center">
+            <div className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-success">
               <Check className="h-4 w-4 text-white" />
             </div>
           </div>
         ) : (
           <>
             <Camera className="h-8 w-8 text-muted-foreground" />
-            <span className="text-xs text-muted-foreground font-medium">{t("take_photo")}</span>
+            <span className="text-xs font-medium text-muted-foreground">{t("take_photo")}</span>
           </>
         )}
       </button>
-      
-      <p className="text-xs text-center text-muted-foreground mt-1 font-medium">
-        {area}
-      </p>
+
+      <p className="mt-1 text-center text-xs font-medium text-muted-foreground">{area}</p>
     </div>
   );
 }

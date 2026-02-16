@@ -38,7 +38,7 @@ export function useBusinessSettings() {
         .select("key, value")
         .in("key", [
           "company_name",
-          "company_logo", 
+          "company_logo",
           "business_abn",
           "business_address",
           "business_phone",

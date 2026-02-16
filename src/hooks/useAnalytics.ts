@@ -36,17 +36,14 @@ export function useAnalytics() {
   const lastPageRef = useRef<string>("");
 
   // Track a custom event (stubbed - analytics_events table not yet created)
-  const trackEvent = useCallback(
-    async ({ event, data = {} }: TrackEventOptions) => {
-      // Log to console for development/debugging
-      // analytics_events table doesn't exist yet - log only
-      if (import.meta.env.DEV || !import.meta.env.VITE_ENABLE_ANALYTICS) {
-        logger.debug("[Analytics]", { event, data });
-      }
-      // TODO: Implement database tracking when analytics_events table is created
-    },
-    []
-  );
+  const trackEvent = useCallback(async ({ event, data = {} }: TrackEventOptions) => {
+    // Log to console for development/debugging
+    // analytics_events table doesn't exist yet - log only
+    if (import.meta.env.DEV || !import.meta.env.VITE_ENABLE_ANALYTICS) {
+      logger.debug("[Analytics]", { event, data });
+    }
+    // TODO: Implement database tracking when analytics_events table is created
+  }, []);
 
   // Automatically track page views
   useEffect(() => {
@@ -79,10 +76,8 @@ export function createAnalyticsHelpers(trackEvent: (options: TrackEventOptions) 
     trackTrialStarted: () => trackEvent({ event: "trial_started" }),
     trackSubscriptionStarted: (plan: string) =>
       trackEvent({ event: "subscription_started", data: { plan } }),
-    trackJobCreated: (jobId: string) =>
-      trackEvent({ event: "job_created", data: { jobId } }),
-    trackJobCompleted: (jobId: string) =>
-      trackEvent({ event: "job_completed", data: { jobId } }),
+    trackJobCreated: (jobId: string) => trackEvent({ event: "job_created", data: { jobId } }),
+    trackJobCompleted: (jobId: string) => trackEvent({ event: "job_completed", data: { jobId } }),
     trackInvoiceCreated: (invoiceId: string) =>
       trackEvent({ event: "invoice_created", data: { invoiceId } }),
     trackInvoiceSent: (invoiceId: string) =>
@@ -90,7 +85,6 @@ export function createAnalyticsHelpers(trackEvent: (options: TrackEventOptions) 
     trackClientCreated: () => trackEvent({ event: "client_created" }),
     trackStaffInvited: () => trackEvent({ event: "staff_invited" }),
     trackOnboardingCompleted: () => trackEvent({ event: "onboarding_completed" }),
-    trackFeatureUsed: (feature: string) =>
-      trackEvent({ event: "feature_used", data: { feature } }),
+    trackFeatureUsed: (feature: string) => trackEvent({ event: "feature_used", data: { feature } }),
   };
 }

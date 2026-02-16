@@ -19,14 +19,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { 
-  ChevronDown, 
-  FileEdit, 
-  Send, 
-  CheckCircle, 
+import {
+  ChevronDown,
+  FileEdit,
+  Send,
+  CheckCircle,
   AlertTriangle,
   Loader2,
-  Mail
+  Mail,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useInvoiceEmail } from "@/hooks/useInvoiceEmail";
@@ -76,10 +76,10 @@ export function InvoiceStatusActions({
 
   const updateStatus = async (newStatus: string) => {
     setIsUpdating(true);
-    
+
     const { error } = await supabase
       .from("invoices")
-      .update({ 
+      .update({
         status: newStatus,
         updated_at: new Date().toISOString(),
       })
@@ -91,7 +91,7 @@ export function InvoiceStatusActions({
       toast.success(`Invoice marked as ${newStatus}`);
       onStatusChange();
     }
-    
+
     setIsUpdating(false);
   };
 
@@ -109,7 +109,7 @@ export function InvoiceStatusActions({
       toast.error("Client has no email address");
       return;
     }
-    
+
     const success = await sendInvoiceEmail(invoiceId);
     if (success) {
       // Update status to sent if it was draft
@@ -123,13 +123,8 @@ export function InvoiceStatusActions({
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="gap-2"
-            disabled={isUpdating || isSending}
-          >
-            {(isUpdating || isSending) ? (
+          <Button variant="outline" size="sm" className="gap-2" disabled={isUpdating || isSending}>
+            {isUpdating || isSending ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
             ) : (
               <StatusIcon className="h-3.5 w-3.5" />
@@ -144,58 +139,61 @@ export function InvoiceStatusActions({
           {currentStatus === "draft" && (
             <>
               <DropdownMenuItem onClick={() => updateStatus("sent")}>
-                <Send className="h-4 w-4 mr-2 text-primary" />
+                <Send className="mr-2 h-4 w-4 text-primary" />
                 Mark as Sent
               </DropdownMenuItem>
               {clientEmail && (
                 <DropdownMenuItem onClick={handleSendReminder}>
-                  <Mail className="h-4 w-4 mr-2 text-primary" />
+                  <Mail className="mr-2 h-4 w-4 text-primary" />
                   Send to Client
                 </DropdownMenuItem>
               )}
             </>
           )}
-          
+
           {currentStatus === "sent" && (
             <>
               <DropdownMenuItem onClick={handleMarkAsPaid}>
-                <CheckCircle className="h-4 w-4 mr-2 text-success" />
+                <CheckCircle className="mr-2 h-4 w-4 text-success" />
                 Mark as Paid
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => updateStatus("overdue")}>
-                <AlertTriangle className="h-4 w-4 mr-2 text-destructive" />
+                <AlertTriangle className="mr-2 h-4 w-4 text-destructive" />
                 Mark as Overdue
               </DropdownMenuItem>
               {clientEmail && (
                 <>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleSendReminder}>
-                    <Mail className="h-4 w-4 mr-2" />
+                    <Mail className="mr-2 h-4 w-4" />
                     Send Reminder
                   </DropdownMenuItem>
                 </>
               )}
             </>
           )}
-          
+
           {currentStatus === "overdue" && (
             <>
               <DropdownMenuItem onClick={handleMarkAsPaid}>
-                <CheckCircle className="h-4 w-4 mr-2 text-success" />
+                <CheckCircle className="mr-2 h-4 w-4 text-success" />
                 Mark as Paid
               </DropdownMenuItem>
               {clientEmail && (
                 <DropdownMenuItem onClick={handleSendReminder}>
-                  <Mail className="h-4 w-4 mr-2 text-destructive" />
+                  <Mail className="mr-2 h-4 w-4 text-destructive" />
                   Send Urgent Reminder
                 </DropdownMenuItem>
               )}
             </>
           )}
-          
+
           {currentStatus === "paid" && (
-            <DropdownMenuItem onClick={() => updateStatus("sent")} className="text-muted-foreground">
-              <Send className="h-4 w-4 mr-2" />
+            <DropdownMenuItem
+              onClick={() => updateStatus("sent")}
+              className="text-muted-foreground"
+            >
+              <Send className="mr-2 h-4 w-4" />
               Revert to Sent
             </DropdownMenuItem>
           )}
@@ -208,14 +206,17 @@ export function InvoiceStatusActions({
           <AlertDialogHeader>
             <AlertDialogTitle>Mark as Paid?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will record that payment has been received for this invoice. 
-              Make sure you've confirmed the payment in your bank account.
+              This will record that payment has been received for this invoice. Make sure you've
+              confirmed the payment in your bank account.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmMarkAsPaid} className="bg-success hover:bg-success/90">
-              <CheckCircle className="h-4 w-4 mr-2" />
+            <AlertDialogAction
+              onClick={confirmMarkAsPaid}
+              className="bg-success hover:bg-success/90"
+            >
+              <CheckCircle className="mr-2 h-4 w-4" />
               Confirm Paid
             </AlertDialogAction>
           </AlertDialogFooter>

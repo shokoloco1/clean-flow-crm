@@ -18,11 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   Search,
   Briefcase,
@@ -122,42 +118,49 @@ export function GlobalSearch() {
           break;
       }
     },
-    [navigate, clearResults]
+    [navigate, clearResults],
   );
 
-  const handleQuickAction = useCallback((e: React.MouseEvent, action: string, data: { phone?: string; email?: string; type?: string }) => {
-    e.stopPropagation();
-    
-    switch (action) {
-      case "call":
-        if (data.phone) {
-          window.open(`tel:${data.phone}`, "_self");
-          toast.success(`Calling ${data.phone}`);
-        } else {
-          toast.error("No phone number available");
-        }
-        break;
-      case "email":
-        if (data.email) {
-          window.open(`mailto:${data.email}`, "_blank");
-        } else {
-          toast.error("No email available");
-        }
-        break;
-      case "view":
-        setOpen(false);
-        setQuery("");
-        clearResults();
-        if (data.type === "job") {
-          navigate("/admin/calendar");
-        } else if (data.type === "client") {
-          navigate("/admin/clients");
-        } else if (data.type === "staff") {
-          navigate("/admin/staff");
-        }
-        break;
-    }
-  }, [navigate, clearResults]);
+  const handleQuickAction = useCallback(
+    (
+      e: React.MouseEvent,
+      action: string,
+      data: { phone?: string; email?: string; type?: string },
+    ) => {
+      e.stopPropagation();
+
+      switch (action) {
+        case "call":
+          if (data.phone) {
+            window.open(`tel:${data.phone}`, "_self");
+            toast.success(`Calling ${data.phone}`);
+          } else {
+            toast.error("No phone number available");
+          }
+          break;
+        case "email":
+          if (data.email) {
+            window.open(`mailto:${data.email}`, "_blank");
+          } else {
+            toast.error("No email available");
+          }
+          break;
+        case "view":
+          setOpen(false);
+          setQuery("");
+          clearResults();
+          if (data.type === "job") {
+            navigate("/admin/calendar");
+          } else if (data.type === "client") {
+            navigate("/admin/clients");
+          } else if (data.type === "staff") {
+            navigate("/admin/staff");
+          }
+          break;
+      }
+    },
+    [navigate, clearResults],
+  );
 
   const clearFilters = () => {
     setFilters({});
@@ -240,7 +243,7 @@ export function GlobalSearch() {
                   <h4 className="font-medium">Filters</h4>
                   {hasActiveFilters && (
                     <Button variant="ghost" size="sm" onClick={clearFilters}>
-                      <X className="h-3 w-3 mr-1" />
+                      <X className="mr-1 h-3 w-3" />
                       Clear
                     </Button>
                   )}
@@ -336,7 +339,7 @@ export function GlobalSearch() {
 
           {results.length > 0 && (
             <>
-          {["job", "client", "property", "staff"].map((type) => {
+              {["job", "client", "property", "staff"].map((type) => {
                 const typeResults = results.filter((r) => r.type === type);
                 if (typeResults.length === 0) return null;
 
@@ -347,41 +350,47 @@ export function GlobalSearch() {
                         key={`${result.type}-${result.id}`}
                         value={`${result.type}-${result.id}`}
                         onSelect={() => handleSelect(result)}
-                        className="cursor-pointer group"
+                        className="group cursor-pointer"
                       >
-                        <div className="flex items-center gap-3 w-full">
+                        <div className="flex w-full items-center gap-3">
                           {getIcon(result.type)}
-                          <div className="flex-1 min-w-0">
-                            <p className="font-medium truncate">{result.title}</p>
-                            <p className="text-xs text-muted-foreground truncate">
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate font-medium">{result.title}</p>
+                            <p className="truncate text-xs text-muted-foreground">
                               {result.subtitle}
                             </p>
                           </div>
-                          
+
                           {/* Quick Actions */}
-                          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            {(result.type === "client" || result.type === "staff") && result.metadata?.phone && (
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-7 w-7"
-                                onClick={(e) => handleQuickAction(e, "call", { phone: result.metadata?.phone })}
-                                title="Call"
-                              >
-                                <Phone className="h-3.5 w-3.5 text-green-500" />
-                              </Button>
-                            )}
-                            {(result.type === "client" || result.type === "staff") && result.metadata?.email && (
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-7 w-7"
-                                onClick={(e) => handleQuickAction(e, "email", { email: result.metadata?.email })}
-                                title="Email"
-                              >
-                                <Mail className="h-3.5 w-3.5 text-blue-500" />
-                              </Button>
-                            )}
+                          <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                            {(result.type === "client" || result.type === "staff") &&
+                              result.metadata?.phone && (
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-7 w-7"
+                                  onClick={(e) =>
+                                    handleQuickAction(e, "call", { phone: result.metadata?.phone })
+                                  }
+                                  title="Call"
+                                >
+                                  <Phone className="h-3.5 w-3.5 text-green-500" />
+                                </Button>
+                              )}
+                            {(result.type === "client" || result.type === "staff") &&
+                              result.metadata?.email && (
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-7 w-7"
+                                  onClick={(e) =>
+                                    handleQuickAction(e, "email", { email: result.metadata?.email })
+                                  }
+                                  title="Email"
+                                >
+                                  <Mail className="h-3.5 w-3.5 text-blue-500" />
+                                </Button>
+                              )}
                             <Button
                               variant="ghost"
                               size="icon"
@@ -398,9 +407,8 @@ export function GlobalSearch() {
                               variant="outline"
                               className={STATUS_COLORS[result.metadata.status]}
                             >
-                              {STATUS_OPTIONS.find(
-                                (s) => s.value === result.metadata?.status
-                              )?.label || result.metadata.status}
+                              {STATUS_OPTIONS.find((s) => s.value === result.metadata?.status)
+                                ?.label || result.metadata.status}
                             </Badge>
                           )}
                         </div>

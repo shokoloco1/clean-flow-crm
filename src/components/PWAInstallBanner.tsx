@@ -57,31 +57,26 @@ const PWAInstallBannerComponent: ForwardRefRenderFunction<HTMLDivElement> = (_, 
   }
 
   return (
-    <div ref={ref} className="fixed bottom-4 left-4 right-4 z-50 animate-in slide-in-from-bottom-4 duration-300 safe-area-inset-bottom">
-      <div className="bg-card border border-border rounded-2xl shadow-lg p-4 flex items-center gap-4">
-        <div className="h-14 w-14 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+    <div
+      ref={ref}
+      className="safe-area-inset-bottom fixed bottom-4 left-4 right-4 z-50 duration-300 animate-in slide-in-from-bottom-4"
+    >
+      <div className="flex items-center gap-4 rounded-2xl border border-border bg-card p-4 shadow-lg">
+        <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-xl bg-primary/10">
           <Smartphone className="h-7 w-7 text-primary" />
         </div>
-        
-        <div className="flex-1 min-w-0">
-          <p className="font-semibold text-foreground text-base">
-            Install Pulcrix
-          </p>
-          <p className="text-sm text-muted-foreground">
-            Add to home screen for quick access
-          </p>
+
+        <div className="min-w-0 flex-1">
+          <p className="text-base font-semibold text-foreground">Install Pulcrix</p>
+          <p className="text-sm text-muted-foreground">Add to home screen for quick access</p>
         </div>
 
         <div className="flex items-center gap-2">
-          <Button 
-            size="default" 
-            onClick={handleInstall}
-            className="gap-2 h-12 px-4"
-          >
+          <Button size="default" onClick={handleInstall} className="h-12 gap-2 px-4">
             <Download className="h-5 w-5" />
             <span className="hidden sm:inline">Install</span>
           </Button>
-          
+
           <Button
             variant="ghost"
             size="icon"

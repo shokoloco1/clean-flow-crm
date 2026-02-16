@@ -30,7 +30,7 @@ export function PendingPaymentsCard() {
     const { data: invoices, error } = await supabase
       .from("invoices")
       .select("status, total, due_date")
-      .neq("status", "paid");  // All invoices that are NOT paid
+      .neq("status", "paid"); // All invoices that are NOT paid
 
     if (error) {
       logger.error("[PendingPayments] Error fetching", error);
@@ -38,7 +38,7 @@ export function PendingPaymentsCard() {
       return;
     }
 
-    logger.debug('[PendingPayments] Found unpaid invoices:', { count: invoices?.length || 0 });
+    logger.debug("[PendingPayments] Found unpaid invoices:", { count: invoices?.length || 0 });
 
     const today = new Date();
     let overdueCount = 0;
@@ -49,7 +49,7 @@ export function PendingPaymentsCard() {
     invoices?.forEach((inv) => {
       // Check if invoice is overdue based on due_date
       const isOverdue = inv.due_date && differenceInDays(today, parseISO(inv.due_date)) > 0;
-      
+
       if (inv.status === "overdue" || (inv.status === "sent" && isOverdue)) {
         overdueCount++;
         overdueAmount += Number(inv.total) || 0;
@@ -71,16 +71,16 @@ export function PendingPaymentsCard() {
 
   useEffect(() => {
     fetchPaymentStats();
-    
+
     // Refresh on visibility change
     const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
+      if (document.visibilityState === "visible") {
         fetchPaymentStats();
       }
     };
-    
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
   }, []);
 
   if (loading) {
@@ -96,22 +96,22 @@ export function PendingPaymentsCard() {
   if (!stats) return null;
 
   return (
-    <Card className="border-border shadow-sm hover:shadow-md transition-shadow">
+    <Card className="border-border shadow-sm transition-shadow hover:shadow-md">
       <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+        <CardTitle className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
           <DollarSign className="h-4 w-4 text-primary" />
           {tAdmin("pending_payments")}
         </CardTitle>
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button 
-              variant="ghost" 
-              size="sm" 
+            <Button
+              variant="ghost"
+              size="sm"
               className="h-7 text-xs"
               onClick={() => navigate("/admin/invoices")}
             >
               {tAdmin("view_all")}
-              <ArrowRight className="h-3 w-3 ml-1" />
+              <ArrowRight className="ml-1 h-3 w-3" />
             </Button>
           </TooltipTrigger>
           <TooltipContent>{tAdmin("invoices")}</TooltipContent>
@@ -123,19 +123,17 @@ export function PendingPaymentsCard() {
           <span className="text-2xl font-bold text-foreground">
             {formatAUD(stats.totalPending)}
           </span>
-          <span className="text-xs text-muted-foreground">
-            Inc. GST
-          </span>
+          <span className="text-xs text-muted-foreground">Inc. GST</span>
         </div>
 
         {/* Breakdown */}
-        <div className="space-y-2 pt-2 border-t border-border">
+        <div className="space-y-2 border-t border-border pt-2">
           {/* Overdue */}
           {stats.overdueCount > 0 && (
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <AlertTriangle className="h-3.5 w-3.5 text-destructive" />
-                <span className="text-sm text-destructive font-medium">
+                <span className="text-sm font-medium text-destructive">
                   {tAdmin("overdue")} ({stats.overdueCount})
                 </span>
               </div>
@@ -154,15 +152,13 @@ export function PendingPaymentsCard() {
                   {tAdmin("awaiting_payment")} ({stats.sentCount})
                 </span>
               </div>
-              <span className="text-sm font-medium">
-                {formatAUD(stats.sentAmount)}
-              </span>
+              <span className="text-sm font-medium">{formatAUD(stats.sentAmount)}</span>
             </div>
           )}
 
           {/* No pending */}
           {stats.totalPending === 0 && (
-            <p className="text-sm text-muted-foreground text-center py-2">
+            <p className="py-2 text-center text-sm text-muted-foreground">
               ✓ {tAdmin("all_caught_up")}
             </p>
           )}

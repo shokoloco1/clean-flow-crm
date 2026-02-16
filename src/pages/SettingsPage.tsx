@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,23 +8,16 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { Building, MapPin, Clock, Save, Loader2, Receipt } from "lucide-react";
-import { CleaningServicesManager, CleaningService } from "@/components/settings/CleaningServicesManager";
+import { CleaningServicesManager } from "@/components/settings/CleaningServicesManager";
 import { formatABN, validateABN } from "@/lib/australian";
 import { AdminLayout } from "@/components/admin";
-
-interface SystemSettings {
-  company_name: string;
-  company_logo: string;
-  business_abn: string;
-  business_address: string;
-  business_phone: string;
-  business_email: string;
-  gst_registered: boolean;
-  default_geofence_radius: number;
-  working_hours: { start: string; end: string };
-  working_days: number[];
-  cleaning_services: CleaningService[];
-}
+import { queryKeys } from "@/lib/queries/keys";
+import {
+  fetchSettings,
+  saveSettings,
+  DEFAULT_SERVICES,
+  type SystemSettings,
+} from "@/lib/queries/settings";
 
 const DAYS_OF_WEEK = [
   { value: 0, label: "Sunday" },
@@ -36,81 +29,61 @@ const DAYS_OF_WEEK = [
   { value: 6, label: "Saturday" },
 ];
 
-const DEFAULT_SERVICES: CleaningService[] = [
-  { id: 'general', label: 'General Cleaning', description: 'Standard house cleaning' },
-  { id: 'deep', label: 'Deep Cleaning', description: 'Thorough top-to-bottom cleaning' },
-  { id: 'end_of_lease', label: 'End of Lease Cleaning', description: 'Bond back guarantee cleaning' },
-];
+const DEFAULT_FORM_STATE: SystemSettings = {
+  company_name: "Pulcrix",
+  company_logo: "",
+  business_abn: "",
+  business_address: "",
+  business_phone: "",
+  business_email: "",
+  gst_registered: true,
+  default_geofence_radius: 100,
+  working_hours: { start: "08:00", end: "18:00" },
+  working_days: [1, 2, 3, 4, 5],
+  cleaning_services: DEFAULT_SERVICES,
+};
 
 export default function SettingsPage() {
   const { toast } = useToast();
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const queryClient = useQueryClient();
   const [abnError, setAbnError] = useState<string | null>(null);
-  const [settings, setSettings] = useState<SystemSettings>({
-    company_name: "Pulcrix",
-    company_logo: "",
-    business_abn: "",
-    business_address: "",
-    business_phone: "",
-    business_email: "",
-    gst_registered: true,
-    default_geofence_radius: 100,
-    working_hours: { start: "08:00", end: "18:00" },
-    working_days: [1, 2, 3, 4, 5],
-    cleaning_services: DEFAULT_SERVICES,
+  const [settings, setSettings] = useState<SystemSettings>(DEFAULT_FORM_STATE);
+
+  const { data: queryData, isLoading: loading } = useQuery({
+    queryKey: queryKeys.settings.list(),
+    queryFn: fetchSettings,
   });
 
+  // Hydrate form state when query data arrives
   useEffect(() => {
-    fetchSettings();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    if (queryData) {
+      setSettings(queryData);
+    }
+  }, [queryData]);
 
-  const fetchSettings = async () => {
-    try {
-      const { data, error } = await supabase
-        .from("system_settings")
-        .select("key, value");
-
-      if (error) throw error;
-
-      if (data) {
-        const newSettings = { ...settings };
-        data.forEach((item) => {
-          const key = item.key as keyof SystemSettings;
-          if (key === "company_name" || key === "company_logo") {
-            (newSettings[key] as string) = item.value as string;
-          } else if (key === "default_geofence_radius") {
-            newSettings[key] = item.value as number;
-          } else if (key === "working_hours") {
-            newSettings[key] = item.value as { start: string; end: string };
-          } else if (key === "working_days") {
-            newSettings[key] = item.value as number[];
-          } else if (key === "cleaning_services") {
-            if (Array.isArray(item.value)) {
-              newSettings[key] = item.value as unknown as CleaningService[];
-            }
-          }
-        });
-        
-        setSettings(newSettings);
-      }
-    } catch (error) {
+  const saveMutation = useMutation({
+    mutationFn: saveSettings,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.settings.all() });
+      toast({
+        title: "Settings saved",
+        description: "Your changes have been saved successfully",
+      });
+    },
+    onError: () => {
       toast({
         title: "Error",
-        description: "Could not load settings",
+        description: "Could not save settings",
         variant: "destructive",
       });
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+  });
 
   const handleABNChange = (value: string) => {
     // Remove non-digits
-    const cleanValue = value.replace(/\D/g, '').slice(0, 11);
-    setSettings(prev => ({ ...prev, business_abn: cleanValue }));
-    
+    const cleanValue = value.replace(/\D/g, "").slice(0, 11);
+    setSettings((prev) => ({ ...prev, business_abn: cleanValue }));
+
     if (cleanValue.length === 11) {
       if (!validateABN(cleanValue)) {
         setAbnError("Invalid ABN - check the number");
@@ -124,7 +97,7 @@ export default function SettingsPage() {
     }
   };
 
-  const handleSave = async () => {
+  const handleSave = () => {
     // Validate ABN before saving
     if (settings.business_abn && !validateABN(settings.business_abn)) {
       toast({
@@ -135,51 +108,7 @@ export default function SettingsPage() {
       return;
     }
 
-    setSaving(true);
-    try {
-      const updates: { key: string; value: unknown }[] = [
-        { key: "company_name", value: settings.company_name },
-        { key: "company_logo", value: settings.company_logo },
-        { key: "business_abn", value: settings.business_abn },
-        { key: "business_address", value: settings.business_address },
-        { key: "business_phone", value: settings.business_phone },
-        { key: "business_email", value: settings.business_email },
-        { key: "gst_registered", value: settings.gst_registered },
-        { key: "default_geofence_radius", value: settings.default_geofence_radius },
-        { key: "working_hours", value: settings.working_hours },
-        { key: "working_days", value: settings.working_days },
-        { key: "cleaning_services", value: settings.cleaning_services },
-      ];
-
-      for (const update of updates) {
-        // Try update first
-        const { data: updateData, error: updateError } = await supabase
-          .from("system_settings")
-          .update({ value: update.value as never })
-          .eq("key", update.key)
-          .select();
-
-        // If no rows updated, insert new record
-        if (!updateError && (!updateData || updateData.length === 0)) {
-          await supabase
-            .from("system_settings")
-            .insert([{ key: update.key, value: update.value as never }]);
-        }
-      }
-
-      toast({
-        title: "Settings saved",
-        description: "Your changes have been saved successfully",
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Could not save settings",
-        variant: "destructive",
-      });
-    } finally {
-      setSaving(false);
-    }
+    saveMutation.mutate(settings);
   };
 
   const toggleWorkingDay = (day: number) => {
@@ -194,7 +123,7 @@ export default function SettingsPage() {
   if (loading) {
     return (
       <AdminLayout>
-        <div className="flex items-center justify-center min-h-[50vh]">
+        <div className="flex min-h-[50vh] items-center justify-center">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
       </AdminLayout>
@@ -219,9 +148,7 @@ export default function SettingsPage() {
                 <Building className="h-5 w-5 text-primary" />
                 Company Information
               </CardTitle>
-              <CardDescription>
-                Customize your company name and logo
-              </CardDescription>
+              <CardDescription>Customize your company name and logo</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
@@ -246,8 +173,8 @@ export default function SettingsPage() {
                   placeholder="https://example.com/logo.png"
                 />
                 {settings.company_logo && (
-                  <div className="mt-2 p-4 border border-border rounded-lg bg-muted/50">
-                    <p className="text-sm text-muted-foreground mb-2">Preview:</p>
+                  <div className="mt-2 rounded-lg border border-border bg-muted/50 p-4">
+                    <p className="mb-2 text-sm text-muted-foreground">Preview:</p>
                     <img
                       src={settings.company_logo}
                       alt="Logo preview"
@@ -270,8 +197,8 @@ export default function SettingsPage() {
                 Tax & GST Settings
               </CardTitle>
               <CardDescription>
-                Configure your Australian Business Number and GST registration.
-                Required for businesses with annual turnover &gt; $75,000 AUD.
+                Configure your Australian Business Number and GST registration. Required for
+                businesses with annual turnover &gt; $75,000 AUD.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -285,9 +212,7 @@ export default function SettingsPage() {
                   maxLength={14}
                   className={abnError ? "border-destructive" : ""}
                 />
-                {abnError && (
-                  <p className="text-sm text-destructive">{abnError}</p>
-                )}
+                {abnError && <p className="text-sm text-destructive">{abnError}</p>}
                 <p className="text-xs text-muted-foreground">
                   Your ABN will appear on all tax invoices
                 </p>
@@ -331,9 +256,11 @@ export default function SettingsPage() {
                 </div>
               </div>
 
-              <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
+              <div className="flex items-center justify-between rounded-lg bg-muted/50 p-4">
                 <div>
-                  <Label htmlFor="gst_registered" className="font-medium">GST Registered</Label>
+                  <Label htmlFor="gst_registered" className="font-medium">
+                    GST Registered
+                  </Label>
                   <p className="text-sm text-muted-foreground">
                     Enable to add 10% GST to all invoices
                   </p>
@@ -352,8 +279,8 @@ export default function SettingsPage() {
           {/* Cleaning Services */}
           <CleaningServicesManager
             services={settings.cleaning_services}
-            onServicesChange={(services) => 
-              setSettings(prev => ({ ...prev, cleaning_services: services }))
+            onServicesChange={(services) =>
+              setSettings((prev) => ({ ...prev, cleaning_services: services }))
             }
           />
 
@@ -364,9 +291,7 @@ export default function SettingsPage() {
                 <MapPin className="h-5 w-5 text-primary" />
                 Geofence Settings
               </CardTitle>
-              <CardDescription>
-                Set the default geofence radius for properties
-              </CardDescription>
+              <CardDescription>Set the default geofence radius for properties</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
@@ -386,13 +311,11 @@ export default function SettingsPage() {
                     }
                     className="w-32"
                   />
-                  <span className="text-sm text-muted-foreground">
-                    Range: 10 - 1000 meters
-                  </span>
+                  <span className="text-sm text-muted-foreground">Range: 10 - 1000 meters</span>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  This value will be used as the default radius when creating new properties.
-                  Staff must be within this radius to check-in/check-out.
+                  This value will be used as the default radius when creating new properties. Staff
+                  must be within this radius to check-in/check-out.
                 </p>
               </div>
             </CardContent>
@@ -405,9 +328,7 @@ export default function SettingsPage() {
                 <Clock className="h-5 w-5 text-primary" />
                 Working Hours
               </CardTitle>
-              <CardDescription>
-                Configure business hours and working days
-              </CardDescription>
+              <CardDescription>Configure business hours and working days</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="grid grid-cols-2 gap-4">
@@ -443,11 +364,11 @@ export default function SettingsPage() {
 
               <div className="space-y-3">
                 <Label>Working Days</Label>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                   {DAYS_OF_WEEK.map((day) => (
                     <div
                       key={day.value}
-                      className="flex items-center space-x-2 p-3 border border-border rounded-lg hover:bg-muted/50 cursor-pointer"
+                      className="flex cursor-pointer items-center space-x-2 rounded-lg border border-border p-3 hover:bg-muted/50"
                       onClick={() => toggleWorkingDay(day.value)}
                     >
                       <Checkbox
@@ -455,10 +376,7 @@ export default function SettingsPage() {
                         checked={settings.working_days.includes(day.value)}
                         onCheckedChange={() => toggleWorkingDay(day.value)}
                       />
-                      <Label
-                        htmlFor={`day-${day.value}`}
-                        className="cursor-pointer font-normal"
-                      >
+                      <Label htmlFor={`day-${day.value}`} className="cursor-pointer font-normal">
                         {day.label}
                       </Label>
                     </div>
@@ -470,8 +388,8 @@ export default function SettingsPage() {
 
           {/* Save Button */}
           <div className="flex justify-end">
-            <Button onClick={handleSave} disabled={saving} size="lg">
-              {saving ? (
+            <Button onClick={handleSave} disabled={saveMutation.isPending} size="lg">
+              {saveMutation.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Saving...

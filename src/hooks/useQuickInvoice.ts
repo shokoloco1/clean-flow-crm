@@ -40,12 +40,14 @@ export function useQuickInvoice() {
       // Fetch job with client and staff info
       const { data: job, error: jobError } = await supabase
         .from("jobs")
-        .select(`
+        .select(
+          `
           id, location, scheduled_date, start_time, end_time, 
           client_id, assigned_staff_id,
           clients (id, name, email, abn),
           properties (name, address)
-        `)
+        `,
+        )
         .eq("id", jobId)
         .single();
 
@@ -65,7 +67,7 @@ export function useQuickInvoice() {
           .select("hourly_rate")
           .eq("user_id", job.assigned_staff_id)
           .single();
-        
+
         if (profile?.hourly_rate) {
           hourlyRate = profile.hourly_rate;
         }
@@ -78,7 +80,7 @@ export function useQuickInvoice() {
 
       // Create invoice
       const dueDate = format(new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), "yyyy-MM-dd");
-      
+
       const { data: invoice, error: invoiceError } = await supabase
         .from("invoices")
         .insert({
@@ -105,16 +107,14 @@ export function useQuickInvoice() {
         ? `Cleaning - ${(job.properties as any).name}, ${(job.properties as any).address}`
         : `Cleaning - ${job.location}`;
 
-      const { error: itemError } = await supabase
-        .from("invoice_items")
-        .insert({
-          invoice_id: invoice.id,
-          job_id: jobId,
-          description: `${description} (${format(new Date(job.scheduled_date), "dd/MM/yyyy")})`,
-          quantity: hours,
-          unit_price: hourlyRate,
-          total: subtotal,
-        });
+      const { error: itemError } = await supabase.from("invoice_items").insert({
+        invoice_id: invoice.id,
+        job_id: jobId,
+        description: `${description} (${format(new Date(job.scheduled_date), "dd/MM/yyyy")})`,
+        quantity: hours,
+        unit_price: hourlyRate,
+        total: subtotal,
+      });
 
       if (itemError) {
         throw new Error("Failed to create invoice item");
@@ -140,7 +140,9 @@ export function useQuickInvoice() {
     }
   };
 
-  const generateInvoiceFromMultipleJobs = async (jobIds: string[]): Promise<QuickInvoiceResult | null> => {
+  const generateInvoiceFromMultipleJobs = async (
+    jobIds: string[],
+  ): Promise<QuickInvoiceResult | null> => {
     if (jobIds.length === 0) return null;
     if (jobIds.length === 1) return generateInvoiceFromJob(jobIds[0]);
 
@@ -150,12 +152,14 @@ export function useQuickInvoice() {
       // Fetch all jobs
       const { data: jobs, error: jobsError } = await supabase
         .from("jobs")
-        .select(`
+        .select(
+          `
           id, location, scheduled_date, start_time, end_time,
           client_id, assigned_staff_id,
           clients (id, name, email, abn),
           properties (name, address)
-        `)
+        `,
+        )
         .in("id", jobIds);
 
       if (jobsError || !jobs || jobs.length === 0) {
@@ -163,7 +167,7 @@ export function useQuickInvoice() {
       }
 
       // Verify all jobs belong to same client
-      const clientIds = [...new Set(jobs.map(j => j.client_id))];
+      const clientIds = [...new Set(jobs.map((j) => j.client_id))];
       if (clientIds.length > 1) {
         throw new Error("All jobs must belong to the same client");
       }
@@ -174,26 +178,28 @@ export function useQuickInvoice() {
       }
 
       // Get hourly rates for all staff
-      const staffIds = [...new Set(jobs.map(j => j.assigned_staff_id).filter((id): id is string => id !== null))];
+      const staffIds = [
+        ...new Set(jobs.map((j) => j.assigned_staff_id).filter((id): id is string => id !== null)),
+      ];
       let ratesMap: Record<string, number> = {};
-      
+
       if (staffIds.length > 0) {
         const { data: profiles } = await supabase
           .from("profiles")
           .select("user_id, hourly_rate")
           .in("user_id", staffIds);
-        
+
         ratesMap = Object.fromEntries(
-          (profiles || []).map(p => [p.user_id, p.hourly_rate || 50])
+          (profiles || []).map((p) => [p.user_id, p.hourly_rate || 50]),
         );
       }
 
       // Calculate line items
-      const lineItems = jobs.map(job => {
+      const lineItems = jobs.map((job) => {
         const hours = calculateJobDuration(job as JobForInvoice);
-        const rate = job.assigned_staff_id ? (ratesMap[job.assigned_staff_id] || 50) : 50;
+        const rate = job.assigned_staff_id ? ratesMap[job.assigned_staff_id] || 50 : 50;
         const itemTotal = hours * rate;
-        
+
         const description = job.properties
           ? `Cleaning - ${(job.properties as any).name}`
           : `Cleaning - ${job.location}`;
@@ -212,7 +218,7 @@ export function useQuickInvoice() {
 
       // Create invoice
       const dueDate = format(new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), "yyyy-MM-dd");
-      
+
       const { data: invoice, error: invoiceError } = await supabase
         .from("invoices")
         .insert({
@@ -235,14 +241,12 @@ export function useQuickInvoice() {
       }
 
       // Create invoice items
-      const itemsToInsert = lineItems.map(item => ({
+      const itemsToInsert = lineItems.map((item) => ({
         ...item,
         invoice_id: invoice.id,
       }));
 
-      const { error: itemsError } = await supabase
-        .from("invoice_items")
-        .insert(itemsToInsert);
+      const { error: itemsError } = await supabase.from("invoice_items").insert(itemsToInsert);
 
       if (itemsError) {
         throw new Error("Failed to create invoice items");

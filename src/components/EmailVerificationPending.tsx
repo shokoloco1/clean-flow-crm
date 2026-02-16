@@ -31,39 +31,35 @@ export function EmailVerificationPending() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-background via-background to-primary/5 p-4">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-background via-background to-primary/5 p-4">
       <div className="w-full max-w-md space-y-6">
         {/* Logo */}
-        <div className="text-center space-y-3">
+        <div className="space-y-3 text-center">
           <div className="flex items-center justify-center">
             <PulcrixLogo size="lg" />
           </div>
         </div>
 
         <Card className="border-border shadow-xl">
-          <CardHeader className="text-center pb-2">
-            <div className="mx-auto mb-4 h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
+          <CardHeader className="pb-2 text-center">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
               <Mail className="h-8 w-8 text-primary" />
             </div>
             <CardTitle className="text-xl">Check Your Email</CardTitle>
-            <CardDescription>
-              We sent a verification link to
-            </CardDescription>
-            <p className="font-medium text-foreground mt-1">{user?.email}</p>
+            <CardDescription>We sent a verification link to</CardDescription>
+            <p className="mt-1 font-medium text-foreground">{user?.email}</p>
           </CardHeader>
 
           <CardContent className="space-y-4">
-            <div className="bg-muted/50 rounded-lg p-4 text-sm text-muted-foreground">
+            <div className="rounded-lg bg-muted/50 p-4 text-sm text-muted-foreground">
               <p className="mb-2">
                 Click the link in your email to verify your account and get started.
               </p>
-              <p>
-                The link will expire in 24 hours.
-              </p>
+              <p>The link will expire in 24 hours.</p>
             </div>
 
             {resent ? (
-              <div className="flex items-center justify-center gap-2 text-success py-2">
+              <div className="flex items-center justify-center gap-2 py-2 text-success">
                 <CheckCircle className="h-5 w-5" />
                 <span className="font-medium">Email sent!</span>
               </div>
@@ -88,11 +84,7 @@ export function EmailVerificationPending() {
               </Button>
             )}
 
-            <Button
-              variant="default"
-              className="w-full"
-              onClick={handleRefresh}
-            >
+            <Button variant="default" className="w-full" onClick={handleRefresh}>
               <RefreshCw className="mr-2 h-4 w-4" />
               I've Verified - Continue
             </Button>
@@ -106,11 +98,7 @@ export function EmailVerificationPending() {
               </div>
             </div>
 
-            <Button
-              variant="ghost"
-              className="w-full text-muted-foreground"
-              onClick={signOut}
-            >
+            <Button variant="ghost" className="w-full text-muted-foreground" onClick={signOut}>
               <LogOut className="mr-2 h-4 w-4" />
               Sign Out
             </Button>

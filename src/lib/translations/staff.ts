@@ -21,7 +21,7 @@ export const staffTranslations = {
     maps: "Maps",
     tasks: "Tasks",
     pets: "Pets",
-    
+
     // Status
     status_pending: "Pending",
     status_active: "Active",
@@ -29,7 +29,7 @@ export const staffTranslations = {
     status_done: "Done",
     status_completed: "Completed",
     unknown_client: "Unknown Client",
-    
+
     // Job Detail View
     job_details: "Job Details",
     location: "Location",
@@ -59,7 +59,8 @@ export const staffTranslations = {
     error_completing: "Error completing job",
     complete_all_photos: "Complete all area photos",
     upload_photo_first: "Upload photo first",
-    complete_area_photos: "Please complete photo documentation for all areas before completing the job",
+    complete_area_photos:
+      "Please complete photo documentation for all areas before completing the job",
     upload_at_least_one: "Please upload at least one photo before completing",
     gps_not_available: "GPS not available on this device",
     gps_capture_failed: "Could not capture GPS location",
@@ -74,7 +75,7 @@ export const staffTranslations = {
     save_availability: "Save Availability",
     not_available: "Not available",
     set_availability: "Set which days and hours you're available to work",
-    
+
     // Days of week
     sunday: "Sunday",
     monday: "Monday",
@@ -130,7 +131,7 @@ export const staffTranslations = {
     error_updating_task: "Error updating task",
     error_saving_issue: "Error saving issue",
     error_uploading_photo: "Error uploading photo",
-    
+
     // General
     loading: "Loading...",
     error: "Error",
@@ -243,7 +244,8 @@ export const staffTranslations = {
     error_completing: "Error al completar el trabajo",
     complete_all_photos: "Completar fotos de todas las áreas",
     upload_photo_first: "Subir foto primero",
-    complete_area_photos: "Por favor completa la documentación fotográfica de todas las áreas antes de completar el trabajo",
+    complete_area_photos:
+      "Por favor completa la documentación fotográfica de todas las áreas antes de completar el trabajo",
     upload_at_least_one: "Por favor sube al menos una foto antes de completar",
     gps_not_available: "GPS no disponible en este dispositivo",
     gps_capture_failed: "No se pudo capturar la ubicación GPS",
@@ -368,5 +370,5 @@ export const staffTranslations = {
     other_issue: "Otro",
     confirm_and_send: "CONFIRMAR Y ENVIAR REPORTE",
     sending_report: "Enviando...",
-  }
+  },
 } as const;

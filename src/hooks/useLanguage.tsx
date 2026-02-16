@@ -42,16 +42,22 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // Translation function for staff
-  const t = useCallback((key: TranslationKey): string => {
-    const translations = staffTranslations[language];
-    return translations[key] || staffTranslations.en[key] || key;
-  }, [language]);
+  const t = useCallback(
+    (key: TranslationKey): string => {
+      const translations = staffTranslations[language];
+      return translations[key] || staffTranslations.en[key] || key;
+    },
+    [language],
+  );
 
   // Translation function for admin
-  const tAdmin = useCallback((key: AdminTranslationKey): string => {
-    const translations = adminTranslations[language];
-    return translations[key] || adminTranslations.en[key] || key;
-  }, [language]);
+  const tAdmin = useCallback(
+    (key: AdminTranslationKey): string => {
+      const translations = adminTranslations[language];
+      return translations[key] || adminTranslations.en[key] || key;
+    },
+    [language],
+  );
 
   return (
     <LanguageContext.Provider value={{ language, setLanguage, t, tAdmin }}>

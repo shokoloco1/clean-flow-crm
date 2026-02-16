@@ -56,7 +56,7 @@ export function XeroExport({ invoices }: XeroExportProps) {
 
   // Filter to only exportable invoices (sent or paid)
   const exportableInvoices = invoices.filter(
-    (inv) => inv.status === "sent" || inv.status === "paid"
+    (inv) => inv.status === "sent" || inv.status === "paid",
   );
 
   const handleOpenDialog = () => {
@@ -148,14 +148,14 @@ export function XeroExport({ invoices }: XeroExportProps) {
       // Generate rows for each invoice + items
       for (const invoice of invoices.filter((inv) => selectedIds.has(inv.id))) {
         const invoiceItems = itemsByInvoice.get(invoice.id) || [];
-        
+
         // Format dates as DD/MM/YYYY for Xero (Australian format)
         const invoiceDate = format(parseISO(invoice.issue_date), "dd/MM/yyyy");
         const dueDate = format(parseISO(invoice.due_date), "dd/MM/yyyy");
-        
+
         // Determine tax type based on invoice tax_rate
         const taxType = invoice.tax_rate > 0 ? "GST on Income" : "GST Free Income";
-        
+
         // Account code - default to Sales (200) which is standard Xero
         const accountCode = "200";
 
@@ -174,7 +174,7 @@ export function XeroExport({ invoices }: XeroExportProps) {
               escapeCSV(taxType),
               "", // TrackingName1
               "", // TrackingOption1
-            ].join(",")
+            ].join(","),
           );
         } else {
           // Multiple line items
@@ -192,7 +192,7 @@ export function XeroExport({ invoices }: XeroExportProps) {
                 escapeCSV(taxType),
                 "", // TrackingName1
                 "", // TrackingOption1
-              ].join(",")
+              ].join(","),
             );
           }
         }
@@ -200,9 +200,9 @@ export function XeroExport({ invoices }: XeroExportProps) {
 
       const csvContent = [headers.join(","), ...rows].join("\n");
       const filename = `xero_invoices_${format(new Date(), "yyyy-MM-dd")}.csv`;
-      
+
       downloadCSV(csvContent, filename);
-      
+
       toast.success(`Exported ${selectedIds.size} invoices for Xero`, {
         description: "Ready to import in Xero > Business > Invoices > Import",
       });
@@ -221,9 +221,9 @@ export function XeroExport({ invoices }: XeroExportProps) {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "paid":
-        return <Badge className="bg-success/10 text-success border-success/30">Paid</Badge>;
+        return <Badge className="border-success/30 bg-success/10 text-success">Paid</Badge>;
       case "sent":
-        return <Badge className="bg-primary/10 text-primary border-primary/30">Sent</Badge>;
+        return <Badge className="border-primary/30 bg-primary/10 text-primary">Sent</Badge>;
       default:
         return <Badge variant="secondary">{status}</Badge>;
     }
@@ -250,33 +250,32 @@ export function XeroExport({ invoices }: XeroExportProps) {
               Export to Xero
             </DialogTitle>
             <DialogDescription>
-              Download a CSV file to manually import into Xero. This is not a direct sync - you'll need to import the file in Xero.
+              Download a CSV file to manually import into Xero. This is not a direct sync - you'll
+              need to import the file in Xero.
             </DialogDescription>
           </DialogHeader>
 
           {exportableInvoices.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-8 text-center">
-              <AlertCircle className="h-12 w-12 text-muted-foreground mb-4" />
+              <AlertCircle className="mb-4 h-12 w-12 text-muted-foreground" />
               <p className="text-muted-foreground">
                 No invoices ready for export. Mark invoices as "Sent" first.
               </p>
             </div>
           ) : (
             <>
-              <div className="flex items-center justify-between py-2 border-b">
+              <div className="flex items-center justify-between border-b py-2">
                 <div className="flex items-center gap-2">
                   <Checkbox
                     id="select-all"
                     checked={selectedIds.size === exportableInvoices.length}
                     onCheckedChange={toggleAll}
                   />
-                  <Label htmlFor="select-all" className="text-sm font-medium cursor-pointer">
+                  <Label htmlFor="select-all" className="cursor-pointer text-sm font-medium">
                     Select All ({exportableInvoices.length})
                   </Label>
                 </div>
-                <Badge variant="secondary">
-                  {selectedIds.size} selected
-                </Badge>
+                <Badge variant="secondary">{selectedIds.size} selected</Badge>
               </div>
 
               <ScrollArea className="h-[300px] pr-4">
@@ -284,7 +283,7 @@ export function XeroExport({ invoices }: XeroExportProps) {
                   {exportableInvoices.map((invoice) => (
                     <div
                       key={invoice.id}
-                      className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
+                      className={`flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-colors ${
                         selectedIds.has(invoice.id)
                           ? "border-primary bg-primary/5"
                           : "border-border hover:bg-accent"
@@ -295,21 +294,17 @@ export function XeroExport({ invoices }: XeroExportProps) {
                         checked={selectedIds.has(invoice.id)}
                         onCheckedChange={() => toggleInvoice(invoice.id)}
                       />
-                      <div className="flex-1 min-w-0">
+                      <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
-                          <span className="font-medium text-sm">
-                            {invoice.invoice_number}
-                          </span>
+                          <span className="text-sm font-medium">{invoice.invoice_number}</span>
                           {getStatusBadge(invoice.status)}
                         </div>
-                        <p className="text-sm text-muted-foreground truncate">
+                        <p className="truncate text-sm text-muted-foreground">
                           {invoice.clients?.name || "Unknown Client"}
                         </p>
                       </div>
                       <div className="text-right">
-                        <p className="font-semibold text-sm">
-                          ${invoice.total.toFixed(2)}
-                        </p>
+                        <p className="text-sm font-semibold">${invoice.total.toFixed(2)}</p>
                         <p className="text-xs text-muted-foreground">
                           {format(parseISO(invoice.issue_date), "dd/MM/yyyy")}
                         </p>
@@ -319,9 +314,9 @@ export function XeroExport({ invoices }: XeroExportProps) {
                 </div>
               </ScrollArea>
 
-              <div className="bg-muted/50 rounded-lg p-3 text-sm">
-                <p className="font-medium mb-1">Xero Import Instructions:</p>
-                <ol className="text-muted-foreground text-xs space-y-1 list-decimal list-inside">
+              <div className="rounded-lg bg-muted/50 p-3 text-sm">
+                <p className="mb-1 font-medium">Xero Import Instructions:</p>
+                <ol className="list-inside list-decimal space-y-1 text-xs text-muted-foreground">
                   <li>Go to Xero → Business → Invoices</li>
                   <li>Click Import → Import invoices</li>
                   <li>Select the downloaded CSV file</li>
@@ -335,18 +330,15 @@ export function XeroExport({ invoices }: XeroExportProps) {
             <Button variant="outline" onClick={() => setIsOpen(false)}>
               Cancel
             </Button>
-            <Button
-              onClick={handleExport}
-              disabled={isExporting || selectedIds.size === 0}
-            >
+            <Button onClick={handleExport} disabled={isExporting || selectedIds.size === 0}>
               {isExporting ? (
                 <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Exporting...
                 </>
               ) : (
                 <>
-                  <Download className="h-4 w-4 mr-2" />
+                  <Download className="mr-2 h-4 w-4" />
                   Export {selectedIds.size} Invoice{selectedIds.size !== 1 ? "s" : ""}
                 </>
               )}

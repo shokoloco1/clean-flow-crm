@@ -32,19 +32,31 @@ interface JobsListProps {
 
 function getStatusColor(status: string) {
   switch (status) {
-    case "completed": return "bg-success/10 text-success";
-    case "in_progress": return "bg-warning/10 text-warning";
-    case "cancelled": return "bg-destructive/10 text-destructive";
-    default: return "bg-muted text-muted-foreground";
+    case "completed":
+      return "bg-success/10 text-success";
+    case "in_progress":
+      return "bg-warning/10 text-warning";
+    case "cancelled":
+      return "bg-destructive/10 text-destructive";
+    default:
+      return "bg-muted text-muted-foreground";
   }
 }
 
-export function JobsList({ jobs, loading, error, isRetrying, onViewJob, onRetry, onJobsChange }: JobsListProps) {
+export function JobsList({
+  jobs,
+  loading,
+  error,
+  isRetrying,
+  onViewJob,
+  onRetry,
+  onJobsChange,
+}: JobsListProps) {
   const { updatingJobId, advanceStatus } = useJobStatusChange(onJobsChange);
-  
+
   // Show error state when there's an error and no data
   const showError = error && jobs.length === 0;
-  
+
   return (
     <Card className="border-border shadow-sm">
       <CardHeader>
@@ -55,21 +67,19 @@ export function JobsList({ jobs, loading, error, isRetrying, onViewJob, onRetry,
       </CardHeader>
       <CardContent>
         {loading && !showError ? (
-          <div className="flex flex-col items-center justify-center py-12 text-muted-foreground gap-3">
+          <div className="flex flex-col items-center justify-center gap-3 py-12 text-muted-foreground">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            <span className="text-sm">
-              {isRetrying ? 'Retrying...' : 'Loading jobs...'}
-            </span>
+            <span className="text-sm">{isRetrying ? "Retrying..." : "Loading jobs..."}</span>
           </div>
         ) : showError ? (
-          <div className="flex flex-col items-center justify-center py-12 gap-4">
-            <div className="h-14 w-14 rounded-full bg-destructive/10 flex items-center justify-center">
+          <div className="flex flex-col items-center justify-center gap-4 py-12">
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-destructive/10">
               <AlertTriangle className="h-7 w-7 text-destructive" />
             </div>
             <div className="text-center">
               <p className="font-medium text-foreground">Something went wrong</p>
-              <p className="text-sm text-muted-foreground mt-1 max-w-xs">
-                {error || 'Failed to load jobs. Please try again.'}
+              <p className="mt-1 max-w-xs text-sm text-muted-foreground">
+                {error || "Failed to load jobs. Please try again."}
               </p>
             </div>
             {onRetry && (
@@ -80,7 +90,7 @@ export function JobsList({ jobs, loading, error, isRetrying, onViewJob, onRetry,
             )}
           </div>
         ) : jobs.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
+          <div className="py-8 text-center text-muted-foreground">
             No upcoming jobs scheduled. Create a new job to get started.
           </div>
         ) : (
@@ -88,20 +98,22 @@ export function JobsList({ jobs, loading, error, isRetrying, onViewJob, onRetry,
             {jobs.map((job) => (
               <div
                 key={job.id}
-                className="flex items-center justify-between p-4 rounded-lg bg-muted/50 hover:bg-muted transition-colors cursor-pointer"
+                className="flex cursor-pointer items-center justify-between rounded-lg bg-muted/50 p-4 transition-colors hover:bg-muted"
                 onClick={() => onViewJob(job)}
               >
                 <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
+                  <div className="mb-1 flex items-center gap-2">
                     <span className="font-medium text-foreground">
                       {job.clients?.name || "Unknown Client"}
                     </span>
-                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getStatusColor(job.status)}`}>
+                    <span
+                      className={`rounded-full px-2 py-0.5 text-xs font-medium ${getStatusColor(job.status)}`}
+                    >
                       {job.status.replace("_", " ")}
                     </span>
                   </div>
                   <p className="text-sm text-muted-foreground">{job.location}</p>
-                  <p className="text-xs text-muted-foreground mt-1">
+                  <p className="mt-1 text-xs text-muted-foreground">
                     {format(new Date(job.scheduled_date), "MMM d, yyyy")} at {job.scheduled_time}
                     {job.profiles?.full_name && ` • ${job.profiles.full_name}`}
                   </p>
@@ -112,7 +124,15 @@ export function JobsList({ jobs, loading, error, isRetrying, onViewJob, onRetry,
                     isUpdating={updatingJobId === job.id}
                     onAdvance={() => advanceStatus(job.id, job.status)}
                   />
-                  <Button variant="ghost" size="icon" aria-label="View job details" onClick={(e) => { e.stopPropagation(); onViewJob(job); }}>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    aria-label="View job details"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onViewJob(job);
+                    }}
+                  >
                     <Eye className="h-4 w-4" />
                   </Button>
                 </div>

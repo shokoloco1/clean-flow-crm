@@ -18,7 +18,7 @@ const requirements = [
 
 export function PasswordStrengthIndicator({
   password,
-  showRequirements = true
+  showRequirements = true,
 }: PasswordStrengthIndicatorProps) {
   const validation = useMemo(() => validatePassword(password), [password]);
 
@@ -30,29 +30,29 @@ export function PasswordStrengthIndicator({
       textColor: "text-destructive",
       label: "Weak",
       icon: ShieldAlert,
-      width: "w-1/3"
+      width: "w-1/3",
     },
     medium: {
       color: "bg-yellow-500",
       textColor: "text-yellow-600",
       label: "Medium",
       icon: Shield,
-      width: "w-2/3"
+      width: "w-2/3",
     },
     strong: {
       color: "bg-green-500",
       textColor: "text-green-600",
       label: "Strong",
       icon: ShieldCheck,
-      width: "w-full"
-    }
+      width: "w-full",
+    },
   };
 
   const config = strengthConfig[validation.strength];
   const Icon = config.icon;
 
   return (
-    <div className="space-y-3 mt-2">
+    <div className="mt-2 space-y-3">
       {/* Strength bar */}
       <div className="space-y-1.5">
         <div className="flex items-center justify-between text-xs">
@@ -62,9 +62,13 @@ export function PasswordStrengthIndicator({
             <span>{config.label}</span>
           </div>
         </div>
-        <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+        <div className="h-1.5 overflow-hidden rounded-full bg-muted">
           <div
-            className={cn("h-full transition-all duration-300 rounded-full", config.color, config.width)}
+            className={cn(
+              "h-full rounded-full transition-all duration-300",
+              config.color,
+              config.width,
+            )}
           />
         </div>
       </div>
@@ -79,14 +83,10 @@ export function PasswordStrengthIndicator({
                 key={req.label}
                 className={cn(
                   "flex items-center gap-1.5 text-xs transition-colors",
-                  passed ? "text-green-600" : "text-muted-foreground"
+                  passed ? "text-green-600" : "text-muted-foreground",
                 )}
               >
-                {passed ? (
-                  <Check className="h-3 w-3" />
-                ) : (
-                  <X className="h-3 w-3" />
-                )}
+                {passed ? <Check className="h-3 w-3" /> : <X className="h-3 w-3" />}
                 <span>{req.label}</span>
               </div>
             );
@@ -96,23 +96,23 @@ export function PasswordStrengthIndicator({
 
       {/* Special warnings */}
       {validation.errors.includes("Leaked password") && (
-        <div className="flex items-start gap-2 p-2 bg-destructive/10 border border-destructive/20 rounded-md">
-          <AlertTriangle className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
+        <div className="flex items-start gap-2 rounded-md border border-destructive/20 bg-destructive/10 p-2">
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
           <p className="text-xs text-destructive">
-            This password appears in leaked databases.
-            Hackers will try it first.
+            This password appears in leaked databases. Hackers will try it first.
           </p>
         </div>
       )}
 
-      {validation.errors.includes("Weak pattern") && !validation.errors.includes("Leaked password") && (
-        <div className="flex items-start gap-2 p-2 bg-yellow-500/10 border border-yellow-500/20 rounded-md">
-          <AlertTriangle className="h-4 w-4 text-yellow-600 shrink-0 mt-0.5" />
-          <p className="text-xs text-yellow-700 dark:text-yellow-500">
-            Avoid predictable patterns like sequences or repetitions.
-          </p>
-        </div>
-      )}
+      {validation.errors.includes("Weak pattern") &&
+        !validation.errors.includes("Leaked password") && (
+          <div className="flex items-start gap-2 rounded-md border border-yellow-500/20 bg-yellow-500/10 p-2">
+            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-yellow-600" />
+            <p className="text-xs text-yellow-700 dark:text-yellow-500">
+              Avoid predictable patterns like sequences or repetitions.
+            </p>
+          </div>
+        )}
     </div>
   );
 }

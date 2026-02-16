@@ -19,7 +19,7 @@ import {
   Camera,
   Loader2,
   ChevronDown,
-  ChevronRight
+  ChevronRight,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -31,7 +31,7 @@ interface ChecklistItem {
   job_id: string;
   room_name: string;
   task_name: string;
-  status: 'pending' | 'done' | 'na' | 'issue';
+  status: "pending" | "done" | "na" | "issue";
   issue_photo_url: string | null;
   issue_note: string | null;
   completed_at: string | null;
@@ -45,11 +45,11 @@ interface AdvancedChecklistProps {
   onProgressUpdate?: (percentage: number) => void;
 }
 
-export default function AdvancedChecklist({ 
-  jobId, 
-  jobStatus, 
+export default function AdvancedChecklist({
+  jobId,
+  jobStatus,
   legacyChecklist = [],
-  onProgressUpdate 
+  onProgressUpdate,
 }: AdvancedChecklistProps) {
   const { t } = useLanguage();
   const [items, setItems] = useState<ChecklistItem[]>([]);
@@ -61,7 +61,7 @@ export default function AdvancedChecklist({
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
   const [issuePhotoUrl, setIssuePhotoUrl] = useState<string | null>(null);
 
-  const isEditable = jobStatus === 'in_progress';
+  const isEditable = jobStatus === "in_progress";
 
   const initializeFromLegacy = useCallback(async () => {
     const newItems = legacyChecklist.map((task, index) => {
@@ -78,20 +78,17 @@ export default function AdvancedChecklist({
         job_id: jobId,
         room_name: roomName,
         task_name: taskName,
-        status: 'pending' as const,
-        sort_order: index
+        status: "pending" as const,
+        sort_order: index,
       };
     });
 
     if (newItems.length > 0) {
-      const { data, error } = await supabase
-        .from("checklist_items")
-        .insert(newItems)
-        .select();
+      const { data, error } = await supabase.from("checklist_items").insert(newItems).select();
 
       if (!error && data) {
         setItems(data as ChecklistItem[]);
-        const rooms = [...new Set(data.map(item => item.room_name))];
+        const rooms = [...new Set(data.map((item) => item.room_name))];
         setExpandedRooms(new Set([rooms[0]]));
       }
     }
@@ -112,7 +109,7 @@ export default function AdvancedChecklist({
 
     if (data && data.length > 0) {
       setItems(data as ChecklistItem[]);
-      const rooms = [...new Set(data.map(item => item.room_name))];
+      const rooms = [...new Set(data.map((item) => item.room_name))];
       setExpandedRooms(new Set([rooms[0]]));
     } else if (legacyChecklist.length > 0) {
       await initializeFromLegacy();
@@ -127,9 +124,9 @@ export default function AdvancedChecklist({
     const channel = supabase
       .channel(`checklist-${jobId}`)
       .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'checklist_items', filter: `job_id=eq.${jobId}` },
-        () => fetchItems()
+        "postgres_changes",
+        { event: "*", schema: "public", table: "checklist_items", filter: `job_id=eq.${jobId}` },
+        () => fetchItems(),
       )
       .subscribe();
 
@@ -140,22 +137,22 @@ export default function AdvancedChecklist({
 
   useEffect(() => {
     if (items.length > 0) {
-      const completedCount = items.filter(item => 
-        item.status === 'done' || item.status === 'na'
+      const completedCount = items.filter(
+        (item) => item.status === "done" || item.status === "na",
       ).length;
       const percentage = Math.round((completedCount / items.length) * 100);
       onProgressUpdate?.(percentage);
     }
   }, [items, onProgressUpdate]);
 
-  const updateItemStatus = async (item: ChecklistItem, newStatus: 'done' | 'na' | 'pending') => {
+  const updateItemStatus = async (item: ChecklistItem, newStatus: "done" | "na" | "pending") => {
     if (!isEditable) return;
 
     const { error } = await supabase
       .from("checklist_items")
-      .update({ 
+      .update({
         status: newStatus,
-        completed_at: newStatus !== 'pending' ? new Date().toISOString() : null
+        completed_at: newStatus !== "pending" ? new Date().toISOString() : null,
       })
       .eq("id", item.id);
 
@@ -177,13 +174,13 @@ export default function AdvancedChecklist({
     if (!file) return;
 
     setIsUploadingPhoto(true);
-    
-    const fileExt = file.name.split('.').pop();
+
+    const fileExt = file.name.split(".").pop();
     const fileName = `issues/${jobId}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-    
+
     const { data, error } = await supabase.storage
-      .from('job-evidence')
-      .upload(fileName, file, { cacheControl: '3600' });
+      .from("job-evidence")
+      .upload(fileName, file, { cacheControl: "3600" });
 
     if (error) {
       toast.error(t("error_uploading_photo"));
@@ -191,13 +188,11 @@ export default function AdvancedChecklist({
       return;
     }
 
-    const { data: urlData } = supabase.storage
-      .from('job-evidence')
-      .getPublicUrl(data.path);
+    const { data: urlData } = supabase.storage.from("job-evidence").getPublicUrl(data.path);
 
     setIssuePhotoUrl(urlData.publicUrl);
     setIsUploadingPhoto(false);
-    e.target.value = '';
+    e.target.value = "";
   };
 
   const saveIssue = async () => {
@@ -206,10 +201,10 @@ export default function AdvancedChecklist({
     const { error } = await supabase
       .from("checklist_items")
       .update({
-        status: 'issue',
+        status: "issue",
         issue_note: issueNote || null,
         issue_photo_url: issuePhotoUrl,
-        completed_at: new Date().toISOString()
+        completed_at: new Date().toISOString(),
       })
       .eq("id", selectedItem.id);
 
@@ -225,7 +220,7 @@ export default function AdvancedChecklist({
   };
 
   const toggleRoom = (roomName: string) => {
-    setExpandedRooms(prev => {
+    setExpandedRooms((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(roomName)) {
         newSet.delete(roomName);
@@ -236,26 +231,29 @@ export default function AdvancedChecklist({
     });
   };
 
-  const groupedItems = items.reduce((acc, item) => {
-    if (!acc[item.room_name]) {
-      acc[item.room_name] = [];
-    }
-    acc[item.room_name].push(item);
-    return acc;
-  }, {} as Record<string, ChecklistItem[]>);
+  const groupedItems = items.reduce(
+    (acc, item) => {
+      if (!acc[item.room_name]) {
+        acc[item.room_name] = [];
+      }
+      acc[item.room_name].push(item);
+      return acc;
+    },
+    {} as Record<string, ChecklistItem[]>,
+  );
 
   const getRoomProgress = (roomItems: ChecklistItem[]) => {
-    const completed = roomItems.filter(i => i.status === 'done' || i.status === 'na').length;
+    const completed = roomItems.filter((i) => i.status === "done" || i.status === "na").length;
     return Math.round((completed / roomItems.length) * 100);
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'done':
+      case "done":
         return <Check className="h-5 w-5 text-success" />;
-      case 'na':
+      case "na":
         return <X className="h-5 w-5 text-muted-foreground" />;
-      case 'issue':
+      case "issue":
         return <AlertTriangle className="h-5 w-5 text-destructive" />;
       default:
         return null;
@@ -276,11 +274,15 @@ export default function AdvancedChecklist({
     return null;
   }
 
-  const totalProgress = items.length > 0 
-    ? Math.round((items.filter(i => i.status === 'done' || i.status === 'na').length / items.length) * 100)
-    : 0;
+  const totalProgress =
+    items.length > 0
+      ? Math.round(
+          (items.filter((i) => i.status === "done" || i.status === "na").length / items.length) *
+            100,
+        )
+      : 0;
 
-  const issueCount = items.filter(i => i.status === 'issue').length;
+  const issueCount = items.filter((i) => i.status === "issue").length;
 
   return (
     <>
@@ -293,29 +295,27 @@ export default function AdvancedChecklist({
             </CardTitle>
             <div className="flex items-center gap-2">
               {issueCount > 0 && (
-                <span className="flex items-center gap-1 text-sm text-destructive bg-destructive/10 px-2 py-1 rounded-full">
+                <span className="flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-1 text-sm text-destructive">
                   <AlertTriangle className="h-3 w-3" />
                   {issueCount} {issueCount > 1 ? t("issues") : t("issue")}
                 </span>
               )}
-              <span className="text-sm font-medium text-foreground">
-                {totalProgress}%
-              </span>
+              <span className="text-sm font-medium text-foreground">{totalProgress}%</span>
             </div>
           </div>
-          <Progress value={totalProgress} className="h-2 mt-2" />
+          <Progress value={totalProgress} className="mt-2 h-2" />
         </CardHeader>
-        <CardContent className="pt-0 space-y-3">
+        <CardContent className="space-y-3 pt-0">
           {Object.entries(groupedItems).map(([roomName, roomItems]) => {
             const isExpanded = expandedRooms.has(roomName);
             const roomProgress = getRoomProgress(roomItems);
-            const roomIssues = roomItems.filter(i => i.status === 'issue').length;
+            const roomIssues = roomItems.filter((i) => i.status === "issue").length;
 
             return (
-              <div key={roomName} className="border border-border rounded-lg overflow-hidden">
+              <div key={roomName} className="overflow-hidden rounded-lg border border-border">
                 <button
                   onClick={() => toggleRoom(roomName)}
-                  className="w-full flex items-center justify-between p-4 bg-muted/30 hover:bg-muted/50 transition-colors"
+                  className="flex w-full items-center justify-between bg-muted/30 p-4 transition-colors hover:bg-muted/50"
                 >
                   <div className="flex items-center gap-3">
                     {isExpanded ? (
@@ -325,19 +325,20 @@ export default function AdvancedChecklist({
                     )}
                     <span className="font-medium text-foreground">{roomName}</span>
                     {roomIssues > 0 && (
-                      <span className="text-xs text-destructive bg-destructive/10 px-1.5 py-0.5 rounded">
+                      <span className="rounded bg-destructive/10 px-1.5 py-0.5 text-xs text-destructive">
                         {roomIssues} {roomIssues > 1 ? t("issues") : t("issue")}
                       </span>
                     )}
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-sm text-muted-foreground">
-                      {roomItems.filter(i => i.status === 'done' || i.status === 'na').length}/{roomItems.length}
+                      {roomItems.filter((i) => i.status === "done" || i.status === "na").length}/
+                      {roomItems.length}
                     </span>
-                    <div className="w-16 h-2 bg-muted rounded-full overflow-hidden">
-                      <div 
-                        className="h-full bg-primary transition-all" 
-                        style={{ width: `${roomProgress}%` }} 
+                    <div className="h-2 w-16 overflow-hidden rounded-full bg-muted">
+                      <div
+                        className="h-full bg-primary transition-all"
+                        style={{ width: `${roomProgress}%` }}
                       />
                     </div>
                   </div>
@@ -346,23 +347,25 @@ export default function AdvancedChecklist({
                 {isExpanded && (
                   <div className="divide-y divide-border">
                     {roomItems.map((item) => (
-                      <div 
-                        key={item.id} 
+                      <div
+                        key={item.id}
                         className={cn(
-                          "p-4 flex items-center justify-between gap-3",
-                          item.status === 'done' && "bg-success/5",
-                          item.status === 'issue' && "bg-destructive/5"
+                          "flex items-center justify-between gap-3 p-4",
+                          item.status === "done" && "bg-success/5",
+                          item.status === "issue" && "bg-destructive/5",
                         )}
                       >
-                        <div className="flex items-center gap-3 flex-1 min-w-0">
-                          <div className="w-6 h-6 flex items-center justify-center">
+                        <div className="flex min-w-0 flex-1 items-center gap-3">
+                          <div className="flex h-6 w-6 items-center justify-center">
                             {getStatusIcon(item.status)}
                           </div>
-                          <span className={cn(
-                            "text-foreground",
-                            item.status === 'done' && "line-through text-muted-foreground",
-                            item.status === 'na' && "line-through text-muted-foreground"
-                          )}>
+                          <span
+                            className={cn(
+                              "text-foreground",
+                              item.status === "done" && "text-muted-foreground line-through",
+                              item.status === "na" && "text-muted-foreground line-through",
+                            )}
+                          >
                             {item.task_name}
                           </span>
                         </div>
@@ -370,23 +373,27 @@ export default function AdvancedChecklist({
                         {isEditable && (
                           <div className="flex items-center gap-1.5">
                             <Button
-                              variant={item.status === 'done' ? 'default' : 'outline'}
+                              variant={item.status === "done" ? "default" : "outline"}
                               size="sm"
                               className="h-9 w-9 p-0"
-                              onClick={() => updateItemStatus(item, item.status === 'done' ? 'pending' : 'done')}
+                              onClick={() =>
+                                updateItemStatus(item, item.status === "done" ? "pending" : "done")
+                              }
                             >
                               <Check className="h-4 w-4" />
                             </Button>
                             <Button
-                              variant={item.status === 'na' ? 'secondary' : 'outline'}
+                              variant={item.status === "na" ? "secondary" : "outline"}
                               size="sm"
                               className="h-9 px-2"
-                              onClick={() => updateItemStatus(item, item.status === 'na' ? 'pending' : 'na')}
+                              onClick={() =>
+                                updateItemStatus(item, item.status === "na" ? "pending" : "na")
+                              }
                             >
                               N/A
                             </Button>
                             <Button
-                              variant={item.status === 'issue' ? 'destructive' : 'outline'}
+                              variant={item.status === "issue" ? "destructive" : "outline"}
                               size="sm"
                               className="h-9 w-9 p-0"
                               onClick={() => handleIssueClick(item)}
@@ -396,12 +403,8 @@ export default function AdvancedChecklist({
                           </div>
                         )}
 
-                        {!isEditable && item.status === 'issue' && item.issue_note && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleIssueClick(item)}
-                          >
+                        {!isEditable && item.status === "issue" && item.issue_note && (
+                          <Button variant="ghost" size="sm" onClick={() => handleIssueClick(item)}>
                             {t("view_issue")}
                           </Button>
                         )}
@@ -423,10 +426,10 @@ export default function AdvancedChecklist({
               {isEditable ? t("report_issue") : t("issue_details")}
             </DialogTitle>
           </DialogHeader>
-          
+
           <div className="space-y-4">
             {selectedItem && (
-              <div className="p-3 bg-muted rounded-lg">
+              <div className="rounded-lg bg-muted p-3">
                 <p className="text-sm text-muted-foreground">{t("task")}:</p>
                 <p className="font-medium text-foreground">{selectedItem.task_name}</p>
               </div>
@@ -435,7 +438,7 @@ export default function AdvancedChecklist({
             {isEditable ? (
               <>
                 <div>
-                  <label className="text-sm font-medium text-foreground mb-2 block">
+                  <label className="mb-2 block text-sm font-medium text-foreground">
                     {t("describe_issue")}
                   </label>
                   <Textarea
@@ -447,27 +450,27 @@ export default function AdvancedChecklist({
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium text-foreground mb-2 block">
+                  <label className="mb-2 block text-sm font-medium text-foreground">
                     {t("photo_evidence")}
                   </label>
                   {issuePhotoUrl ? (
                     <div className="relative">
-                      <img 
-                        src={issuePhotoUrl} 
-                        alt="Issue" 
-                        className="w-full h-48 object-cover rounded-lg"
+                      <img
+                        src={issuePhotoUrl}
+                        alt="Issue"
+                        className="h-48 w-full rounded-lg object-cover"
                       />
                       <Button
                         variant="destructive"
                         size="sm"
-                        className="absolute top-2 right-2"
+                        className="absolute right-2 top-2"
                         onClick={() => setIssuePhotoUrl(null)}
                       >
                         <X className="h-4 w-4" />
                       </Button>
                     </div>
                   ) : (
-                    <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors">
+                    <label className="flex h-32 w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-border transition-colors hover:bg-muted/50">
                       <input
                         type="file"
                         accept="image/*"
@@ -480,8 +483,10 @@ export default function AdvancedChecklist({
                         <Loader2 className="h-8 w-8 animate-spin text-primary" />
                       ) : (
                         <>
-                          <Camera className="h-8 w-8 text-muted-foreground mb-2" />
-                          <span className="text-sm text-muted-foreground">{t("take_upload_photo")}</span>
+                          <Camera className="mb-2 h-8 w-8 text-muted-foreground" />
+                          <span className="text-sm text-muted-foreground">
+                            {t("take_upload_photo")}
+                          </span>
                         </>
                       )}
                     </label>
@@ -492,15 +497,15 @@ export default function AdvancedChecklist({
               <>
                 {selectedItem?.issue_note && (
                   <div>
-                    <p className="text-sm font-medium text-foreground mb-1">{t("notes")}:</p>
+                    <p className="mb-1 text-sm font-medium text-foreground">{t("notes")}:</p>
                     <p className="text-muted-foreground">{selectedItem.issue_note}</p>
                   </div>
                 )}
                 {selectedItem?.issue_photo_url && (
-                  <img 
-                    src={selectedItem.issue_photo_url} 
-                    alt="Issue" 
-                    className="w-full h-48 object-cover rounded-lg"
+                  <img
+                    src={selectedItem.issue_photo_url}
+                    alt="Issue"
+                    className="h-48 w-full rounded-lg object-cover"
                   />
                 )}
               </>
@@ -513,14 +518,10 @@ export default function AdvancedChecklist({
                 <Button variant="outline" onClick={() => setIssueDialogOpen(false)}>
                   {t("cancel")}
                 </Button>
-                <Button onClick={saveIssue}>
-                  {t("save_issue")}
-                </Button>
+                <Button onClick={saveIssue}>{t("save_issue")}</Button>
               </>
             ) : (
-              <Button onClick={() => setIssueDialogOpen(false)}>
-                {t("close")}
-              </Button>
+              <Button onClick={() => setIssueDialogOpen(false)}>{t("close")}</Button>
             )}
           </DialogFooter>
         </DialogContent>

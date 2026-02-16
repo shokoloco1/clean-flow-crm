@@ -3,17 +3,31 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useLanguage } from "@/hooks/useLanguage";
 
-interface TodayJobsListProps<T extends { id: string; location: string; scheduled_time: string; status: string; clients: { name: string } | null }> {
+interface TodayJobsListProps<
+  T extends {
+    id: string;
+    location: string;
+    scheduled_time: string;
+    status: string;
+    clients: { name: string } | null;
+  },
+> {
   jobs: T[];
   currentJobId?: string;
   onSelectJob: (job: T) => void;
 }
 
-export function TodayJobsList<T extends { id: string; location: string; scheduled_time: string; status: string; clients: { name: string } | null }>({ 
-  jobs, currentJobId, onSelectJob 
-}: TodayJobsListProps<T>) {
+export function TodayJobsList<
+  T extends {
+    id: string;
+    location: string;
+    scheduled_time: string;
+    status: string;
+    clients: { name: string } | null;
+  },
+>({ jobs, currentJobId, onSelectJob }: TodayJobsListProps<T>) {
   const { t } = useLanguage();
-  
+
   if (jobs.length === 0) return null;
 
   const getStatusIcon = (status: string) => {
@@ -30,45 +44,51 @@ export function TodayJobsList<T extends { id: string; location: string; schedule
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "completed":
-        return <Badge variant="secondary" className="bg-success/20 text-success text-xs">{t("status_done")}</Badge>;
+        return (
+          <Badge variant="secondary" className="bg-success/20 text-xs text-success">
+            {t("status_done")}
+          </Badge>
+        );
       case "in_progress":
-        return <Badge variant="secondary" className="bg-warning/20 text-warning text-xs">{t("status_active")}</Badge>;
+        return (
+          <Badge variant="secondary" className="bg-warning/20 text-xs text-warning">
+            {t("status_active")}
+          </Badge>
+        );
       default:
-        return <Badge variant="outline" className="text-xs">{t("status_pending")}</Badge>;
+        return (
+          <Badge variant="outline" className="text-xs">
+            {t("status_pending")}
+          </Badge>
+        );
     }
   };
 
   return (
     <div className="space-y-2">
-      <h3 className="text-sm font-semibold text-muted-foreground px-1">
+      <h3 className="px-1 text-sm font-semibold text-muted-foreground">
         📋 {t("todays_schedule")} ({jobs.length} {t("jobs_count")})
       </h3>
-      
+
       <div className="space-y-2">
         {jobs.map((job) => {
           const isCurrent = job.id === currentJobId;
-          
+
           return (
-            <Card 
+            <Card
               key={job.id}
-              className={`
-                cursor-pointer active:scale-[0.98] transition-all
-                ${isCurrent ? "ring-2 ring-primary bg-primary/5" : ""}
-                ${job.status === "completed" ? "opacity-60" : ""}
-              `}
+              className={`cursor-pointer transition-all active:scale-[0.98] ${isCurrent ? "bg-primary/5 ring-2 ring-primary" : ""} ${job.status === "completed" ? "opacity-60" : ""} `}
               onClick={() => onSelectJob(job)}
             >
               <CardContent className="p-3">
                 <div className="flex items-center gap-3">
                   {/* Status Icon */}
-                  <div className="flex-shrink-0">
-                    {getStatusIcon(job.status)}
-                  </div>
-                  
+                  <div className="flex-shrink-0">{getStatusIcon(job.status)}</div>
+
                   {/* Job Info */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-0.5">
-                      <span className="font-semibold text-foreground truncate">
+                  <div className="min-w-0 flex-1">
+                    <div className="mb-0.5 flex items-center gap-2">
+                      <span className="truncate font-semibold text-foreground">
                         {job.clients?.name || t("unknown_client")}
                       </span>
                       {getStatusBadge(job.status)}
@@ -78,7 +98,7 @@ export function TodayJobsList<T extends { id: string; location: string; schedule
                       <span className="truncate">{job.location}</span>
                     </div>
                   </div>
-                  
+
                   {/* Time */}
                   <div className="flex-shrink-0 text-sm font-medium text-muted-foreground">
                     {job.scheduled_time}

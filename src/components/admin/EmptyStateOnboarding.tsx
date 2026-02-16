@@ -16,7 +16,7 @@ export function EmptyStateOnboarding({
   onCreateJob,
   hasClients = false,
   hasJobs = false,
-  hasStaff = false
+  hasStaff = false,
 }: EmptyStateOnboardingProps) {
   const navigate = useNavigate();
   const { tAdmin } = useLanguage();
@@ -49,20 +49,18 @@ export function EmptyStateOnboarding({
   ];
 
   return (
-    <div className="flex flex-col items-center justify-center py-12 px-4">
+    <div className="flex flex-col items-center justify-center px-4 py-12">
       {/* Header */}
-      <div className="text-center mb-8">
-        <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
+      <div className="mb-8 text-center">
+        <h2 className="mb-2 text-2xl font-bold text-foreground md:text-3xl">
           {tAdmin("welcome_to_pulcrix")}
         </h2>
-        <p className="text-muted-foreground text-lg">
-          {tAdmin("lets_get_started")}
-        </p>
+        <p className="text-lg text-muted-foreground">{tAdmin("lets_get_started")}</p>
       </div>
 
       {/* Progress */}
-      <div className="w-full max-w-md mb-8">
-        <div className="flex justify-between items-center mb-2">
+      <div className="mb-8 w-full max-w-md">
+        <div className="mb-2 flex items-center justify-between">
           <span className="text-sm text-muted-foreground">{tAdmin("setup_progress")}</span>
           <span className="text-sm font-medium text-foreground">
             {completedSteps}/3 {tAdmin("completed")}
@@ -72,11 +70,11 @@ export function EmptyStateOnboarding({
       </div>
 
       {/* Steps Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full max-w-4xl">
+      <div className="grid w-full max-w-4xl grid-cols-1 gap-4 md:grid-cols-3">
         {steps.map((step) => (
           <Card
             key={step.id}
-            className={`cursor-pointer transition-all hover:shadow-md hover:border-primary/50 ${
+            className={`cursor-pointer transition-all hover:border-primary/50 hover:shadow-md ${
               step.completed ? "border-primary/30 bg-primary/5" : ""
             }`}
             onClick={step.action}
@@ -84,10 +82,8 @@ export function EmptyStateOnboarding({
             <CardContent className="p-6">
               <div className="flex items-start gap-4">
                 <div
-                  className={`h-12 w-12 rounded-full flex items-center justify-center flex-shrink-0 ${
-                    step.completed
-                      ? "bg-primary/20 text-primary"
-                      : "bg-muted text-muted-foreground"
+                  className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full ${
+                    step.completed ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground"
                   }`}
                 >
                   {step.completed ? (
@@ -96,10 +92,8 @@ export function EmptyStateOnboarding({
                     <step.icon className="h-6 w-6" />
                   )}
                 </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-foreground mb-1">
-                    {step.title}
-                  </h3>
+                <div className="min-w-0 flex-1">
+                  <h3 className="mb-1 font-semibold text-foreground">{step.title}</h3>
                 </div>
               </div>
               <div className="mt-4">

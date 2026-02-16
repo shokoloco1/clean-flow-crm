@@ -1,29 +1,33 @@
-import { useStaffAvailability } from '@/hooks/useStaffAvailability';
-import { useLanguage } from '@/hooks/useLanguage';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Switch } from '@/components/ui/switch';
-import { Loader2, Save, Calendar } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { useStaffAvailability } from "@/hooks/useStaffAvailability";
+import { useLanguage } from "@/hooks/useLanguage";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
+import { Loader2, Save, Calendar } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface StaffAvailabilityCalendarProps {
   staffId?: string;
   compact?: boolean;
 }
 
-export function StaffAvailabilityCalendar({ staffId, compact = false }: StaffAvailabilityCalendarProps) {
-  const { availability, loading, saving, toggleDay, updateHours, saveAvailability } = useStaffAvailability(staffId);
+export function StaffAvailabilityCalendar({
+  staffId,
+  compact = false,
+}: StaffAvailabilityCalendarProps) {
+  const { availability, loading, saving, toggleDay, updateHours, saveAvailability } =
+    useStaffAvailability(staffId);
   const { t } = useLanguage();
 
   const DAYS = [
-    { value: 0, label: t('sun'), fullLabel: t('sunday') },
-    { value: 1, label: t('mon'), fullLabel: t('monday') },
-    { value: 2, label: t('tue'), fullLabel: t('tuesday') },
-    { value: 3, label: t('wed'), fullLabel: t('wednesday') },
-    { value: 4, label: t('thu'), fullLabel: t('thursday') },
-    { value: 5, label: t('fri'), fullLabel: t('friday') },
-    { value: 6, label: t('sat'), fullLabel: t('saturday') },
+    { value: 0, label: t("sun"), fullLabel: t("sunday") },
+    { value: 1, label: t("mon"), fullLabel: t("monday") },
+    { value: 2, label: t("tue"), fullLabel: t("tuesday") },
+    { value: 3, label: t("wed"), fullLabel: t("wednesday") },
+    { value: 4, label: t("thu"), fullLabel: t("thursday") },
+    { value: 5, label: t("fri"), fullLabel: t("friday") },
+    { value: 6, label: t("sat"), fullLabel: t("saturday") },
   ];
 
   if (loading) {
@@ -37,34 +41,34 @@ export function StaffAvailabilityCalendar({ staffId, compact = false }: StaffAva
   }
 
   const getAvailabilityForDay = (dayOfWeek: number) => {
-    return availability.find(a => a.day_of_week === dayOfWeek);
+    return availability.find((a) => a.day_of_week === dayOfWeek);
   };
 
   if (compact) {
     return (
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-base flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-base">
             <Calendar className="h-4 w-4 text-primary" />
-            {t('weekly_availability')}
+            {t("weekly_availability")}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Quick day toggles */}
-          <div className="flex gap-1 justify-between">
-            {DAYS.map(day => {
+          <div className="flex justify-between gap-1">
+            {DAYS.map((day) => {
               const avail = getAvailabilityForDay(day.value);
               const isAvailable = avail?.is_available ?? false;
-              
+
               return (
                 <button
                   key={day.value}
                   onClick={() => toggleDay(day.value)}
                   className={cn(
-                    "flex-1 py-2 px-1 rounded-lg text-xs font-medium transition-colors",
+                    "flex-1 rounded-lg px-1 py-2 text-xs font-medium transition-colors",
                     isAvailable
                       ? "bg-primary text-primary-foreground"
-                      : "bg-muted text-muted-foreground hover:bg-muted/80"
+                      : "bg-muted text-muted-foreground hover:bg-muted/80",
                   )}
                 >
                   {day.label}
@@ -75,7 +79,7 @@ export function StaffAvailabilityCalendar({ staffId, compact = false }: StaffAva
 
           {/* Available days with hours */}
           <div className="space-y-2">
-            {DAYS.filter(day => getAvailabilityForDay(day.value)?.is_available).map(day => {
+            {DAYS.filter((day) => getAvailabilityForDay(day.value)?.is_available).map((day) => {
               const avail = getAvailabilityForDay(day.value)!;
               return (
                 <div key={day.value} className="flex items-center gap-2 text-sm">
@@ -98,18 +102,13 @@ export function StaffAvailabilityCalendar({ staffId, compact = false }: StaffAva
             })}
           </div>
 
-          <Button 
-            onClick={saveAvailability} 
-            disabled={saving}
-            className="w-full"
-            size="sm"
-          >
+          <Button onClick={saveAvailability} disabled={saving} className="w-full" size="sm">
             {saving ? (
-              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : (
-              <Save className="h-4 w-4 mr-2" />
+              <Save className="mr-2 h-4 w-4" />
             )}
-            {t('save_availability')}
+            {t("save_availability")}
           </Button>
         </CardContent>
       </Card>
@@ -121,15 +120,13 @@ export function StaffAvailabilityCalendar({ staffId, compact = false }: StaffAva
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Calendar className="h-5 w-5 text-primary" />
-          {t('weekly_availability')}
+          {t("weekly_availability")}
         </CardTitle>
-        <CardDescription>
-          {t('set_availability')}
-        </CardDescription>
+        <CardDescription>{t("set_availability")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-3">
-          {DAYS.map(day => {
+          {DAYS.map((day) => {
             const avail = getAvailabilityForDay(day.value);
             const isAvailable = avail?.is_available ?? false;
 
@@ -137,25 +134,22 @@ export function StaffAvailabilityCalendar({ staffId, compact = false }: StaffAva
               <div
                 key={day.value}
                 className={cn(
-                  "flex items-center gap-4 p-3 rounded-lg border transition-colors",
-                  isAvailable ? "border-primary/50 bg-primary/5" : "border-border"
+                  "flex items-center gap-4 rounded-lg border p-3 transition-colors",
+                  isAvailable ? "border-primary/50 bg-primary/5" : "border-border",
                 )}
               >
-                <Switch
-                  checked={isAvailable}
-                  onCheckedChange={() => toggleDay(day.value)}
-                />
+                <Switch checked={isAvailable} onCheckedChange={() => toggleDay(day.value)} />
                 <span className="w-24 font-medium">{day.fullLabel}</span>
-                
+
                 {isAvailable && avail && (
-                  <div className="flex items-center gap-2 ml-auto">
+                  <div className="ml-auto flex items-center gap-2">
                     <Input
                       type="time"
                       value={avail.start_time}
                       onChange={(e) => updateHours(day.value, e.target.value, avail.end_time)}
                       className="w-28"
                     />
-                    <span className="text-muted-foreground">{t('to')}</span>
+                    <span className="text-muted-foreground">{t("to")}</span>
                     <Input
                       type="time"
                       value={avail.end_time}
@@ -164,26 +158,24 @@ export function StaffAvailabilityCalendar({ staffId, compact = false }: StaffAva
                     />
                   </div>
                 )}
-                
+
                 {!isAvailable && (
-                  <span className="text-sm text-muted-foreground ml-auto">{t('not_available')}</span>
+                  <span className="ml-auto text-sm text-muted-foreground">
+                    {t("not_available")}
+                  </span>
                 )}
               </div>
             );
           })}
         </div>
 
-        <Button 
-          onClick={saveAvailability} 
-          disabled={saving}
-          className="w-full"
-        >
+        <Button onClick={saveAvailability} disabled={saving} className="w-full">
           {saving ? (
-            <Loader2 className="h-4 w-4 animate-spin mr-2" />
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           ) : (
-            <Save className="h-4 w-4 mr-2" />
+            <Save className="mr-2 h-4 w-4" />
           )}
-          {t('save_availability')}
+          {t("save_availability")}
         </Button>
       </CardContent>
     </Card>

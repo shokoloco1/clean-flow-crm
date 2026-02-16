@@ -1,6 +1,19 @@
-import { useState, useEffect } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { queryKeys } from "@/lib/queries/keys";
+import { fetchInvoicesPaginated, type Invoice } from "@/lib/queries/invoices";
+import { DEFAULT_PAGE_SIZE } from "@/lib/queries/pagination";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+  PaginationEllipsis,
+} from "@/components/ui/pagination";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -19,84 +32,58 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { 
-  ArrowLeft, 
-  Plus, 
-  FileText, 
+import {
+  ArrowLeft,
+  Plus,
+  FileText,
   Eye,
   Search,
   DollarSign,
   Clock,
   CheckCircle,
-  Loader2
+  Loader2,
 } from "lucide-react";
 import { format, parseISO } from "date-fns";
-import { toast } from "sonner";
 import { CreateInvoiceDialog } from "@/components/invoices/CreateInvoiceDialog";
 import { InvoiceDetailDialog } from "@/components/invoices/InvoiceDetailDialog";
 import { AccountingExport } from "@/components/invoices/AccountingExport";
 import { InvoiceStatusActions } from "@/components/invoices/InvoiceStatusActions";
 
-interface Invoice {
-  id: string;
-  invoice_number: string;
-  client_id: string;
-  status: string;
-  issue_date: string;
-  due_date: string;
-  subtotal: number;
-  tax_rate: number;
-  tax_amount: number;
-  total: number;
-  notes: string | null;
-  created_at: string;
-  clients?: { name: string; address?: string; email?: string; phone?: string; abn?: string } | null;
-}
-
 export default function InvoicesPage() {
   const navigate = useNavigate();
-  const [invoices, setInvoices] = useState<Invoice[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
+  const [page, setPage] = useState(1);
+  const debouncedSearch = useDebouncedValue(searchQuery, 300);
 
+  // Reset to page 1 when search or status filter changes
   useEffect(() => {
-    fetchInvoices();
-  }, []);
+    setPage(1);
+  }, [debouncedSearch, statusFilter]);
 
-  const fetchInvoices = async () => {
-    setLoading(true);
-    const { data, error } = await supabase
-      .from("invoices")
-      .select(`
-        *,
-        clients (name, email, abn, address)
-      `)
-      .order("created_at", { ascending: false });
-
-    if (error) {
-      toast.error("Error loading invoices");
-    } else {
-      setInvoices(data as Invoice[]);
-    }
-    setLoading(false);
-  };
-
-  // getStatusConfig is unused in this component as it's likely used in child components or not at all
-  // const getStatusConfig = (status: string) => { ... }
-
-  const filteredInvoices = invoices.filter((invoice) => {
-    const matchesSearch =
-      invoice.invoice_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      invoice.clients?.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = statusFilter === "all" || invoice.status === statusFilter;
-    return matchesSearch && matchesStatus;
+  const { data: result, isLoading: loading } = useQuery({
+    queryKey: queryKeys.invoices.list({ page, search: debouncedSearch }),
+    queryFn: () =>
+      fetchInvoicesPaginated({
+        page,
+        pageSize: DEFAULT_PAGE_SIZE,
+        search: debouncedSearch,
+        status: statusFilter,
+      }),
   });
+  const invoices = result?.data ?? [];
+  const totalCount = result?.count ?? 0;
+  const totalPages = Math.ceil(totalCount / DEFAULT_PAGE_SIZE);
+
+  const invalidateInvoices = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: queryKeys.invoices.all() });
+  }, [queryClient]);
 
   const stats = {
-    total: invoices.length,
+    total: totalCount,
     draft: invoices.filter((i) => i.status === "draft").length,
     sent: invoices.filter((i) => i.status === "sent").length,
     paid: invoices.filter((i) => i.status === "paid").length,
@@ -109,8 +96,8 @@ export default function InvoicesPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-card border-b border-border sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+      <header className="sticky top-0 z-10 border-b border-border bg-card">
+        <div className="container mx-auto flex items-center justify-between px-4 py-4">
           <div className="flex items-center gap-3">
             <Button variant="ghost" size="icon" onClick={() => navigate("/admin")}>
               <ArrowLeft className="h-5 w-5" />
@@ -123,7 +110,7 @@ export default function InvoicesPage() {
           <div className="flex items-center gap-2">
             <AccountingExport invoices={invoices} />
             <Button onClick={() => setIsCreateOpen(true)}>
-              <Plus className="h-4 w-4 mr-2" />
+              <Plus className="mr-2 h-4 w-4" />
               New Invoice
             </Button>
           </div>
@@ -132,11 +119,11 @@ export default function InvoicesPage() {
 
       <main className="container mx-auto px-4 py-8">
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-4">
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center gap-4">
-                <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
                   <FileText className="h-6 w-6 text-primary" />
                 </div>
                 <div>
@@ -149,7 +136,7 @@ export default function InvoicesPage() {
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center gap-4">
-                <div className="h-12 w-12 rounded-lg bg-warning/10 flex items-center justify-center">
+                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-warning/10">
                   <Clock className="h-6 w-6 text-warning" />
                 </div>
                 <div>
@@ -162,7 +149,7 @@ export default function InvoicesPage() {
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center gap-4">
-                <div className="h-12 w-12 rounded-lg bg-success/10 flex items-center justify-center">
+                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-success/10">
                   <CheckCircle className="h-6 w-6 text-success" />
                 </div>
                 <div>
@@ -175,7 +162,7 @@ export default function InvoicesPage() {
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center gap-4">
-                <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
                   <DollarSign className="h-6 w-6 text-primary" />
                 </div>
                 <div>
@@ -190,9 +177,9 @@ export default function InvoicesPage() {
         {/* Filters */}
         <Card className="mb-6">
           <CardContent className="pt-6">
-            <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex flex-col gap-4 md:flex-row">
               <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   placeholder="Search by number or client..."
                   value={searchQuery}
@@ -226,16 +213,12 @@ export default function InvoicesPage() {
               <div className="flex items-center justify-center py-12">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
               </div>
-            ) : filteredInvoices.length === 0 ? (
-              <div className="text-center py-12">
-                <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            ) : invoices.length === 0 ? (
+              <div className="py-12 text-center">
+                <FileText className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
                 <p className="text-muted-foreground">No invoices</p>
-                <Button
-                  variant="outline"
-                  className="mt-4"
-                  onClick={() => setIsCreateOpen(true)}
-                >
-                  <Plus className="h-4 w-4 mr-2" />
+                <Button variant="outline" className="mt-4" onClick={() => setIsCreateOpen(true)}>
+                  <Plus className="mr-2 h-4 w-4" />
                   Create first invoice
                 </Button>
               </div>
@@ -253,19 +236,13 @@ export default function InvoicesPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredInvoices.map((invoice) => {
+                  {invoices.map((invoice) => {
                     return (
                       <TableRow key={invoice.id}>
-                        <TableCell className="font-medium">
-                          {invoice.invoice_number}
-                        </TableCell>
+                        <TableCell className="font-medium">{invoice.invoice_number}</TableCell>
                         <TableCell>{invoice.clients?.name || "—"}</TableCell>
-                        <TableCell>
-                          {format(parseISO(invoice.issue_date), "dd/MM/yyyy")}
-                        </TableCell>
-                        <TableCell>
-                          {format(parseISO(invoice.due_date), "dd/MM/yyyy")}
-                        </TableCell>
+                        <TableCell>{format(parseISO(invoice.issue_date), "dd/MM/yyyy")}</TableCell>
+                        <TableCell>{format(parseISO(invoice.due_date), "dd/MM/yyyy")}</TableCell>
                         <TableCell className="font-semibold">
                           ${Number(invoice.total).toFixed(2)}
                         </TableCell>
@@ -274,7 +251,7 @@ export default function InvoicesPage() {
                             invoiceId={invoice.id}
                             currentStatus={invoice.status}
                             clientEmail={invoice.clients?.email}
-                            onStatusChange={fetchInvoices}
+                            onStatusChange={invalidateInvoices}
                           />
                         </TableCell>
                         <TableCell className="text-right">
@@ -294,20 +271,75 @@ export default function InvoicesPage() {
             )}
           </CardContent>
         </Card>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="mt-4 flex items-center justify-between">
+            <p className="text-sm text-muted-foreground">
+              Page {page} of {totalPages}
+            </p>
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    className={page <= 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                  />
+                </PaginationItem>
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  let pageNum: number;
+                  if (totalPages <= 5) {
+                    pageNum = i + 1;
+                  } else if (page <= 3) {
+                    pageNum = i + 1;
+                  } else if (page >= totalPages - 2) {
+                    pageNum = totalPages - 4 + i;
+                  } else {
+                    pageNum = page - 2 + i;
+                  }
+                  return (
+                    <PaginationItem key={pageNum}>
+                      <PaginationLink
+                        onClick={() => setPage(pageNum)}
+                        isActive={page === pageNum}
+                        className="cursor-pointer"
+                      >
+                        {pageNum}
+                      </PaginationLink>
+                    </PaginationItem>
+                  );
+                })}
+                {totalPages > 5 && page < totalPages - 2 && (
+                  <PaginationItem>
+                    <PaginationEllipsis />
+                  </PaginationItem>
+                )}
+                <PaginationItem>
+                  <PaginationNext
+                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    className={
+                      page >= totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"
+                    }
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </div>
+        )}
       </main>
 
       {/* Create Invoice Dialog */}
       <CreateInvoiceDialog
         isOpen={isCreateOpen}
         onOpenChange={setIsCreateOpen}
-        onCreated={fetchInvoices}
+        onCreated={invalidateInvoices}
       />
 
       {/* Invoice Detail Dialog */}
       <InvoiceDetailDialog
         invoice={selectedInvoice}
         onClose={() => setSelectedInvoice(null)}
-        onUpdated={fetchInvoices}
+        onUpdated={invalidateInvoices}
       />
     </div>
   );

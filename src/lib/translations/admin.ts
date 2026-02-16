@@ -7,13 +7,13 @@ export const adminTranslations = {
     new_job: "New Job",
     todays_jobs: "Today's Jobs",
     no_jobs_scheduled_today: "No jobs scheduled for today",
-    
+
     // Stats
     total: "Total",
     in_progress: "In Progress",
     completed: "Completed",
     rate: "Rate",
-    
+
     // Kanban
     scheduled: "Scheduled",
     no_jobs: "No jobs",
@@ -21,7 +21,7 @@ export const adminTranslations = {
     unassigned: "Unassigned",
     duplicate_job_tomorrow: "Duplicate job for tomorrow",
     generate_invoice: "Generate Invoice",
-    
+
     // Job Detail
     job_details: "Job Details",
     client: "Client",
@@ -36,7 +36,7 @@ export const adminTranslations = {
     after: "After",
     timeline: "Timeline",
     no_photos: "No photos",
-    
+
     // Create Job Wizard
     select_client: "Select Client",
     service_schedule: "Service & Schedule",
@@ -69,17 +69,17 @@ export const adminTranslations = {
     next: "Next",
     create_job: "Create Job",
     creating: "Creating...",
-    
+
     // Quick Status
     start: "Start",
     complete: "Complete",
-    
+
     // Alerts
     urgent_alerts: "Urgent Alerts",
     late_arrival: "Late Arrival",
     issue_reported: "Issue Reported",
     staff_unavailable: "Staff Unavailable",
-    
+
     // Pending Payments
     pending_payments: "Pending Payments",
     awaiting_payment: "awaiting payment",
@@ -88,7 +88,7 @@ export const adminTranslations = {
     all_caught_up: "All caught up!",
     overdue: "Overdue",
     days_overdue: "days overdue",
-    
+
     // Empty State
     welcome_to_pulcrix: "Welcome to Pulcrix! 👋",
     lets_get_started: "Let's get you set up for success",
@@ -98,7 +98,7 @@ export const adminTranslations = {
     invite_team_member: "Invite team member",
     create_first_job: "Create First Job",
     add_client_first: "Add a client first to create jobs",
-    
+
     // Navigation & General
     calendar: "Calendar",
     clients: "Clients",
@@ -109,7 +109,7 @@ export const adminTranslations = {
     properties: "Properties",
     recurring_jobs: "Recurring Jobs",
     pricing: "Pricing",
-    
+
     // Common Actions
     save: "Save",
     cancel: "Cancel",
@@ -130,13 +130,13 @@ export const adminTranslations = {
     new_job: "Nuevo Trabajo",
     todays_jobs: "Trabajos de Hoy",
     no_jobs_scheduled_today: "No hay trabajos programados para hoy",
-    
+
     // Stats
     total: "Total",
     in_progress: "En Progreso",
     completed: "Completados",
     rate: "Tasa",
-    
+
     // Kanban
     scheduled: "Programados",
     no_jobs: "Sin trabajos",
@@ -144,7 +144,7 @@ export const adminTranslations = {
     unassigned: "Sin Asignar",
     duplicate_job_tomorrow: "Duplicar trabajo para mañana",
     generate_invoice: "Generar Factura",
-    
+
     // Job Detail
     job_details: "Detalles del Trabajo",
     client: "Cliente",
@@ -159,7 +159,7 @@ export const adminTranslations = {
     after: "Después",
     timeline: "Cronología",
     no_photos: "Sin fotos",
-    
+
     // Create Job Wizard
     select_client: "Seleccionar Cliente",
     service_schedule: "Servicio y Horario",
@@ -192,17 +192,17 @@ export const adminTranslations = {
     next: "Siguiente",
     create_job: "Crear Trabajo",
     creating: "Creando...",
-    
+
     // Quick Status
     start: "Iniciar",
     complete: "Completar",
-    
+
     // Alerts
     urgent_alerts: "Alertas Urgentes",
     late_arrival: "Llegada Tardía",
     issue_reported: "Problema Reportado",
     staff_unavailable: "Personal No Disponible",
-    
+
     // Pending Payments
     pending_payments: "Pagos Pendientes",
     awaiting_payment: "esperando pago",
@@ -211,7 +211,7 @@ export const adminTranslations = {
     all_caught_up: "¡Todo al día!",
     overdue: "Vencida",
     days_overdue: "días de atraso",
-    
+
     // Empty State
     welcome_to_pulcrix: "¡Bienvenido a Pulcrix! 👋",
     lets_get_started: "Vamos a configurarte para el éxito",
@@ -221,7 +221,7 @@ export const adminTranslations = {
     invite_team_member: "Invita a un miembro del equipo",
     create_first_job: "Crear Primer Trabajo",
     add_client_first: "Agrega un cliente primero para crear trabajos",
-    
+
     // Navigation & General
     calendar: "Calendario",
     clients: "Clientes",
@@ -232,7 +232,7 @@ export const adminTranslations = {
     properties: "Propiedades",
     recurring_jobs: "Trabajos Recurrentes",
     pricing: "Precios",
-    
+
     // Common Actions
     save: "Guardar",
     cancel: "Cancelar",
@@ -246,5 +246,5 @@ export const adminTranslations = {
     loading: "Cargando...",
     error: "Error",
     success: "Éxito",
-  }
+  },
 } as const;

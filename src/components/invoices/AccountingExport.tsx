@@ -23,7 +23,7 @@ import {
   AlertCircle,
   Calendar,
   Building2,
-  Receipt
+  Receipt,
 } from "lucide-react";
 import { format, parseISO, isWithinInterval, startOfMonth, endOfMonth, subMonths } from "date-fns";
 import { toast } from "sonner";
@@ -41,7 +41,12 @@ interface Invoice {
   tax_amount: number;
   total: number;
   notes: string | null;
-  clients?: { name: string; abn?: string | null; email?: string | null; address?: string | null } | null;
+  clients?: {
+    name: string;
+    abn?: string | null;
+    email?: string | null;
+    address?: string | null;
+  } | null;
 }
 
 interface InvoiceItem {
@@ -67,7 +72,9 @@ export function AccountingExport({ invoices }: AccountingExportProps) {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isExporting, setIsExporting] = useState(false);
   const [exportFormat, setExportFormat] = useState<ExportFormat>("xero");
-  const [dateFrom, setDateFrom] = useState(() => format(startOfMonth(subMonths(new Date(), 1)), "yyyy-MM-dd"));
+  const [dateFrom, setDateFrom] = useState(() =>
+    format(startOfMonth(subMonths(new Date(), 1)), "yyyy-MM-dd"),
+  );
   const [dateTo, setDateTo] = useState(() => format(endOfMonth(new Date()), "yyyy-MM-dd"));
 
   // Filter exportable invoices (sent or paid) within date range
@@ -190,7 +197,7 @@ export function AccountingExport({ invoices }: AccountingExportProps) {
             "200", // Sales account
             escapeCSV(taxType),
             "AUD",
-          ].join(",")
+          ].join(","),
         );
       } else {
         for (const item of invoiceItems) {
@@ -214,7 +221,7 @@ export function AccountingExport({ invoices }: AccountingExportProps) {
               "200",
               escapeCSV(taxType),
               "AUD",
-            ].join(",")
+            ].join(","),
           );
         }
       }
@@ -289,15 +296,13 @@ export function AccountingExport({ invoices }: AccountingExportProps) {
             "0", // Freight Tax Amount
             escapeCSV(invoice.notes || ""),
             "AUD",
-          ].join(",")
+          ].join(","),
         );
       } else {
         for (let i = 0; i < invoiceItems.length; i++) {
           const item = invoiceItems[i];
-          const itemTax = Number(invoice.tax_rate) > 0 
-            ? (item.total * 0.1).toFixed(2) 
-            : "0";
-          
+          const itemTax = Number(invoice.tax_rate) > 0 ? (item.total * 0.1).toFixed(2) : "0";
+
           rows.push(
             [
               escapeCSV(invoice.clients?.name || "Unknown Client"),
@@ -321,7 +326,7 @@ export function AccountingExport({ invoices }: AccountingExportProps) {
               "0",
               i === 0 ? escapeCSV(invoice.notes || "") : "",
               "AUD",
-            ].join(",")
+            ].join(","),
           );
         }
       }
@@ -390,7 +395,9 @@ export function AccountingExport({ invoices }: AccountingExportProps) {
       setIsOpen(false);
     } catch (error) {
       logger.error("Error exporting:", error);
-      toast.error("Failed to export invoices", { description: error instanceof Error ? error.message : "Unknown error" });
+      toast.error("Failed to export invoices", {
+        description: error instanceof Error ? error.message : "Unknown error",
+      });
     } finally {
       setIsExporting(false);
     }
@@ -399,9 +406,9 @@ export function AccountingExport({ invoices }: AccountingExportProps) {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "paid":
-        return <Badge className="bg-success/10 text-success border-success/30">Paid</Badge>;
+        return <Badge className="border-success/30 bg-success/10 text-success">Paid</Badge>;
       case "sent":
-        return <Badge className="bg-primary/10 text-primary border-primary/30">Sent</Badge>;
+        return <Badge className="border-primary/30 bg-primary/10 text-primary">Sent</Badge>;
       default:
         return <Badge variant="secondary">{status}</Badge>;
     }
@@ -429,7 +436,11 @@ export function AccountingExport({ invoices }: AccountingExportProps) {
           <Tabs value={exportFormat} onValueChange={(v) => setExportFormat(v as ExportFormat)}>
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="xero" className="gap-2">
-                <img src="https://www.xero.com/etc/designs/xero-cms/clientlib/assets/img/favicon/favicon-32x32.png" className="h-4 w-4" alt="Xero" />
+                <img
+                  src="https://www.xero.com/etc/designs/xero-cms/clientlib/assets/img/favicon/favicon-32x32.png"
+                  className="h-4 w-4"
+                  alt="Xero"
+                />
                 Xero
               </TabsTrigger>
               <TabsTrigger value="myob" className="gap-2">
@@ -439,9 +450,9 @@ export function AccountingExport({ invoices }: AccountingExportProps) {
             </TabsList>
 
             <TabsContent value="xero" className="mt-4">
-              <div className="bg-muted/50 rounded-lg p-3 text-sm mb-4">
-                <p className="font-medium mb-1">Xero Import Instructions:</p>
-                <ol className="text-muted-foreground text-xs space-y-1 list-decimal list-inside">
+              <div className="mb-4 rounded-lg bg-muted/50 p-3 text-sm">
+                <p className="mb-1 font-medium">Xero Import Instructions:</p>
+                <ol className="list-inside list-decimal space-y-1 text-xs text-muted-foreground">
                   <li>Go to Xero → Business → Invoices</li>
                   <li>Click Import → Import invoices</li>
                   <li>Select the downloaded CSV file</li>
@@ -451,9 +462,9 @@ export function AccountingExport({ invoices }: AccountingExportProps) {
             </TabsContent>
 
             <TabsContent value="myob" className="mt-4">
-              <div className="bg-muted/50 rounded-lg p-3 text-sm mb-4">
-                <p className="font-medium mb-1">MYOB Import Instructions:</p>
-                <ol className="text-muted-foreground text-xs space-y-1 list-decimal list-inside">
+              <div className="mb-4 rounded-lg bg-muted/50 p-3 text-sm">
+                <p className="mb-1 font-medium">MYOB Import Instructions:</p>
+                <ol className="list-inside list-decimal space-y-1 text-xs text-muted-foreground">
                   <li>Open MYOB AccountRight/Essentials</li>
                   <li>Go to File → Import Data → Sales</li>
                   <li>Select "Item Sales" and choose the CSV</li>
@@ -464,53 +475,45 @@ export function AccountingExport({ invoices }: AccountingExportProps) {
           </Tabs>
 
           {/* Date Range Filter */}
-          <div className="grid grid-cols-2 gap-4 my-4">
+          <div className="my-4 grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label className="text-sm flex items-center gap-2">
+              <Label className="flex items-center gap-2 text-sm">
                 <Calendar className="h-4 w-4" />
                 From Date
               </Label>
-              <Input
-                type="date"
-                value={dateFrom}
-                onChange={(e) => setDateFrom(e.target.value)}
-              />
+              <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} />
             </div>
             <div className="space-y-2">
-              <Label className="text-sm flex items-center gap-2">
+              <Label className="flex items-center gap-2 text-sm">
                 <Calendar className="h-4 w-4" />
                 To Date
               </Label>
-              <Input
-                type="date"
-                value={dateTo}
-                onChange={(e) => setDateTo(e.target.value)}
-              />
+              <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} />
             </div>
           </div>
 
           {/* GST Summary Card */}
-          <Card className="bg-primary/5 border-primary/20">
+          <Card className="border-primary/20 bg-primary/5">
             <CardContent className="pt-4">
-              <div className="flex items-center gap-2 mb-3">
+              <div className="mb-3 flex items-center gap-2">
                 <Receipt className="h-4 w-4 text-primary" />
-                <span className="font-semibold text-sm">GST Summary (for BAS)</span>
+                <span className="text-sm font-semibold">GST Summary (for BAS)</span>
               </div>
               <div className="grid grid-cols-4 gap-4 text-sm">
                 <div>
-                  <p className="text-muted-foreground text-xs">Ex GST</p>
+                  <p className="text-xs text-muted-foreground">Ex GST</p>
                   <p className="font-bold">${gstSummary.totalExGST.toFixed(2)}</p>
                 </div>
                 <div>
-                  <p className="text-muted-foreground text-xs">GST Collected</p>
+                  <p className="text-xs text-muted-foreground">GST Collected</p>
                   <p className="font-bold text-primary">${gstSummary.totalGST.toFixed(2)}</p>
                 </div>
                 <div>
-                  <p className="text-muted-foreground text-xs">Inc GST</p>
+                  <p className="text-xs text-muted-foreground">Inc GST</p>
                   <p className="font-bold">${gstSummary.totalIncGST.toFixed(2)}</p>
                 </div>
                 <div>
-                  <p className="text-muted-foreground text-xs">Invoices</p>
+                  <p className="text-xs text-muted-foreground">Invoices</p>
                   <p className="font-bold">{gstSummary.invoiceCount}</p>
                 </div>
               </div>
@@ -519,21 +522,21 @@ export function AccountingExport({ invoices }: AccountingExportProps) {
 
           {exportableInvoices.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-8 text-center">
-              <AlertCircle className="h-12 w-12 text-muted-foreground mb-4" />
+              <AlertCircle className="mb-4 h-12 w-12 text-muted-foreground" />
               <p className="text-muted-foreground">
                 No invoices in selected date range. Adjust dates or mark invoices as "Sent".
               </p>
             </div>
           ) : (
             <>
-              <div className="flex items-center justify-between py-2 border-b">
+              <div className="flex items-center justify-between border-b py-2">
                 <div className="flex items-center gap-2">
                   <Checkbox
                     id="select-all"
                     checked={selectedIds.size === exportableInvoices.length}
                     onCheckedChange={toggleAll}
                   />
-                  <Label htmlFor="select-all" className="text-sm font-medium cursor-pointer">
+                  <Label htmlFor="select-all" className="cursor-pointer text-sm font-medium">
                     Select All ({exportableInvoices.length})
                   </Label>
                 </div>
@@ -545,7 +548,7 @@ export function AccountingExport({ invoices }: AccountingExportProps) {
                   {exportableInvoices.map((invoice) => (
                     <div
                       key={invoice.id}
-                      className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
+                      className={`flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-colors ${
                         selectedIds.has(invoice.id)
                           ? "border-primary bg-primary/5"
                           : "border-border hover:bg-accent"
@@ -556,12 +559,12 @@ export function AccountingExport({ invoices }: AccountingExportProps) {
                         checked={selectedIds.has(invoice.id)}
                         onCheckedChange={() => toggleInvoice(invoice.id)}
                       />
-                      <div className="flex-1 min-w-0">
+                      <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
-                          <span className="font-medium text-sm">{invoice.invoice_number}</span>
+                          <span className="text-sm font-medium">{invoice.invoice_number}</span>
                           {getStatusBadge(invoice.status)}
                         </div>
-                        <p className="text-sm text-muted-foreground truncate">
+                        <p className="truncate text-sm text-muted-foreground">
                           {invoice.clients?.name || "Unknown Client"}
                           {invoice.clients?.abn && (
                             <span className="ml-2 text-xs">ABN: {invoice.clients.abn}</span>
@@ -569,7 +572,7 @@ export function AccountingExport({ invoices }: AccountingExportProps) {
                         </p>
                       </div>
                       <div className="text-right">
-                        <p className="font-semibold text-sm">${Number(invoice.total).toFixed(2)}</p>
+                        <p className="text-sm font-semibold">${Number(invoice.total).toFixed(2)}</p>
                         <p className="text-xs text-muted-foreground">
                           GST: ${Number(invoice.tax_amount).toFixed(2)}
                         </p>
@@ -588,12 +591,12 @@ export function AccountingExport({ invoices }: AccountingExportProps) {
             <Button onClick={handleExport} disabled={isExporting || selectedIds.size === 0}>
               {isExporting ? (
                 <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Exporting...
                 </>
               ) : (
                 <>
-                  <Download className="h-4 w-4 mr-2" />
+                  <Download className="mr-2 h-4 w-4" />
                   Export to {exportFormat.toUpperCase()}
                 </>
               )}

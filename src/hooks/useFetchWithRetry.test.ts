@@ -1,8 +1,8 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { renderHook, act } from '@testing-library/react';
-import { useFetchWithRetry } from './useFetchWithRetry';
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { renderHook, act } from "@testing-library/react";
+import { useFetchWithRetry } from "./useFetchWithRetry";
 
-describe('useFetchWithRetry', () => {
+describe("useFetchWithRetry", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.useFakeTimers();
@@ -12,12 +12,10 @@ describe('useFetchWithRetry', () => {
     vi.useRealTimers();
   });
 
-  describe('initial state', () => {
-    it('should have correct initial state', () => {
-      const fetchFn = vi.fn().mockResolvedValue({ data: 'test' });
-      const { result } = renderHook(() =>
-        useFetchWithRetry(fetchFn, { cacheKey: 'test-key' })
-      );
+  describe("initial state", () => {
+    it("should have correct initial state", () => {
+      const fetchFn = vi.fn().mockResolvedValue({ data: "test" });
+      const { result } = renderHook(() => useFetchWithRetry(fetchFn, { cacheKey: "test-key" }));
 
       expect(result.current.data).toBeNull();
       expect(result.current.loading).toBe(true);
@@ -27,55 +25,46 @@ describe('useFetchWithRetry', () => {
       expect(result.current.isRetrying).toBe(false);
     });
 
-    it('should expose execute and retry functions', () => {
-      const fetchFn = vi.fn().mockResolvedValue({ data: 'test' });
-      const { result } = renderHook(() =>
-        useFetchWithRetry(fetchFn, { cacheKey: 'test' })
-      );
+    it("should expose execute and retry functions", () => {
+      const fetchFn = vi.fn().mockResolvedValue({ data: "test" });
+      const { result } = renderHook(() => useFetchWithRetry(fetchFn, { cacheKey: "test" }));
 
-      expect(typeof result.current.execute).toBe('function');
-      expect(typeof result.current.retry).toBe('function');
+      expect(typeof result.current.execute).toBe("function");
+      expect(typeof result.current.retry).toBe("function");
     });
   });
 
-  describe('caching behavior', () => {
-    it('should attempt to read from localStorage on mount', () => {
-      const fetchFn = vi.fn().mockResolvedValue({ data: 'test' });
+  describe("caching behavior", () => {
+    it("should attempt to read from localStorage on mount", () => {
+      const fetchFn = vi.fn().mockResolvedValue({ data: "test" });
 
-      renderHook(() =>
-        useFetchWithRetry(fetchFn, { cacheKey: 'my-cache-key' })
-      );
+      renderHook(() => useFetchWithRetry(fetchFn, { cacheKey: "my-cache-key" }));
 
-      expect(localStorage.getItem).toHaveBeenCalledWith('my-cache-key');
+      expect(localStorage.getItem).toHaveBeenCalledWith("my-cache-key");
     });
 
-    it('should attempt to write to localStorage on success', async () => {
-      const fetchFn = vi.fn().mockResolvedValue({ data: 'test' });
+    it("should attempt to write to localStorage on success", async () => {
+      const fetchFn = vi.fn().mockResolvedValue({ data: "test" });
 
-      const { result } = renderHook(() =>
-        useFetchWithRetry(fetchFn, { cacheKey: 'save-key' })
-      );
+      const { result } = renderHook(() => useFetchWithRetry(fetchFn, { cacheKey: "save-key" }));
 
       await act(async () => {
         await result.current.execute();
       });
 
-      expect(localStorage.setItem).toHaveBeenCalledWith(
-        'save-key',
-        expect.any(String)
-      );
+      expect(localStorage.setItem).toHaveBeenCalledWith("save-key", expect.any(String));
     });
   });
 
-  describe('execute', () => {
-    it('should set loading state during fetch', async () => {
-      const fetchFn = vi.fn().mockImplementation(() =>
-        new Promise(resolve => setTimeout(() => resolve({ data: 'test' }), 100))
-      );
+  describe("execute", () => {
+    it("should set loading state during fetch", async () => {
+      const fetchFn = vi
+        .fn()
+        .mockImplementation(
+          () => new Promise((resolve) => setTimeout(() => resolve({ data: "test" }), 100)),
+        );
 
-      const { result } = renderHook(() =>
-        useFetchWithRetry(fetchFn, { cacheKey: 'test' })
-      );
+      const { result } = renderHook(() => useFetchWithRetry(fetchFn, { cacheKey: "test" }));
 
       act(() => {
         result.current.execute();
@@ -88,13 +77,11 @@ describe('useFetchWithRetry', () => {
       });
     });
 
-    it('should return data on success', async () => {
-      const data = { name: 'success' };
+    it("should return data on success", async () => {
+      const data = { name: "success" };
       const fetchFn = vi.fn().mockResolvedValue(data);
 
-      const { result } = renderHook(() =>
-        useFetchWithRetry(fetchFn, { cacheKey: 'test' })
-      );
+      const { result } = renderHook(() => useFetchWithRetry(fetchFn, { cacheKey: "test" }));
 
       await act(async () => {
         const returned = await result.current.execute();
@@ -106,12 +93,10 @@ describe('useFetchWithRetry', () => {
       expect(result.current.error).toBeNull();
     });
 
-    it('should set isFromCache false after successful fetch', async () => {
-      const fetchFn = vi.fn().mockResolvedValue({ data: 'fresh' });
+    it("should set isFromCache false after successful fetch", async () => {
+      const fetchFn = vi.fn().mockResolvedValue({ data: "fresh" });
 
-      const { result } = renderHook(() =>
-        useFetchWithRetry(fetchFn, { cacheKey: 'test' })
-      );
+      const { result } = renderHook(() => useFetchWithRetry(fetchFn, { cacheKey: "test" }));
 
       await act(async () => {
         await result.current.execute();
@@ -121,19 +106,20 @@ describe('useFetchWithRetry', () => {
     });
   });
 
-  describe('retry logic', () => {
-    it('should retry on failure up to maxRetries', async () => {
-      const fetchFn = vi.fn()
-        .mockRejectedValueOnce(new Error('Error 1'))
-        .mockRejectedValueOnce(new Error('Error 2'))
-        .mockResolvedValueOnce({ data: 'success' });
+  describe("retry logic", () => {
+    it("should retry on failure up to maxRetries", async () => {
+      const fetchFn = vi
+        .fn()
+        .mockRejectedValueOnce(new Error("Error 1"))
+        .mockRejectedValueOnce(new Error("Error 2"))
+        .mockResolvedValueOnce({ data: "success" });
 
       const { result } = renderHook(() =>
         useFetchWithRetry(fetchFn, {
-          cacheKey: 'test',
+          cacheKey: "test",
           maxRetries: 2,
-          retryDelay: 1000
-        })
+          retryDelay: 1000,
+        }),
       );
 
       await act(async () => {
@@ -156,18 +142,18 @@ describe('useFetchWithRetry', () => {
       });
 
       expect(fetchFn).toHaveBeenCalledTimes(3);
-      expect(result.current.data).toEqual({ data: 'success' });
+      expect(result.current.data).toEqual({ data: "success" });
     });
 
-    it('should set error after max retries exceeded', async () => {
-      const fetchFn = vi.fn().mockRejectedValue(new Error('Persistent error'));
+    it("should set error after max retries exceeded", async () => {
+      const fetchFn = vi.fn().mockRejectedValue(new Error("Persistent error"));
 
       const { result } = renderHook(() =>
         useFetchWithRetry(fetchFn, {
-          cacheKey: 'test',
+          cacheKey: "test",
           maxRetries: 1,
-          retryDelay: 100
-        })
+          retryDelay: 100,
+        }),
       );
 
       await act(async () => {
@@ -184,21 +170,22 @@ describe('useFetchWithRetry', () => {
         vi.advanceTimersByTime(200);
       });
 
-      expect(result.current.error).toBe('Persistent error');
+      expect(result.current.error).toBe("Persistent error");
       expect(result.current.loading).toBe(false);
     });
 
-    it('should set isRetrying flag during retry', async () => {
-      const fetchFn = vi.fn()
-        .mockRejectedValueOnce(new Error('Error'))
-        .mockResolvedValueOnce({ data: 'success' });
+    it("should set isRetrying flag during retry", async () => {
+      const fetchFn = vi
+        .fn()
+        .mockRejectedValueOnce(new Error("Error"))
+        .mockResolvedValueOnce({ data: "success" });
 
       const { result } = renderHook(() =>
         useFetchWithRetry(fetchFn, {
-          cacheKey: 'test',
+          cacheKey: "test",
           maxRetries: 2,
-          retryDelay: 100
-        })
+          retryDelay: 100,
+        }),
       );
 
       await act(async () => {
@@ -209,15 +196,15 @@ describe('useFetchWithRetry', () => {
       expect(result.current.isRetrying).toBe(true);
     });
 
-    it('should use exponential backoff between retries', async () => {
-      const fetchFn = vi.fn().mockRejectedValue(new Error('Error'));
+    it("should use exponential backoff between retries", async () => {
+      const fetchFn = vi.fn().mockRejectedValue(new Error("Error"));
 
       const { result } = renderHook(() =>
         useFetchWithRetry(fetchFn, {
-          cacheKey: 'test',
+          cacheKey: "test",
           maxRetries: 2,
-          retryDelay: 1000
-        })
+          retryDelay: 1000,
+        }),
       );
 
       await act(async () => {
@@ -242,17 +229,18 @@ describe('useFetchWithRetry', () => {
     });
   });
 
-  describe('retry function', () => {
-    it('should allow manual retry after failure', async () => {
-      const fetchFn = vi.fn()
-        .mockRejectedValueOnce(new Error('Error'))
-        .mockResolvedValueOnce({ data: 'success' });
+  describe("retry function", () => {
+    it("should allow manual retry after failure", async () => {
+      const fetchFn = vi
+        .fn()
+        .mockRejectedValueOnce(new Error("Error"))
+        .mockResolvedValueOnce({ data: "success" });
 
       const { result } = renderHook(() =>
         useFetchWithRetry(fetchFn, {
-          cacheKey: 'test',
-          maxRetries: 0
-        })
+          cacheKey: "test",
+          maxRetries: 0,
+        }),
       );
 
       // First attempt fails
@@ -260,7 +248,7 @@ describe('useFetchWithRetry', () => {
         await result.current.execute();
       });
 
-      expect(result.current.error).toBe('Error');
+      expect(result.current.error).toBe("Error");
       expect(fetchFn).toHaveBeenCalledTimes(1);
 
       // Manual retry
@@ -269,22 +257,24 @@ describe('useFetchWithRetry', () => {
       });
 
       expect(fetchFn).toHaveBeenCalledTimes(2);
-      expect(result.current.data).toEqual({ data: 'success' });
+      expect(result.current.data).toEqual({ data: "success" });
     });
   });
 
-  describe('timeout', () => {
-    it('should timeout slow requests', async () => {
-      const fetchFn = vi.fn().mockImplementation(() =>
-        new Promise(resolve => setTimeout(() => resolve({ data: 'slow' }), 10000))
-      );
+  describe("timeout", () => {
+    it("should timeout slow requests", async () => {
+      const fetchFn = vi
+        .fn()
+        .mockImplementation(
+          () => new Promise((resolve) => setTimeout(() => resolve({ data: "slow" }), 10000)),
+        );
 
       const { result } = renderHook(() =>
         useFetchWithRetry(fetchFn, {
-          cacheKey: 'test',
+          cacheKey: "test",
           timeout: 1000,
-          maxRetries: 0
-        })
+          maxRetries: 0,
+        }),
       );
 
       await act(async () => {
@@ -295,29 +285,27 @@ describe('useFetchWithRetry', () => {
         vi.advanceTimersByTime(1500);
       });
 
-      expect(result.current.error).toContain('timeout');
+      expect(result.current.error).toContain("timeout");
     });
   });
 
-  describe('default options', () => {
-    it('should use default values when not specified', () => {
-      const fetchFn = vi.fn().mockResolvedValue({ data: 'test' });
+  describe("default options", () => {
+    it("should use default values when not specified", () => {
+      const fetchFn = vi.fn().mockResolvedValue({ data: "test" });
 
-      const { result } = renderHook(() =>
-        useFetchWithRetry(fetchFn, { cacheKey: 'test' })
-      );
+      const { result } = renderHook(() => useFetchWithRetry(fetchFn, { cacheKey: "test" }));
 
       expect(result.current).toBeDefined();
     });
 
-    it('should handle multiple retries with default maxRetries', async () => {
-      const fetchFn = vi.fn().mockRejectedValue(new Error('Error'));
+    it("should handle multiple retries with default maxRetries", async () => {
+      const fetchFn = vi.fn().mockRejectedValue(new Error("Error"));
 
       const { result } = renderHook(() =>
         useFetchWithRetry(fetchFn, {
-          cacheKey: 'test',
-          retryDelay: 10
-        })
+          cacheKey: "test",
+          retryDelay: 10,
+        }),
       );
 
       await act(async () => {

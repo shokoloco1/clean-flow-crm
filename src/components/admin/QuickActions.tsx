@@ -2,7 +2,17 @@ import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 
 import { useNavigate } from "react-router-dom";
-import { Plus, Home, Users, Calendar, UserCircle, Repeat, Settings, FileText, DollarSign } from "lucide-react";
+import {
+  Plus,
+  Home,
+  Users,
+  Calendar,
+  UserCircle,
+  Repeat,
+  Settings,
+  FileText,
+  DollarSign,
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 interface QuickActionsProps {
@@ -39,11 +49,20 @@ export function QuickActions({ onNewJobClick }: QuickActionsProps) {
         { count: invoicesCount },
         { count: pendingJobsCount },
       ] = await Promise.all([
-        supabase.from("properties").select("*", { count: "exact", head: true }).eq("is_active", true),
+        supabase
+          .from("properties")
+          .select("*", { count: "exact", head: true })
+          .eq("is_active", true),
         supabase.from("clients").select("*", { count: "exact", head: true }),
         supabase.from("user_roles").select("*", { count: "exact", head: true }).eq("role", "staff"),
-        supabase.from("recurring_schedules").select("*", { count: "exact", head: true }).eq("is_active", true),
-        supabase.from("invoices").select("*", { count: "exact", head: true }).in("status", ["draft", "sent"]),
+        supabase
+          .from("recurring_schedules")
+          .select("*", { count: "exact", head: true })
+          .eq("is_active", true),
+        supabase
+          .from("invoices")
+          .select("*", { count: "exact", head: true })
+          .in("status", ["draft", "sent"]),
         supabase.from("jobs").select("*", { count: "exact", head: true }).eq("status", "pending"),
       ]);
 
@@ -61,10 +80,10 @@ export function QuickActions({ onNewJobClick }: QuickActionsProps) {
 
     // Subscribe to real-time updates
     const channel = supabase
-      .channel('quick-actions-counts')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'jobs' }, fetchCounts)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'clients' }, fetchCounts)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'properties' }, fetchCounts)
+      .channel("quick-actions-counts")
+      .on("postgres_changes", { event: "*", schema: "public", table: "jobs" }, fetchCounts)
+      .on("postgres_changes", { event: "*", schema: "public", table: "clients" }, fetchCounts)
+      .on("postgres_changes", { event: "*", schema: "public", table: "properties" }, fetchCounts)
       .subscribe();
 
     return () => {
@@ -137,27 +156,29 @@ export function QuickActions({ onNewJobClick }: QuickActionsProps) {
   ];
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4">
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:gap-4 lg:grid-cols-6">
       {actions.map((action) => (
-        <Card 
+        <Card
           key={action.title}
-          className="border-border shadow-sm hover:shadow-md transition-shadow cursor-pointer relative"
+          className="relative cursor-pointer border-border shadow-sm transition-shadow hover:shadow-md"
           onClick={action.onClick}
         >
-          <CardContent className="flex flex-col items-center gap-2 md:gap-3 p-3 md:p-4 text-center">
+          <CardContent className="flex flex-col items-center gap-2 p-3 text-center md:gap-3 md:p-4">
             {action.badge !== undefined && action.badge > 0 && (
-              <span 
-                className={`absolute -top-2 -right-2 h-5 min-w-5 flex items-center justify-center text-xs rounded-full border font-semibold px-1.5 bg-secondary text-secondary-foreground ${action.badgeClassName || ""}`}
+              <span
+                className={`absolute -right-2 -top-2 flex h-5 min-w-5 items-center justify-center rounded-full border bg-secondary px-1.5 text-xs font-semibold text-secondary-foreground ${action.badgeClassName || ""}`}
               >
                 {action.badge > 99 ? "99+" : action.badge}
               </span>
             )}
-            <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-primary/10 flex items-center justify-center">
-              <action.icon className="h-5 w-5 md:h-6 md:w-6 text-primary" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 md:h-12 md:w-12">
+              <action.icon className="h-5 w-5 text-primary md:h-6 md:w-6" />
             </div>
             <div>
-              <h3 className="font-semibold text-foreground text-xs md:text-sm">{action.title}</h3>
-              <p className="text-[10px] md:text-xs text-muted-foreground hidden sm:block">{action.subtitle}</p>
+              <h3 className="text-xs font-semibold text-foreground md:text-sm">{action.title}</h3>
+              <p className="hidden text-[10px] text-muted-foreground sm:block md:text-xs">
+                {action.subtitle}
+              </p>
             </div>
           </CardContent>
         </Card>

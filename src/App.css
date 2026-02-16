@@ -38,7 +38,7 @@ html {
   textarea {
     min-height: 44px;
   }
-  
+
   /* Better touch targets for cards */
   .card {
     cursor: pointer;
@@ -51,7 +51,7 @@ html {
   .pb-safe {
     padding-bottom: max(env(safe-area-inset-bottom, 0), 1rem);
   }
-  
+
   /* Sticky header adjustments */
   header.sticky {
     padding-top: env(safe-area-inset-top, 0);

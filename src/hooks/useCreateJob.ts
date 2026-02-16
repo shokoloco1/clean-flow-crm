@@ -28,13 +28,13 @@ export interface NewJobData {
 }
 
 const initialJobData: NewJobData = {
-  client_id: '',
-  location: '',
-  assigned_staff_id: '',
-  scheduled_date: format(new Date(), 'yyyy-MM-dd'),
-  scheduled_time: '09:00',
-  notes: '',
-  checklist: ''
+  client_id: "",
+  location: "",
+  assigned_staff_id: "",
+  scheduled_date: format(new Date(), "yyyy-MM-dd"),
+  scheduled_time: "09:00",
+  notes: "",
+  checklist: "",
 };
 
 export function useCreateJob(onJobCreated?: () => void) {
@@ -68,7 +68,7 @@ export function useCreateJob(onJobCreated?: () => void) {
         throw new Error(`Failed to load staff roles: ${rolesError.message}`);
       }
 
-      const staffIds = staffRoles?.map(r => r.user_id) || [];
+      const staffIds = staffRoles?.map((r) => r.user_id) || [];
 
       if (staffIds.length > 0) {
         const { data: staffData, error: staffError } = await supabase
@@ -87,7 +87,7 @@ export function useCreateJob(onJobCreated?: () => void) {
 
       setClients((clientsData as Client[]) || []);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to load data';
+      const errorMessage = error instanceof Error ? error.message : "Failed to load data";
       logger.error("Error fetching clients/staff:", error);
       setFetchError(errorMessage);
       toast.error(errorMessage);
@@ -107,9 +107,9 @@ export function useCreateJob(onJobCreated?: () => void) {
     }
 
     const checklistArray = newJob.checklist
-      .split('\n')
-      .filter(item => item.trim())
-      .map(item => item.trim());
+      .split("\n")
+      .filter((item) => item.trim())
+      .map((item) => item.trim());
 
     const { error } = await supabase.from("jobs").insert({
       client_id: newJob.client_id,
@@ -118,7 +118,7 @@ export function useCreateJob(onJobCreated?: () => void) {
       scheduled_date: newJob.scheduled_date,
       scheduled_time: newJob.scheduled_time,
       notes: newJob.notes || null,
-      checklist: checklistArray
+      checklist: checklistArray,
     });
 
     if (error) {

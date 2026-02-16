@@ -39,17 +39,19 @@ export default function JobChecklistPage() {
 
   const fetchJob = async () => {
     if (!id) return;
-    
+
     const { data, error } = await supabase
       .from("jobs")
-      .select(`
+      .select(
+        `
         id,
         location,
         start_time,
         checklist,
         property:properties(estimated_hours),
         client:clients(name)
-      `)
+      `,
+      )
       .eq("id", id)
       .single();
 
@@ -66,7 +68,7 @@ export default function JobChecklistPage() {
       start_time: data.start_time,
       checklist: data.checklist as string[] | null,
       property: Array.isArray(data.property) ? data.property[0] : data.property,
-      client: Array.isArray(data.client) ? data.client[0] : data.client
+      client: Array.isArray(data.client) ? data.client[0] : data.client,
     };
 
     setJob(jobData);
@@ -85,7 +87,7 @@ export default function JobChecklistPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
@@ -101,7 +103,7 @@ export default function JobChecklistPage() {
   return (
     <div className="min-h-screen bg-background pb-24">
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-background border-b border-border">
+      <div className="sticky top-0 z-10 border-b border-border bg-background">
         <div className="flex items-center justify-between p-4">
           <Button
             variant="ghost"
@@ -112,38 +114,37 @@ export default function JobChecklistPage() {
             <ArrowLeft className="h-4 w-4" />
             {t("go_back")}
           </Button>
-          
+
           {startedAt && (
-            <JobTimer 
-              startedAt={startedAt} 
+            <JobTimer
+              startedAt={startedAt}
               estimatedHours={job.property?.estimated_hours ?? undefined}
               compact
             />
           )}
         </div>
-        
+
         {/* Progress bar */}
         <div className="px-4 pb-3">
-          <div className="flex items-center justify-between text-sm mb-1">
+          <div className="mb-1 flex items-center justify-between text-sm">
             <span className="font-medium text-foreground">{t("checklist")}</span>
             <span className="text-muted-foreground">{checklistProgress}%</span>
           </div>
           <Progress value={checklistProgress} className="h-2" />
-          <p className="text-xs text-muted-foreground mt-1">
-            {checklistProgress < 80 
-              ? `${t("tasks_completed")}: ${checklistProgress}% (80% ${t("minimum_photos").replace('3 photos', '')})`
-              : "✓ " + t("on_track")
-            }
+          <p className="mt-1 text-xs text-muted-foreground">
+            {checklistProgress < 80
+              ? `${t("tasks_completed")}: ${checklistProgress}% (80% ${t("minimum_photos").replace("3 photos", "")})`
+              : "✓ " + t("on_track")}
           </p>
         </div>
       </div>
 
       {/* Content */}
-      <div className="p-4 space-y-4">
+      <div className="space-y-4 p-4">
         {/* Job Info Card */}
         <Card className="border-border">
           <CardHeader className="pb-2">
-            <CardTitle className="text-base flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-base">
               <CheckSquare className="h-4 w-4 text-primary" />
               {job.client?.name || t("unknown_client")}
             </CardTitle>
@@ -163,19 +164,19 @@ export default function JobChecklistPage() {
       </div>
 
       {/* Bottom Action */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t border-border">
+      <div className="fixed bottom-0 left-0 right-0 border-t border-border bg-background p-4">
         <Button
           onClick={handleContinue}
           disabled={!canContinue}
-          className="w-full h-14 text-lg font-semibold gap-2"
+          className="h-14 w-full gap-2 text-lg font-semibold"
           size="lg"
         >
           <Camera className="h-5 w-5" />
           {t("photos_after_title")}
         </Button>
         {!canContinue && (
-          <p className="text-center text-sm text-muted-foreground mt-2">
-            {t("complete_all_photos").replace('photos', 'tasks')} (80%+)
+          <p className="mt-2 text-center text-sm text-muted-foreground">
+            {t("complete_all_photos").replace("photos", "tasks")} (80%+)
           </p>
         )}
       </div>

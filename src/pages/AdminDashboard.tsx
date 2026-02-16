@@ -30,7 +30,7 @@ export default function AdminDashboard() {
   const { tAdmin } = useLanguage();
   // Onboarding
   const { showOnboarding, isLoading: onboardingLoading, completeOnboarding } = useOnboarding();
-  
+
   // Data fetching
   const {
     jobs,
@@ -57,12 +57,7 @@ export default function AdminDashboard() {
   } = useCreateJob(refreshData);
 
   // Job detail view
-  const {
-    selectedJob,
-    jobPhotos,
-    handleViewJob,
-    closeJobDetail,
-  } = useJobDetail();
+  const { selectedJob, jobPhotos, handleViewJob, closeJobDetail } = useJobDetail();
 
   // Duplicate job
   useDuplicateJob(refreshData); // Using the hook without destructuring as they are currently unused in UI
@@ -70,23 +65,19 @@ export default function AdminDashboard() {
   // Keyboard shortcuts
   useAdminShortcuts({
     onNewJob: () => setIsCreateOpen(true),
-    onNavigateJobs: () => navigate('/admin/calendar'),
-    onNavigateClients: () => navigate('/admin/clients'),
-    onNavigateStaff: () => navigate('/admin/staff'),
+    onNavigateJobs: () => navigate("/admin/calendar"),
+    onNavigateClients: () => navigate("/admin/clients"),
+    onNavigateStaff: () => navigate("/admin/staff"),
     enabled: !isCreateOpen && !selectedJob,
   });
 
   // Initial data load and realtime subscription
   useEffect(() => {
     refreshData();
-    
+
     const channel = supabase
-      .channel('admin-jobs-today')
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'jobs' },
-        () => refreshData()
-      )
+      .channel("admin-jobs-today")
+      .on("postgres_changes", { event: "*", schema: "public", table: "jobs" }, () => refreshData())
       .subscribe();
 
     return () => {
@@ -96,17 +87,21 @@ export default function AdminDashboard() {
 
   // Show onboarding wizard for new users
   if (!onboardingLoading && showOnboarding) {
-    return <OnboardingWizard onComplete={() => {
-      completeOnboarding();
-      refreshData();
-    }} />;
+    return (
+      <OnboardingWizard
+        onComplete={() => {
+          completeOnboarding();
+          refreshData();
+        }}
+      />
+    );
   }
 
   return (
     <AdminLayout>
       <div className="container mx-auto px-4 py-4 md:py-6">
         {/* Page Title with Mobile New Job Button */}
-        <div className="flex items-center justify-between mb-4">
+        <div className="mb-4 flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-foreground">{tAdmin("todays_view")}</h1>
             <p className="text-sm text-muted-foreground">
@@ -114,11 +109,7 @@ export default function AdminDashboard() {
             </p>
           </div>
           {/* Mobile-only New Job Button */}
-          <Button 
-            onClick={() => setIsCreateOpen(true)}
-            size="sm"
-            className="md:hidden gap-1.5"
-          >
+          <Button onClick={() => setIsCreateOpen(true)} size="sm" className="gap-1.5 md:hidden">
             <Plus className="h-4 w-4" />
             {tAdmin("new_job")}
           </Button>
@@ -126,8 +117,8 @@ export default function AdminDashboard() {
 
         {/* Error State */}
         {error && (
-          <DashboardErrorState 
-            error={error} 
+          <DashboardErrorState
+            error={error}
             isFromCache={isFromCache}
             retryCount={retryCount}
             onRetry={retry}
@@ -136,9 +127,9 @@ export default function AdminDashboard() {
 
         {/* Urgent Alerts */}
         <UrgentAlerts jobs={jobs} />
-        
+
         {/* Today Stats + Pending Payments */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-6">
+        <div className="mb-6 grid grid-cols-1 gap-4 lg:grid-cols-4">
           <div className="lg:col-span-3">
             <TodayStats stats={stats} hasNoJobsToday={hasNoJobsToday} />
           </div>
@@ -156,8 +147,8 @@ export default function AdminDashboard() {
             hasStaff={staffList.length > 0}
           />
         ) : (
-          <TodayKanban 
-            jobs={jobs} 
+          <TodayKanban
+            jobs={jobs}
             loading={loading}
             onViewJob={handleViewJob}
             onJobsChange={refreshData}
@@ -166,10 +157,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* Floating Action Button */}
-      <FloatingActionButton 
-        onClick={() => setIsCreateOpen(true)} 
-        label={tAdmin("new_job")}
-      />
+      <FloatingActionButton onClick={() => setIsCreateOpen(true)} label={tAdmin("new_job")} />
 
       {/* Create Job Wizard */}
       <CreateJobWizard
@@ -184,11 +172,7 @@ export default function AdminDashboard() {
       />
 
       {/* Job Detail Dialog */}
-      <JobDetailDialog
-        job={selectedJob}
-        photos={jobPhotos}
-        onClose={closeJobDetail}
-      />
+      <JobDetailDialog job={selectedJob} photos={jobPhotos} onClose={closeJobDetail} />
     </AdminLayout>
   );
 }

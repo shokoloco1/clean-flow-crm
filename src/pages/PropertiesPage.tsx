@@ -1,5 +1,20 @@
-import { useEffect, useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { queryKeys } from "@/lib/queries/keys";
+import { fetchProperties, fetchPropertyPhotos, fetchPropertiesPaginated } from "@/lib/queries/properties";
+import { fetchClientsDropdown } from "@/lib/queries/reference";
+import { DEFAULT_PAGE_SIZE } from "@/lib/queries/pagination";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+  PaginationEllipsis,
+} from "@/components/ui/pagination";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -59,10 +74,10 @@ import {
   Waves,
   Layers,
   AlertCircle,
+  Search,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { logger } from "@/lib/logger";
 import { CONFIG } from "@/lib/config";
 
 interface Property {
@@ -100,7 +115,6 @@ interface Client {
   name: string;
 }
 
-
 interface PropertyPhoto {
   id: string;
   photo_url: string;
@@ -124,18 +138,13 @@ const floorTypeOptions = [
 
 export default function PropertiesPage() {
   const navigate = useNavigate();
-  const [properties, setProperties] = useState<Property[]>([]);
-  const [clients, setClients] = useState<Client[]>([]);
-  const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProperty, setEditingProperty] = useState<Property | null>(null);
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
-  const [propertyPhotos, setPropertyPhotos] = useState<PropertyPhoto[]>([]);
   const [copiedLink, setCopiedLink] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [propertyToDelete, setPropertyToDelete] = useState<string | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -179,44 +188,50 @@ export default function PropertiesPage() {
     const hours = Math.floor(minutes / 60);
     const remainingMinutes = minutes % 60;
     return { hours, minutes: remainingMinutes, totalMinutes: minutes, totalHours: minutes / 60 };
-  }, [formData.bedrooms, formData.bathrooms, formData.living_areas, formData.floors, formData.has_pool, formData.has_garage]);
+  }, [
+    formData.bedrooms,
+    formData.bathrooms,
+    formData.living_areas,
+    formData.floors,
+    formData.has_pool,
+    formData.has_garage,
+  ]);
 
+  const queryClient = useQueryClient();
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const [page, setPage] = useState(1);
+  const debouncedSearch = useDebouncedValue(searchTerm, 300);
+
+  // Reset to page 1 when search changes
   useEffect(() => {
-    fetchData();
-  }, []);
+    setPage(1);
+  }, [debouncedSearch]);
 
-  const fetchData = async () => {
-    try {
-      const [propertiesRes, clientsRes] = await Promise.all([
-        supabase
-          .from("properties")
-          .select(`
-            *,
-            clients (name)
-          `)
-          .order("created_at", { ascending: false }),
-        supabase.from("clients").select("id, name").order("name"),
-      ]);
+  const { data: propertiesResult, isLoading: loading } = useQuery({
+    queryKey: queryKeys.properties.list({ page, search: debouncedSearch }),
+    queryFn: () =>
+      fetchPropertiesPaginated({ page, pageSize: DEFAULT_PAGE_SIZE, search: debouncedSearch }),
+  });
+  const properties = propertiesResult?.data ?? [];
+  const totalCount = propertiesResult?.count ?? 0;
+  const totalPages = Math.ceil(totalCount / DEFAULT_PAGE_SIZE);
 
-      if (propertiesRes.error) {
-        throw new Error(`Failed to load properties: ${propertiesRes.error.message}`);
-      }
+  const { data: clients = [] } = useQuery({
+    queryKey: queryKeys.clients.dropdown(),
+    queryFn: fetchClientsDropdown,
+    staleTime: 5 * 60 * 1000,
+  });
 
-      if (clientsRes.error) {
-        logger.warn("Failed to load clients:", clientsRes.error);
-        // Don't throw - properties can still work without clients
-      }
+  const { data: propertyPhotos = [] } = useQuery({
+    queryKey: queryKeys.properties.photos(selectedProperty?.id ?? ""),
+    queryFn: () => fetchPropertyPhotos(selectedProperty!.id),
+    enabled: !!selectedProperty,
+  });
 
-      setProperties((propertiesRes.data as unknown as Property[]) || []);
-      setClients((clientsRes.data as Client[]) || []);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to load data';
-      logger.error("Error fetching data:", error);
-      toast.error(message);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const invalidateProperties = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: queryKeys.properties.all() });
+  }, [queryClient]);
 
   const resetForm = () => {
     setFormData({
@@ -229,9 +244,9 @@ export default function PropertiesPage() {
       size_sqm: "",
       property_type: "commercial",
       special_instructions: "",
-    access_codes: "",
-    client_id: "",
-    bedrooms: "0",
+      access_codes: "",
+      client_id: "",
+      bedrooms: "0",
       bathrooms: "0",
       living_areas: "0",
       floors: "1",
@@ -289,47 +304,59 @@ export default function PropertiesPage() {
   };
 
   // Handle positive number inputs
-  const handlePositiveNumberChange = useCallback((field: string, value: string) => {
-    const num = parseInt(value) || 0;
-    const safeValue = Math.max(0, num).toString();
-    setFormData(prev => ({ ...prev, [field]: safeValue }));
-    if (fieldErrors[field]) {
-      setFieldErrors(prev => ({ ...prev, [field]: '' }));
-    }
-  }, [fieldErrors]);
+  const handlePositiveNumberChange = useCallback(
+    (field: string, value: string) => {
+      const num = parseInt(value) || 0;
+      const safeValue = Math.max(0, num).toString();
+      setFormData((prev) => ({ ...prev, [field]: safeValue }));
+      if (fieldErrors[field]) {
+        setFieldErrors((prev) => ({ ...prev, [field]: "" }));
+      }
+    },
+    [fieldErrors],
+  );
 
   const handleSubmit = async () => {
     // Reset errors
     setFieldErrors({});
-    
+
     // Validate required fields
     const errors: Record<string, string> = {};
-    
+
     if (!formData.name.trim()) {
-      errors.name = 'Property name is required';
+      errors.name = "Property name is required";
     }
-    
+
     if (!formData.address.trim()) {
-      errors.address = 'Address is required';
+      errors.address = "Address is required";
     }
-    
+
     // Validate post code format (Australian 4 digits)
     if (formData.post_code && !/^\d{4}$/.test(formData.post_code)) {
-      errors.post_code = 'Post code must be 4 digits';
+      errors.post_code = "Post code must be 4 digits";
     }
-    
+
     // Validate numeric fields
-    const numericFields = ['bedrooms', 'bathrooms', 'living_areas', 'floors', 'sofas', 'dining_chairs', 'beds', 'rugs'];
-    numericFields.forEach(field => {
+    const numericFields = [
+      "bedrooms",
+      "bathrooms",
+      "living_areas",
+      "floors",
+      "sofas",
+      "dining_chairs",
+      "beds",
+      "rugs",
+    ];
+    numericFields.forEach((field) => {
       const value = parseInt(formData[field as keyof typeof formData] as string);
       if (isNaN(value) || value < 0) {
-        errors[field] = 'Must be 0 or a positive number';
+        errors[field] = "Must be 0 or a positive number";
       }
     });
-    
+
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors);
-      toast.error('Please fix the form errors');
+      toast.error("Please fix the form errors");
       return;
     }
 
@@ -385,7 +412,7 @@ export default function PropertiesPage() {
 
     setIsDialogOpen(false);
     resetForm();
-    fetchData();
+    invalidateProperties();
   };
 
   const openDeleteDialog = (id: string) => {
@@ -393,23 +420,25 @@ export default function PropertiesPage() {
     setDeleteDialogOpen(true);
   };
 
-  const handleDelete = async () => {
-    if (!propertyToDelete) return;
-
-    setIsDeleting(true);
-    const { error } = await supabase.from("properties").delete().eq("id", propertyToDelete);
-
-    if (error) {
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("properties").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Property deleted!");
+      setDeleteDialogOpen(false);
+      setPropertyToDelete(null);
+      invalidateProperties();
+    },
+    onError: () => {
       toast.error("Failed to delete property");
-      setIsDeleting(false);
-      return;
-    }
+    },
+  });
 
-    toast.success("Property deleted!");
-    setDeleteDialogOpen(false);
-    setPropertyToDelete(null);
-    setIsDeleting(false);
-    fetchData();
+  const handleDelete = () => {
+    if (!propertyToDelete) return;
+    deleteMutation.mutate(propertyToDelete);
   };
 
   const handleToggleActive = async (property: Property) => {
@@ -424,19 +453,11 @@ export default function PropertiesPage() {
     }
 
     toast.success(property.is_active ? "Property archived" : "Property activated");
-    fetchData();
+    invalidateProperties();
   };
 
-  const viewPropertyDetails = async (property: Property) => {
+  const viewPropertyDetails = (property: Property) => {
     setSelectedProperty(property);
-    
-    const { data } = await supabase
-      .from("property_photos")
-      .select("*")
-      .eq("property_id", property.id)
-      .order("created_at", { ascending: false });
-
-    setPropertyPhotos((data as PropertyPhoto[]) || []);
   };
 
   const getTypeConfig = (type: string) => {
@@ -449,8 +470,8 @@ export default function PropertiesPage() {
 
     return (
       <div className="min-h-screen bg-background">
-        <header className="bg-card border-b border-border sticky top-0 z-10">
-          <div className="container mx-auto px-4 py-4 flex items-center gap-4">
+        <header className="sticky top-0 z-10 border-b border-border bg-card">
+          <div className="container mx-auto flex items-center gap-4 px-4 py-4">
             <Button variant="ghost" size="icon" onClick={() => setSelectedProperty(null)}>
               <ArrowLeft className="h-5 w-5" />
             </Button>
@@ -459,15 +480,15 @@ export default function PropertiesPage() {
               <p className="text-sm text-muted-foreground">{selectedProperty.address}</p>
             </div>
             <Badge className={typeConfig.color}>
-              <TypeIcon className="h-3 w-3 mr-1" />
+              <TypeIcon className="mr-1 h-3 w-3" />
               {typeConfig.label}
             </Badge>
           </div>
         </header>
 
-        <main className="container mx-auto px-4 py-6 space-y-6">
+        <main className="container mx-auto space-y-6 px-4 py-6">
           {/* Property Info Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
             {selectedProperty.clients && (
               <Card>
                 <CardContent className="p-4">
@@ -511,7 +532,7 @@ export default function PropertiesPage() {
             )}
 
             {selectedProperty.estimated_hours && (
-              <Card className="bg-primary/5 border-primary/20">
+              <Card className="border-primary/20 bg-primary/5">
                 <CardContent className="p-4">
                   <div className="flex items-center gap-3">
                     <Clock className="h-5 w-5 text-primary" />
@@ -571,7 +592,7 @@ export default function PropertiesPage() {
                     <Dog className="h-5 w-5 text-primary" />
                     <div>
                       <p className="text-sm text-muted-foreground">Pets</p>
-                      <p className="font-medium text-sm">{selectedProperty.pet_details || "Yes"}</p>
+                      <p className="text-sm font-medium">{selectedProperty.pet_details || "Yes"}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -585,8 +606,9 @@ export default function PropertiesPage() {
                     <MapPin className="h-5 w-5 text-primary" />
                     <div>
                       <p className="text-sm text-muted-foreground">GPS Coordinates</p>
-                      <p className="font-medium text-sm">
-                        {selectedProperty.location_lat.toFixed(6)}, {selectedProperty.location_lng.toFixed(6)}
+                      <p className="text-sm font-medium">
+                        {selectedProperty.location_lat.toFixed(6)},{" "}
+                        {selectedProperty.location_lng.toFixed(6)}
                       </p>
                     </div>
                   </div>
@@ -599,13 +621,15 @@ export default function PropertiesPage() {
           {selectedProperty.access_codes && (
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-base flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 text-base">
                   <Key className="h-4 w-4" />
                   Access Codes
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-foreground whitespace-pre-wrap">{selectedProperty.access_codes}</p>
+                <p className="whitespace-pre-wrap text-foreground">
+                  {selectedProperty.access_codes}
+                </p>
               </CardContent>
             </Card>
           )}
@@ -614,13 +638,15 @@ export default function PropertiesPage() {
           {selectedProperty.special_instructions && (
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-base flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 text-base">
                   <FileText className="h-4 w-4" />
                   Special Instructions
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-foreground whitespace-pre-wrap">{selectedProperty.special_instructions}</p>
+                <p className="whitespace-pre-wrap text-foreground">
+                  {selectedProperty.special_instructions}
+                </p>
               </CardContent>
             </Card>
           )}
@@ -628,25 +654,28 @@ export default function PropertiesPage() {
           {/* Reference Photos */}
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-base flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-base">
                 <Camera className="h-4 w-4" />
                 Reference Photos ({propertyPhotos.length})
               </CardTitle>
             </CardHeader>
             <CardContent>
               {propertyPhotos.length === 0 ? (
-                <p className="text-muted-foreground text-center py-8">No reference photos yet</p>
+                <p className="py-8 text-center text-muted-foreground">No reference photos yet</p>
               ) : (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
                   {propertyPhotos.map((photo) => (
-                    <div key={photo.id} className="relative aspect-square rounded-lg overflow-hidden group">
+                    <div
+                      key={photo.id}
+                      className="group relative aspect-square overflow-hidden rounded-lg"
+                    >
                       <img
                         src={photo.photo_url}
                         alt={photo.room_area || "Property photo"}
-                        className="w-full h-full object-cover"
+                        className="h-full w-full object-cover"
                       />
                       {photo.room_area && (
-                        <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-xs p-2">
+                        <div className="absolute bottom-0 left-0 right-0 bg-black/60 p-2 text-xs text-white">
                           {photo.room_area}
                         </div>
                       )}
@@ -664,8 +693,8 @@ export default function PropertiesPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-card border-b border-border sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4 flex items-center gap-4">
+      <header className="sticky top-0 z-10 border-b border-border bg-card">
+        <div className="container mx-auto flex items-center gap-4 px-4 py-4">
           <Button variant="ghost" size="icon" onClick={() => navigate("/admin")}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
@@ -673,24 +702,27 @@ export default function PropertiesPage() {
             <h1 className="text-xl font-bold text-foreground">Properties</h1>
             <p className="text-sm text-muted-foreground">{properties.length} properties</p>
           </div>
-          <Dialog open={isDialogOpen} onOpenChange={(open) => {
-            setIsDialogOpen(open);
-            if (!open) resetForm();
-          }}>
+          <Dialog
+            open={isDialogOpen}
+            onOpenChange={(open) => {
+              setIsDialogOpen(open);
+              if (!open) resetForm();
+            }}
+          >
             <DialogTrigger asChild>
               <Button>
-                <Plus className="h-4 w-4 mr-2" />
+                <Plus className="mr-2 h-4 w-4" />
                 Add Property
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
               <DialogHeader>
                 <DialogTitle>{editingProperty ? "Edit Property" : "Add New Property"}</DialogTitle>
               </DialogHeader>
-              <div className="space-y-6 mt-4">
+              <div className="mt-4 space-y-6">
                 {/* Basic Info */}
                 <div className="space-y-4">
-                  <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                  <h3 className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
                     <Building2 className="h-4 w-4" />
                     Basic Information
                   </h3>
@@ -701,13 +733,13 @@ export default function PropertiesPage() {
                         value={formData.name}
                         onChange={(e) => {
                           setFormData({ ...formData, name: e.target.value });
-                          if (fieldErrors.name) setFieldErrors(prev => ({ ...prev, name: '' }));
+                          if (fieldErrors.name) setFieldErrors((prev) => ({ ...prev, name: "" }));
                         }}
                         placeholder="e.g., Smith Family Home"
                         className={fieldErrors.name ? "border-destructive" : ""}
                       />
                       {fieldErrors.name && (
-                        <p className="text-xs text-destructive flex items-center gap-1">
+                        <p className="flex items-center gap-1 text-xs text-destructive">
                           <AlertCircle className="h-3 w-3" />
                           {fieldErrors.name}
                         </p>
@@ -720,13 +752,14 @@ export default function PropertiesPage() {
                         value={formData.address}
                         onChange={(e) => {
                           setFormData({ ...formData, address: e.target.value });
-                          if (fieldErrors.address) setFieldErrors(prev => ({ ...prev, address: '' }));
+                          if (fieldErrors.address)
+                            setFieldErrors((prev) => ({ ...prev, address: "" }));
                         }}
                         placeholder="Full address"
                         className={fieldErrors.address ? "border-destructive" : ""}
                       />
                       {fieldErrors.address && (
-                        <p className="text-xs text-destructive flex items-center gap-1">
+                        <p className="flex items-center gap-1 text-xs text-destructive">
                           <AlertCircle className="h-3 w-3" />
                           {fieldErrors.address}
                         </p>
@@ -771,7 +804,7 @@ export default function PropertiesPage() {
                   </div>
 
                   {/* Address Details */}
-                  <div className="grid grid-cols-3 gap-4 mt-4">
+                  <div className="mt-4 grid grid-cols-3 gap-4">
                     <div>
                       <Label>Suburb</Label>
                       <Input
@@ -786,9 +819,10 @@ export default function PropertiesPage() {
                         value={formData.post_code}
                         onChange={(e) => {
                           // Only allow 4 digits
-                          const val = e.target.value.replace(/\D/g, '').slice(0, 4);
+                          const val = e.target.value.replace(/\D/g, "").slice(0, 4);
                           setFormData({ ...formData, post_code: val });
-                          if (fieldErrors.post_code) setFieldErrors(prev => ({ ...prev, post_code: '' }));
+                          if (fieldErrors.post_code)
+                            setFieldErrors((prev) => ({ ...prev, post_code: "" }));
                         }}
                         placeholder="e.g., 2026"
                         maxLength={4}
@@ -825,11 +859,11 @@ export default function PropertiesPage() {
 
                 {/* Property Details - NEW SECTION */}
                 <div className="space-y-4">
-                  <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                  <h3 className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
                     <Home className="h-4 w-4" />
                     Property Details
                   </h3>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
                     <div className="space-y-1">
                       <Label className="flex items-center gap-1">
                         <Bed className="h-3 w-3" />
@@ -840,7 +874,7 @@ export default function PropertiesPage() {
                         min="0"
                         max="50"
                         value={formData.bedrooms}
-                        onChange={(e) => handlePositiveNumberChange('bedrooms', e.target.value)}
+                        onChange={(e) => handlePositiveNumberChange("bedrooms", e.target.value)}
                         className={fieldErrors.bedrooms ? "border-destructive" : ""}
                       />
                       {fieldErrors.bedrooms && (
@@ -858,7 +892,7 @@ export default function PropertiesPage() {
                         min="0"
                         max="50"
                         value={formData.bathrooms}
-                        onChange={(e) => handlePositiveNumberChange('bathrooms', e.target.value)}
+                        onChange={(e) => handlePositiveNumberChange("bathrooms", e.target.value)}
                         className={fieldErrors.bathrooms ? "border-destructive" : ""}
                       />
                       {fieldErrors.bathrooms && (
@@ -876,7 +910,7 @@ export default function PropertiesPage() {
                         min="0"
                         max="5"
                         value={formData.living_areas}
-                        onChange={(e) => handlePositiveNumberChange('living_areas', e.target.value)}
+                        onChange={(e) => handlePositiveNumberChange("living_areas", e.target.value)}
                       />
                     </div>
 
@@ -890,7 +924,7 @@ export default function PropertiesPage() {
                         min="1"
                         max="5"
                         value={formData.floors}
-                        onChange={(e) => handlePositiveNumberChange('floors', e.target.value)}
+                        onChange={(e) => handlePositiveNumberChange("floors", e.target.value)}
                       />
                     </div>
                   </div>
@@ -932,9 +966,11 @@ export default function PropertiesPage() {
                       <Checkbox
                         id="has_pool"
                         checked={formData.has_pool}
-                        onCheckedChange={(checked) => setFormData({ ...formData, has_pool: checked as boolean })}
+                        onCheckedChange={(checked) =>
+                          setFormData({ ...formData, has_pool: checked as boolean })
+                        }
                       />
-                      <Label htmlFor="has_pool" className="flex items-center gap-1 cursor-pointer">
+                      <Label htmlFor="has_pool" className="flex cursor-pointer items-center gap-1">
                         <Waves className="h-3 w-3" />
                         Has Pool/Spa
                       </Label>
@@ -944,9 +980,14 @@ export default function PropertiesPage() {
                       <Checkbox
                         id="has_garage"
                         checked={formData.has_garage}
-                        onCheckedChange={(checked) => setFormData({ ...formData, has_garage: checked as boolean })}
+                        onCheckedChange={(checked) =>
+                          setFormData({ ...formData, has_garage: checked as boolean })
+                        }
                       />
-                      <Label htmlFor="has_garage" className="flex items-center gap-1 cursor-pointer">
+                      <Label
+                        htmlFor="has_garage"
+                        className="flex cursor-pointer items-center gap-1"
+                      >
                         <Car className="h-3 w-3" />
                         Has Garage
                       </Label>
@@ -956,9 +997,11 @@ export default function PropertiesPage() {
                       <Checkbox
                         id="has_pets"
                         checked={formData.has_pets}
-                        onCheckedChange={(checked) => setFormData({ ...formData, has_pets: checked as boolean })}
+                        onCheckedChange={(checked) =>
+                          setFormData({ ...formData, has_pets: checked as boolean })
+                        }
                       />
-                      <Label htmlFor="has_pets" className="flex items-center gap-1 cursor-pointer">
+                      <Label htmlFor="has_pets" className="flex cursor-pointer items-center gap-1">
                         <Dog className="h-3 w-3" />
                         Has Pets
                       </Label>
@@ -982,11 +1025,11 @@ export default function PropertiesPage() {
 
                 {/* Furniture & Items - NEW SECTION */}
                 <div className="space-y-4">
-                  <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                  <h3 className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
                     <Sofa className="h-4 w-4" />
                     Furniture & Items
                   </h3>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
                     <div>
                       <Label>Sofas/Couches</Label>
                       <Input
@@ -1005,7 +1048,9 @@ export default function PropertiesPage() {
                         min="0"
                         max="20"
                         value={formData.dining_chairs}
-                        onChange={(e) => setFormData({ ...formData, dining_chairs: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({ ...formData, dining_chairs: e.target.value })
+                        }
                       />
                     </div>
 
@@ -1036,11 +1081,11 @@ export default function PropertiesPage() {
                 <Separator />
 
                 {/* Estimated Cleaning Time - PROMINENT DISPLAY */}
-                <Card className="bg-primary/5 border-primary/20">
+                <Card className="border-primary/20 bg-primary/5">
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
                           <Clock className="h-5 w-5 text-primary" />
                         </div>
                         <div>
@@ -1064,7 +1109,7 @@ export default function PropertiesPage() {
 
                 {/* Google Maps Link */}
                 <div className="space-y-4">
-                  <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                  <h3 className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
                     <Link2 className="h-4 w-4" />
                     Location (Google Maps)
                   </h3>
@@ -1073,10 +1118,12 @@ export default function PropertiesPage() {
                       <Label>Google Maps Link</Label>
                       <Input
                         value={formData.google_maps_link}
-                        onChange={(e) => setFormData({ ...formData, google_maps_link: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({ ...formData, google_maps_link: e.target.value })
+                        }
                         placeholder="Paste Google Maps link here..."
                       />
-                      <p className="text-xs text-muted-foreground mt-1">
+                      <p className="mt-1 text-xs text-muted-foreground">
                         Copy the link from Google Maps or WhatsApp
                       </p>
                     </div>
@@ -1103,7 +1150,7 @@ export default function PropertiesPage() {
 
                 {/* Additional Info */}
                 <div className="space-y-4">
-                  <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                  <h3 className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
                     <FileText className="h-4 w-4" />
                     Additional Information
                   </h3>
@@ -1122,7 +1169,9 @@ export default function PropertiesPage() {
                     <Label>Special Instructions</Label>
                     <Textarea
                       value={formData.special_instructions}
-                      onChange={(e) => setFormData({ ...formData, special_instructions: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, special_instructions: e.target.value })
+                      }
                       placeholder="Any special cleaning requirements, areas to avoid, etc."
                       rows={3}
                     />
@@ -1144,22 +1193,31 @@ export default function PropertiesPage() {
       </header>
 
       <main className="container mx-auto px-4 py-6">
+        <div className="relative mb-4">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder="Search properties..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10"
+          />
+        </div>
         {loading ? (
           <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
           </div>
         ) : properties.length === 0 ? (
           <Card className="p-12 text-center">
-            <Building2 className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold mb-2">No properties yet</h3>
-            <p className="text-muted-foreground mb-4">Add your first property to get started</p>
+            <Building2 className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
+            <h3 className="mb-2 text-lg font-semibold">No properties yet</h3>
+            <p className="mb-4 text-muted-foreground">Add your first property to get started</p>
             <Button onClick={() => setIsDialogOpen(true)}>
-              <Plus className="h-4 w-4 mr-2" />
+              <Plus className="mr-2 h-4 w-4" />
               Add Property
             </Button>
           </Card>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
             {properties.map((property) => {
               const typeConfig = getTypeConfig(property.property_type);
               const TypeIcon = typeConfig.icon;
@@ -1167,21 +1225,25 @@ export default function PropertiesPage() {
               return (
                 <Card
                   key={property.id}
-                  className={`border-border hover:shadow-md transition-shadow cursor-pointer ${
+                  className={`cursor-pointer border-border transition-shadow hover:shadow-md ${
                     !property.is_active ? "opacity-60" : ""
                   }`}
                   onClick={() => viewPropertyDetails(property)}
                 >
                   <CardContent className="p-4">
-                    <div className="flex items-start justify-between mb-3">
+                    <div className="mb-3 flex items-start justify-between">
                       <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
+                        <div className="mb-1 flex items-center gap-2">
                           <h3 className="font-semibold text-foreground">{property.name}</h3>
                           {!property.is_active && (
-                            <Badge variant="secondary" className="text-xs">Archived</Badge>
+                            <Badge variant="secondary" className="text-xs">
+                              Archived
+                            </Badge>
                           )}
                         </div>
-                        <p className="text-sm text-muted-foreground line-clamp-1">{property.address}</p>
+                        <p className="line-clamp-1 text-sm text-muted-foreground">
+                          {property.address}
+                        </p>
                       </div>
                       <Badge className={typeConfig.color}>
                         <TypeIcon className="h-3 w-3" />
@@ -1189,7 +1251,7 @@ export default function PropertiesPage() {
                     </div>
 
                     {/* Property quick stats */}
-                    <div className="flex items-center gap-3 text-sm text-muted-foreground mb-2">
+                    <div className="mb-2 flex items-center gap-3 text-sm text-muted-foreground">
                       {property.bedrooms !== undefined && property.bedrooms > 0 && (
                         <span className="flex items-center gap-1">
                           <Bed className="h-3 w-3" />
@@ -1203,7 +1265,7 @@ export default function PropertiesPage() {
                         </span>
                       )}
                       {property.estimated_hours && (
-                        <span className="flex items-center gap-1 text-primary font-medium">
+                        <span className="flex items-center gap-1 font-medium text-primary">
                           <Clock className="h-3 w-3" />
                           {property.estimated_hours}h
                         </span>
@@ -1211,20 +1273,20 @@ export default function PropertiesPage() {
                     </div>
 
                     {property.clients && (
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+                      <div className="mb-2 flex items-center gap-2 text-sm text-muted-foreground">
                         <Building2 className="h-4 w-4" />
                         {property.clients.name}
                       </div>
                     )}
 
                     {property.location_lat && property.location_lng && (
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+                      <div className="mb-2 flex items-center gap-2 text-sm text-muted-foreground">
                         <MapPin className="h-4 w-4" />
                         GPS: ✓
                       </div>
                     )}
 
-                    <div className="flex gap-2 mt-4 pt-3 border-t border-border">
+                    <div className="mt-4 flex gap-2 border-t border-border pt-3">
                       <Button
                         variant="outline"
                         size="sm"
@@ -1234,7 +1296,7 @@ export default function PropertiesPage() {
                           handleEdit(property);
                         }}
                       >
-                        <Edit className="h-4 w-4 mr-1" />
+                        <Edit className="mr-1 h-4 w-4" />
                         Edit
                       </Button>
                       <Button
@@ -1265,6 +1327,60 @@ export default function PropertiesPage() {
           </div>
         )}
 
+        {totalPages > 1 && (
+          <div className="mt-4 flex items-center justify-between">
+            <p className="text-sm text-muted-foreground">
+              Page {page} of {totalPages}
+            </p>
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    className={page <= 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                  />
+                </PaginationItem>
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  let pageNum: number;
+                  if (totalPages <= 5) {
+                    pageNum = i + 1;
+                  } else if (page <= 3) {
+                    pageNum = i + 1;
+                  } else if (page >= totalPages - 2) {
+                    pageNum = totalPages - 4 + i;
+                  } else {
+                    pageNum = page - 2 + i;
+                  }
+                  return (
+                    <PaginationItem key={pageNum}>
+                      <PaginationLink
+                        onClick={() => setPage(pageNum)}
+                        isActive={page === pageNum}
+                        className="cursor-pointer"
+                      >
+                        {pageNum}
+                      </PaginationLink>
+                    </PaginationItem>
+                  );
+                })}
+                {totalPages > 5 && page < totalPages - 2 && (
+                  <PaginationItem>
+                    <PaginationEllipsis />
+                  </PaginationItem>
+                )}
+                <PaginationItem>
+                  <PaginationNext
+                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    className={
+                      page >= totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"
+                    }
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </div>
+        )}
+
         {/* Delete Confirmation Dialog */}
         <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
           <AlertDialogContent>
@@ -1275,13 +1391,13 @@ export default function PropertiesPage() {
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+              <AlertDialogCancel disabled={deleteMutation.isPending}>Cancel</AlertDialogCancel>
               <AlertDialogAction
                 onClick={handleDelete}
-                disabled={isDeleting}
+                disabled={deleteMutation.isPending}
                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               >
-                {isDeleting ? "Deleting..." : "Delete"}
+                {deleteMutation.isPending ? "Deleting..." : "Delete"}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

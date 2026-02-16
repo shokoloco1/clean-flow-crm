@@ -1,10 +1,18 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+function getCorsHeaders(req: Request) {
+  const origin = req.headers.get("origin") ?? "";
+  const isAllowed =
+    origin === "https://pulcrix.com" ||
+    origin === "http://localhost:8080" ||
+    origin === "http://localhost:3000" ||
+    origin.endsWith(".lovable.app");
+  return {
+    "Access-Control-Allow-Origin": isAllowed ? origin : "https://pulcrix.com",
+    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  };
+}
 
 // Email template for staff invitation
 const getInvitationEmailHtml = (staffName: string, inviteLink: string, adminName: string) => `
@@ -218,6 +226,7 @@ async function sendEmailWithRetry(
 }
 
 serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
   // Handle CORS preflight
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });

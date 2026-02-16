@@ -8,24 +8,17 @@ const badgeVariants = cva(
   {
     variants: {
       variant: {
-        default:
-          "border-transparent bg-primary/10 text-primary hover:bg-primary/20",
+        default: "border-transparent bg-primary/10 text-primary hover:bg-primary/20",
         secondary:
           "border-transparent bg-secondary/20 text-secondary-foreground hover:bg-secondary/30",
         destructive:
           "border-transparent bg-destructive/10 text-destructive hover:bg-destructive/20",
-        success:
-          "border-transparent bg-success/10 text-success hover:bg-success/20",
-        warning:
-          "border-transparent bg-warning/10 text-warning hover:bg-warning/20",
-        info:
-          "border-transparent bg-info/10 text-info hover:bg-info/20",
-        outline:
-          "border-primary/30 text-primary hover:bg-primary/5",
-        glow:
-          "border-transparent bg-amber text-amber-foreground shadow-sm shadow-amber/30",
-        pulse:
-          "border-transparent bg-primary text-primary-foreground animate-pulse",
+        success: "border-transparent bg-success/10 text-success hover:bg-success/20",
+        warning: "border-transparent bg-warning/10 text-warning hover:bg-warning/20",
+        info: "border-transparent bg-info/10 text-info hover:bg-info/20",
+        outline: "border-primary/30 text-primary hover:bg-primary/5",
+        glow: "border-transparent bg-amber text-amber-foreground shadow-sm shadow-amber/30",
+        pulse: "border-transparent bg-primary text-primary-foreground animate-pulse",
       },
     },
     defaultVariants: {
@@ -34,7 +27,8 @@ const badgeVariants = cva(
   },
 );
 
-export interface BadgeProps extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof badgeVariants> {}
+export interface BadgeProps
+  extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof badgeVariants> {}
 
 function Badge({ className, variant, ...props }: BadgeProps) {
   return <div className={cn(badgeVariants({ variant }), className)} {...props} />;

@@ -1,8 +1,11 @@
 import { z } from "zod";
 
 // Default values from Lovable Cloud - these are automatically injected
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || "https://edeprzdcvbejtnhoqawv.supabase.co";
-const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkZXByemRjdmJlanRuaG9xYXd2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc1NzQwNzYsImV4cCI6MjA4MzE1MDA3Nn0._DXUCh4cG4cQo7gltaUxn_VOcbF5JlcHlF2L0xlZvOc";
+const SUPABASE_URL =
+  import.meta.env.VITE_SUPABASE_URL || "https://edeprzdcvbejtnhoqawv.supabase.co";
+const SUPABASE_KEY =
+  import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkZXByemRjdmJlanRuaG9xYXd2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc1NzQwNzYsImV4cCI6MjA4MzE1MDA3Nn0._DXUCh4cG4cQo7gltaUxn_VOcbF5JlcHlF2L0xlZvOc";
 
 const envSchema = z.object({
   VITE_SUPABASE_URL: z.string().url(),

@@ -10,7 +10,13 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from "@/components/ui/sheet";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -53,7 +59,7 @@ import {
   TrendingUp,
   MoreVertical,
   Edit,
-  Trash2
+  Trash2,
 } from "lucide-react";
 
 interface StaffProfile {
@@ -95,7 +101,7 @@ const DAYS_OF_WEEK = [
   { short: "Wed", full: "Wednesday" },
   { short: "Thu", full: "Thursday" },
   { short: "Fri", full: "Friday" },
-  { short: "Sat", full: "Saturday" }
+  { short: "Sat", full: "Saturday" },
 ];
 
 const SKILL_OPTIONS = [
@@ -106,7 +112,7 @@ const SKILL_OPTIONS = [
   "Carpet Cleaning",
   "Industrial Kitchen Cleaning",
   "Chemical Handling",
-  "Post-Construction Cleaning"
+  "Post-Construction Cleaning",
 ];
 
 const CERTIFICATION_OPTIONS = [
@@ -114,7 +120,7 @@ const CERTIFICATION_OPTIONS = [
   "First Aid",
   "Occupational Safety",
   "Hospital Cleaning",
-  "Green Cleaning"
+  "Green Cleaning",
 ];
 
 export default function StaffManagementPage() {
@@ -143,7 +149,7 @@ export default function StaffManagementPage() {
 
       if (rolesError) throw rolesError;
 
-      const staffUserIds = staffRoles.map(r => r.user_id);
+      const staffUserIds = staffRoles.map((r) => r.user_id);
 
       if (staffUserIds.length === 0) return [];
 
@@ -155,13 +161,13 @@ export default function StaffManagementPage() {
 
       if (profilesError) throw profilesError;
 
-      return profiles.map(p => ({
+      return profiles.map((p) => ({
         ...p,
         skills: Array.isArray(p.skills) ? p.skills : [],
         certifications: Array.isArray(p.certifications) ? p.certifications : [],
-        is_active: p.is_active ?? true
+        is_active: p.is_active ?? true,
       })) as StaffProfile[];
-    }
+    },
   });
 
   // Fetch metrics for all staff
@@ -171,14 +177,15 @@ export default function StaffManagementPage() {
       const { data: jobs, error } = await supabase
         .from("jobs")
         .select("assigned_staff_id, status, start_time, end_time, quality_score")
-        .eq("status", "completed");
+        .eq("status", "completed")
+        .limit(1000);
 
       if (error) throw error;
 
       // Calculate metrics per staff member
       const metricsMap: Record<string, StaffMetrics> = {};
 
-      jobs.forEach(job => {
+      jobs.forEach((job) => {
         if (!job.assigned_staff_id) return;
 
         if (!metricsMap[job.assigned_staff_id]) {
@@ -186,7 +193,7 @@ export default function StaffManagementPage() {
             user_id: job.assigned_staff_id,
             jobs_completed: 0,
             total_hours: 0,
-            avg_quality_score: null
+            avg_quality_score: null,
           };
         }
 
@@ -201,13 +208,14 @@ export default function StaffManagementPage() {
 
         if (job.quality_score) {
           const current = metricsMap[job.assigned_staff_id];
-          const totalScores = (current.avg_quality_score || 0) * (current.jobs_completed - 1) + job.quality_score;
+          const totalScores =
+            (current.avg_quality_score || 0) * (current.jobs_completed - 1) + job.quality_score;
           current.avg_quality_score = totalScores / current.jobs_completed;
         }
       });
 
       return metricsMap;
-    }
+    },
   });
 
   // Fetch availability for selected staff
@@ -225,7 +233,7 @@ export default function StaffManagementPage() {
       if (error) throw error;
       return data as StaffAvailability[];
     },
-    enabled: !!selectedStaff
+    enabled: !!selectedStaff,
   });
 
   // Update profile mutation
@@ -244,7 +252,7 @@ export default function StaffManagementPage() {
           certifications: updates.certifications,
           hire_date: updates.hire_date,
           hourly_rate: updates.hourly_rate,
-          is_active: updates.is_active
+          is_active: updates.is_active,
         })
         .eq("id", selectedStaff.id);
 
@@ -255,8 +263,12 @@ export default function StaffManagementPage() {
       queryClient.invalidateQueries({ queryKey: ["staff-list"] });
     },
     onError: (error) => {
-      toast({ title: "Error updating profile", description: error.message, variant: "destructive" });
-    }
+      toast({
+        title: "Error updating profile",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
   });
 
   // Update availability mutation
@@ -265,23 +277,26 @@ export default function StaffManagementPage() {
       if (!selectedStaff) throw new Error("No staff selected");
       if (avail.day_of_week === undefined) throw new Error("Day of week is required");
 
-      const { error } = await supabase
-        .from("staff_availability")
-        .upsert([{
-          user_id: selectedStaff.user_id,
-          day_of_week: avail.day_of_week,
-          start_time: avail.start_time ?? "09:00",
-          end_time: avail.end_time ?? "17:00",
-          is_available: avail.is_available ?? true
-        }], {
-          onConflict: "user_id,day_of_week"
-        });
+      const { error } = await supabase.from("staff_availability").upsert(
+        [
+          {
+            user_id: selectedStaff.user_id,
+            day_of_week: avail.day_of_week,
+            start_time: avail.start_time ?? "09:00",
+            end_time: avail.end_time ?? "17:00",
+            is_available: avail.is_available ?? true,
+          },
+        ],
+        {
+          onConflict: "user_id,day_of_week",
+        },
+      );
 
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["staff-availability", selectedStaff?.user_id] });
-    }
+    },
   });
 
   // Quick toggle status from list
@@ -296,14 +311,14 @@ export default function StaffManagementPage() {
 
       toast({
         title: staff.is_active ? "Staff deactivated" : "Staff activated",
-        description: `${staff.full_name} has been ${staff.is_active ? "deactivated" : "activated"}.`
+        description: `${staff.full_name} has been ${staff.is_active ? "deactivated" : "activated"}.`,
       });
       queryClient.invalidateQueries({ queryKey: ["staff-list"] });
     } catch (error: any) {
       toast({
         title: "Error updating status",
         description: error.message,
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   };
@@ -322,7 +337,7 @@ export default function StaffManagementPage() {
 
       toast({
         title: "Staff member removed",
-        description: `${staffToDelete.full_name} has been deactivated.`
+        description: `${staffToDelete.full_name} has been deactivated.`,
       });
       queryClient.invalidateQueries({ queryKey: ["staff-list"] });
       setStaffToDelete(null);
@@ -330,7 +345,7 @@ export default function StaffManagementPage() {
       toast({
         title: "Error removing staff",
         description: error.message,
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   };
@@ -348,7 +363,7 @@ export default function StaffManagementPage() {
   const toggleSkill = (skill: string) => {
     const currentSkills = editForm.skills || [];
     if (currentSkills.includes(skill)) {
-      setEditForm({ ...editForm, skills: currentSkills.filter(s => s !== skill) });
+      setEditForm({ ...editForm, skills: currentSkills.filter((s) => s !== skill) });
     } else {
       setEditForm({ ...editForm, skills: [...currentSkills, skill] });
     }
@@ -357,38 +372,49 @@ export default function StaffManagementPage() {
   const toggleCertification = (cert: string) => {
     const currentCerts = editForm.certifications || [];
     if (currentCerts.includes(cert)) {
-      setEditForm({ ...editForm, certifications: currentCerts.filter(c => c !== cert) });
+      setEditForm({ ...editForm, certifications: currentCerts.filter((c) => c !== cert) });
     } else {
       setEditForm({ ...editForm, certifications: [...currentCerts, cert] });
     }
   };
 
   const getMetrics = (userId: string): StaffMetrics => {
-    return metricsData?.[userId] || { user_id: userId, jobs_completed: 0, total_hours: 0, avg_quality_score: null };
+    return (
+      metricsData?.[userId] || {
+        user_id: userId,
+        jobs_completed: 0,
+        total_hours: 0,
+        avg_quality_score: null,
+      }
+    );
   };
 
   const getAvailabilityForDay = (dayIndex: number): StaffAvailability | undefined => {
-    return staffAvailability?.find(a => a.day_of_week === dayIndex);
+    return staffAvailability?.find((a) => a.day_of_week === dayIndex);
   };
 
   // Filter staff list
-  const filteredStaffList = staffList?.filter(staff => {
-    const matchesSearch = staff.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          staff.email.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = statusFilter === "all" || 
-                          (statusFilter === "active" && staff.is_active) ||
-                          (statusFilter === "inactive" && !staff.is_active);
+  const filteredStaffList = staffList?.filter((staff) => {
+    const matchesSearch =
+      staff.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      staff.email.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesStatus =
+      statusFilter === "all" ||
+      (statusFilter === "active" && staff.is_active) ||
+      (statusFilter === "inactive" && !staff.is_active);
     return matchesSearch && matchesStatus;
   });
 
   // Calculate stats
   const totalStaff = staffList?.length || 0;
-  const activeStaff = staffList?.filter(s => s.is_active).length || 0;
-  const avgRating = metricsData 
-    ? Object.values(metricsData).filter(m => m.avg_quality_score).reduce((acc, m) => acc + (m.avg_quality_score || 0), 0) / 
-      (Object.values(metricsData).filter(m => m.avg_quality_score).length || 1)
+  const activeStaff = staffList?.filter((s) => s.is_active).length || 0;
+  const avgRating = metricsData
+    ? Object.values(metricsData)
+        .filter((m) => m.avg_quality_score)
+        .reduce((acc, m) => acc + (m.avg_quality_score || 0), 0) /
+      (Object.values(metricsData).filter((m) => m.avg_quality_score).length || 1)
     : 0;
-  const totalJobsCompleted = metricsData 
+  const totalJobsCompleted = metricsData
     ? Object.values(metricsData).reduce((acc, m) => acc + m.jobs_completed, 0)
     : 0;
 
@@ -396,20 +422,25 @@ export default function StaffManagementPage() {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="sticky top-0 z-50 border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60">
-        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+        <div className="container mx-auto flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" onClick={() => navigate("/admin")} className="shrink-0">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate("/admin")}
+              className="shrink-0"
+            >
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <div className="flex items-center gap-2">
-              <div className="p-2 rounded-lg bg-primary/10">
+              <div className="rounded-lg bg-primary/10 p-2">
                 <Users className="h-5 w-5 text-primary" />
               </div>
               <div className="hidden sm:block">
                 <h1 className="text-lg font-bold">Staff Management</h1>
                 <p className="text-xs text-muted-foreground">Manage your team members</p>
               </div>
-              <h1 className="sm:hidden text-lg font-bold">Staff</h1>
+              <h1 className="text-lg font-bold sm:hidden">Staff</h1>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -422,60 +453,62 @@ export default function StaffManagementPage() {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-6 space-y-6">
+      <main className="container mx-auto space-y-6 px-4 py-6">
         {/* Stats Overview */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
           <Card className="border-l-4 border-l-primary">
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-full bg-primary/10 shrink-0">
-                  <Users className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                <div className="shrink-0 rounded-full bg-primary/10 p-2">
+                  <Users className="h-4 w-4 text-primary sm:h-5 sm:w-5" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-xs sm:text-sm text-muted-foreground truncate">Total Staff</p>
-                  <p className="text-xl sm:text-2xl font-bold">{totalStaff}</p>
+                  <p className="truncate text-xs text-muted-foreground sm:text-sm">Total Staff</p>
+                  <p className="text-xl font-bold sm:text-2xl">{totalStaff}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
-          
+
           <Card className="border-l-4 border-l-green-500">
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-full bg-green-500/10 shrink-0">
-                  <UserCheck className="h-4 w-4 sm:h-5 sm:w-5 text-green-500" />
+                <div className="shrink-0 rounded-full bg-green-500/10 p-2">
+                  <UserCheck className="h-4 w-4 text-green-500 sm:h-5 sm:w-5" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-xs sm:text-sm text-muted-foreground truncate">Active</p>
-                  <p className="text-xl sm:text-2xl font-bold">{activeStaff}</p>
+                  <p className="truncate text-xs text-muted-foreground sm:text-sm">Active</p>
+                  <p className="text-xl font-bold sm:text-2xl">{activeStaff}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
-          
+
           <Card className="border-l-4 border-l-blue-500">
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-full bg-blue-500/10 shrink-0">
-                  <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500" />
+                <div className="shrink-0 rounded-full bg-blue-500/10 p-2">
+                  <TrendingUp className="h-4 w-4 text-blue-500 sm:h-5 sm:w-5" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-xs sm:text-sm text-muted-foreground truncate">Jobs</p>
-                  <p className="text-xl sm:text-2xl font-bold">{totalJobsCompleted}</p>
+                  <p className="truncate text-xs text-muted-foreground sm:text-sm">Jobs</p>
+                  <p className="text-xl font-bold sm:text-2xl">{totalJobsCompleted}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
-          
+
           <Card className="border-l-4 border-l-yellow-500">
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-full bg-yellow-500/10 shrink-0">
-                  <Star className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-500" />
+                <div className="shrink-0 rounded-full bg-yellow-500/10 p-2">
+                  <Star className="h-4 w-4 text-yellow-500 sm:h-5 sm:w-5" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-xs sm:text-sm text-muted-foreground truncate">Avg Rating</p>
-                  <p className="text-xl sm:text-2xl font-bold">{avgRating ? avgRating.toFixed(1) : "-"}</p>
+                  <p className="truncate text-xs text-muted-foreground sm:text-sm">Avg Rating</p>
+                  <p className="text-xl font-bold sm:text-2xl">
+                    {avgRating ? avgRating.toFixed(1) : "-"}
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -485,9 +518,9 @@ export default function StaffManagementPage() {
         {/* Search and Filters */}
         <Card>
           <CardContent className="p-4">
-            <div className="flex flex-col sm:flex-row gap-3">
+            <div className="flex flex-col gap-3 sm:flex-row">
               <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   placeholder="Search by name or email..."
                   value={searchQuery}
@@ -496,28 +529,28 @@ export default function StaffManagementPage() {
                 />
               </div>
               <div className="flex gap-2">
-                <Button 
-                  variant={statusFilter === "all" ? "default" : "outline"} 
+                <Button
+                  variant={statusFilter === "all" ? "default" : "outline"}
                   size="sm"
                   onClick={() => setStatusFilter("all")}
                   className="flex-1 sm:flex-none"
                 >
                   All
                 </Button>
-                <Button 
-                  variant={statusFilter === "active" ? "default" : "outline"} 
+                <Button
+                  variant={statusFilter === "active" ? "default" : "outline"}
                   size="sm"
                   onClick={() => setStatusFilter("active")}
-                  className="flex-1 sm:flex-none gap-1"
+                  className="flex-1 gap-1 sm:flex-none"
                 >
                   <UserCheck className="h-3 w-3" />
                   Active
                 </Button>
-                <Button 
-                  variant={statusFilter === "inactive" ? "default" : "outline"} 
+                <Button
+                  variant={statusFilter === "inactive" ? "default" : "outline"}
                   size="sm"
                   onClick={() => setStatusFilter("inactive")}
-                  className="flex-1 sm:flex-none gap-1"
+                  className="flex-1 gap-1 sm:flex-none"
                 >
                   <UserX className="h-3 w-3" />
                   Inactive
@@ -534,7 +567,8 @@ export default function StaffManagementPage() {
               <div>
                 <CardTitle>Team Members</CardTitle>
                 <CardDescription>
-                  {filteredStaffList?.length || 0} employee{filteredStaffList?.length !== 1 ? 's' : ''} found
+                  {filteredStaffList?.length || 0} employee
+                  {filteredStaffList?.length !== 1 ? "s" : ""} found
                 </CardDescription>
               </div>
             </div>
@@ -545,13 +579,13 @@ export default function StaffManagementPage() {
                 <div className="animate-pulse text-muted-foreground">Loading employees...</div>
               </div>
             ) : filteredStaffList?.length === 0 ? (
-              <div className="text-center py-12">
-                <Users className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
-                <h3 className="font-semibold text-lg mb-2">
+              <div className="py-12 text-center">
+                <Users className="mx-auto mb-4 h-12 w-12 text-muted-foreground/50" />
+                <h3 className="mb-2 text-lg font-semibold">
                   {staffList?.length === 0 ? "No employees registered" : "No results found"}
                 </h3>
-                <p className="text-muted-foreground mb-4">
-                  {staffList?.length === 0 
+                <p className="mb-4 text-muted-foreground">
+                  {staffList?.length === 0
                     ? "Add your first employee to start managing your team"
                     : "Try different search terms or filters"}
                 </p>
@@ -569,26 +603,31 @@ export default function StaffManagementPage() {
                   return (
                     <div
                       key={staff.id}
-                      className="group flex flex-col sm:flex-row sm:items-center justify-between p-4 border rounded-lg hover:bg-muted/50 cursor-pointer transition-all hover:shadow-sm"
+                      className="group flex cursor-pointer flex-col justify-between rounded-lg border p-4 transition-all hover:bg-muted/50 hover:shadow-sm sm:flex-row sm:items-center"
                       onClick={() => openStaffDetails(staff)}
                     >
-                      <div className="flex items-center gap-3 sm:gap-4 mb-3 sm:mb-0">
-                        <Avatar className="h-10 w-10 sm:h-12 sm:w-12 shrink-0">
-                          <AvatarFallback className="bg-primary/10 text-primary font-semibold">
-                            {staff.full_name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()}
+                      <div className="mb-3 flex items-center gap-3 sm:mb-0 sm:gap-4">
+                        <Avatar className="h-10 w-10 shrink-0 sm:h-12 sm:w-12">
+                          <AvatarFallback className="bg-primary/10 font-semibold text-primary">
+                            {staff.full_name
+                              .split(" ")
+                              .map((n) => n[0])
+                              .join("")
+                              .slice(0, 2)
+                              .toUpperCase()}
                           </AvatarFallback>
                         </Avatar>
                         <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <h3 className="font-medium truncate">{staff.full_name}</h3>
-                            <Badge 
+                          <div className="flex flex-wrap items-center gap-2">
+                            <h3 className="truncate font-medium">{staff.full_name}</h3>
+                            <Badge
                               variant={staff.is_active ? "default" : "secondary"}
                               className="shrink-0"
                             >
                               {staff.is_active ? "Active" : "Inactive"}
                             </Badge>
                           </div>
-                          <div className="flex items-center gap-3 text-xs sm:text-sm text-muted-foreground mt-1 flex-wrap">
+                          <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-muted-foreground sm:text-sm">
                             <span className="flex items-center gap-1 truncate">
                               <Mail className="h-3 w-3 shrink-0" />
                               <span className="truncate">{staff.email}</span>
@@ -602,8 +641,8 @@ export default function StaffManagementPage() {
                           </div>
                           {/* Skills badges - mobile */}
                           {staff.skills.length > 0 && (
-                            <div className="flex flex-wrap gap-1 mt-2 sm:hidden">
-                              {staff.skills.slice(0, 2).map(skill => (
+                            <div className="mt-2 flex flex-wrap gap-1 sm:hidden">
+                              {staff.skills.slice(0, 2).map((skill) => (
                                 <Badge key={skill} variant="outline" className="text-xs">
                                   {skill}
                                 </Badge>
@@ -617,26 +656,28 @@ export default function StaffManagementPage() {
                           )}
                         </div>
                       </div>
-                      
-                      <div className="flex items-center justify-between sm:justify-end gap-4 sm:gap-6 pl-13 sm:pl-0">
-                        <div className="flex items-center gap-4 sm:gap-6 text-xs sm:text-sm">
+
+                      <div className="pl-13 flex items-center justify-between gap-4 sm:justify-end sm:gap-6 sm:pl-0">
+                        <div className="flex items-center gap-4 text-xs sm:gap-6 sm:text-sm">
                           <div className="text-center">
                             <p className="text-muted-foreground">Jobs</p>
                             <p className="font-semibold">{metrics.jobs_completed}</p>
                           </div>
-                          <div className="text-center hidden sm:block">
+                          <div className="hidden text-center sm:block">
                             <p className="text-muted-foreground">Hours</p>
                             <p className="font-semibold">{metrics.total_hours.toFixed(0)}</p>
                           </div>
                           <div className="text-center">
                             <p className="text-muted-foreground">Rating</p>
-                            <p className="font-semibold flex items-center justify-center gap-1">
+                            <p className="flex items-center justify-center gap-1 font-semibold">
                               {metrics.avg_quality_score ? (
                                 <>
-                                  <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
+                                  <Star className="h-3 w-3 fill-yellow-500 text-yellow-500" />
                                   {metrics.avg_quality_score.toFixed(1)}
                                 </>
-                              ) : "-"}
+                              ) : (
+                                "-"
+                              )}
                             </p>
                           </div>
                         </div>
@@ -644,7 +685,7 @@ export default function StaffManagementPage() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                            className="shrink-0 opacity-0 transition-opacity group-hover:opacity-100"
                             onClick={(e) => {
                               e.stopPropagation();
                               openStaffDetails(staff);
@@ -717,17 +758,22 @@ export default function StaffManagementPage() {
 
       {/* Staff Detail Sheet */}
       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-        <SheetContent className="w-full sm:max-w-xl p-0">
+        <SheetContent className="w-full p-0 sm:max-w-xl">
           <SheetHeader className="p-6 pb-0">
             <div className="flex items-center gap-4">
               <Avatar className="h-16 w-16">
-                <AvatarFallback className="bg-primary/10 text-primary font-semibold text-xl">
-                  {selectedStaff?.full_name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()}
+                <AvatarFallback className="bg-primary/10 text-xl font-semibold text-primary">
+                  {selectedStaff?.full_name
+                    .split(" ")
+                    .map((n) => n[0])
+                    .join("")
+                    .slice(0, 2)
+                    .toUpperCase()}
                 </AvatarFallback>
               </Avatar>
               <div>
                 <SheetTitle className="text-xl">{selectedStaff?.full_name}</SheetTitle>
-                <SheetDescription className="flex items-center gap-2 mt-1">
+                <SheetDescription className="mt-1 flex items-center gap-2">
                   <Mail className="h-3 w-3" />
                   {selectedStaff?.email}
                 </SheetDescription>
@@ -739,25 +785,31 @@ export default function StaffManagementPage() {
             <div className="p-6">
               {selectedStaff && (
                 <Tabs defaultValue="profile" className="w-full">
-                  <TabsList className="grid w-full grid-cols-3 mb-6">
+                  <TabsList className="mb-6 grid w-full grid-cols-3">
                     <TabsTrigger value="profile" className="text-xs sm:text-sm">
-                      <User className="h-4 w-4 mr-1 sm:mr-2" />
+                      <User className="mr-1 h-4 w-4 sm:mr-2" />
                       <span className="hidden sm:inline">Profile</span>
                     </TabsTrigger>
                     <TabsTrigger value="availability" className="text-xs sm:text-sm">
-                      <Clock className="h-4 w-4 mr-1 sm:mr-2" />
+                      <Clock className="mr-1 h-4 w-4 sm:mr-2" />
                       <span className="hidden sm:inline">Schedule</span>
                     </TabsTrigger>
                     <TabsTrigger value="metrics" className="text-xs sm:text-sm">
-                      <TrendingUp className="h-4 w-4 mr-1 sm:mr-2" />
+                      <TrendingUp className="mr-1 h-4 w-4 sm:mr-2" />
                       <span className="hidden sm:inline">Metrics</span>
                     </TabsTrigger>
                   </TabsList>
 
                   {/* Profile Tab */}
-                  <TabsContent value="profile" className="space-y-6 mt-0">
+                  <TabsContent value="profile" className="mt-0 space-y-6">
                     {/* Status Toggle */}
-                    <Card className={editForm.is_active ? "border-green-500/50 bg-green-500/5" : "border-orange-500/50 bg-orange-500/5"}>
+                    <Card
+                      className={
+                        editForm.is_active
+                          ? "border-green-500/50 bg-green-500/5"
+                          : "border-orange-500/50 bg-orange-500/5"
+                      }
+                    >
                       <CardContent className="p-4">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
@@ -775,7 +827,9 @@ export default function StaffManagementPage() {
                           </div>
                           <Switch
                             checked={editForm.is_active}
-                            onCheckedChange={(checked) => setEditForm({ ...editForm, is_active: checked })}
+                            onCheckedChange={(checked) =>
+                              setEditForm({ ...editForm, is_active: checked })
+                            }
                           />
                         </div>
                       </CardContent>
@@ -783,11 +837,11 @@ export default function StaffManagementPage() {
 
                     {/* Basic Info */}
                     <div className="space-y-4">
-                      <h4 className="font-semibold flex items-center gap-2">
+                      <h4 className="flex items-center gap-2 font-semibold">
                         <User className="h-4 w-4" />
                         Basic Information
                       </h4>
-                      
+
                       <div className="space-y-2">
                         <Label>Full Name</Label>
                         <Input
@@ -805,25 +859,34 @@ export default function StaffManagementPage() {
                         />
                       </div>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <div className="space-y-2">
                           <Label>Hire Date</Label>
                           <Input
                             type="date"
                             value={editForm.hire_date || ""}
-                            onChange={(e) => setEditForm({ ...editForm, hire_date: e.target.value })}
+                            onChange={(e) =>
+                              setEditForm({ ...editForm, hire_date: e.target.value })
+                            }
                           />
                         </div>
                         <div className="space-y-2">
                           <Label>Hourly Rate (AUD)</Label>
                           <div className="relative">
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                              $
+                            </span>
                             <Input
                               type="number"
                               step="0.01"
                               className="pl-7"
                               value={editForm.hourly_rate || ""}
-                              onChange={(e) => setEditForm({ ...editForm, hourly_rate: parseFloat(e.target.value) || null })}
+                              onChange={(e) =>
+                                setEditForm({
+                                  ...editForm,
+                                  hourly_rate: parseFloat(e.target.value) || null,
+                                })
+                              }
                             />
                           </div>
                         </div>
@@ -834,16 +897,18 @@ export default function StaffManagementPage() {
 
                     {/* Emergency Contact */}
                     <div className="space-y-4">
-                      <h4 className="font-semibold flex items-center gap-2">
+                      <h4 className="flex items-center gap-2 font-semibold">
                         <AlertCircle className="h-4 w-4 text-orange-500" />
                         Emergency Contact
                       </h4>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <div className="space-y-2">
                           <Label>Name</Label>
                           <Input
                             value={editForm.emergency_contact_name || ""}
-                            onChange={(e) => setEditForm({ ...editForm, emergency_contact_name: e.target.value })}
+                            onChange={(e) =>
+                              setEditForm({ ...editForm, emergency_contact_name: e.target.value })
+                            }
                             placeholder="Contact name"
                           />
                         </div>
@@ -851,7 +916,9 @@ export default function StaffManagementPage() {
                           <Label>Phone</Label>
                           <Input
                             value={editForm.emergency_contact_phone || ""}
-                            onChange={(e) => setEditForm({ ...editForm, emergency_contact_phone: e.target.value })}
+                            onChange={(e) =>
+                              setEditForm({ ...editForm, emergency_contact_phone: e.target.value })
+                            }
                             placeholder="Phone number"
                           />
                         </div>
@@ -862,7 +929,7 @@ export default function StaffManagementPage() {
 
                     {/* Skills */}
                     <div className="space-y-4">
-                      <h4 className="font-semibold flex items-center gap-2">
+                      <h4 className="flex items-center gap-2 font-semibold">
                         <Briefcase className="h-4 w-4" />
                         Skills
                       </h4>
@@ -874,7 +941,9 @@ export default function StaffManagementPage() {
                             className="cursor-pointer transition-all hover:scale-105"
                             onClick={() => toggleSkill(skill)}
                           >
-                            {editForm.skills?.includes(skill) && <CheckCircle className="h-3 w-3 mr-1" />}
+                            {editForm.skills?.includes(skill) && (
+                              <CheckCircle className="mr-1 h-3 w-3" />
+                            )}
                             {skill}
                           </Badge>
                         ))}
@@ -885,7 +954,7 @@ export default function StaffManagementPage() {
 
                     {/* Certifications */}
                     <div className="space-y-4">
-                      <h4 className="font-semibold flex items-center gap-2">
+                      <h4 className="flex items-center gap-2 font-semibold">
                         <Award className="h-4 w-4" />
                         Certifications
                       </h4>
@@ -893,20 +962,24 @@ export default function StaffManagementPage() {
                         {CERTIFICATION_OPTIONS.map((cert) => (
                           <Badge
                             key={cert}
-                            variant={editForm.certifications?.includes(cert) ? "default" : "outline"}
+                            variant={
+                              editForm.certifications?.includes(cert) ? "default" : "outline"
+                            }
                             className="cursor-pointer transition-all hover:scale-105"
                             onClick={() => toggleCertification(cert)}
                           >
-                            {editForm.certifications?.includes(cert) && <CheckCircle className="h-3 w-3 mr-1" />}
+                            {editForm.certifications?.includes(cert) && (
+                              <CheckCircle className="mr-1 h-3 w-3" />
+                            )}
                             {cert}
                           </Badge>
                         ))}
                       </div>
                     </div>
 
-                    <Button 
-                      onClick={handleSaveProfile} 
-                      className="w-full mt-6" 
+                    <Button
+                      onClick={handleSaveProfile}
+                      className="mt-6 w-full"
                       disabled={updateProfileMutation.isPending}
                     >
                       {updateProfileMutation.isPending ? "Saving..." : "Save Changes"}
@@ -914,21 +987,21 @@ export default function StaffManagementPage() {
                   </TabsContent>
 
                   {/* Availability Tab */}
-                  <TabsContent value="availability" className="space-y-4 mt-0">
+                  <TabsContent value="availability" className="mt-0 space-y-4">
                     <p className="text-sm text-muted-foreground">
                       Configure the weekly availability schedule for this employee.
                     </p>
-                    
+
                     <div className="space-y-3">
                       {DAYS_OF_WEEK.map((day, index) => {
                         const avail = getAvailabilityForDay(index);
                         const isAvailable = avail?.is_available ?? (index >= 1 && index <= 5);
-                        
+
                         return (
                           <Card key={day.full} className={!isAvailable ? "opacity-60" : ""}>
                             <CardContent className="p-4">
                               <div className="flex items-center justify-between gap-4">
-                                <div className="flex items-center gap-3 min-w-0">
+                                <div className="flex min-w-0 items-center gap-3">
                                   <Switch
                                     checked={isAvailable}
                                     onCheckedChange={(checked) => {
@@ -936,7 +1009,7 @@ export default function StaffManagementPage() {
                                         day_of_week: index,
                                         start_time: avail?.start_time || "08:00",
                                         end_time: avail?.end_time || "17:00",
-                                        is_available: checked
+                                        is_available: checked,
                                       });
                                     }}
                                   />
@@ -947,7 +1020,7 @@ export default function StaffManagementPage() {
                                     )}
                                   </div>
                                 </div>
-                                
+
                                 {isAvailable && (
                                   <div className="flex items-center gap-2">
                                     <Input
@@ -959,7 +1032,7 @@ export default function StaffManagementPage() {
                                           day_of_week: index,
                                           start_time: e.target.value,
                                           end_time: avail?.end_time || "17:00",
-                                          is_available: true
+                                          is_available: true,
                                         });
                                       }}
                                     />
@@ -973,7 +1046,7 @@ export default function StaffManagementPage() {
                                           day_of_week: index,
                                           start_time: avail?.start_time || "08:00",
                                           end_time: e.target.value,
-                                          is_available: true
+                                          is_available: true,
                                         });
                                       }}
                                     />
@@ -988,7 +1061,7 @@ export default function StaffManagementPage() {
                   </TabsContent>
 
                   {/* Metrics Tab */}
-                  <TabsContent value="metrics" className="space-y-4 mt-0">
+                  <TabsContent value="metrics" className="mt-0 space-y-4">
                     {(() => {
                       const metrics = getMetrics(selectedStaff.user_id);
                       return (
@@ -996,16 +1069,18 @@ export default function StaffManagementPage() {
                           <div className="grid grid-cols-2 gap-4">
                             <Card>
                               <CardContent className="p-4 text-center">
-                                <Briefcase className="h-8 w-8 mx-auto text-primary mb-2" />
+                                <Briefcase className="mx-auto mb-2 h-8 w-8 text-primary" />
                                 <p className="text-2xl font-bold">{metrics.jobs_completed}</p>
                                 <p className="text-sm text-muted-foreground">Jobs Completed</p>
                               </CardContent>
                             </Card>
-                            
+
                             <Card>
                               <CardContent className="p-4 text-center">
-                                <Clock className="h-8 w-8 mx-auto text-blue-500 mb-2" />
-                                <p className="text-2xl font-bold">{metrics.total_hours.toFixed(1)}</p>
+                                <Clock className="mx-auto mb-2 h-8 w-8 text-blue-500" />
+                                <p className="text-2xl font-bold">
+                                  {metrics.total_hours.toFixed(1)}
+                                </p>
                                 <p className="text-sm text-muted-foreground">Hours Worked</p>
                               </CardContent>
                             </Card>
@@ -1014,13 +1089,13 @@ export default function StaffManagementPage() {
                           <Card>
                             <CardContent className="p-4">
                               <div className="flex items-center gap-4">
-                                <div className="p-3 rounded-full bg-yellow-500/10">
+                                <div className="rounded-full bg-yellow-500/10 p-3">
                                   <Star className="h-6 w-6 text-yellow-500" />
                                 </div>
                                 <div>
                                   <p className="text-sm text-muted-foreground">Average Rating</p>
                                   <p className="text-2xl font-bold">
-                                    {metrics.avg_quality_score 
+                                    {metrics.avg_quality_score
                                       ? `${metrics.avg_quality_score.toFixed(1)} / 5.0`
                                       : "No ratings yet"}
                                   </p>
@@ -1033,30 +1108,36 @@ export default function StaffManagementPage() {
                             <Card>
                               <CardContent className="p-4">
                                 <div className="flex items-center gap-4">
-                                  <div className="p-3 rounded-full bg-green-500/10">
+                                  <div className="rounded-full bg-green-500/10 p-3">
                                     <Calendar className="h-6 w-6 text-green-500" />
                                   </div>
-                                <div>
-                                  <p className="text-sm text-muted-foreground">Tenure</p>
-                                  <p className="text-2xl font-bold">
-                                    {(() => {
-                                      const months = Math.floor(
-                                        (new Date().getTime() - new Date(selectedStaff.hire_date).getTime()) / 
-                                        (1000 * 60 * 60 * 24 * 30)
-                                      );
-                                      if (months < 1) return "Less than 1 month";
-                                      if (months < 12) return `${months} month${months > 1 ? 's' : ''}`;
-                                      const years = Math.floor(months / 12);
-                                      const remainingMonths = months % 12;
-                                      return `${years} year${years > 1 ? 's' : ''}${remainingMonths > 0 ? ` and ${remainingMonths} month${remainingMonths > 1 ? 's' : ''}` : ''}`;
-                                    })()}
+                                  <div>
+                                    <p className="text-sm text-muted-foreground">Tenure</p>
+                                    <p className="text-2xl font-bold">
+                                      {(() => {
+                                        const months = Math.floor(
+                                          (new Date().getTime() -
+                                            new Date(selectedStaff.hire_date).getTime()) /
+                                            (1000 * 60 * 60 * 24 * 30),
+                                        );
+                                        if (months < 1) return "Less than 1 month";
+                                        if (months < 12)
+                                          return `${months} month${months > 1 ? "s" : ""}`;
+                                        const years = Math.floor(months / 12);
+                                        const remainingMonths = months % 12;
+                                        return `${years} year${years > 1 ? "s" : ""}${remainingMonths > 0 ? ` and ${remainingMonths} month${remainingMonths > 1 ? "s" : ""}` : ""}`;
+                                      })()}
                                     </p>
-                                    <p className="text-xs text-muted-foreground mt-1">
-                                      Since {new Date(selectedStaff.hire_date).toLocaleDateString('en-AU', { 
-                                        year: 'numeric', 
-                                        month: 'long', 
-                                        day: 'numeric' 
-                                      })}
+                                    <p className="mt-1 text-xs text-muted-foreground">
+                                      Since{" "}
+                                      {new Date(selectedStaff.hire_date).toLocaleDateString(
+                                        "en-AU",
+                                        {
+                                          year: "numeric",
+                                          month: "long",
+                                          day: "numeric",
+                                        },
+                                      )}
                                     </p>
                                   </div>
                                 </div>
@@ -1068,20 +1149,26 @@ export default function StaffManagementPage() {
                             <Card>
                               <CardContent className="p-4">
                                 <div className="flex items-center gap-4">
-                                  <div className="p-3 rounded-full bg-primary/10">
+                                  <div className="rounded-full bg-primary/10 p-3">
                                     <TrendingUp className="h-6 w-6 text-primary" />
                                   </div>
-                                <div>
-                                  <p className="text-sm text-muted-foreground">Estimated Earnings</p>
-                                  <p className="text-2xl font-bold">
-                                    ${(metrics.total_hours * selectedStaff.hourly_rate).toLocaleString('en-AU', { 
-                                      minimumFractionDigits: 2,
-                                      maximumFractionDigits: 2 
-                                    })}
-                                  </p>
-                                  <p className="text-xs text-muted-foreground mt-1">
-                                    Based on {metrics.total_hours.toFixed(1)} hrs × ${selectedStaff.hourly_rate}/hr
-                                  </p>
+                                  <div>
+                                    <p className="text-sm text-muted-foreground">
+                                      Estimated Earnings
+                                    </p>
+                                    <p className="text-2xl font-bold">
+                                      $
+                                      {(
+                                        metrics.total_hours * selectedStaff.hourly_rate
+                                      ).toLocaleString("en-AU", {
+                                        minimumFractionDigits: 2,
+                                        maximumFractionDigits: 2,
+                                      })}
+                                    </p>
+                                    <p className="mt-1 text-xs text-muted-foreground">
+                                      Based on {metrics.total_hours.toFixed(1)} hrs × $
+                                      {selectedStaff.hourly_rate}/hr
+                                    </p>
                                   </div>
                                 </div>
                               </CardContent>
@@ -1099,10 +1186,7 @@ export default function StaffManagementPage() {
       </Sheet>
 
       {/* Invite Staff Dialog */}
-      <InviteStaffDialog
-        open={isInviteDialogOpen}
-        onOpenChange={setIsInviteDialogOpen}
-      />
+      <InviteStaffDialog open={isInviteDialogOpen} onOpenChange={setIsInviteDialogOpen} />
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={!!staffToDelete} onOpenChange={() => setStaffToDelete(null)}>
@@ -1110,8 +1194,8 @@ export default function StaffManagementPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Staff Member</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to remove {staffToDelete?.full_name}?
-              This will deactivate their account but preserve their job history.
+              Are you sure you want to remove {staffToDelete?.full_name}? This will deactivate their
+              account but preserve their job history.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

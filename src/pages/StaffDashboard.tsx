@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/hooks/useLanguage";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,7 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { LogOut, Calendar, Smile, ChevronDown, Clock, Loader2 } from "lucide-react";
 import { PulcrixLogo } from "@/components/PulcrixLogo";
-import { format, addDays } from "date-fns";
+import { format } from "date-fns";
 import JobDetailView from "@/components/JobDetailView";
 import { NotificationCenter } from "@/components/NotificationCenter";
 import { useJobStatusChange } from "@/hooks/useJobStatusChange";
@@ -16,6 +17,8 @@ import { NextJobCard } from "@/components/staff/NextJobCard";
 import { TodayJobsList } from "@/components/staff/TodayJobsList";
 import { StaffAvailabilityCalendar } from "@/components/staff/StaffAvailabilityCalendar";
 import { LanguageSwitcher } from "@/components/staff/LanguageSwitcher";
+import { queryKeys } from "@/lib/queries/keys";
+import { fetchMyJobs, fetchChecklistProgress } from "@/lib/queries/staff-dashboard";
 
 interface PropertyPhotos {
   id: string;
@@ -73,14 +76,35 @@ export default function StaffDashboard() {
   const { user, signOut } = useAuth();
   const { t } = useLanguage();
   const navigate = useNavigate();
-  const [jobs, setJobs] = useState<Job[]>([]);
+  const queryClient = useQueryClient();
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
-  const [loading, setLoading] = useState(true);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [_propertyPhotos, _setPropertyPhotos] = useState<Record<string, PropertyPhotos[]>>({});
-  const [checklistProgressMap, setChecklistProgressMap] = useState<Record<string, ChecklistProgress>>({});
   const [isSigningOut, setIsSigningOut] = useState(false);
-  const { updatingJobId, advanceStatus } = useJobStatusChange(() => fetchMyJobs());
+
+  const { data: jobsRaw = [], isLoading: loading } = useQuery({
+    queryKey: queryKeys.staffDashboard.myJobs(user?.id ?? ""),
+    queryFn: () => fetchMyJobs(user?.id ?? ""),
+    enabled: !!user?.id,
+  });
+
+  const jobs = jobsRaw as Job[];
+
+  // Get in-progress job IDs for checklist progress query
+  const inProgressJobIds = useMemo(
+    () => jobs.filter((j) => j.status === "in_progress").map((j) => j.id),
+    [jobs],
+  );
+
+  const { data: checklistProgressMap = {} } = useQuery({
+    queryKey: queryKeys.staffDashboard.checklistProgress(user?.id ?? ""),
+    queryFn: () => fetchChecklistProgress(inProgressJobIds),
+    enabled: inProgressJobIds.length > 0,
+  });
+
+  const invalidateMyJobs = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: queryKeys.staffDashboard.myJobs(user?.id ?? "") });
+  }, [queryClient, user?.id]);
+
+  const { updatingJobId, advanceStatus } = useJobStatusChange(invalidateMyJobs);
 
   const handleSignOut = async () => {
     if (isSigningOut) return;
@@ -89,148 +113,43 @@ export default function StaffDashboard() {
   };
 
   useEffect(() => {
-    if (user) {
-      fetchMyJobs();
-      
-      // Subscribe to real-time updates
-      const channel = supabase
-        .channel('my-jobs')
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'jobs',
-            filter: `assigned_staff_id=eq.${user.id}`
-          },
-          () => {
-            fetchMyJobs();
-          }
-        )
-        .subscribe();
+    if (!user?.id) return;
 
-      return () => {
-        supabase.removeChannel(channel);
-      };
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]);
+    const channel = supabase
+      .channel("my-jobs")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "jobs",
+          filter: `assigned_staff_id=eq.${user.id}`,
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: queryKeys.staffDashboard.myJobs(user.id) });
+        },
+      )
+      .subscribe();
 
-  const fetchMyJobs = async () => {
-    const today = format(new Date(), "yyyy-MM-dd");
-    const nextWeek = format(addDays(new Date(), 7), "yyyy-MM-dd");
-    
-    const { data } = await supabase
-      .from("jobs")
-      .select(`
-        id,
-        location,
-        scheduled_date,
-        scheduled_time,
-        status,
-        checklist,
-        start_time,
-        end_time,
-        notes,
-        property_id,
-        clients (name),
-        properties (
-          id,
-          name,
-          address,
-          bedrooms,
-          bathrooms,
-          living_areas,
-          floors,
-          floor_type,
-          has_pets,
-          pet_details,
-          has_pool,
-          has_garage,
-          special_instructions,
-          access_codes,
-          estimated_hours,
-          google_maps_link,
-          suburb,
-          post_code,
-          state
-        )
-      `)
-      .eq("assigned_staff_id", user?.id ?? "")
-      .gte("scheduled_date", today)
-      .lte("scheduled_date", nextWeek)
-      .order("scheduled_date", { ascending: true })
-      .order("scheduled_time", { ascending: true });
-
-    const jobsData = (data as unknown as Job[]) || [];
-    setJobs(jobsData);
-    
-    // Fetch property photos for jobs with properties
-    const propertyIds = jobsData
-      .filter(j => j.property_id)
-      .map(j => j.property_id as string);
-    
-    if (propertyIds.length > 0) {
-      const { data: photos } = await supabase
-        .from("property_photos")
-        .select("id, photo_url, room_area, property_id")
-        .in("property_id", propertyIds);
-
-      if (photos) {
-        const photosMap: Record<string, PropertyPhotos[]> = {};
-        photos.forEach((photo: any) => {
-          if (!photosMap[photo.property_id]) {
-            photosMap[photo.property_id] = [];
-          }
-          photosMap[photo.property_id].push(photo);
-        });
-        _setPropertyPhotos(photosMap);
-      }
-    }
-
-    // Fetch checklist progress for in_progress jobs
-    const inProgressJobIds = jobsData
-      .filter(j => j.status === "in_progress")
-      .map(j => j.id);
-
-    if (inProgressJobIds.length > 0) {
-      const { data: checklistItems } = await supabase
-        .from("checklist_items")
-        .select("job_id, completed_at")
-        .in("job_id", inProgressJobIds);
-
-      if (checklistItems) {
-        const progressMap: Record<string, ChecklistProgress> = {};
-        checklistItems.forEach((item: { job_id: string; completed_at: string | null }) => {
-          if (!progressMap[item.job_id]) {
-            progressMap[item.job_id] = { completed: 0, total: 0 };
-          }
-          progressMap[item.job_id].total++;
-          if (item.completed_at) {
-            progressMap[item.job_id].completed++;
-          }
-        });
-        setChecklistProgressMap(progressMap);
-      }
-    }
-
-    setLoading(false);
-  };
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id, queryClient]);
 
   // Group jobs by date
   const todayStr = format(new Date(), "yyyy-MM-dd");
-  const todayJobs = jobs.filter(j => j.scheduled_date === todayStr);
-  const upcomingJobs = jobs.filter(j => j.scheduled_date !== todayStr);
+  const todayJobs = useMemo(() => jobs.filter((j) => j.scheduled_date === todayStr), [jobs, todayStr]);
+  const upcomingJobs = useMemo(() => jobs.filter((j) => j.scheduled_date !== todayStr), [jobs, todayStr]);
 
   if (selectedJob) {
     return (
-      <JobDetailView 
-        job={selectedJob} 
+      <JobDetailView
+        job={selectedJob}
         onBack={() => {
           setSelectedJob(null);
-          fetchMyJobs();
+          invalidateMyJobs();
         }}
-        onUpdate={fetchMyJobs}
+        onUpdate={invalidateMyJobs}
       />
     );
   }
@@ -238,9 +157,9 @@ export default function StaffDashboard() {
   return (
     <div className="min-h-screen bg-background">
       {/* Mobile Header */}
-      <header className="bg-card border-b border-border sticky top-0 z-10 px-4 py-4 safe-area-inset-top">
+      <header className="safe-area-inset-top sticky top-0 z-10 border-b border-border bg-card px-4 py-4">
         <div className="flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+          <Link to="/" className="flex items-center gap-3 transition-opacity hover:opacity-80">
             <PulcrixLogo />
             <div>
               <h1 className="text-xl font-bold text-foreground">Pulcrix</h1>
@@ -269,8 +188,8 @@ export default function StaffDashboard() {
 
       <main className="px-4 py-6 pb-24">
         {/* Date Header */}
-        <div className="flex items-center gap-3 mb-6 px-2">
-          <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+        <div className="mb-6 flex items-center gap-3 px-2">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
             <Calendar className="h-5 w-5 text-primary" />
           </div>
           <span className="text-xl font-semibold text-foreground">
@@ -280,20 +199,18 @@ export default function StaffDashboard() {
 
         {loading ? (
           <div className="flex flex-col items-center justify-center py-16">
-            <div className="h-12 w-12 rounded-full border-4 border-primary border-t-transparent animate-spin mb-4" />
+            <div className="mb-4 h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
             <p className="text-muted-foreground">{t("loading_jobs")}</p>
           </div>
         ) : todayJobs.length === 0 && upcomingJobs.length === 0 ? (
           /* Empty State - Friendly message */
           <Card className="border-border bg-card">
-            <CardContent className="flex flex-col items-center justify-center py-16 text-center px-6">
-              <div className="h-20 w-20 rounded-full bg-success/10 flex items-center justify-center mb-6">
+            <CardContent className="flex flex-col items-center justify-center px-6 py-16 text-center">
+              <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-success/10">
                 <Smile className="h-10 w-10 text-success" />
               </div>
-              <h3 className="text-2xl font-bold text-foreground mb-3">🎉 {t("day_off")}</h3>
-              <p className="text-muted-foreground text-lg">
-                {t("no_jobs_scheduled")}
-              </p>
+              <h3 className="mb-3 text-2xl font-bold text-foreground">🎉 {t("day_off")}</h3>
+              <p className="text-lg text-muted-foreground">{t("no_jobs_scheduled")}</p>
             </CardContent>
           </Card>
         ) : (
@@ -302,10 +219,13 @@ export default function StaffDashboard() {
             {todayJobs.length > 0 && (
               <>
                 <NextJobCard
-                  job={todayJobs.find(j => j.status !== "completed") || todayJobs[0]}
-                  isUpdating={updatingJobId === (todayJobs.find(j => j.status !== "completed") || todayJobs[0]).id}
+                  job={todayJobs.find((j) => j.status !== "completed") || todayJobs[0]}
+                  isUpdating={
+                    updatingJobId ===
+                    (todayJobs.find((j) => j.status !== "completed") || todayJobs[0]).id
+                  }
                   onStartComplete={() => {
-                    const nextJob = todayJobs.find(j => j.status !== "completed") || todayJobs[0];
+                    const nextJob = todayJobs.find((j) => j.status !== "completed") || todayJobs[0];
                     // Use new workflow for pending jobs, legacy flow for in_progress
                     if (nextJob.status === "pending") {
                       navigate(`/staff/job/${nextJob.id}/start`);
@@ -314,17 +234,23 @@ export default function StaffDashboard() {
                     }
                   }}
                   onViewDetails={() => {
-                    const nextJob = todayJobs.find(j => j.status !== "completed") || todayJobs[0];
+                    const nextJob = todayJobs.find((j) => j.status !== "completed") || todayJobs[0];
                     setSelectedJob(nextJob);
                   }}
-                  checklistProgress={checklistProgressMap[(todayJobs.find(j => j.status !== "completed") || todayJobs[0]).id] || null}
+                  checklistProgress={
+                    checklistProgressMap[
+                      (todayJobs.find((j) => j.status !== "completed") || todayJobs[0]).id
+                    ] || null
+                  }
                 />
 
                 {/* Today's Jobs List */}
                 {todayJobs.length > 1 && (
                   <TodayJobsList
                     jobs={todayJobs}
-                    currentJobId={(todayJobs.find(j => j.status !== "completed") || todayJobs[0]).id}
+                    currentJobId={
+                      (todayJobs.find((j) => j.status !== "completed") || todayJobs[0]).id
+                    }
                     onSelectJob={(job) => setSelectedJob(job)}
                   />
                 )}
@@ -334,25 +260,26 @@ export default function StaffDashboard() {
             {/* Upcoming Jobs (simplified) */}
             {upcomingJobs.length > 0 && (
               <Collapsible>
-                <CollapsibleTrigger className="flex items-center gap-2 text-sm font-semibold text-muted-foreground px-1 mb-2 hover:text-foreground transition-colors">
+                <CollapsibleTrigger className="mb-2 flex items-center gap-2 px-1 text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground">
                   <ChevronDown className="h-4 w-4" />
                   📅 {t("upcoming")} ({upcomingJobs.length})
                 </CollapsibleTrigger>
                 <CollapsibleContent>
                   <div className="space-y-2">
                     {upcomingJobs.slice(0, 3).map((job) => (
-                      <Card 
+                      <Card
                         key={job.id}
-                        className="cursor-pointer active:scale-[0.98] transition-all opacity-70"
+                        className="cursor-pointer opacity-70 transition-all active:scale-[0.98]"
                         onClick={() => setSelectedJob(job)}
                       >
                         <CardContent className="p-3">
                           <div className="flex items-center justify-between">
-                            <div className="flex-1 min-w-0">
-                              <p className="text-xs text-muted-foreground mb-0.5">
-                                {format(new Date(job.scheduled_date), "EEE, MMM d")} • {job.scheduled_time}
+                            <div className="min-w-0 flex-1">
+                              <p className="mb-0.5 text-xs text-muted-foreground">
+                                {format(new Date(job.scheduled_date), "EEE, MMM d")} •{" "}
+                                {job.scheduled_time}
                               </p>
-                              <p className="font-medium text-foreground truncate">
+                              <p className="truncate font-medium text-foreground">
                                 {job.clients?.name || t("unknown_client")}
                               </p>
                             </div>
@@ -361,7 +288,7 @@ export default function StaffDashboard() {
                       </Card>
                     ))}
                     {upcomingJobs.length > 3 && (
-                      <p className="text-xs text-center text-muted-foreground py-2">
+                      <p className="py-2 text-center text-xs text-muted-foreground">
                         +{upcomingJobs.length - 3} more upcoming jobs
                       </p>
                     )}
@@ -372,7 +299,7 @@ export default function StaffDashboard() {
 
             {/* Staff Availability Calendar */}
             <Collapsible className="pt-4">
-              <CollapsibleTrigger className="flex items-center gap-2 text-sm font-semibold text-muted-foreground px-1 mb-2 hover:text-foreground transition-colors w-full">
+              <CollapsibleTrigger className="mb-2 flex w-full items-center gap-2 px-1 text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground">
                 <ChevronDown className="h-4 w-4" />
                 <Clock className="h-4 w-4" />
                 {t("my_availability")}

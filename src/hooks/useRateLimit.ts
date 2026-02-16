@@ -29,9 +29,7 @@ export function useRateLimit() {
       if (data && data.length > 0) {
         const result = data[0];
         const isBlocked = result.is_blocked;
-        const blockExpiresAt = result.block_expires_at
-          ? new Date(result.block_expires_at)
-          : null;
+        const blockExpiresAt = result.block_expires_at ? new Date(result.block_expires_at) : null;
         const remainingMinutes = blockExpiresAt
           ? Math.ceil((blockExpiresAt.getTime() - Date.now()) / 60000)
           : 0;
@@ -77,7 +75,7 @@ export function useRateLimit() {
         // Silently fail - don't block user action
       }
     },
-    [checkRateLimit]
+    [checkRateLimit],
   );
 
   const clearRateLimitState = useCallback(() => {

@@ -1,11 +1,5 @@
 import { useState, useEffect } from "react";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, FileText, FileSpreadsheet, ExternalLink } from "lucide-react";
@@ -102,33 +96,33 @@ export function PriceListReference({ trigger }: PriceListReferenceProps) {
       <SheetTrigger asChild>
         {trigger || (
           <Button variant="outline" size="sm">
-            <FileText className="h-4 w-4 mr-2" />
+            <FileText className="mr-2 h-4 w-4" />
             View Prices
           </Button>
         )}
       </SheetTrigger>
-      <SheetContent className="w-full sm:max-w-2xl overflow-hidden flex flex-col">
+      <SheetContent className="flex w-full flex-col overflow-hidden sm:max-w-2xl">
         <SheetHeader className="flex-shrink-0">
           <SheetTitle>Price List</SheetTitle>
         </SheetHeader>
 
         {loading ? (
-          <div className="flex-1 flex items-center justify-center">
+          <div className="flex flex-1 items-center justify-center">
             <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
           </div>
         ) : priceLists.length === 0 ? (
-          <div className="flex-1 flex flex-col items-center justify-center text-center p-8">
-            <FileText className="h-12 w-12 text-muted-foreground mb-4" />
+          <div className="flex flex-1 flex-col items-center justify-center p-8 text-center">
+            <FileText className="mb-4 h-12 w-12 text-muted-foreground" />
             <h3 className="text-lg font-medium">No price lists available</h3>
-            <p className="text-sm text-muted-foreground mt-2">
+            <p className="mt-2 text-sm text-muted-foreground">
               The administrator must upload a price list first.
             </p>
           </div>
         ) : (
-          <div className="flex-1 flex flex-col overflow-hidden mt-4">
+          <div className="mt-4 flex flex-1 flex-col overflow-hidden">
             {/* List selector if multiple */}
             {priceLists.length > 1 && (
-              <div className="flex-shrink-0 mb-4 flex flex-wrap gap-2">
+              <div className="mb-4 flex flex-shrink-0 flex-wrap gap-2">
                 {priceLists.map((list) => (
                   <Button
                     key={list.id}
@@ -146,14 +140,12 @@ export function PriceListReference({ trigger }: PriceListReferenceProps) {
 
             {/* Selected list viewer */}
             {selectedList && (
-              <div className="flex-1 overflow-hidden flex flex-col">
-                <div className="flex-shrink-0 mb-3 flex items-center justify-between">
+              <div className="flex flex-1 flex-col overflow-hidden">
+                <div className="mb-3 flex flex-shrink-0 items-center justify-between">
                   <div className="flex items-center gap-2">
                     {getFileIcon(selectedList.file_type)}
                     <span className="font-medium">{selectedList.name}</span>
-                    <Badge variant="outline">
-                      {selectedList.file_type.toUpperCase()}
-                    </Badge>
+                    <Badge variant="outline">{selectedList.file_type.toUpperCase()}</Badge>
                   </div>
                   {signedUrl && (
                     <Button
@@ -161,36 +153,31 @@ export function PriceListReference({ trigger }: PriceListReferenceProps) {
                       size="sm"
                       onClick={() => window.open(signedUrl, "_blank")}
                     >
-                      <ExternalLink className="h-4 w-4 mr-1" />
+                      <ExternalLink className="mr-1 h-4 w-4" />
                       Open
                     </Button>
                   )}
                 </div>
 
                 {loadingUrl ? (
-                  <div className="flex-1 flex items-center justify-center">
+                  <div className="flex flex-1 items-center justify-center">
                     <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
                   </div>
                 ) : signedUrl && selectedList.file_type === "pdf" ? (
                   <iframe
                     src={signedUrl}
-                    className="flex-1 w-full rounded-lg border border-border"
+                    className="w-full flex-1 rounded-lg border border-border"
                     title={selectedList.name}
                   />
                 ) : signedUrl ? (
-                  <div className="flex-1 flex flex-col items-center justify-center text-center p-8 border border-border rounded-lg">
+                  <div className="flex flex-1 flex-col items-center justify-center rounded-lg border border-border p-8 text-center">
                     {getFileIcon(selectedList.file_type)}
-                    <h3 className="text-lg font-medium mt-4">
-                      Preview not available
-                    </h3>
-                    <p className="text-sm text-muted-foreground mt-2">
+                    <h3 className="mt-4 text-lg font-medium">Preview not available</h3>
+                    <p className="mt-2 text-sm text-muted-foreground">
                       Open the file in a new tab to view it.
                     </p>
-                    <Button
-                      className="mt-4"
-                      onClick={() => window.open(signedUrl, "_blank")}
-                    >
-                      <ExternalLink className="h-4 w-4 mr-2" />
+                    <Button className="mt-4" onClick={() => window.open(signedUrl, "_blank")}>
+                      <ExternalLink className="mr-2 h-4 w-4" />
                       Open file
                     </Button>
                   </div>

@@ -25,7 +25,7 @@ import {
   CheckCircle2,
   Mail,
   RefreshCw,
-  AlertTriangle
+  AlertTriangle,
 } from "lucide-react";
 
 const CERTIFICATION_OPTIONS = [
@@ -35,7 +35,7 @@ const CERTIFICATION_OPTIONS = [
   "White Card",
   "Chemical Handling Certificate",
   "Food Safety Certificate",
-  "COVID-19 Infection Control"
+  "COVID-19 Infection Control",
 ];
 
 interface InviteStaffDialogProps {
@@ -64,7 +64,7 @@ const initialFormData: FormData = {
   fullName: "",
   phone: "",
   hourlyRate: "",
-  certifications: []
+  certifications: [],
 };
 
 export function InviteStaffDialog({ open, onOpenChange }: InviteStaffDialogProps) {
@@ -99,14 +99,14 @@ export function InviteStaffDialog({ open, onOpenChange }: InviteStaffDialogProps
 
   const createStaffMutation = useMutation({
     mutationFn: async (): Promise<InviteResult> => {
-      const { data, error } = await supabase.functions.invoke('invite-staff', {
+      const { data, error } = await supabase.functions.invoke("invite-staff", {
         body: {
           email: formData.email,
           fullName: formData.fullName,
           phone: formData.phone || null,
           hourlyRate: formData.hourlyRate || null,
-          certifications: formData.certifications
-        }
+          certifications: formData.certifications,
+        },
       });
 
       if (error) throw error;
@@ -119,7 +119,7 @@ export function InviteStaffDialog({ open, onOpenChange }: InviteStaffDialogProps
 
       if (result.emailSent) {
         toast.success(`Invitation sent to ${formData.email}`, {
-          description: "They will receive an email to set up their account"
+          description: "They will receive an email to set up their account",
         });
         handleClose();
       } else {
@@ -127,20 +127,22 @@ export function InviteStaffDialog({ open, onOpenChange }: InviteStaffDialogProps
         setShowEmailWarning(true);
         toast.warning("Staff member created", {
           description: "Email delivery may have failed. You can resend the invitation.",
-          duration: 6000
+          duration: 6000,
         });
       }
     },
     onError: (error: Error) => {
       if (error.message?.includes("already registered")) {
-        setErrors({ email: "This email is already registered. Please use a different email address." });
+        setErrors({
+          email: "This email is already registered. Please use a different email address.",
+        });
         toast.error("Email already exists", {
-          description: "This person already has an account. Try a different email."
+          description: "This person already has an account. Try a different email.",
         });
       } else {
         toast.error(error.message || "Failed to send invitation");
       }
-    }
+    },
   });
 
   // Resend invitation mutation
@@ -148,21 +150,21 @@ export function InviteStaffDialog({ open, onOpenChange }: InviteStaffDialogProps
     mutationFn: async () => {
       // For resending, we can use Supabase's password reset which sends an email
       const { error } = await supabase.auth.resetPasswordForEmail(formData.email, {
-        redirectTo: `${window.location.origin}/signup?invited=true`
+        redirectTo: `${window.location.origin}/signup?invited=true`,
       });
       if (error) throw error;
     },
     onSuccess: () => {
       toast.success("Password reset email sent", {
-        description: `${formData.fullName} can use this link to set up their password`
+        description: `${formData.fullName} can use this link to set up their password`,
       });
       handleClose();
     },
     onError: (error: Error) => {
       toast.error("Failed to resend invitation", {
-        description: error.message
+        description: error.message,
       });
-    }
+    },
   });
 
   const handleClose = () => {
@@ -175,7 +177,10 @@ export function InviteStaffDialog({ open, onOpenChange }: InviteStaffDialogProps
 
   const toggleCertification = (cert: string) => {
     if (formData.certifications.includes(cert)) {
-      setFormData({ ...formData, certifications: formData.certifications.filter(c => c !== cert) });
+      setFormData({
+        ...formData,
+        certifications: formData.certifications.filter((c) => c !== cert),
+      });
     } else {
       setFormData({ ...formData, certifications: [...formData.certifications, cert] });
     }
@@ -193,10 +198,10 @@ export function InviteStaffDialog({ open, onOpenChange }: InviteStaffDialogProps
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-xl">
-            <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
               <UserPlus className="h-5 w-5 text-primary" />
             </div>
             Add New Employee
@@ -208,14 +213,20 @@ export function InviteStaffDialog({ open, onOpenChange }: InviteStaffDialogProps
 
         {/* Email delivery warning */}
         {showEmailWarning && lastInviteResult && !lastInviteResult.emailSent && (
-          <Alert variant="destructive" className="border-amber-500 bg-amber-50 dark:bg-amber-950/20">
+          <Alert
+            variant="destructive"
+            className="border-amber-500 bg-amber-50 dark:bg-amber-950/20"
+          >
             <AlertTriangle className="h-4 w-4 text-amber-600" />
             <AlertDescription className="text-amber-800 dark:text-amber-200">
-              <p className="font-medium">Staff member created, but email may not have been delivered.</p>
-              <p className="text-sm mt-1">
-                {lastInviteResult.emailError || "Please resend the invitation or share login instructions manually."}
+              <p className="font-medium">
+                Staff member created, but email may not have been delivered.
               </p>
-              <div className="flex gap-2 mt-3">
+              <p className="mt-1 text-sm">
+                {lastInviteResult.emailError ||
+                  "Please resend the invitation or share login instructions manually."}
+              </p>
+              <div className="mt-3 flex gap-2">
                 <Button
                   size="sm"
                   variant="outline"
@@ -225,22 +236,17 @@ export function InviteStaffDialog({ open, onOpenChange }: InviteStaffDialogProps
                 >
                   {resendInvitationMutation.isPending ? (
                     <>
-                      <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                      <Loader2 className="mr-1 h-3 w-3 animate-spin" />
                       Sending...
                     </>
                   ) : (
                     <>
-                      <RefreshCw className="h-3 w-3 mr-1" />
+                      <RefreshCw className="mr-1 h-3 w-3" />
                       Resend Invitation
                     </>
                   )}
                 </Button>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={handleClose}
-                  className="text-amber-700"
-                >
+                <Button size="sm" variant="ghost" onClick={handleClose} className="text-amber-700">
                   Close
                 </Button>
               </div>
@@ -267,7 +273,7 @@ export function InviteStaffDialog({ open, onOpenChange }: InviteStaffDialogProps
                 className={`h-12 ${errors.fullName ? "border-destructive" : ""}`}
               />
               {errors.fullName && (
-                <p className="text-xs text-destructive flex items-center gap-1">
+                <p className="flex items-center gap-1 text-xs text-destructive">
                   <AlertCircle className="h-3 w-3" />
                   {errors.fullName}
                 </p>
@@ -294,7 +300,7 @@ export function InviteStaffDialog({ open, onOpenChange }: InviteStaffDialogProps
                 />
               </div>
               {errors.email && (
-                <p className="text-xs text-destructive flex items-center gap-1">
+                <p className="flex items-center gap-1 text-xs text-destructive">
                   <AlertCircle className="h-3 w-3" />
                   {errors.email}
                 </p>
@@ -360,11 +366,11 @@ export function InviteStaffDialog({ open, onOpenChange }: InviteStaffDialogProps
                 <Badge
                   key={cert}
                   variant={formData.certifications.includes(cert) ? "default" : "outline"}
-                  className={`cursor-pointer transition-all hover:scale-105 py-2 px-3 ${showEmailWarning ? "opacity-50 pointer-events-none" : ""}`}
+                  className={`cursor-pointer px-3 py-2 transition-all hover:scale-105 ${showEmailWarning ? "pointer-events-none opacity-50" : ""}`}
                   onClick={() => !showEmailWarning && toggleCertification(cert)}
                 >
                   {formData.certifications.includes(cert) && (
-                    <CheckCircle2 className="h-3 w-3 mr-1" />
+                    <CheckCircle2 className="mr-1 h-3 w-3" />
                   )}
                   {cert}
                 </Badge>
@@ -374,23 +380,23 @@ export function InviteStaffDialog({ open, onOpenChange }: InviteStaffDialogProps
         </div>
 
         {!showEmailWarning && (
-          <DialogFooter className="flex-col sm:flex-row gap-2 mt-4">
-            <Button variant="outline" onClick={handleClose} className="w-full sm:w-auto h-12">
+          <DialogFooter className="mt-4 flex-col gap-2 sm:flex-row">
+            <Button variant="outline" onClick={handleClose} className="h-12 w-full sm:w-auto">
               Cancel
             </Button>
             <Button
               onClick={handleSubmit}
               disabled={createStaffMutation.isPending}
-              className="w-full sm:w-auto h-12"
+              className="h-12 w-full sm:w-auto"
             >
               {createStaffMutation.isPending ? (
                 <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Sending Invite...
                 </>
               ) : (
                 <>
-                  <Mail className="h-4 w-4 mr-2" />
+                  <Mail className="mr-2 h-4 w-4" />
                   Send Invitation
                 </>
               )}

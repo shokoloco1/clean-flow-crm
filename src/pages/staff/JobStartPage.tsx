@@ -5,20 +5,20 @@ import { useLanguage } from "@/hooks/useLanguage";
 import { useJobWorkflow } from "@/hooks/useJobWorkflow";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { 
-  ArrowLeft, 
-  MapPin, 
-  Clock, 
-  Navigation, 
-  Bed, 
-  Bath, 
+import {
+  ArrowLeft,
+  MapPin,
+  Clock,
+  Navigation,
+  Bed,
+  Bath,
   PawPrint,
   Timer,
   AlertCircle,
   Loader2,
   Play,
   FileText,
-  Home
+  Home,
 } from "lucide-react";
 
 interface JobData {
@@ -50,7 +50,7 @@ export default function JobStartPage() {
   const navigate = useNavigate();
   const { t } = useLanguage();
   const { startJob, isStarting } = useJobWorkflow(id || "");
-  
+
   const [job, setJob] = useState<JobData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -66,7 +66,8 @@ export default function JobStartPage() {
       try {
         const { data, error: fetchError } = await supabase
           .from("jobs")
-          .select(`
+          .select(
+            `
             id,
             location,
             scheduled_date,
@@ -88,7 +89,8 @@ export default function JobStartPage() {
               special_instructions,
               google_maps_link
             )
-          `)
+          `,
+          )
           .eq("id", id)
           .single();
 
@@ -117,14 +119,15 @@ export default function JobStartPage() {
 
   const openMaps = () => {
     if (!job) return;
-    const mapsUrl = job.properties?.google_maps_link || 
+    const mapsUrl =
+      job.properties?.google_maps_link ||
       `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(job.location)}`;
     window.open(mapsUrl, "_blank");
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-3">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
           <p className="text-sm text-muted-foreground">{t("loading")}</p>
@@ -135,16 +138,12 @@ export default function JobStartPage() {
 
   if (error || !job) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <div className="flex min-h-screen items-center justify-center bg-background p-4">
         <Card className="w-full max-w-md">
           <CardContent className="pt-6 text-center">
-            <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
-            <p className="text-destructive font-medium">{error || "Job not found"}</p>
-            <Button 
-              variant="outline" 
-              className="mt-4" 
-              onClick={() => navigate("/staff")}
-            >
+            <AlertCircle className="mx-auto mb-4 h-12 w-12 text-destructive" />
+            <p className="font-medium text-destructive">{error || "Job not found"}</p>
+            <Button variant="outline" className="mt-4" onClick={() => navigate("/staff")}>
               {t("go_back")}
             </Button>
           </CardContent>
@@ -162,13 +161,9 @@ export default function JobStartPage() {
   return (
     <div className="min-h-screen bg-background pb-24">
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-background border-b px-4 py-3">
+      <div className="sticky top-0 z-10 border-b bg-background px-4 py-3">
         <div className="flex items-center gap-3">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={() => navigate("/staff")}
-          >
+          <Button variant="ghost" size="icon" onClick={() => navigate("/staff")}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div>
@@ -180,11 +175,11 @@ export default function JobStartPage() {
         </div>
       </div>
 
-      <div className="p-4 space-y-4">
+      <div className="space-y-4 p-4">
         {/* Client Card */}
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-base flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-base">
               <span className="text-xl">👤</span>
               {job.clients?.name || t("unknown_client")}
             </CardTitle>
@@ -193,14 +188,19 @@ export default function JobStartPage() {
             {/* Scheduled Time */}
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Clock className="h-4 w-4" />
-              <span>{t("scheduled_time")}: <strong className="text-foreground">{job.scheduled_time}</strong></span>
+              <span>
+                {t("scheduled_time")}:{" "}
+                <strong className="text-foreground">{job.scheduled_time}</strong>
+              </span>
             </div>
 
             {/* Estimated Duration */}
             {job.properties?.estimated_hours && (
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Timer className="h-4 w-4" />
-                <span>~{job.properties.estimated_hours}h {t("estimated")}</span>
+                <span>
+                  ~{job.properties.estimated_hours}h {t("estimated")}
+                </span>
               </div>
             )}
           </CardContent>
@@ -209,18 +209,14 @@ export default function JobStartPage() {
         {/* Location Card */}
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-base flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-base">
               <MapPin className="h-5 w-5 text-primary" />
               {t("location")}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-foreground mb-3">{job.location}</p>
-            <Button 
-              variant="secondary" 
-              className="w-full gap-2"
-              onClick={openMaps}
-            >
+            <p className="mb-3 text-sm text-foreground">{job.location}</p>
+            <Button variant="secondary" className="w-full gap-2" onClick={openMaps}>
               <Navigation className="h-4 w-4" />
               {t("open_google_maps")}
             </Button>
@@ -231,7 +227,7 @@ export default function JobStartPage() {
         {job.properties && (
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-base flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-base">
                 <Home className="h-5 w-5 text-primary" />
                 {t("property_details")}
               </CardTitle>
@@ -241,13 +237,17 @@ export default function JobStartPage() {
                 {(job.properties.bedrooms ?? 0) > 0 && (
                   <div className="flex items-center gap-1.5">
                     <Bed className="h-4 w-4 text-muted-foreground" />
-                    <span>{job.properties.bedrooms} {t("bedrooms")}</span>
+                    <span>
+                      {job.properties.bedrooms} {t("bedrooms")}
+                    </span>
                   </div>
                 )}
                 {(job.properties.bathrooms ?? 0) > 0 && (
                   <div className="flex items-center gap-1.5">
                     <Bath className="h-4 w-4 text-muted-foreground" />
-                    <span>{job.properties.bathrooms} {t("bathrooms")}</span>
+                    <span>
+                      {job.properties.bathrooms} {t("bathrooms")}
+                    </span>
                   </div>
                 )}
                 {job.properties.has_pets && (
@@ -257,9 +257,9 @@ export default function JobStartPage() {
                   </div>
                 )}
               </div>
-              
+
               {job.properties.pet_details && (
-                <p className="mt-2 text-sm text-warning bg-warning/10 p-2 rounded">
+                <p className="mt-2 rounded bg-warning/10 p-2 text-sm text-warning">
                   🐾 {job.properties.pet_details}
                 </p>
               )}
@@ -271,7 +271,7 @@ export default function JobStartPage() {
         {(job.clients?.notes || job.notes || job.properties?.special_instructions) && (
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-base flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-base">
                 <FileText className="h-5 w-5 text-primary" />
                 {t("special_instructions")}
               </CardTitle>
@@ -279,20 +279,28 @@ export default function JobStartPage() {
             <CardContent className="space-y-3">
               {job.clients?.notes && (
                 <div>
-                  <p className="text-xs text-muted-foreground uppercase mb-1">{t("client_notes")}</p>
-                  <p className="text-sm bg-muted/50 p-2 rounded">{job.clients.notes}</p>
+                  <p className="mb-1 text-xs uppercase text-muted-foreground">
+                    {t("client_notes")}
+                  </p>
+                  <p className="rounded bg-muted/50 p-2 text-sm">{job.clients.notes}</p>
                 </div>
               )}
               {job.notes && (
                 <div>
-                  <p className="text-xs text-muted-foreground uppercase mb-1">{t("service_notes")}</p>
-                  <p className="text-sm bg-muted/50 p-2 rounded">{job.notes}</p>
+                  <p className="mb-1 text-xs uppercase text-muted-foreground">
+                    {t("service_notes")}
+                  </p>
+                  <p className="rounded bg-muted/50 p-2 text-sm">{job.notes}</p>
                 </div>
               )}
               {job.properties?.special_instructions && (
                 <div>
-                  <p className="text-xs text-muted-foreground uppercase mb-1">{t("property_details")}</p>
-                  <p className="text-sm bg-muted/50 p-2 rounded">{job.properties.special_instructions}</p>
+                  <p className="mb-1 text-xs uppercase text-muted-foreground">
+                    {t("property_details")}
+                  </p>
+                  <p className="rounded bg-muted/50 p-2 text-sm">
+                    {job.properties.special_instructions}
+                  </p>
                 </div>
               )}
             </CardContent>
@@ -301,10 +309,10 @@ export default function JobStartPage() {
       </div>
 
       {/* Fixed Bottom Button */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t">
+      <div className="fixed bottom-0 left-0 right-0 border-t bg-background p-4">
         <Button
           size="xl"
-          className="w-full h-16 text-xl font-bold gap-3 bg-success hover:bg-success/90"
+          className="h-16 w-full gap-3 bg-success text-xl font-bold hover:bg-success/90"
           onClick={handleStartJob}
           disabled={isStarting}
         >

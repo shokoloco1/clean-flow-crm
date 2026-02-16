@@ -58,16 +58,16 @@ export default function JobPhotosAfterPage() {
     }
 
     // Group photos by area and type
-    const beforePhotos = photos?.filter(p => p.photo_type === 'before') || [];
-    const afterPhotos = photos?.filter(p => p.photo_type === 'after') || [];
+    const beforePhotos = photos?.filter((p) => p.photo_type === "before") || [];
+    const afterPhotos = photos?.filter((p) => p.photo_type === "after") || [];
 
     // Get unique areas from before photos
-    const areas = [...new Set(beforePhotos.map(p => p.area || 'General'))];
+    const areas = [...new Set(beforePhotos.map((p) => p.area || "General"))];
 
-    const comparisons: AreaComparison[] = areas.map(area => ({
+    const comparisons: AreaComparison[] = areas.map((area) => ({
       area,
-      beforePhoto: beforePhotos.find(p => (p.area || 'General') === area) || null,
-      afterPhoto: afterPhotos.find(p => (p.area || 'General') === area) || null
+      beforePhoto: beforePhotos.find((p) => (p.area || "General") === area) || null,
+      afterPhoto: afterPhotos.find((p) => (p.area || "General") === area) || null,
     }));
 
     setAreaComparisons(comparisons);
@@ -82,16 +82,18 @@ export default function JobPhotosAfterPage() {
 
   const fetchJob = async () => {
     if (!id) return;
-    
+
     const { data, error } = await supabase
       .from("jobs")
-      .select(`
+      .select(
+        `
         id,
         location,
         start_time,
         property:properties(estimated_hours),
         client:clients(name)
-      `)
+      `,
+      )
       .eq("id", id)
       .single();
 
@@ -106,7 +108,7 @@ export default function JobPhotosAfterPage() {
       location: data.location,
       start_time: data.start_time,
       property: Array.isArray(data.property) ? data.property[0] : data.property,
-      client: Array.isArray(data.client) ? data.client[0] : data.client
+      client: Array.isArray(data.client) ? data.client[0] : data.client,
     };
 
     setJob(jobData);
@@ -115,15 +117,15 @@ export default function JobPhotosAfterPage() {
 
   const handlePhotoCapture = async (file: File, area: string) => {
     if (!id) return;
-    
+
     setUploadingArea(area);
-    
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${id}/after-${area.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}.${fileExt}`;
-    
+
+    const fileExt = file.name.split(".").pop();
+    const fileName = `${id}/after-${area.toLowerCase().replace(/\s+/g, "-")}-${Date.now()}.${fileExt}`;
+
     const { data: uploadData, error: uploadError } = await supabase.storage
-      .from('job-evidence')
-      .upload(fileName, file, { cacheControl: '3600' });
+      .from("job-evidence")
+      .upload(fileName, file, { cacheControl: "3600" });
 
     if (uploadError) {
       toast.error(t("failed_upload"));
@@ -131,19 +133,15 @@ export default function JobPhotosAfterPage() {
       return;
     }
 
-    const { data: urlData } = supabase.storage
-      .from('job-evidence')
-      .getPublicUrl(uploadData.path);
+    const { data: urlData } = supabase.storage.from("job-evidence").getPublicUrl(uploadData.path);
 
-    const { error: insertError } = await supabase
-      .from('job_photos')
-      .insert({
-        job_id: id,
-        photo_url: urlData.publicUrl,
-        photo_type: 'after',
-        area: area,
-        taken_at: new Date().toISOString()
-      });
+    const { error: insertError } = await supabase.from("job_photos").insert({
+      job_id: id,
+      photo_url: urlData.publicUrl,
+      photo_type: "after",
+      area: area,
+      taken_at: new Date().toISOString(),
+    });
 
     if (insertError) {
       toast.error(t("failed_upload"));
@@ -151,11 +149,11 @@ export default function JobPhotosAfterPage() {
       toast.success(`${area} - ${t("photo_saved")}`);
       fetchPhotos();
     }
-    
+
     setUploadingArea(null);
   };
 
-  const afterPhotosCount = areaComparisons.filter(c => c.afterPhoto).length;
+  const afterPhotosCount = areaComparisons.filter((c) => c.afterPhoto).length;
   const totalAreas = areaComparisons.length;
   const canFinish = afterPhotosCount >= Math.min(3, totalAreas);
 
@@ -165,7 +163,7 @@ export default function JobPhotosAfterPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
@@ -180,7 +178,7 @@ export default function JobPhotosAfterPage() {
   return (
     <div className="min-h-screen bg-background pb-24">
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-background border-b border-border">
+      <div className="sticky top-0 z-10 border-b border-border bg-background">
         <div className="flex items-center justify-between p-4">
           <Button
             variant="ghost"
@@ -191,10 +189,10 @@ export default function JobPhotosAfterPage() {
             <ArrowLeft className="h-4 w-4" />
             {t("go_back")}
           </Button>
-          
+
           {startedAt && (
-            <JobTimer 
-              startedAt={startedAt} 
+            <JobTimer
+              startedAt={startedAt}
               estimatedHours={job.property?.estimated_hours ?? undefined}
               compact
             />
@@ -203,9 +201,9 @@ export default function JobPhotosAfterPage() {
       </div>
 
       {/* Content */}
-      <div className="p-4 space-y-4">
+      <div className="space-y-4 p-4">
         {/* Title */}
-        <div className="text-center space-y-1">
+        <div className="space-y-1 text-center">
           <h1 className="text-xl font-bold text-foreground">{t("photos_after_title")}</h1>
           <p className="text-sm text-muted-foreground">{t("capture_after_state")}</p>
           <p className="text-sm font-medium text-primary">
@@ -216,24 +214,24 @@ export default function JobPhotosAfterPage() {
         {/* Area Comparisons */}
         <div className="space-y-4">
           {areaComparisons.map((comparison) => (
-            <Card key={comparison.area} className="border-border overflow-hidden">
+            <Card key={comparison.area} className="overflow-hidden border-border">
               <CardContent className="p-4">
-                <h3 className="font-medium text-foreground mb-3">{comparison.area}</h3>
-                
+                <h3 className="mb-3 font-medium text-foreground">{comparison.area}</h3>
+
                 <div className="grid grid-cols-2 gap-3">
                   {/* Before Photo */}
                   <div className="space-y-1">
-                    <p className="text-xs text-muted-foreground text-center">{t("before")}</p>
+                    <p className="text-center text-xs text-muted-foreground">{t("before")}</p>
                     {comparison.beforePhoto ? (
-                      <div className="aspect-square rounded-lg overflow-hidden bg-muted">
-                        <img 
-                          src={comparison.beforePhoto.photo_url} 
+                      <div className="aspect-square overflow-hidden rounded-lg bg-muted">
+                        <img
+                          src={comparison.beforePhoto.photo_url}
                           alt={`${comparison.area} before`}
-                          className="w-full h-full object-cover"
+                          className="h-full w-full object-cover"
                         />
                       </div>
                     ) : (
-                      <div className="aspect-square rounded-lg bg-muted flex items-center justify-center">
+                      <div className="flex aspect-square items-center justify-center rounded-lg bg-muted">
                         <ImageIcon className="h-8 w-8 text-muted-foreground" />
                       </div>
                     )}
@@ -241,15 +239,15 @@ export default function JobPhotosAfterPage() {
 
                   {/* After Photo */}
                   <div className="space-y-1">
-                    <p className="text-xs text-muted-foreground text-center">{t("after")}</p>
+                    <p className="text-center text-xs text-muted-foreground">{t("after")}</p>
                     {comparison.afterPhoto ? (
-                      <div className="aspect-square rounded-lg overflow-hidden bg-muted relative">
-                        <img 
-                          src={comparison.afterPhoto.photo_url} 
+                      <div className="relative aspect-square overflow-hidden rounded-lg bg-muted">
+                        <img
+                          src={comparison.afterPhoto.photo_url}
                           alt={`${comparison.area} after`}
-                          className="w-full h-full object-cover"
+                          className="h-full w-full object-cover"
                         />
-                        <div className="absolute top-2 right-2 bg-success text-success-foreground rounded-full p-1">
+                        <div className="absolute right-2 top-2 rounded-full bg-success p-1 text-success-foreground">
                           <CheckCircle className="h-4 w-4" />
                         </div>
                       </div>
@@ -284,7 +282,7 @@ export default function JobPhotosAfterPage() {
         {areaComparisons.length === 0 && (
           <Card className="border-border">
             <CardContent className="p-8 text-center">
-              <ImageIcon className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+              <ImageIcon className="mx-auto mb-3 h-12 w-12 text-muted-foreground" />
               <p className="text-muted-foreground">{t("no_photos_yet")}</p>
             </CardContent>
           </Card>
@@ -292,20 +290,18 @@ export default function JobPhotosAfterPage() {
       </div>
 
       {/* Bottom Action */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t border-border">
+      <div className="fixed bottom-0 left-0 right-0 border-t border-border bg-background p-4">
         <Button
           onClick={handleFinish}
           disabled={!canFinish}
-          className="w-full h-14 text-lg font-semibold gap-2"
+          className="h-14 w-full gap-2 text-lg font-semibold"
           size="lg"
         >
           <CheckCircle className="h-5 w-5" />
           {t("finish_job")}
         </Button>
         {!canFinish && (
-          <p className="text-center text-sm text-muted-foreground mt-2">
-            {t("minimum_photos")}
-          </p>
+          <p className="mt-2 text-center text-sm text-muted-foreground">{t("minimum_photos")}</p>
         )}
       </div>
     </div>

@@ -79,11 +79,11 @@ export function TrialBanner({ className }: TrialBannerProps) {
   return (
     <div
       className={cn(
-        "fixed top-0 left-0 right-0 z-[100] py-2 px-4 transition-colors",
+        "fixed left-0 right-0 top-0 z-[100] px-4 py-2 transition-colors",
         isUrgent
           ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white"
           : "bg-gradient-to-r from-primary to-primary/80 text-primary-foreground",
-        className
+        className,
       )}
     >
       <div className="container mx-auto flex items-center justify-between">
@@ -100,13 +100,13 @@ export function TrialBanner({ className }: TrialBannerProps) {
               </>
             ) : (
               <>
-                <span className="font-bold">{trialInfo.daysRemaining} days</span> left in
-                your free trial
+                <span className="font-bold">{trialInfo.daysRemaining} days</span> left in your free
+                trial
               </>
             )}
           </span>
           {trialInfo.plan && (
-            <span className="text-xs opacity-80 hidden sm:inline">
+            <span className="hidden text-xs opacity-80 sm:inline">
               ({trialInfo.plan.charAt(0).toUpperCase() + trialInfo.plan.slice(1)} plan)
             </span>
           )}
@@ -119,17 +119,15 @@ export function TrialBanner({ className }: TrialBannerProps) {
             onClick={() => navigate("/admin/settings")}
             className={cn(
               "h-7 text-xs",
-              isUrgent
-                ? "bg-white text-orange-600 hover:bg-white/90"
-                : ""
+              isUrgent ? "bg-white text-orange-600 hover:bg-white/90" : "",
             )}
           >
-            <CreditCard className="h-3 w-3 mr-1" />
+            <CreditCard className="mr-1 h-3 w-3" />
             Manage Subscription
           </Button>
           <button
             onClick={handleDismiss}
-            className="p-1 rounded-full hover:bg-white/20 transition-colors"
+            className="rounded-full p-1 transition-colors hover:bg-white/20"
             aria-label="Dismiss banner"
           >
             <X className="h-4 w-4" />
@@ -184,11 +182,13 @@ export function TrialBannerCompact({ className }: TrialBannerProps) {
     <div
       className={cn(
         "rounded-lg p-3 text-center",
-        isUrgent ? "bg-amber-500/10 border border-amber-500/20" : "bg-primary/10 border border-primary/20",
-        className
+        isUrgent
+          ? "border border-amber-500/20 bg-amber-500/10"
+          : "border border-primary/20 bg-primary/10",
+        className,
       )}
     >
-      <div className="flex items-center justify-center gap-2 mb-2">
+      <div className="mb-2 flex items-center justify-center gap-2">
         <Clock className={cn("h-4 w-4", isUrgent ? "text-amber-500" : "text-primary")} />
         <span className={cn("text-sm font-medium", isUrgent ? "text-amber-600" : "text-primary")}>
           {trialInfo.daysRemaining === 1
@@ -200,7 +200,7 @@ export function TrialBannerCompact({ className }: TrialBannerProps) {
         size="sm"
         variant="outline"
         onClick={() => navigate("/admin/settings")}
-        className="w-full text-xs h-8"
+        className="h-8 w-full text-xs"
       >
         Manage Subscription
       </Button>

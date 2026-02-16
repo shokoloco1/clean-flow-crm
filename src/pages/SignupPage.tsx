@@ -8,7 +8,17 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "sonner";
-import { ArrowLeft, ArrowRight, Check, Eye, EyeOff, Loader2, Users, CheckCircle, Chrome } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Check,
+  Eye,
+  EyeOff,
+  Loader2,
+  Users,
+  CheckCircle,
+  Chrome,
+} from "lucide-react";
 import { lovable } from "@/integrations/lovable";
 import { PulcrixLogo } from "@/components/PulcrixLogo";
 import { signupSchema, validatePassword } from "@/lib/passwordSecurity";
@@ -55,13 +65,15 @@ const SignupPage = () => {
 
   // Ref for synchronous access - critical for avoiding race conditions
   // Use IIFE to immediately evaluate the sessionStorage check
-  const isSigningUpRef = useRef<boolean>((() => {
-    try {
-      return sessionStorage.getItem(SIGNUP_FLOW_KEY) === "true";
-    } catch {
-      return false;
-    }
-  })());
+  const isSigningUpRef = useRef<boolean>(
+    (() => {
+      try {
+        return sessionStorage.getItem(SIGNUP_FLOW_KEY) === "true";
+      } catch {
+        return false;
+      }
+    })(),
+  );
 
   // Initialize ref from sessionStorage on mount
   useEffect(() => {
@@ -73,12 +85,16 @@ const SignupPage = () => {
   // Persist signup flag to ALL layers (ref + sessionStorage + state)
   const markSignupStarted = () => {
     isSigningUpRef.current = true;
-    try { sessionStorage.setItem(SIGNUP_FLOW_KEY, "true"); } catch {}
+    try {
+      sessionStorage.setItem(SIGNUP_FLOW_KEY, "true");
+    } catch {}
     setIsSigningUp(true);
   };
   const clearSignupFlag = () => {
     isSigningUpRef.current = false;
-    try { sessionStorage.removeItem(SIGNUP_FLOW_KEY); } catch {}
+    try {
+      sessionStorage.removeItem(SIGNUP_FLOW_KEY);
+    } catch {}
     setIsSigningUp(false);
   };
 
@@ -93,7 +109,7 @@ const SignupPage = () => {
   const urlPlan = searchParams.get("plan") as PlanType | null;
   const urlBilling = searchParams.get("billing");
   const [selectedPlan, setSelectedPlan] = useState<PlanType | null>(
-    urlPlan && ["starter", "professional", "business"].includes(urlPlan) ? urlPlan : null
+    urlPlan && ["starter", "professional", "business"].includes(urlPlan) ? urlPlan : null,
   );
   const [isAnnual, setIsAnnual] = useState(urlBilling === "annual");
 
@@ -119,12 +135,16 @@ const SignupPage = () => {
       // 3. React state (for completeness)
       // 4. sessionStorage directly (ground truth)
       const sessionStorageFlag = (() => {
-        try { return sessionStorage.getItem(SIGNUP_FLOW_KEY) === "true"; }
-        catch { return false; }
+        try {
+          return sessionStorage.getItem(SIGNUP_FLOW_KEY) === "true";
+        } catch {
+          return false;
+        }
       })();
       const isSignupFromUrl = searchParams.get("flow") === "signup";
 
-      const inSignupFlow = isSignupFromUrl || isSigningUpRef.current || isSigningUp || sessionStorageFlag;
+      const inSignupFlow =
+        isSignupFromUrl || isSigningUpRef.current || isSigningUp || sessionStorageFlag;
 
       if (inSignupFlow) {
         // User is actively signing up — advance to next step, DO NOT redirect
@@ -181,7 +201,17 @@ const SignupPage = () => {
           }
         });
     }
-  }, [user, session, authLoading, navigate, currentStep, isInvitedStaff, role, isSigningUp, searchParams]);
+  }, [
+    user,
+    session,
+    authLoading,
+    navigate,
+    currentStep,
+    isInvitedStaff,
+    role,
+    isSigningUp,
+    searchParams,
+  ]);
 
   const handleAccountSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -268,9 +298,7 @@ const SignupPage = () => {
     setIsSubmitting(true);
 
     try {
-      const priceId = isAnnual
-        ? PRICE_IDS[selectedPlan].annual
-        : PRICE_IDS[selectedPlan].monthly;
+      const priceId = isAnnual ? PRICE_IDS[selectedPlan].annual : PRICE_IDS[selectedPlan].monthly;
 
       const { data, error } = await supabase.functions.invoke("create-checkout", {
         body: { priceId, isNewSignup: true },
@@ -331,7 +359,7 @@ const SignupPage = () => {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-3">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
           <span className="text-sm text-muted-foreground">Loading...</span>
@@ -343,16 +371,16 @@ const SignupPage = () => {
   // Invited Staff - Simplified Flow
   if (isInvitedStaff) {
     return (
-      <div className="min-h-screen flex flex-col bg-gradient-to-br from-background via-background to-primary/5">
+      <div className="flex min-h-screen flex-col bg-gradient-to-br from-background via-background to-primary/5">
         {/* Header */}
         <header className="border-b border-border bg-background/80 backdrop-blur-sm">
-          <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-            <Link to="/" className="hover:opacity-80 transition-opacity">
+          <div className="container mx-auto flex items-center justify-between px-4 py-4">
+            <Link to="/" className="transition-opacity hover:opacity-80">
               <PulcrixLogo variant="full" size="md" />
             </Link>
 
             <div className="flex items-center gap-4">
-              <span className="text-sm text-muted-foreground hidden sm:block">
+              <span className="hidden text-sm text-muted-foreground sm:block">
                 Already have an account?
               </span>
               <Button variant="outline" size="sm" asChild>
@@ -362,10 +390,10 @@ const SignupPage = () => {
           </div>
         </header>
 
-        <main className="flex-1 container mx-auto px-4 py-8 flex items-center justify-center">
-          <Card className="max-w-md w-full border-border shadow-xl">
+        <main className="container mx-auto flex flex-1 items-center justify-center px-4 py-8">
+          <Card className="w-full max-w-md border-border shadow-xl">
             <CardHeader className="text-center">
-              <div className="mx-auto h-16 w-16 rounded-full bg-secondary/10 flex items-center justify-center mb-4">
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-secondary/10">
                 <Users className="h-8 w-8 text-secondary" />
               </div>
               <CardTitle className="text-2xl">Welcome to the Team!</CardTitle>
@@ -377,7 +405,8 @@ const SignupPage = () => {
               <Alert className="mb-6 border-primary/20 bg-primary/5">
                 <CheckCircle className="h-4 w-4 text-primary" />
                 <AlertDescription className="text-sm">
-                  Your admin has already set up your profile. Just create a password to access your account.
+                  Your admin has already set up your profile. Just create a password to access your
+                  account.
                 </AlertDescription>
               </Alert>
 
@@ -396,9 +425,7 @@ const SignupPage = () => {
                     className={formErrors.name ? "border-destructive" : ""}
                     required
                   />
-                  {formErrors.name && (
-                    <p className="text-xs text-destructive">{formErrors.name}</p>
-                  )}
+                  {formErrors.name && <p className="text-xs text-destructive">{formErrors.name}</p>}
                 </div>
 
                 <div className="space-y-2">
@@ -435,21 +462,15 @@ const SignupPage = () => {
                         setPassword(e.target.value);
                         setFormErrors((prev) => ({ ...prev, password: "" }));
                       }}
-                      className={
-                        formErrors.password ? "border-destructive pr-10" : "pr-10"
-                      }
+                      className={formErrors.password ? "border-destructive pr-10" : "pr-10"}
                       required
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
                     >
-                      {showPassword ? (
-                        <EyeOff className="h-4 w-4" />
-                      ) : (
-                        <Eye className="h-4 w-4" />
-                      )}
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </button>
                   </div>
                   <PasswordStrengthIndicator password={password} />
@@ -460,10 +481,8 @@ const SignupPage = () => {
 
                 <Button
                   type="submit"
-                  className="w-full h-12 text-base group"
-                  disabled={
-                    isSubmitting || validatePassword(password).strength === "weak"
-                  }
+                  className="group h-12 w-full text-base"
+                  disabled={isSubmitting || validatePassword(password).strength === "weak"}
                 >
                   {isSubmitting ? (
                     <>
@@ -473,7 +492,7 @@ const SignupPage = () => {
                   ) : (
                     <>
                       Complete Setup
-                      <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                      <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
                     </>
                   )}
                 </Button>
@@ -493,16 +512,16 @@ const SignupPage = () => {
 
   // Owner/Admin - Full Multi-Step Flow
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-background via-background to-primary/5">
+    <div className="flex min-h-screen flex-col bg-gradient-to-br from-background via-background to-primary/5">
       {/* Header */}
       <header className="border-b border-border bg-background/80 backdrop-blur-sm">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link to="/" className="hover:opacity-80 transition-opacity">
+        <div className="container mx-auto flex items-center justify-between px-4 py-4">
+          <Link to="/" className="transition-opacity hover:opacity-80">
             <PulcrixLogo variant="full" size="md" />
           </Link>
 
           <div className="flex items-center gap-4">
-            <span className="text-sm text-muted-foreground hidden sm:block">
+            <span className="hidden text-sm text-muted-foreground sm:block">
               Already have an account?
             </span>
             <Button variant="outline" size="sm" asChild>
@@ -512,41 +531,35 @@ const SignupPage = () => {
         </div>
       </header>
 
-      <main className="flex-1 container mx-auto px-4 py-8">
+      <main className="container mx-auto flex-1 px-4 py-8">
         {/* Progress Steps */}
-        <div className="max-w-2xl mx-auto mb-8">
+        <div className="mx-auto mb-8 max-w-2xl">
           <div className="flex items-center justify-between">
             {steps.map((step, idx) => (
-              <div key={step.id} className="flex-1 flex items-center">
-                <div className="flex flex-col items-center flex-1">
+              <div key={step.id} className="flex flex-1 items-center">
+                <div className="flex flex-1 flex-col items-center">
                   <div
                     className={cn(
-                      "h-10 w-10 rounded-full flex items-center justify-center font-medium text-sm transition-colors",
+                      "flex h-10 w-10 items-center justify-center rounded-full text-sm font-medium transition-colors",
                       idx < currentStepIndex
                         ? "bg-primary text-primary-foreground"
                         : idx === currentStepIndex
-                        ? "bg-primary text-primary-foreground ring-4 ring-primary/20"
-                        : "bg-muted text-muted-foreground"
+                          ? "bg-primary text-primary-foreground ring-4 ring-primary/20"
+                          : "bg-muted text-muted-foreground",
                     )}
                   >
-                    {idx < currentStepIndex ? (
-                      <Check className="h-5 w-5" />
-                    ) : (
-                      idx + 1
-                    )}
+                    {idx < currentStepIndex ? <Check className="h-5 w-5" /> : idx + 1}
                   </div>
                   <div className="mt-2 text-center">
                     <p
                       className={cn(
                         "text-sm font-medium",
-                        idx <= currentStepIndex
-                          ? "text-foreground"
-                          : "text-muted-foreground"
+                        idx <= currentStepIndex ? "text-foreground" : "text-muted-foreground",
                       )}
                     >
                       {step.title}
                     </p>
-                    <p className="text-xs text-muted-foreground hidden sm:block">
+                    <p className="hidden text-xs text-muted-foreground sm:block">
                       {step.description}
                     </p>
                   </div>
@@ -554,8 +567,8 @@ const SignupPage = () => {
                 {idx < steps.length - 1 && (
                   <div
                     className={cn(
-                      "h-0.5 flex-1 mx-2 mt-[-20px]",
-                      idx < currentStepIndex ? "bg-primary" : "bg-muted"
+                      "mx-2 mt-[-20px] h-0.5 flex-1",
+                      idx < currentStepIndex ? "bg-primary" : "bg-muted",
                     )}
                   />
                 )}
@@ -565,15 +578,13 @@ const SignupPage = () => {
         </div>
 
         {/* Step Content */}
-        <div className="max-w-4xl mx-auto">
+        <div className="mx-auto max-w-4xl">
           {/* Step 1: Account */}
           {currentStep === "account" && (
-            <Card className="max-w-md mx-auto border-border shadow-xl">
+            <Card className="mx-auto max-w-md border-border shadow-xl">
               <CardHeader className="text-center">
                 <CardTitle className="text-2xl">Create Your Account</CardTitle>
-                <CardDescription>
-                  Start your 14-day free trial of Pulcrix
-                </CardDescription>
+                <CardDescription>Start your 14-day free trial of Pulcrix</CardDescription>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleAccountSubmit} className="space-y-4">
@@ -638,15 +649,13 @@ const SignupPage = () => {
                           setPassword(e.target.value);
                           setFormErrors((prev) => ({ ...prev, password: "" }));
                         }}
-                        className={
-                          formErrors.password ? "border-destructive pr-10" : "pr-10"
-                        }
+                        className={formErrors.password ? "border-destructive pr-10" : "pr-10"}
                         required
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
                       >
                         {showPassword ? (
                           <EyeOff className="h-4 w-4" />
@@ -663,10 +672,8 @@ const SignupPage = () => {
 
                   <Button
                     type="submit"
-                    className="w-full h-12 text-base group"
-                    disabled={
-                      isSubmitting || validatePassword(password).strength === "weak"
-                    }
+                    className="group h-12 w-full text-base"
+                    disabled={isSubmitting || validatePassword(password).strength === "weak"}
                   >
                     {isSubmitting ? (
                       <>
@@ -676,7 +683,7 @@ const SignupPage = () => {
                     ) : (
                       <>
                         Continue
-                        <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                        <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
                       </>
                     )}
                   </Button>
@@ -696,7 +703,7 @@ const SignupPage = () => {
                 <Button
                   type="button"
                   variant="outline"
-                  className="w-full h-12"
+                  className="h-12 w-full"
                   onClick={async () => {
                     setIsSubmitting(true);
                     // Clear stale cache and mark signup in progress BEFORE the OAuth redirect
@@ -727,11 +734,9 @@ const SignupPage = () => {
           {/* Step 2: Plan Selection */}
           {currentStep === "plan" && (
             <div className="space-y-6">
-              <div className="text-center mb-8">
+              <div className="mb-8 text-center">
                 <h2 className="text-2xl font-bold">Choose Your Plan</h2>
-                <p className="text-muted-foreground mt-1">
-                  All plans include a 14-day free trial
-                </p>
+                <p className="mt-1 text-muted-foreground">All plans include a 14-day free trial</p>
               </div>
 
               <PlanSelection
@@ -741,7 +746,7 @@ const SignupPage = () => {
                 onToggleAnnual={setIsAnnual}
               />
 
-              <div className="flex items-center justify-between max-w-md mx-auto pt-4">
+              <div className="mx-auto flex max-w-md items-center justify-between pt-4">
                 <Button variant="ghost" onClick={goBack}>
                   <ArrowLeft className="mr-2 h-4 w-4" />
                   Back
@@ -752,7 +757,7 @@ const SignupPage = () => {
                   className="group"
                 >
                   Continue
-                  <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                  <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </Button>
               </div>
             </div>
@@ -761,9 +766,9 @@ const SignupPage = () => {
           {/* Step 3: Payment */}
           {currentStep === "payment" && selectedPlan && (
             <div className="space-y-6">
-              <div className="text-center mb-8">
+              <div className="mb-8 text-center">
                 <h2 className="text-2xl font-bold">Start Your Free Trial</h2>
-                <p className="text-muted-foreground mt-1">
+                <p className="mt-1 text-muted-foreground">
                   Add payment details to begin your 14-day trial
                 </p>
               </div>

@@ -42,7 +42,7 @@ export function useJobWorkflow(jobId: string) {
           enableHighAccuracy: true,
           timeout: 10000,
           maximumAge: 0,
-        }
+        },
       );
     });
   }, [toast, t]);
@@ -64,10 +64,7 @@ export function useJobWorkflow(jobId: string) {
         updateData.checkin_lng = location.lng;
       }
 
-      const { error } = await supabase
-        .from("jobs")
-        .update(updateData)
-        .eq("id", jobId);
+      const { error } = await supabase.from("jobs").update(updateData).eq("id", jobId);
 
       if (error) {
         throw error;
@@ -113,9 +110,7 @@ export function useJobWorkflow(jobId: string) {
         // Calculate duration in minutes
         const startTime = new Date(job.start_time);
         const endTime = new Date();
-        const durationMinutes = Math.round(
-          (endTime.getTime() - startTime.getTime()) / 60000
-        );
+        const durationMinutes = Math.round((endTime.getTime() - startTime.getTime()) / 60000);
 
         // Update job
         const updateData: Record<string, unknown> = {
@@ -137,10 +132,7 @@ export function useJobWorkflow(jobId: string) {
           updateData.issue_reported = issueReported;
         }
 
-        const { error } = await supabase
-          .from("jobs")
-          .update(updateData)
-          .eq("id", jobId);
+        const { error } = await supabase.from("jobs").update(updateData).eq("id", jobId);
 
         if (error) {
           throw error;
@@ -164,7 +156,7 @@ export function useJobWorkflow(jobId: string) {
         setIsCompleting(false);
       }
     },
-    [jobId, captureGps, toast, t]
+    [jobId, captureGps, toast, t],
   );
 
   return {

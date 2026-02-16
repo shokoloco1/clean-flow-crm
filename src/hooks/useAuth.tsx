@@ -1,4 +1,12 @@
-import { createContext, useContext, useEffect, useState, useCallback, useMemo, ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+  useMemo,
+  ReactNode,
+} from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { logger } from "@/lib/logger";
@@ -12,7 +20,12 @@ interface AuthContextType {
   loading: boolean;
   emailVerified: boolean;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
-  signUp: (email: string, password: string, fullName: string, role: AppRole) => Promise<{ error: Error | null }>;
+  signUp: (
+    email: string,
+    password: string,
+    fullName: string,
+    role: AppRole,
+  ) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   refreshRole: () => Promise<void>;
   resendVerificationEmail: () => Promise<{ error: Error | null }>;
@@ -79,7 +92,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return cached;
       }
     }
-    
+
     try {
       const { data, error } = await supabase.rpc("get_user_role", { _user_id: userId });
       if (error) {
@@ -101,21 +114,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const initializeAuth = async () => {
       try {
-        const { data: { session: existingSession } } = await supabase.auth.getSession();
-        
+        const {
+          data: { session: existingSession },
+        } = await supabase.auth.getSession();
+
         if (!mounted) return;
 
         if (existingSession?.user) {
           setSession(existingSession);
           setUser(existingSession.user);
-          
+
           // Try cached role first for instant display
           const cachedRole = getCachedRole(existingSession.user.id);
           if (cachedRole) {
             setRole(cachedRole);
             setLoading(false);
             // Validate in background (non-blocking)
-            fetchUserRole(existingSession.user.id, false).then(freshRole => {
+            fetchUserRole(existingSession.user.id, false).then((freshRole) => {
               if (mounted && freshRole && freshRole !== cachedRole) {
                 setRole(freshRole);
               }
@@ -142,33 +157,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     // Set up auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, newSession) => {
-        if (!mounted) return;
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, newSession) => {
+      if (!mounted) return;
 
-        if (event === "SIGNED_IN" && newSession?.user) {
-          setSession(newSession);
-          setUser(newSession.user);
-          // Use setTimeout to avoid blocking
-          setTimeout(async () => {
-            const userRole = await fetchUserRole(newSession.user.id);
-            if (mounted) {
-              setRole(userRole);
-              setLoading(false);
-            }
-          }, 0);
-        } else if (event === "SIGNED_OUT") {
-          clearCachedRole();
-          setSession(null);
-          setUser(null);
-          setRole(null);
-          setLoading(false);
-        } else if (event === "TOKEN_REFRESHED" && newSession) {
-          setSession(newSession);
-          setUser(newSession.user);
-        }
+      if (event === "SIGNED_IN" && newSession?.user) {
+        setSession(newSession);
+        setUser(newSession.user);
+        // Use setTimeout to avoid blocking
+        setTimeout(async () => {
+          const userRole = await fetchUserRole(newSession.user.id);
+          if (mounted) {
+            setRole(userRole);
+            setLoading(false);
+          }
+        }, 0);
+      } else if (event === "SIGNED_OUT") {
+        clearCachedRole();
+        setSession(null);
+        setUser(null);
+        setRole(null);
+        setLoading(false);
+      } else if (event === "TOKEN_REFRESHED" && newSession) {
+        setSession(newSession);
+        setUser(newSession.user);
       }
-    );
+    });
 
     initializeAuth();
 
@@ -187,23 +202,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { error };
   }, []);
 
-  const signUp = useCallback(async (email: string, password: string, fullName: string, intendedRole?: AppRole) => {
-    const redirectUrl = `${window.location.origin}/`;
+  const signUp = useCallback(
+    async (email: string, password: string, fullName: string, intendedRole?: AppRole) => {
+      const redirectUrl = `${window.location.origin}/`;
 
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: redirectUrl,
-        data: {
-          full_name: fullName,
-          intended_role: intendedRole || "staff",
-        }
-      }
-    });
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: redirectUrl,
+          data: {
+            full_name: fullName,
+            intended_role: intendedRole || "staff",
+          },
+        },
+      });
 
-    return { error };
-  }, []);
+      return { error };
+    },
+    [],
+  );
 
   const signOut = useCallback(async () => {
     try {
@@ -250,11 +268,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!user?.email) return { error: new Error("No email found") };
 
     const { error } = await supabase.auth.resend({
-      type: 'signup',
+      type: "signup",
       email: user.email,
       options: {
-        emailRedirectTo: `${window.location.origin}/auth`
-      }
+        emailRedirectTo: `${window.location.origin}/auth`,
+      },
     });
 
     return { error };
@@ -267,24 +285,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return !!user.email_confirmed_at;
   }, [user]);
 
-  const value = useMemo(() => ({
-    user,
-    session,
-    role,
-    loading,
-    emailVerified,
-    signIn,
-    signUp,
-    signOut,
-    refreshRole,
-    resendVerificationEmail
-  }), [user, session, role, loading, emailVerified, signIn, signUp, signOut, refreshRole, resendVerificationEmail]);
-
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
+  const value = useMemo(
+    () => ({
+      user,
+      session,
+      role,
+      loading,
+      emailVerified,
+      signIn,
+      signUp,
+      signOut,
+      refreshRole,
+      resendVerificationEmail,
+    }),
+    [
+      user,
+      session,
+      role,
+      loading,
+      emailVerified,
+      signIn,
+      signUp,
+      signOut,
+      refreshRole,
+      resendVerificationEmail,
+    ],
   );
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {

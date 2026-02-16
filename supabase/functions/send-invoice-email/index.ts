@@ -4,10 +4,18 @@ import { Resend } from "https://esm.sh/resend@2.0.0";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+function getCorsHeaders(req: Request) {
+  const origin = req.headers.get("origin") ?? "";
+  const isAllowed =
+    origin === "https://pulcrix.com" ||
+    origin === "http://localhost:8080" ||
+    origin === "http://localhost:3000" ||
+    origin.endsWith(".lovable.app");
+  return {
+    "Access-Control-Allow-Origin": isAllowed ? origin : "https://pulcrix.com",
+    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  };
+}
 
 interface InvoiceEmailRequest {
   to: string;
@@ -20,6 +28,7 @@ interface InvoiceEmailRequest {
 }
 
 const handler = async (req: Request): Promise<Response> => {
+  const corsHeaders = getCorsHeaders(req);
   console.log("[send-invoice-email] Received request");
 
   // Handle CORS preflight

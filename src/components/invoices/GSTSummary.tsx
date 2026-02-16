@@ -22,12 +22,10 @@ export function GSTSummary({ subtotal, showExGST = true, className = "" }: GSTSu
         <span>{formatAUD(subtotal)}</span>
       </div>
       <div className="flex justify-between text-sm">
-        <span className="text-muted-foreground">
-          GST ({GST_RATE * 100}%)
-        </span>
+        <span className="text-muted-foreground">GST ({GST_RATE * 100}%)</span>
         <span>{formatAUD(gst)}</span>
       </div>
-      <div className="flex justify-between text-lg font-bold border-t pt-2">
+      <div className="flex justify-between border-t pt-2 text-lg font-bold">
         <span>
           Total <span className="text-sm font-normal text-muted-foreground">(Inc. GST)</span>
         </span>
@@ -40,12 +38,12 @@ export function GSTSummary({ subtotal, showExGST = true, className = "" }: GSTSu
 /**
  * Compact GST display for inline use
  */
-export function GSTBadge({ 
-  amount, 
+export function GSTBadge({
+  amount,
   isIncGST = true,
-  className = "" 
-}: { 
-  amount: number; 
+  className = "",
+}: {
+  amount: number;
   isIncGST?: boolean;
   className?: string;
 }) {

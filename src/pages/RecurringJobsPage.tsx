@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useState, useCallback, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -35,9 +36,24 @@ import {
   RefreshCw,
   Repeat,
   CalendarSync,
+  Search,
 } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
+import { queryKeys } from "@/lib/queries/keys";
+import { fetchRecurringSchedules, fetchRecurringSchedulesPaginated } from "@/lib/queries/recurring";
+import { fetchClientsDropdown, fetchPropertiesDropdown, fetchStaffDropdown } from "@/lib/queries/reference";
+import { DEFAULT_PAGE_SIZE } from "@/lib/queries/pagination";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+  PaginationEllipsis,
+} from "@/components/ui/pagination";
 
 interface RecurringSchedule {
   id: string;
@@ -97,14 +113,12 @@ const FREQUENCY_OPTIONS = [
 
 export default function RecurringJobsPage() {
   const navigate = useNavigate();
-  const [schedules, setSchedules] = useState<RecurringSchedule[]>([]);
-  const [clients, setClients] = useState<Client[]>([]);
-  const [properties, setProperties] = useState<Property[]>([]);
-  const [staffList, setStaffList] = useState<Staff[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingSchedule, setEditingSchedule] = useState<RecurringSchedule | null>(null);
-  const [generating, setGenerating] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [page, setPage] = useState(1);
+  const debouncedSearch = useDebouncedValue(searchTerm, 300);
 
   const [formData, setFormData] = useState({
     client_id: "",
@@ -118,46 +132,41 @@ export default function RecurringJobsPage() {
     day_of_month: 1,
   });
 
+  // Reset to page 1 when search changes
   useEffect(() => {
-    fetchData();
-  }, []);
+    setPage(1);
+  }, [debouncedSearch]);
 
-  const fetchData = async () => {
-    setLoading(true);
+  const { data: schedulesResult, isLoading: loading } = useQuery({
+    queryKey: queryKeys.recurring.list({ page, search: debouncedSearch }),
+    queryFn: () =>
+      fetchRecurringSchedulesPaginated({ page, pageSize: DEFAULT_PAGE_SIZE, search: debouncedSearch }),
+  });
+  const schedules = schedulesResult?.data ?? [];
+  const totalCount = schedulesResult?.count ?? 0;
+  const totalPages = Math.ceil(totalCount / DEFAULT_PAGE_SIZE);
 
-    const [schedulesRes, clientsRes, propertiesRes, staffRolesRes] = await Promise.all([
-      supabase
-        .from("recurring_schedules")
-        .select(`
-          *,
-          clients (name),
-          properties (name)
-        `)
-        .order("created_at", { ascending: false }),
-      supabase.from("clients").select("id, name, address").order("name"),
-      supabase.from("properties").select("id, name, address, client_id").eq("is_active", true).order("name"),
-      supabase.from("user_roles").select("user_id").eq("role", "staff"),
-    ]);
+  const { data: clients = [] } = useQuery({
+    queryKey: queryKeys.clients.dropdown(),
+    queryFn: fetchClientsDropdown,
+    staleTime: 5 * 60 * 1000,
+  });
 
-    const staffIds = staffRolesRes.data?.map((r) => r.user_id) || [];
-    const { data: staffData } = await supabase
-      .from("profiles")
-      .select("user_id, full_name")
-      .in("user_id", staffIds.length > 0 ? staffIds : ['']);
+  const { data: properties = [] } = useQuery({
+    queryKey: queryKeys.properties.dropdown(),
+    queryFn: fetchPropertiesDropdown,
+    staleTime: 5 * 60 * 1000,
+  });
 
-    // Map staff names to schedules
-    const staffMap = Object.fromEntries((staffData || []).map(s => [s.user_id, s.full_name]));
-    const schedulesWithStaff = (schedulesRes.data || []).map((schedule: any) => ({
-      ...schedule,
-      profiles: schedule.assigned_staff_id ? { full_name: staffMap[schedule.assigned_staff_id] || 'Unassigned' } : null
-    }));
+  const { data: staffList = [] } = useQuery({
+    queryKey: queryKeys.staff.dropdown(),
+    queryFn: fetchStaffDropdown,
+    staleTime: 5 * 60 * 1000,
+  });
 
-    setSchedules(schedulesWithStaff as RecurringSchedule[]);
-    setClients((clientsRes.data as Client[]) || []);
-    setProperties((propertiesRes.data as Property[]) || []);
-    setStaffList((staffData as Staff[]) || []);
-    setLoading(false);
-  };
+  const invalidateSchedules = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: queryKeys.recurring.all() });
+  }, [queryClient]);
 
   const resetForm = () => {
     setFormData({
@@ -196,7 +205,10 @@ export default function RecurringJobsPage() {
       return;
     }
 
-    if ((formData.frequency === "weekly" || formData.frequency === "biweekly") && formData.days_of_week.length === 0) {
+    if (
+      (formData.frequency === "weekly" || formData.frequency === "biweekly") &&
+      formData.days_of_week.length === 0
+    ) {
       toast.error("Please select at least one day of the week");
       return;
     }
@@ -209,7 +221,10 @@ export default function RecurringJobsPage() {
       scheduled_time: formData.scheduled_time,
       notes: formData.notes || null,
       frequency: formData.frequency,
-      days_of_week: formData.frequency === "weekly" || formData.frequency === "biweekly" ? formData.days_of_week : [],
+      days_of_week:
+        formData.frequency === "weekly" || formData.frequency === "biweekly"
+          ? formData.days_of_week
+          : [],
       day_of_month: formData.frequency === "monthly" ? formData.day_of_month : null,
     };
 
@@ -236,7 +251,7 @@ export default function RecurringJobsPage() {
 
     setIsDialogOpen(false);
     resetForm();
-    fetchData();
+    invalidateSchedules();
   };
 
   const handleDelete = async (id: string) => {
@@ -250,7 +265,7 @@ export default function RecurringJobsPage() {
     }
 
     toast.success("Schedule deleted");
-    fetchData();
+    invalidateSchedules();
   };
 
   const handleToggleActive = async (schedule: RecurringSchedule) => {
@@ -265,22 +280,27 @@ export default function RecurringJobsPage() {
     }
 
     toast.success(schedule.is_active ? "Schedule paused" : "Schedule activated");
-    fetchData();
+    invalidateSchedules();
   };
 
-  const handleGenerateNow = async () => {
-    setGenerating(true);
-    try {
+  const generateMutation = useMutation({
+    mutationFn: async () => {
       const { data, error } = await supabase.functions.invoke("generate-recurring-jobs");
-
       if (error) throw error;
+      return data;
+    },
+    onSuccess: (data) => {
+      toast.success(`Generated ${data?.jobsCreated || 0} job(s) successfully`);
+      invalidateSchedules();
+      queryClient.invalidateQueries({ queryKey: queryKeys.jobs.all() });
+    },
+    onError: (error: Error) => {
+      toast.error("Failed to generate jobs: " + error.message);
+    },
+  });
 
-      toast.success(`${data.jobsCreated} job(s) generated`);
-      fetchData();
-    } catch (error: any) {
-      toast.error("Error generating jobs: " + error.message);
-    }
-    setGenerating(false);
+  const handleGenerateNow = () => {
+    generateMutation.mutate();
   };
 
   const getFrequencyLabel = (frequency: string) => {
@@ -299,29 +319,34 @@ export default function RecurringJobsPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-card border-b border-border sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+      <header className="sticky top-0 z-10 border-b border-border bg-card">
+        <div className="container mx-auto flex items-center justify-between px-4 py-4">
           <div className="flex items-center gap-4">
             <Button variant="ghost" size="icon" onClick={() => navigate("/admin")}>
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-lg bg-primary flex items-center justify-center">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
                 <Repeat className="h-5 w-5 text-primary-foreground" />
               </div>
               <div>
-              <h1 className="text-xl font-bold text-foreground">Recurring Jobs</h1>
+                <h1 className="text-xl font-bold text-foreground">Recurring Jobs</h1>
                 <p className="text-sm text-muted-foreground">{schedules.length} schedules</p>
               </div>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="outline" onClick={handleGenerateNow} disabled={generating}>
-              <RefreshCw className={`h-4 w-4 mr-2 ${generating ? "animate-spin" : ""}`} />
+            <Button variant="outline" onClick={handleGenerateNow} disabled={generateMutation.isPending}>
+              <RefreshCw className={`mr-2 h-4 w-4 ${generateMutation.isPending ? "animate-spin" : ""}`} />
               Generate Now
             </Button>
-            <Button onClick={() => { resetForm(); setIsDialogOpen(true); }}>
-              <Plus className="h-4 w-4 mr-2" />
+            <Button
+              onClick={() => {
+                resetForm();
+                setIsDialogOpen(true);
+              }}
+            >
+              <Plus className="mr-2 h-4 w-4" />
               New Schedule
             </Button>
           </div>
@@ -329,22 +354,39 @@ export default function RecurringJobsPage() {
       </header>
 
       <main className="container mx-auto px-4 py-6">
+        <div className="relative mb-4">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder="Search schedules..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10"
+          />
+        </div>
         {loading ? (
           <div className="flex items-center justify-center py-16">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+            <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary" />
           </div>
         ) : schedules.length === 0 ? (
           <Card className="border-border">
             <CardContent className="flex flex-col items-center justify-center py-16 text-center">
-              <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+              <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
                 <CalendarSync className="h-8 w-8 text-primary" />
               </div>
-              <h3 className="text-lg font-semibold text-foreground mb-2">No recurring schedules yet</h3>
-              <p className="text-muted-foreground mb-6 max-w-sm">
-                Set up weekly or monthly cleaning schedules and let Pulcrix auto-generate jobs for you.
+              <h3 className="mb-2 text-lg font-semibold text-foreground">
+                No recurring schedules yet
+              </h3>
+              <p className="mb-6 max-w-sm text-muted-foreground">
+                Set up weekly or monthly cleaning schedules and let Pulcrix auto-generate jobs for
+                you.
               </p>
-              <Button onClick={() => { resetForm(); setIsDialogOpen(true); }}>
-                <Plus className="h-4 w-4 mr-2" />
+              <Button
+                onClick={() => {
+                  resetForm();
+                  setIsDialogOpen(true);
+                }}
+              >
+                <Plus className="mr-2 h-4 w-4" />
                 Create Your First Schedule
               </Button>
             </CardContent>
@@ -352,12 +394,15 @@ export default function RecurringJobsPage() {
         ) : (
           <div className="grid gap-4">
             {schedules.map((schedule) => (
-              <Card key={schedule.id} className={`border-border ${!schedule.is_active ? "opacity-60" : ""}`}>
+              <Card
+                key={schedule.id}
+                className={`border-border ${!schedule.is_active ? "opacity-60" : ""}`}
+              >
                 <CardContent className="p-5">
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 space-y-3">
                       <div className="flex items-center gap-3">
-                        <h3 className="font-semibold text-foreground text-lg">
+                        <h3 className="text-lg font-semibold text-foreground">
                           {schedule.clients?.name || "No client"}
                         </h3>
                         <Badge variant={schedule.is_active ? "default" : "secondary"}>
@@ -366,7 +411,7 @@ export default function RecurringJobsPage() {
                         <Badge variant="outline">{getFrequencyLabel(schedule.frequency)}</Badge>
                       </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
+                      <div className="grid grid-cols-1 gap-3 text-sm md:grid-cols-3">
                         <div className="flex items-center gap-2 text-muted-foreground">
                           <MapPin className="h-4 w-4" />
                           <span>{schedule.location}</span>
@@ -397,7 +442,8 @@ export default function RecurringJobsPage() {
 
                       {schedule.last_generated_date && (
                         <p className="text-xs text-muted-foreground">
-                          Last generated: {format(new Date(schedule.last_generated_date), "dd/MM/yyyy")}
+                          Last generated:{" "}
+                          {format(new Date(schedule.last_generated_date), "dd/MM/yyyy")}
                         </p>
                       )}
                     </div>
@@ -420,18 +466,78 @@ export default function RecurringJobsPage() {
             ))}
           </div>
         )}
+
+        {totalPages > 1 && (
+          <div className="mt-4 flex items-center justify-between">
+            <p className="text-sm text-muted-foreground">
+              Page {page} of {totalPages}
+            </p>
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    className={page <= 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                  />
+                </PaginationItem>
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  let pageNum: number;
+                  if (totalPages <= 5) {
+                    pageNum = i + 1;
+                  } else if (page <= 3) {
+                    pageNum = i + 1;
+                  } else if (page >= totalPages - 2) {
+                    pageNum = totalPages - 4 + i;
+                  } else {
+                    pageNum = page - 2 + i;
+                  }
+                  return (
+                    <PaginationItem key={pageNum}>
+                      <PaginationLink
+                        onClick={() => setPage(pageNum)}
+                        isActive={page === pageNum}
+                        className="cursor-pointer"
+                      >
+                        {pageNum}
+                      </PaginationLink>
+                    </PaginationItem>
+                  );
+                })}
+                {totalPages > 5 && page < totalPages - 2 && (
+                  <PaginationItem>
+                    <PaginationEllipsis />
+                  </PaginationItem>
+                )}
+                <PaginationItem>
+                  <PaginationNext
+                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    className={
+                      page >= totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"
+                    }
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </div>
+        )}
       </main>
 
       {/* Create/Edit Dialog */}
-      <Dialog open={isDialogOpen} onOpenChange={(open) => { setIsDialogOpen(open); if (!open) resetForm(); }}>
-        <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
+      <Dialog
+        open={isDialogOpen}
+        onOpenChange={(open) => {
+          setIsDialogOpen(open);
+          if (!open) resetForm();
+        }}
+      >
+        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>
               {editingSchedule ? "Edit Schedule" : "New Recurring Schedule"}
             </DialogTitle>
           </DialogHeader>
 
-          <div className="space-y-4 mt-4">
+          <div className="mt-4 space-y-4">
             <div>
               <Label>Client</Label>
               <Select
@@ -546,14 +652,14 @@ export default function RecurringJobsPage() {
             {(formData.frequency === "weekly" || formData.frequency === "biweekly") && (
               <div>
                 <Label>Days of Week</Label>
-                <div className="flex flex-wrap gap-2 mt-2">
+                <div className="mt-2 flex flex-wrap gap-2">
                   {DAYS_OF_WEEK.map((day) => (
                     <label
                       key={day.value}
-                      className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-colors ${
+                      className={`flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 transition-colors ${
                         formData.days_of_week.includes(day.value)
-                          ? "bg-primary text-primary-foreground border-primary"
-                          : "bg-background border-border hover:bg-muted"
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "border-border bg-background hover:bg-muted"
                       }`}
                     >
                       <Checkbox
@@ -613,7 +719,13 @@ export default function RecurringJobsPage() {
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => { setIsDialogOpen(false); resetForm(); }}>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsDialogOpen(false);
+                resetForm();
+              }}
+            >
               Cancel
             </Button>
             <Button onClick={handleSubmit}>

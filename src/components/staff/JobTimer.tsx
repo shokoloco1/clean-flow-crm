@@ -45,12 +45,12 @@ export function JobTimer({ startedAt, estimatedHours, compact = false }: JobTime
     return (
       <div
         className={cn(
-          "flex items-center gap-1.5 px-2 py-1 rounded-full text-sm font-mono font-medium",
+          "flex items-center gap-1.5 rounded-full px-2 py-1 font-mono text-sm font-medium",
           isOverTime
             ? "bg-warning/20 text-warning"
             : isNearLimit
               ? "bg-warning/20 text-warning"
-              : "bg-success/20 text-success"
+              : "bg-success/20 text-success",
         )}
       >
         <Clock className="h-3.5 w-3.5" />
@@ -62,21 +62,21 @@ export function JobTimer({ startedAt, estimatedHours, compact = false }: JobTime
   return (
     <div
       className={cn(
-        "flex flex-col items-center gap-1 p-4 rounded-xl",
+        "flex flex-col items-center gap-1 rounded-xl p-4",
         isOverTime
-          ? "bg-warning/10 border border-warning/30"
+          ? "border border-warning/30 bg-warning/10"
           : isNearLimit
-            ? "bg-warning/10 border border-warning/30"
-            : "bg-success/10 border border-success/30"
+            ? "border border-warning/30 bg-warning/10"
+            : "border border-success/30 bg-success/10",
       )}
     >
-      <span className="text-xs text-muted-foreground uppercase tracking-wide">
+      <span className="text-xs uppercase tracking-wide text-muted-foreground">
         {t("time_elapsed")}
       </span>
       <div
         className={cn(
-          "text-3xl font-mono font-bold",
-          isOverTime ? "text-warning" : isNearLimit ? "text-warning" : "text-success"
+          "font-mono text-3xl font-bold",
+          isOverTime ? "text-warning" : isNearLimit ? "text-warning" : "text-success",
         )}
       >
         {timeString}
@@ -85,7 +85,7 @@ export function JobTimer({ startedAt, estimatedHours, compact = false }: JobTime
         <span
           className={cn(
             "text-xs font-medium",
-            isOverTime ? "text-warning" : "text-muted-foreground"
+            isOverTime ? "text-warning" : "text-muted-foreground",
           )}
         >
           {isOverTime ? t("over_time") : t("on_track")} ({estimatedHours}h {t("estimated")})

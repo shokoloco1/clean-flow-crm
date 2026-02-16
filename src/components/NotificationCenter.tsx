@@ -1,25 +1,30 @@
-import { useState } from 'react';
-import { Bell, Check, CheckCheck, Trash2, Briefcase, AlertCircle, Info, CheckCircle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { useState } from "react";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { useNotifications, Notification } from '@/hooks/useNotifications';
-import { formatDistanceToNow } from 'date-fns';
-import { cn } from '@/lib/utils';
+  Bell,
+  Check,
+  CheckCheck,
+  Trash2,
+  Briefcase,
+  AlertCircle,
+  Info,
+  CheckCircle,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { useNotifications, Notification } from "@/hooks/useNotifications";
+import { formatDistanceToNow } from "date-fns";
+import { cn } from "@/lib/utils";
 
 const getNotificationIcon = (type: string) => {
   switch (type) {
-    case 'job_assigned':
+    case "job_assigned":
       return <Briefcase className="h-4 w-4 text-primary" />;
-    case 'job_completed':
+    case "job_completed":
       return <CheckCircle className="h-4 w-4 text-green-500" />;
-    case 'alert':
+    case "alert":
       return <AlertCircle className="h-4 w-4 text-destructive" />;
     default:
       return <Info className="h-4 w-4 text-muted-foreground" />;
@@ -27,17 +32,17 @@ const getNotificationIcon = (type: string) => {
 };
 
 const getNotificationBgColor = (type: string, isRead: boolean) => {
-  if (isRead) return 'bg-background';
-  
+  if (isRead) return "bg-background";
+
   switch (type) {
-    case 'job_assigned':
-      return 'bg-primary/5';
-    case 'job_completed':
-      return 'bg-green-500/5';
-    case 'alert':
-      return 'bg-destructive/5';
+    case "job_assigned":
+      return "bg-primary/5";
+    case "job_completed":
+      return "bg-green-500/5";
+    case "alert":
+      return "bg-destructive/5";
     default:
-      return 'bg-muted/50';
+      return "bg-muted/50";
   }
 };
 
@@ -49,39 +54,39 @@ interface NotificationItemProps {
 
 function NotificationItem({ notification, onMarkAsRead, onDelete }: NotificationItemProps) {
   return (
-    <div 
+    <div
       className={cn(
-        "p-3 border-b border-border last:border-b-0 transition-colors",
-        getNotificationBgColor(notification.type, notification.is_read)
+        "border-b border-border p-3 transition-colors last:border-b-0",
+        getNotificationBgColor(notification.type, notification.is_read),
       )}
     >
       <div className="flex items-start gap-3">
-        <div className="mt-0.5">
-          {getNotificationIcon(notification.type)}
-        </div>
-        <div className="flex-1 min-w-0">
+        <div className="mt-0.5">{getNotificationIcon(notification.type)}</div>
+        <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <p className={cn(
-              "text-sm font-medium truncate",
-              !notification.is_read && "text-foreground",
-              notification.is_read && "text-muted-foreground"
-            )}>
+            <p
+              className={cn(
+                "truncate text-sm font-medium",
+                !notification.is_read && "text-foreground",
+                notification.is_read && "text-muted-foreground",
+              )}
+            >
               {notification.title}
             </p>
             {!notification.is_read && (
-              <div className="h-2 w-2 rounded-full bg-primary flex-shrink-0" />
+              <div className="h-2 w-2 flex-shrink-0 rounded-full bg-primary" />
             )}
           </div>
-          <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
+          <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">
             {notification.message}
           </p>
-          <p className="text-xs text-muted-foreground/70 mt-1">
-            {formatDistanceToNow(new Date(notification.created_at), { 
-              addSuffix: true
+          <p className="mt-1 text-xs text-muted-foreground/70">
+            {formatDistanceToNow(new Date(notification.created_at), {
+              addSuffix: true,
             })}
           </p>
         </div>
-        <div className="flex items-center gap-1 flex-shrink-0">
+        <div className="flex flex-shrink-0 items-center gap-1">
           {!notification.is_read && (
             <Button
               variant="ghost"
@@ -110,14 +115,14 @@ function NotificationItem({ notification, onMarkAsRead, onDelete }: Notification
 
 export function NotificationCenter() {
   const [open, setOpen] = useState(false);
-  const { 
-    notifications, 
-    unreadCount, 
-    loading, 
-    markAsRead, 
-    markAllAsRead, 
-    deleteNotification, 
-    clearAll 
+  const {
+    notifications,
+    unreadCount,
+    loading,
+    markAsRead,
+    markAllAsRead,
+    deleteNotification,
+    clearAll,
   } = useNotifications();
 
   return (
@@ -126,41 +131,36 @@ export function NotificationCenter() {
         <Button variant="ghost" size="icon" className="relative" aria-label="Open notifications">
           <Bell className="h-5 w-5" />
           {unreadCount > 0 && (
-            <Badge 
-              variant="destructive" 
-              className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
+            <Badge
+              variant="destructive"
+              className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center p-0 text-xs"
             >
-              {unreadCount > 9 ? '9+' : unreadCount}
+              {unreadCount > 9 ? "9+" : unreadCount}
             </Badge>
           )}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-80 p-0" align="end">
-        <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-          <h3 className="font-semibold text-sm">Notifications</h3>
+        <div className="flex items-center justify-between border-b border-border px-4 py-3">
+          <h3 className="text-sm font-semibold">Notifications</h3>
           <div className="flex items-center gap-1">
             {unreadCount > 0 && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-7 text-xs"
-                onClick={markAllAsRead}
-              >
-                <CheckCheck className="h-3.5 w-3.5 mr-1" />
+              <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={markAllAsRead}>
+                <CheckCheck className="mr-1 h-3.5 w-3.5" />
                 Mark all read
               </Button>
             )}
           </div>
         </div>
-        
+
         <ScrollArea className="h-[300px]">
           {loading ? (
-            <div className="flex items-center justify-center h-full">
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary" />
+            <div className="flex h-full items-center justify-center">
+              <div className="h-6 w-6 animate-spin rounded-full border-b-2 border-primary" />
             </div>
           ) : notifications.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full text-muted-foreground py-8">
-              <Bell className="h-10 w-10 mb-2 opacity-50" />
+            <div className="flex h-full flex-col items-center justify-center py-8 text-muted-foreground">
+              <Bell className="mb-2 h-10 w-10 opacity-50" />
               <p className="text-sm">No notifications</p>
             </div>
           ) : (
@@ -176,7 +176,7 @@ export function NotificationCenter() {
             </div>
           )}
         </ScrollArea>
-        
+
         {notifications.length > 0 && (
           <>
             <Separator />
@@ -187,7 +187,7 @@ export function NotificationCenter() {
                 className="w-full text-xs text-muted-foreground hover:text-destructive"
                 onClick={clearAll}
               >
-                <Trash2 className="h-3.5 w-3.5 mr-1" />
+                <Trash2 className="mr-1 h-3.5 w-3.5" />
                 Clear all
               </Button>
             </div>

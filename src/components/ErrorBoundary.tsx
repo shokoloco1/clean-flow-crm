@@ -43,33 +43,31 @@ export class ErrorBoundary extends React.Component<Props, State> {
       }
 
       return (
-        <div className="min-h-[400px] flex items-center justify-center p-6">
-          <div className="max-w-md w-full bg-card border border-border rounded-lg p-6 text-center">
-            <div className="h-12 w-12 rounded-full bg-destructive/10 flex items-center justify-center mx-auto mb-4">
+        <div className="flex min-h-[400px] items-center justify-center p-6">
+          <div className="w-full max-w-md rounded-lg border border-border bg-card p-6 text-center">
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10">
               <AlertTriangle className="h-6 w-6 text-destructive" />
             </div>
-            <h2 className="text-lg font-semibold text-foreground mb-2">
-              Something went wrong
-            </h2>
-            <p className="text-sm text-muted-foreground mb-4">
+            <h2 className="mb-2 text-lg font-semibold text-foreground">Something went wrong</h2>
+            <p className="mb-4 text-sm text-muted-foreground">
               An unexpected error occurred. Please try reloading the page.
             </p>
             {this.state.error && (
-              <details className="text-left mb-4">
-                <summary className="text-xs text-muted-foreground cursor-pointer hover:text-foreground">
+              <details className="mb-4 text-left">
+                <summary className="cursor-pointer text-xs text-muted-foreground hover:text-foreground">
                   Error details
                 </summary>
-                <pre className="mt-2 p-2 bg-muted rounded text-xs overflow-auto max-h-32">
+                <pre className="mt-2 max-h-32 overflow-auto rounded bg-muted p-2 text-xs">
                   {this.state.error.message}
                 </pre>
               </details>
             )}
-            <div className="flex gap-2 justify-center">
+            <div className="flex justify-center gap-2">
               <Button variant="outline" size="sm" onClick={this.handleReset}>
                 Try again
               </Button>
               <Button size="sm" onClick={this.handleReload}>
-                <RefreshCw className="h-4 w-4 mr-2" />
+                <RefreshCw className="mr-2 h-4 w-4" />
                 Reload page
               </Button>
             </div>

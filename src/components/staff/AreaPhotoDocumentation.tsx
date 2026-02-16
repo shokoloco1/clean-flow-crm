@@ -14,13 +14,9 @@ import {
   ChevronUp,
   ImagePlus,
   Trash2,
-  MessageSquare
+  MessageSquare,
 } from "lucide-react";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger
-} from "@/components/ui/collapsible";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { logger } from "@/lib/logger";
@@ -106,7 +102,7 @@ async function compressImage(file: File, maxSizeMB = 2): Promise<Blob> {
               }
             },
             "image/jpeg",
-            quality
+            quality,
           );
         };
         tryCompress();
@@ -122,7 +118,7 @@ export function AreaPhotoDocumentation({
   jobStatus,
   requiredAreas = [],
   onPhotosUpdated,
-  onAllAreasComplete
+  onAllAreasComplete,
 }: AreaPhotoDocumentationProps) {
   // Area photos are stored in job_photos table with photo_type format: "area_before:AreaName" or "area_after:AreaName"
   const [areaPhotos, setAreaPhotos] = useState<AreaPhoto[]>([]);
@@ -191,7 +187,7 @@ export function AreaPhotoDocumentation({
             after_photo_id: existing?.after?.id || null,
             notes: null, // Notes could be stored separately if needed
             status: hasBefore && hasAfter ? "completed" : "pending",
-            uploaded_at: existing?.before?.created_at || existing?.after?.created_at || ""
+            uploaded_at: existing?.before?.created_at || existing?.after?.created_at || "",
           };
         });
 
@@ -211,9 +207,7 @@ export function AreaPhotoDocumentation({
   }, [jobId, requiredAreas]);
 
   // Calculate completion stats
-  const completedAreas = areaPhotos.filter(
-    (a) => a.before_photo_url && a.after_photo_url
-  ).length;
+  const completedAreas = areaPhotos.filter((a) => a.before_photo_url && a.after_photo_url).length;
   const totalAreas = areaPhotos.length || requiredAreas.length;
   const completionPercent = totalAreas > 0 ? (completedAreas / totalAreas) * 100 : 0;
   const allComplete = completedAreas === totalAreas && totalAreas > 0;
@@ -238,7 +232,7 @@ export function AreaPhotoDocumentation({
       // Compress image
       const compressedBlob = await compressImage(file);
       const compressedFile = new File([compressedBlob], file.name, {
-        type: "image/jpeg"
+        type: "image/jpeg",
       });
 
       // Upload to storage
@@ -248,14 +242,12 @@ export function AreaPhotoDocumentation({
         .from("job-evidence")
         .upload(fileName, compressedFile, {
           cacheControl: "3600",
-          upsert: false
+          upsert: false,
         });
 
       if (uploadError) throw uploadError;
 
-      const { data: urlData } = supabase.storage
-        .from("job-evidence")
-        .getPublicUrl(uploadData.path);
+      const { data: urlData } = supabase.storage.from("job-evidence").getPublicUrl(uploadData.path);
 
       // Save to database with area-prefixed photo_type
       const photoType = `area_${type}:${areaName}`;
@@ -264,7 +256,7 @@ export function AreaPhotoDocumentation({
         .insert({
           job_id: jobId,
           photo_url: urlData.publicUrl,
-          photo_type: photoType
+          photo_type: photoType,
         })
         .select()
         .single();
@@ -282,14 +274,15 @@ export function AreaPhotoDocumentation({
             const updatedArea = {
               ...area,
               [`${type}_photo_url`]: urlData.publicUrl,
-              [`${type}_photo_id`]: insertedPhoto.id
+              [`${type}_photo_id`]: insertedPhoto.id,
             };
             // Check if both photos are now present
             const hasOtherType = type === "before" ? area.after_photo_url : area.before_photo_url;
             if (hasOtherType || urlData.publicUrl) {
-              const hasBoth = type === "before"
-                ? (urlData.publicUrl && area.after_photo_url)
-                : (area.before_photo_url && urlData.publicUrl);
+              const hasBoth =
+                type === "before"
+                  ? urlData.publicUrl && area.after_photo_url
+                  : area.before_photo_url && urlData.publicUrl;
               if (hasBoth) {
                 updatedArea.status = "completed";
               }
@@ -297,7 +290,7 @@ export function AreaPhotoDocumentation({
             return updatedArea as AreaPhoto;
           }
           return area;
-        })
+        }),
       );
 
       toast.success(`📸 ${type === "before" ? "Before" : "After"} photo saved for ${areaName}!`);
@@ -314,9 +307,7 @@ export function AreaPhotoDocumentation({
   const handleSaveNotes = async (areaName: string) => {
     // Update local state
     setAreaPhotos((prev) =>
-      prev.map((area) =>
-        area.area_name === areaName ? { ...area, notes: notesText } : area
-      )
+      prev.map((area) => (area.area_name === areaName ? { ...area, notes: notesText } : area)),
     );
     toast.success("Notes saved");
     setEditingNotes(null);
@@ -330,10 +321,7 @@ export function AreaPhotoDocumentation({
 
     if (photoId) {
       // Delete from database
-      const { error } = await supabase
-        .from("job_photos")
-        .delete()
-        .eq("id", photoId);
+      const { error } = await supabase.from("job_photos").delete().eq("id", photoId);
 
       if (error) {
         logger.error("Error deleting photo:", error);
@@ -350,34 +338,35 @@ export function AreaPhotoDocumentation({
               ...area,
               [`${type}_photo_url`]: null,
               [`${type}_photo_id`]: null,
-              status: "pending" as const
+              status: "pending" as const,
             }
-          : area
-      )
+          : area,
+      ),
     );
     toast.success(`${type === "before" ? "Before" : "After"} photo removed`);
     onPhotosUpdated?.();
   };
 
   // Render area list based on required areas or existing photos
-  const areasToRender = areaPhotos.length > 0
-    ? areaPhotos
-    : requiredAreas.map((ra) => ({
-        id: "",
-        job_id: jobId,
-        area_name: ra.name,
-        service_type: ra.services.join(", "),
-        before_photo_url: null,
-        after_photo_url: null,
-        notes: null,
-        status: "pending" as const,
-        uploaded_at: ""
-      }));
+  const areasToRender =
+    areaPhotos.length > 0
+      ? areaPhotos
+      : requiredAreas.map((ra) => ({
+          id: "",
+          job_id: jobId,
+          area_name: ra.name,
+          service_type: ra.services.join(", "),
+          before_photo_url: null,
+          after_photo_url: null,
+          notes: null,
+          status: "pending" as const,
+          uploaded_at: "",
+        }));
 
   if (loading) {
     return (
       <Card className="border-border">
-        <CardContent className="p-4 flex items-center justify-center">
+        <CardContent className="flex items-center justify-center p-4">
           <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
         </CardContent>
       </Card>
@@ -389,7 +378,7 @@ export function AreaPhotoDocumentation({
     return (
       <Card className="border-border">
         <CardContent className="p-4 text-center text-muted-foreground">
-          <Camera className="h-8 w-8 mx-auto mb-2 opacity-50" />
+          <Camera className="mx-auto mb-2 h-8 w-8 opacity-50" />
           <p>No areas defined for photo documentation.</p>
           <p className="text-sm">Photos will be captured as general before/after.</p>
         </CardContent>
@@ -411,7 +400,7 @@ export function AreaPhotoDocumentation({
       <Card className="border-border">
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-base flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-base">
               <Camera className="h-5 w-5 text-primary" />
               Photo Documentation
             </CardTitle>
@@ -424,10 +413,10 @@ export function AreaPhotoDocumentation({
               {completedAreas}/{totalAreas} areas
             </Badge>
           </div>
-          <Progress value={completionPercent} className="h-2 mt-2" />
+          <Progress value={completionPercent} className="mt-2 h-2" />
         </CardHeader>
 
-        <CardContent className="p-4 pt-2 space-y-2">
+        <CardContent className="space-y-2 p-4 pt-2">
           {areasToRender.map((area) => {
             const hasBefore = !!area.before_photo_url;
             const hasAfter = !!area.after_photo_url;
@@ -438,27 +427,19 @@ export function AreaPhotoDocumentation({
               <Collapsible
                 key={area.area_name}
                 open={isExpanded}
-                onOpenChange={() =>
-                  setExpandedArea(isExpanded ? null : area.area_name)
-                }
+                onOpenChange={() => setExpandedArea(isExpanded ? null : area.area_name)}
               >
                 <CollapsibleTrigger asChild>
                   <div
-                    className={`
-                      flex items-center justify-between p-3 rounded-lg cursor-pointer
-                      transition-colors
-                      ${isComplete
-                        ? "bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900"
-                        : "bg-muted/50 border border-border hover:bg-muted"
-                      }
-                    `}
+                    className={`flex cursor-pointer items-center justify-between rounded-lg p-3 transition-colors ${
+                      isComplete
+                        ? "border border-emerald-200 bg-emerald-50 dark:border-emerald-900 dark:bg-emerald-950/30"
+                        : "border border-border bg-muted/50 hover:bg-muted"
+                    } `}
                   >
                     <div className="flex items-center gap-3">
                       <div
-                        className={`
-                          h-8 w-8 rounded-full flex items-center justify-center
-                          ${isComplete ? "bg-emerald-500 text-white" : "bg-muted-foreground/20"}
-                        `}
+                        className={`flex h-8 w-8 items-center justify-center rounded-full ${isComplete ? "bg-emerald-500 text-white" : "bg-muted-foreground/20"} `}
                       >
                         {isComplete ? (
                           <CheckCircle2 className="h-4 w-4" />
@@ -467,7 +448,7 @@ export function AreaPhotoDocumentation({
                         )}
                       </div>
                       <div>
-                        <p className="font-medium text-sm">{area.area_name}</p>
+                        <p className="text-sm font-medium">{area.area_name}</p>
                         <p className="text-xs text-muted-foreground">
                           {area.service_type || "Standard cleaning"}
                         </p>
@@ -475,8 +456,7 @@ export function AreaPhotoDocumentation({
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-xs text-muted-foreground">
-                        {hasBefore ? "✓" : "○"} Before{" "}
-                        {hasAfter ? "✓" : "○"} After
+                        {hasBefore ? "✓" : "○"} Before {hasAfter ? "✓" : "○"} After
                       </span>
                       {isExpanded ? (
                         <ChevronUp className="h-4 w-4 text-muted-foreground" />
@@ -491,26 +471,24 @@ export function AreaPhotoDocumentation({
                   <div className="grid grid-cols-2 gap-3 pl-11">
                     {/* Before Photo */}
                     <div className="space-y-2">
-                      <p className="text-xs font-medium text-muted-foreground">
-                        Before
-                      </p>
+                      <p className="text-xs font-medium text-muted-foreground">Before</p>
                       {hasBefore ? (
                         <div className="relative">
                           <div
-                            className="aspect-square rounded-lg overflow-hidden bg-muted cursor-pointer border-2 border-primary/30"
+                            className="aspect-square cursor-pointer overflow-hidden rounded-lg border-2 border-primary/30 bg-muted"
                             onClick={() => setSelectedPhoto(area.before_photo_url!)}
                           >
                             <img
                               src={area.before_photo_url!}
                               alt="Before"
-                              className="w-full h-full object-cover"
+                              className="h-full w-full object-cover"
                             />
                           </div>
                           {isInProgress && (
                             <Button
                               size="icon"
                               variant="destructive"
-                              className="absolute -top-2 -right-2 h-6 w-6"
+                              className="absolute -right-2 -top-2 h-6 w-6"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleDeletePhoto(area.area_name, "before");
@@ -523,7 +501,7 @@ export function AreaPhotoDocumentation({
                       ) : isInProgress ? (
                         <Button
                           variant="outline"
-                          className="w-full aspect-square flex flex-col gap-1"
+                          className="flex aspect-square w-full flex-col gap-1"
                           onClick={() => handlePhotoCapture(area.area_name, "before")}
                           disabled={
                             uploadingArea?.areaName === area.area_name &&
@@ -541,36 +519,32 @@ export function AreaPhotoDocumentation({
                           )}
                         </Button>
                       ) : (
-                        <div className="aspect-square rounded-lg bg-muted/50 flex items-center justify-center">
-                          <span className="text-xs text-muted-foreground">
-                            No photo
-                          </span>
+                        <div className="flex aspect-square items-center justify-center rounded-lg bg-muted/50">
+                          <span className="text-xs text-muted-foreground">No photo</span>
                         </div>
                       )}
                     </div>
 
                     {/* After Photo */}
                     <div className="space-y-2">
-                      <p className="text-xs font-medium text-muted-foreground">
-                        After
-                      </p>
+                      <p className="text-xs font-medium text-muted-foreground">After</p>
                       {hasAfter ? (
                         <div className="relative">
                           <div
-                            className="aspect-square rounded-lg overflow-hidden bg-muted cursor-pointer border-2 border-primary/30"
+                            className="aspect-square cursor-pointer overflow-hidden rounded-lg border-2 border-primary/30 bg-muted"
                             onClick={() => setSelectedPhoto(area.after_photo_url!)}
                           >
                             <img
                               src={area.after_photo_url!}
                               alt="After"
-                              className="w-full h-full object-cover"
+                              className="h-full w-full object-cover"
                             />
                           </div>
                           {isInProgress && (
                             <Button
                               size="icon"
                               variant="destructive"
-                              className="absolute -top-2 -right-2 h-6 w-6"
+                              className="absolute -right-2 -top-2 h-6 w-6"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleDeletePhoto(area.area_name, "after");
@@ -583,7 +557,7 @@ export function AreaPhotoDocumentation({
                       ) : isInProgress ? (
                         <Button
                           variant="outline"
-                          className="w-full aspect-square flex flex-col gap-1"
+                          className="flex aspect-square w-full flex-col gap-1"
                           onClick={() => handlePhotoCapture(area.area_name, "after")}
                           disabled={
                             uploadingArea?.areaName === area.area_name &&
@@ -601,10 +575,8 @@ export function AreaPhotoDocumentation({
                           )}
                         </Button>
                       ) : (
-                        <div className="aspect-square rounded-lg bg-muted/50 flex items-center justify-center">
-                          <span className="text-xs text-muted-foreground">
-                            No photo
-                          </span>
+                        <div className="flex aspect-square items-center justify-center rounded-lg bg-muted/50">
+                          <span className="text-xs text-muted-foreground">No photo</span>
                         </div>
                       )}
                     </div>
@@ -621,10 +593,7 @@ export function AreaPhotoDocumentation({
                           className="min-h-[60px] text-sm"
                         />
                         <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            onClick={() => handleSaveNotes(area.area_name)}
-                          >
+                          <Button size="sm" onClick={() => handleSaveNotes(area.area_name)}>
                             Save
                           </Button>
                           <Button
@@ -642,9 +611,7 @@ export function AreaPhotoDocumentation({
                     ) : (
                       <div className="flex items-start gap-2">
                         {area.notes ? (
-                          <p className="text-sm text-muted-foreground flex-1">
-                            {area.notes}
-                          </p>
+                          <p className="flex-1 text-sm text-muted-foreground">{area.notes}</p>
                         ) : null}
                         {isInProgress && (
                           <Button
@@ -656,7 +623,7 @@ export function AreaPhotoDocumentation({
                               setNotesText(area.notes || "");
                             }}
                           >
-                            <MessageSquare className="h-3 w-3 mr-1" />
+                            <MessageSquare className="mr-1 h-3 w-3" />
                             {area.notes ? "Edit" : "Add"} Notes
                           </Button>
                         )}
@@ -673,13 +640,13 @@ export function AreaPhotoDocumentation({
       {/* Photo preview modal */}
       {selectedPhoto && (
         <div
-          className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
           onClick={() => setSelectedPhoto(null)}
         >
           <img
             src={selectedPhoto}
             alt="Photo preview"
-            className="max-w-full max-h-full object-contain rounded-lg"
+            className="max-h-full max-w-full rounded-lg object-contain"
           />
         </div>
       )}

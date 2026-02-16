@@ -7,21 +7,21 @@ import { logger } from "@/lib/logger";
 interface DuplicateJobOptions {
   jobId: string;
   daysOffset?: number; // How many days from today (default: 1)
-  keepTime?: boolean;  // Keep original time (default: true)
+  keepTime?: boolean; // Keep original time (default: true)
   keepStaff?: boolean; // Keep same staff (default: true)
 }
 
 export function useDuplicateJob(onSuccess?: () => void) {
   const [isDuplicating, setIsDuplicating] = useState(false);
 
-  const duplicateJob = async ({ 
-    jobId, 
-    daysOffset = 1, 
-    keepTime = true, 
-    keepStaff = true 
+  const duplicateJob = async ({
+    jobId,
+    daysOffset = 1,
+    keepTime = true,
+    keepStaff = true,
   }: DuplicateJobOptions) => {
     setIsDuplicating(true);
-    
+
     try {
       // Fetch the original job
       const { data: originalJob, error: fetchError } = await supabase
@@ -35,8 +35,8 @@ export function useDuplicateJob(onSuccess?: () => void) {
       }
 
       // Calculate new date
-      const newDate = format(addDays(new Date(), daysOffset), 'yyyy-MM-dd');
-      
+      const newDate = format(addDays(new Date(), daysOffset), "yyyy-MM-dd");
+
       // Create the duplicate
       const { data: newJob, error: insertError } = await supabase
         .from("jobs")
@@ -46,10 +46,10 @@ export function useDuplicateJob(onSuccess?: () => void) {
           location: originalJob.location,
           assigned_staff_id: keepStaff ? originalJob.assigned_staff_id : null,
           scheduled_date: newDate,
-          scheduled_time: keepTime ? originalJob.scheduled_time : '09:00',
+          scheduled_time: keepTime ? originalJob.scheduled_time : "09:00",
           notes: originalJob.notes,
           checklist: originalJob.checklist,
-          status: 'scheduled',
+          status: "scheduled",
         })
         .select()
         .single();
@@ -57,9 +57,9 @@ export function useDuplicateJob(onSuccess?: () => void) {
       if (insertError) throw insertError;
 
       toast.success("Job duplicated!", {
-        description: `Scheduled for ${format(new Date(newDate), 'EEEE, MMM d')}`,
+        description: `Scheduled for ${format(new Date(newDate), "EEEE, MMM d")}`,
       });
-      
+
       onSuccess?.();
       return newJob;
     } catch (error) {

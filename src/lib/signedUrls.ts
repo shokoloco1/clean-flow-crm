@@ -9,10 +9,7 @@ const SIGNED_URL_EXPIRY = 3600; // 1 hour in seconds
  * @param filePath The path to the file in the bucket
  * @returns The signed URL or null if failed
  */
-export async function getSignedUrl(
-  bucketName: string,
-  filePath: string
-): Promise<string | null> {
+export async function getSignedUrl(bucketName: string, filePath: string): Promise<string | null> {
   try {
     const { data, error } = await supabase.storage
       .from(bucketName)
@@ -38,7 +35,7 @@ export async function getSignedUrl(
  */
 export async function getSignedUrls(
   bucketName: string,
-  filePaths: string[]
+  filePaths: string[],
 ): Promise<(string | null)[]> {
   try {
     const { data, error } = await supabase.storage

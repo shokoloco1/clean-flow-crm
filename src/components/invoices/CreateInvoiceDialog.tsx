@@ -60,11 +60,7 @@ interface CreateInvoiceDialogProps {
   onCreated: () => void;
 }
 
-export function CreateInvoiceDialog({
-  isOpen,
-  onOpenChange,
-  onCreated,
-}: CreateInvoiceDialogProps) {
+export function CreateInvoiceDialog({ isOpen, onOpenChange, onCreated }: CreateInvoiceDialogProps) {
   const [loading, setLoading] = useState(false);
   const [clients, setClients] = useState<Client[]>([]);
   const [completedJobs, setCompletedJobs] = useState<CompletedJob[]>([]);
@@ -75,7 +71,7 @@ export function CreateInvoiceDialog({
   const [applyGST, setApplyGST] = useState(true); // GST enabled by default for AU
   const [notes, setNotes] = useState("");
   const [dueDate, setDueDate] = useState(
-    format(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), "yyyy-MM-dd")
+    format(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), "yyyy-MM-dd"),
   );
 
   useEffect(() => {
@@ -87,7 +83,7 @@ export function CreateInvoiceDialog({
   useEffect(() => {
     if (selectedClientId) {
       fetchCompletedJobs(selectedClientId);
-      const client = clients.find(c => c.id === selectedClientId);
+      const client = clients.find((c) => c.id === selectedClientId);
       setSelectedClient(client || null);
     } else {
       setCompletedJobs([]);
@@ -98,10 +94,7 @@ export function CreateInvoiceDialog({
 
   const fetchClients = async () => {
     try {
-      const { data, error } = await supabase
-        .from("clients")
-        .select("id, name, abn")
-        .order("name");
+      const { data, error } = await supabase.from("clients").select("id, name, abn").order("name");
 
       if (error) {
         throw new Error(`Failed to load clients: ${error.message}`);
@@ -109,7 +102,7 @@ export function CreateInvoiceDialog({
 
       setClients(data || []);
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to load clients';
+      const message = error instanceof Error ? error.message : "Failed to load clients";
       logger.error("Error fetching clients:", error);
       toast.error(message);
     }
@@ -119,10 +112,12 @@ export function CreateInvoiceDialog({
     try {
       const { data: jobsData, error: jobsError } = await supabase
         .from("jobs")
-        .select(`
+        .select(
+          `
           id, location, scheduled_date, start_time, end_time, assigned_staff_id,
           clients (name)
-        `)
+        `,
+        )
         .eq("client_id", clientId)
         .eq("status", "completed")
         .order("scheduled_date", { ascending: false })
@@ -133,7 +128,11 @@ export function CreateInvoiceDialog({
       }
 
       if (jobsData && jobsData.length > 0) {
-        const staffIds = [...new Set(jobsData.map(j => j.assigned_staff_id).filter((id): id is string => id !== null))];
+        const staffIds = [
+          ...new Set(
+            jobsData.map((j) => j.assigned_staff_id).filter((id): id is string => id !== null),
+          ),
+        ];
 
         const { data: profilesData, error: profilesError } = await supabase
           .from("profiles")
@@ -144,16 +143,16 @@ export function CreateInvoiceDialog({
           logger.warn("Failed to load staff profiles:", profilesError);
         }
 
-        const profilesMap = new Map(profilesData?.map(p => [p.user_id, p]) || []);
+        const profilesMap = new Map(profilesData?.map((p) => [p.user_id, p]) || []);
 
-        const jobs: CompletedJob[] = jobsData.map(job => ({
+        const jobs: CompletedJob[] = jobsData.map((job) => ({
           id: job.id,
           location: job.location,
           scheduled_date: job.scheduled_date,
           start_time: job.start_time,
           end_time: job.end_time,
           clients: job.clients,
-          profiles: job.assigned_staff_id ? profilesMap.get(job.assigned_staff_id) || null : null
+          profiles: job.assigned_staff_id ? profilesMap.get(job.assigned_staff_id) || null : null,
         }));
 
         setCompletedJobs(jobs);
@@ -161,7 +160,7 @@ export function CreateInvoiceDialog({
         setCompletedJobs([]);
       }
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to load jobs';
+      const message = error instanceof Error ? error.message : "Failed to load jobs";
       logger.error("Error fetching completed jobs:", error);
       toast.error(message);
       setCompletedJobs([]);
@@ -187,7 +186,7 @@ export function CreateInvoiceDialog({
 
   const updateLineItemsFromJobs = (jobIds: Set<string>) => {
     const items: InvoiceLineItem[] = [];
-    
+
     jobIds.forEach((jobId) => {
       const job = completedJobs.find((j) => j.id === jobId);
       if (job) {
@@ -233,7 +232,7 @@ export function CreateInvoiceDialog({
           return updated;
         }
         return item;
-      })
+      }),
     );
   };
 
@@ -250,9 +249,7 @@ export function CreateInvoiceDialog({
   // Calculate totals using Australian GST utilities
   const subtotal = lineItems.reduce((sum, item) => sum + item.total, 0);
   const taxRate = applyGST ? GST_RATE * 100 : 0;
-  const { gst: taxAmount, total } = applyGST 
-    ? calculateGST(subtotal) 
-    : { gst: 0, total: subtotal };
+  const { gst: taxAmount, total } = applyGST ? calculateGST(subtotal) : { gst: 0, total: subtotal };
 
   const handleSubmit = async () => {
     if (!selectedClientId) {
@@ -294,9 +291,7 @@ export function CreateInvoiceDialog({
         total: item.total,
       }));
 
-      const { error: itemsError } = await supabase
-        .from("invoice_items")
-        .insert(itemsToInsert);
+      const { error: itemsError } = await supabase.from("invoice_items").insert(itemsToInsert);
 
       if (itemsError) throw itemsError;
 
@@ -326,19 +321,17 @@ export function CreateInvoiceDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
         <DialogHeader>
           <div className="flex items-center justify-between">
             <div>
               <DialogTitle className="text-xl">New Tax Invoice</DialogTitle>
-              <p className="text-sm text-muted-foreground mt-1">
-                Australian Tax Invoice with GST
-              </p>
+              <p className="mt-1 text-sm text-muted-foreground">Australian Tax Invoice with GST</p>
             </div>
-            <PriceListReference 
+            <PriceListReference
               trigger={
                 <Button variant="outline" size="sm" type="button">
-                  <FileText className="h-4 w-4 mr-2" />
+                  <FileText className="mr-2 h-4 w-4" />
                   View Prices
                 </Button>
               }
@@ -371,11 +364,7 @@ export function CreateInvoiceDialog({
             </div>
             <div className="space-y-2">
               <Label>Due Date</Label>
-              <Input
-                type="date"
-                value={dueDate}
-                onChange={(e) => setDueDate(e.target.value)}
-              />
+              <Input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
             </div>
           </div>
 
@@ -384,25 +373,27 @@ export function CreateInvoiceDialog({
             <div className="space-y-2">
               <Label>Completed Jobs (select to add)</Label>
               <Card>
-                <CardContent className="p-3 max-h-48 overflow-y-auto space-y-2">
+                <CardContent className="max-h-48 space-y-2 overflow-y-auto p-3">
                   {completedJobs.map((job) => {
                     const hours = calculateJobDuration(job);
                     const rate = job.profiles?.hourly_rate || 25;
                     return (
                       <div
                         key={job.id}
-                        className="flex items-center gap-3 p-2 rounded hover:bg-muted/50 cursor-pointer"
+                        className="flex cursor-pointer items-center gap-3 rounded p-2 hover:bg-muted/50"
                         onClick={() => toggleJobSelection(job.id)}
                       >
                         <Checkbox checked={selectedJobs.has(job.id)} />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium truncate">{job.location}</p>
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-medium">{job.location}</p>
                           <p className="text-xs text-muted-foreground">
-                            {format(new Date(job.scheduled_date), "dd/MM/yyyy")} • {hours.toFixed(2)}h × ${rate}/h
+                            {format(new Date(job.scheduled_date), "dd/MM/yyyy")} •{" "}
+                            {hours.toFixed(2)}h × ${rate}/h
                           </p>
                         </div>
                         <span className="text-sm font-semibold">
-                          {formatAUD(hours * rate)} <span className="text-xs text-muted-foreground">Ex. GST</span>
+                          {formatAUD(hours * rate)}{" "}
+                          <span className="text-xs text-muted-foreground">Ex. GST</span>
                         </span>
                       </div>
                     );
@@ -417,22 +408,24 @@ export function CreateInvoiceDialog({
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Label>Invoice Items</Label>
-                <Badge variant="secondary" className="text-xs">Ex. GST</Badge>
+                <Badge variant="secondary" className="text-xs">
+                  Ex. GST
+                </Badge>
               </div>
               <Button variant="outline" size="sm" onClick={addManualLineItem}>
-                <Plus className="h-4 w-4 mr-1" />
+                <Plus className="mr-1 h-4 w-4" />
                 Add Item
               </Button>
             </div>
             <Card>
-              <CardContent className="p-3 space-y-3">
+              <CardContent className="space-y-3 p-3">
                 {lineItems.length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-4">
+                  <p className="py-4 text-center text-sm text-muted-foreground">
                     Select jobs or add items manually
                   </p>
                 ) : (
                   <>
-                    <div className="grid grid-cols-12 gap-2 text-xs font-medium text-muted-foreground px-1">
+                    <div className="grid grid-cols-12 gap-2 px-1 text-xs font-medium text-muted-foreground">
                       <div className="col-span-5">Description</div>
                       <div className="col-span-2 text-center">Qty</div>
                       <div className="col-span-2 text-right">Unit (Ex. GST)</div>
@@ -440,17 +433,12 @@ export function CreateInvoiceDialog({
                       <div className="col-span-1"></div>
                     </div>
                     {lineItems.map((item) => (
-                      <div
-                        key={item.id}
-                        className="grid grid-cols-12 gap-2 items-center"
-                      >
+                      <div key={item.id} className="grid grid-cols-12 items-center gap-2">
                         <div className="col-span-5">
                           <Input
                             placeholder="Description"
                             value={item.description}
-                            onChange={(e) =>
-                              updateLineItem(item.id, "description", e.target.value)
-                            }
+                            onChange={(e) => updateLineItem(item.id, "description", e.target.value)}
                           />
                         </div>
                         <div className="col-span-2">
@@ -507,9 +495,9 @@ export function CreateInvoiceDialog({
                   rows={3}
                 />
               </div>
-              
+
               {/* GST Toggle */}
-              <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
+              <div className="flex items-center gap-3 rounded-lg bg-muted/50 p-3">
                 <Checkbox
                   id="apply-gst"
                   checked={applyGST}
@@ -525,12 +513,12 @@ export function CreateInvoiceDialog({
                 </div>
               </div>
             </div>
-            
+
             <Card>
               <CardContent className="pt-4">
                 <GSTSummary subtotal={subtotal} />
                 {!applyGST && (
-                  <div className="flex items-center gap-2 mt-3 p-2 bg-warning/10 rounded text-xs text-warning">
+                  <div className="mt-3 flex items-center gap-2 rounded bg-warning/10 p-2 text-xs text-warning">
                     <Info className="h-4 w-4" />
                     GST not applied
                   </div>
@@ -545,7 +533,7 @@ export function CreateInvoiceDialog({
             Cancel
           </Button>
           <Button onClick={handleSubmit} disabled={loading}>
-            {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+            {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Create Tax Invoice
           </Button>
         </DialogFooter>

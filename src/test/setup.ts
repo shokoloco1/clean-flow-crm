@@ -1,17 +1,17 @@
-import '@testing-library/jest-dom';
-import { cleanup } from '@testing-library/react';
-import { afterEach, vi } from 'vitest';
+import "@testing-library/jest-dom";
+import { cleanup } from "@testing-library/react";
+import { afterEach, vi } from "vitest";
 
 afterEach(() => {
   cleanup();
 });
 
 // Mock environment variables for tests
-vi.stubEnv('VITE_SUPABASE_URL', 'https://test-project.supabase.co');
-vi.stubEnv('VITE_SUPABASE_PUBLISHABLE_KEY', 'test-anon-key');
+vi.stubEnv("VITE_SUPABASE_URL", "https://test-project.supabase.co");
+vi.stubEnv("VITE_SUPABASE_PUBLISHABLE_KEY", "test-anon-key");
 
 // Mock sonner toast
-vi.mock('sonner', () => ({
+vi.mock("sonner", () => ({
   toast: Object.assign(vi.fn(), {
     success: vi.fn(),
     error: vi.fn(),
@@ -21,7 +21,7 @@ vi.mock('sonner', () => ({
 }));
 
 // Mock logger to prevent console noise in tests
-vi.mock('@/lib/logger', () => ({
+vi.mock("@/lib/logger", () => ({
   logger: {
     info: vi.fn(),
     warn: vi.fn(),
@@ -41,10 +41,10 @@ const localStorageMock = {
   length: 0,
   key: vi.fn(),
 };
-Object.defineProperty(window, 'localStorage', { value: localStorageMock });
+Object.defineProperty(window, "localStorage", { value: localStorageMock });
 
 // Mock matchMedia
-Object.defineProperty(window, 'matchMedia', {
+Object.defineProperty(window, "matchMedia", {
   writable: true,
   value: vi.fn().mockImplementation((query) => ({
     matches: false,

@@ -46,12 +46,15 @@ export function useOnboarding() {
 
   const completeOnboarding = async () => {
     try {
-      await supabase.from("system_settings").upsert({
-        key: "onboarding_completed",
-        value: true,
-        description: "Whether the onboarding wizard has been completed",
-      }, { onConflict: "key" });
-      
+      await supabase.from("system_settings").upsert(
+        {
+          key: "onboarding_completed",
+          value: true,
+          description: "Whether the onboarding wizard has been completed",
+        },
+        { onConflict: "key" },
+      );
+
       setShowOnboarding(false);
     } catch (err) {
       logger.error("Error completing onboarding:", err);

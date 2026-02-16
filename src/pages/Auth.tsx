@@ -35,7 +35,9 @@ export default function Auth() {
 
   // Clear any in-progress signup flag — user navigated to login instead
   useEffect(() => {
-    try { sessionStorage.removeItem("pulcrix_signup_in_progress"); } catch {}
+    try {
+      sessionStorage.removeItem("pulcrix_signup_in_progress");
+    } catch {}
   }, []);
 
   const handlePasswordReset = async (e: React.FormEvent) => {
@@ -108,14 +110,16 @@ export default function Auth() {
     // Check rate limiting first
     const isBlocked = await checkRateLimit(loginEmail);
     if (isBlocked) {
-      toast.error(`Too many failed attempts. Please try again in ${rateLimitState.remainingMinutes} minutes.`);
+      toast.error(
+        `Too many failed attempts. Please try again in ${rateLimitState.remainingMinutes} minutes.`,
+      );
       return;
     }
 
     // Validate with zod
     const result = loginSchema.safeParse({
       email: loginEmail,
-      password: loginPassword
+      password: loginPassword,
     });
 
     if (!result.success) {
@@ -145,7 +149,7 @@ export default function Auth() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="animate-pulse text-primary">Loading...</div>
       </div>
     );
@@ -154,9 +158,9 @@ export default function Auth() {
   // Logged in but no role assigned
   if (user && !role) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4">
+      <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4">
         <div className="w-full max-w-md space-y-6">
-          <div className="text-center space-y-2">
+          <div className="space-y-2 text-center">
             <div className="flex items-center justify-center">
               <PulcrixLogo variant="icon" size="lg" className="text-primary" />
             </div>
@@ -172,11 +176,7 @@ export default function Auth() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
-              <Button
-                className="w-full"
-                onClick={handleBootstrapAdmin}
-                disabled={isBootstrapping}
-              >
+              <Button className="w-full" onClick={handleBootstrapAdmin} disabled={isBootstrapping}>
                 {isBootstrapping ? "Configuring..." : "Configure as Admin (first time only)"}
               </Button>
               <Button variant="outline" className="w-full" onClick={signOut}>
@@ -190,31 +190,34 @@ export default function Auth() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-background via-background to-primary/5 p-4 safe-area-inset-top safe-area-inset-bottom">
+    <div className="safe-area-inset-top safe-area-inset-bottom flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-background via-background to-primary/5 p-4">
       <div className="w-full max-w-md space-y-4 sm:space-y-6">
         {/* Logo and branding */}
-        <div className="text-center space-y-2 sm:space-y-3">
-          <Link to="/" className="flex items-center justify-center hover:opacity-80 transition-opacity">
+        <div className="space-y-2 text-center sm:space-y-3">
+          <Link
+            to="/"
+            className="flex items-center justify-center transition-opacity hover:opacity-80"
+          >
             <PulcrixLogo variant="icon" size="lg" className="text-primary" />
           </Link>
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Pulcrix</h1>
-          <p className="text-sm sm:text-base text-muted-foreground">Clean Living. Pure Solutions.</p>
+          <h1 className="text-2xl font-bold text-foreground sm:text-3xl">Pulcrix</h1>
+          <p className="text-sm text-muted-foreground sm:text-base">
+            Clean Living. Pure Solutions.
+          </p>
         </div>
 
         <Card className="border-border shadow-xl">
-          <CardHeader className="pb-2 text-center px-4 sm:px-6">
+          <CardHeader className="px-4 pb-2 text-center sm:px-6">
             <CardTitle className="text-lg sm:text-xl">👋 Welcome Back</CardTitle>
-            <CardDescription className="text-sm">
-              Sign in to your account
-            </CardDescription>
+            <CardDescription className="text-sm">Sign in to your account</CardDescription>
           </CardHeader>
           <CardContent className="px-4 sm:px-6">
             {/* Password Reset Form */}
             {showResetForm ? (
               <div className="space-y-4">
                 {resetSent ? (
-                  <div className="text-center space-y-4">
-                    <div className="h-16 w-16 rounded-full bg-success/10 flex items-center justify-center mx-auto">
+                  <div className="space-y-4 text-center">
+                    <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-success/10">
                       <CheckCircle className="h-8 w-8 text-success" />
                     </div>
                     <h3 className="font-semibold text-foreground">Email sent!</h3>
@@ -235,7 +238,7 @@ export default function Auth() {
                   </div>
                 ) : (
                   <form onSubmit={handlePasswordReset} className="space-y-4">
-                    <div className="text-center mb-4">
+                    <div className="mb-4 text-center">
                       <h3 className="font-semibold text-foreground">Forgot your password?</h3>
                       <p className="text-sm text-muted-foreground">
                         Enter your email and we'll send you a reset link.
@@ -252,11 +255,7 @@ export default function Auth() {
                         required
                       />
                     </div>
-                    <Button
-                      type="submit"
-                      className="w-full"
-                      disabled={isSubmitting}
-                    >
+                    <Button type="submit" className="w-full" disabled={isSubmitting}>
                       {isSubmitting ? "Sending..." : "Send reset link"}
                     </Button>
                     <Button
@@ -277,7 +276,8 @@ export default function Auth() {
                   <Alert variant="destructive" className="mb-4">
                     <Lock className="h-4 w-4" />
                     <AlertDescription>
-                      Account temporarily blocked. Please try again in {rateLimitState.remainingMinutes} minutes.
+                      Account temporarily blocked. Please try again in{" "}
+                      {rateLimitState.remainingMinutes} minutes.
                     </AlertDescription>
                   </Alert>
                 )}
@@ -293,7 +293,9 @@ export default function Auth() {
 
                 <form onSubmit={handleLogin} className="space-y-3 sm:space-y-4">
                   <div className="space-y-1.5 sm:space-y-2">
-                    <Label htmlFor="login-email" className="text-sm">Email</Label>
+                    <Label htmlFor="login-email" className="text-sm">
+                      Email
+                    </Label>
                     <Input
                       id="login-email"
                       type="email"
@@ -303,7 +305,7 @@ export default function Auth() {
                         setLoginEmail(e.target.value);
                         setFormErrors((prev) => ({ ...prev, login_email: "" }));
                       }}
-                      className={`h-11 sm:h-10 text-base sm:text-sm ${formErrors.login_email ? "border-destructive" : ""}`}
+                      className={`h-11 text-base sm:h-10 sm:text-sm ${formErrors.login_email ? "border-destructive" : ""}`}
                       disabled={rateLimitState.isBlocked}
                       required
                       autoComplete="email"
@@ -314,11 +316,13 @@ export default function Auth() {
                   </div>
                   <div className="space-y-1.5 sm:space-y-2">
                     <div className="flex items-center justify-between">
-                      <Label htmlFor="login-password" className="text-sm">Password</Label>
+                      <Label htmlFor="login-password" className="text-sm">
+                        Password
+                      </Label>
                       <button
                         type="button"
                         onClick={() => setShowResetForm(true)}
-                        className="text-xs text-primary hover:underline py-1"
+                        className="py-1 text-xs text-primary hover:underline"
                       >
                         Forgot password?
                       </button>
@@ -333,7 +337,7 @@ export default function Auth() {
                           setLoginPassword(e.target.value);
                           setFormErrors((prev) => ({ ...prev, login_password: "" }));
                         }}
-                        className={`h-11 sm:h-10 text-base sm:text-sm pr-11 ${formErrors.login_password ? "border-destructive" : ""}`}
+                        className={`h-11 pr-11 text-base sm:h-10 sm:text-sm ${formErrors.login_password ? "border-destructive" : ""}`}
                         disabled={rateLimitState.isBlocked}
                         required
                         autoComplete="current-password"
@@ -341,10 +345,14 @@ export default function Auth() {
                       <button
                         type="button"
                         onClick={() => setShowLoginPassword(!showLoginPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-1"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-muted-foreground transition-colors hover:text-foreground"
                         disabled={rateLimitState.isBlocked}
                       >
-                        {showLoginPassword ? <EyeOff className="h-5 w-5 sm:h-4 sm:w-4" /> : <Eye className="h-5 w-5 sm:h-4 sm:w-4" />}
+                        {showLoginPassword ? (
+                          <EyeOff className="h-5 w-5 sm:h-4 sm:w-4" />
+                        ) : (
+                          <Eye className="h-5 w-5 sm:h-4 sm:w-4" />
+                        )}
                       </button>
                     </div>
                     {formErrors.login_password && (
@@ -353,7 +361,7 @@ export default function Auth() {
                   </div>
                   <Button
                     type="submit"
-                    className="w-full h-12 text-base mt-2"
+                    className="mt-2 h-12 w-full text-base"
                     disabled={isSubmitting || rateLimitState.isBlocked}
                   >
                     {isSubmitting ? "Signing in..." : "Sign In"}
@@ -361,18 +369,14 @@ export default function Auth() {
                 </form>
 
                 {/* Create account link */}
-                <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-border">
-                  <p className="text-center text-sm text-muted-foreground mb-3">
+                <div className="mt-4 border-t border-border pt-4 sm:mt-6 sm:pt-6">
+                  <p className="mb-3 text-center text-sm text-muted-foreground">
                     Don't have an account yet?
                   </p>
-                  <Button
-                    variant="outline"
-                    className="w-full h-11 sm:h-10 group"
-                    asChild
-                  >
+                  <Button variant="outline" className="group h-11 w-full sm:h-10" asChild>
                     <Link to="/signup">
                       Start your 14-day free trial
-                      <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                      <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                     </Link>
                   </Button>
                 </div>
@@ -381,7 +385,7 @@ export default function Auth() {
           </CardContent>
         </Card>
 
-        <p className="text-center text-xs sm:text-sm text-muted-foreground">
+        <p className="text-center text-xs text-muted-foreground sm:text-sm">
           Pulcrix — Clean Living. Pure Solutions.
         </p>
       </div>

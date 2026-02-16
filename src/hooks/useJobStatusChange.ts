@@ -28,21 +28,18 @@ export function useJobStatusChange(onUpdate?: () => void) {
 
   const updateJobStatus = async (jobId: string, newStatus: JobStatus) => {
     setUpdatingJobId(jobId);
-    
+
     try {
       const updateData: Record<string, unknown> = { status: newStatus };
-      
+
       // Auto-set timestamps based on status
       if (newStatus === "in_progress") {
         updateData.start_time = new Date().toISOString();
       } else if (newStatus === "completed") {
         updateData.end_time = new Date().toISOString();
       }
-      
-      const { error } = await supabase
-        .from("jobs")
-        .update(updateData)
-        .eq("id", jobId);
+
+      const { error } = await supabase.from("jobs").update(updateData).eq("id", jobId);
 
       if (error) throw error;
 

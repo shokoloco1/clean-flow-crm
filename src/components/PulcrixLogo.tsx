@@ -39,11 +39,7 @@ export function PulcrixLogo({ variant = "full", size = "md", className }: Pulcri
   if (variant === "wordmark") {
     return (
       <span
-        className={cn(
-          "font-bold tracking-wider",
-          config.text,
-          className
-        )}
+        className={cn("font-bold tracking-wider", config.text, className)}
         style={{ fontFamily: "'Inter', sans-serif" }}
       >
         PULCRIX

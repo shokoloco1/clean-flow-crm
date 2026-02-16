@@ -43,7 +43,7 @@ export function PaymentStep({
   });
 
   return (
-    <div className="space-y-6 max-w-md mx-auto">
+    <div className="mx-auto max-w-md space-y-6">
       {/* Order Summary */}
       <Card>
         <CardHeader className="pb-3">
@@ -71,8 +71,8 @@ export function PaymentStep({
           <hr className="border-border" />
 
           {/* Trial Info */}
-          <div className="bg-primary/5 border border-primary/20 rounded-lg p-3">
-            <div className="flex items-center gap-2 mb-2">
+          <div className="rounded-lg border border-primary/20 bg-primary/5 p-3">
+            <div className="mb-2 flex items-center gap-2">
               <Badge variant="secondary" className="bg-primary/10 text-primary">
                 14-Day Free Trial
               </Badge>
@@ -132,7 +132,7 @@ export function PaymentStep({
       {/* Start Trial Button */}
       <Button
         size="lg"
-        className="w-full h-14 text-lg group"
+        className="group h-14 w-full text-lg"
         onClick={onStartCheckout}
         disabled={isLoading}
       >
@@ -145,29 +145,29 @@ export function PaymentStep({
           <>
             <CreditCard className="mr-2 h-5 w-5" />
             Start Free Trial
-            <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+            <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
           </>
         )}
       </Button>
 
       {/* What happens next */}
-      <div className="bg-muted/50 rounded-lg p-4 space-y-3">
-        <p className="font-medium text-sm">What happens next:</p>
+      <div className="space-y-3 rounded-lg bg-muted/50 p-4">
+        <p className="text-sm font-medium">What happens next:</p>
         <ol className="space-y-2 text-sm text-muted-foreground">
           <li className="flex items-start gap-2">
-            <span className="flex-shrink-0 h-5 w-5 rounded-full bg-primary/10 text-primary text-xs flex items-center justify-center font-medium">
+            <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-medium text-primary">
               1
             </span>
             <span>Enter your payment details securely with Stripe</span>
           </li>
           <li className="flex items-start gap-2">
-            <span className="flex-shrink-0 h-5 w-5 rounded-full bg-primary/10 text-primary text-xs flex items-center justify-center font-medium">
+            <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-medium text-primary">
               2
             </span>
             <span>Your 14-day trial begins immediately</span>
           </li>
           <li className="flex items-start gap-2">
-            <span className="flex-shrink-0 h-5 w-5 rounded-full bg-primary/10 text-primary text-xs flex items-center justify-center font-medium">
+            <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-medium text-primary">
               3
             </span>
             <span>Cancel anytime before {formattedTrialEnd} to avoid charges</span>
@@ -176,7 +176,7 @@ export function PaymentStep({
       </div>
 
       {/* Terms */}
-      <p className="text-xs text-center text-muted-foreground">
+      <p className="text-center text-xs text-muted-foreground">
         By starting your trial, you agree to our{" "}
         <a href="/terms" className="underline hover:text-foreground">
           Terms of Service

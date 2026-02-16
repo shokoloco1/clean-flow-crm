@@ -9,9 +9,13 @@ export interface CleaningService {
 }
 
 const DEFAULT_SERVICES: CleaningService[] = [
-  { id: 'general', label: 'General Cleaning', description: 'Standard house cleaning' },
-  { id: 'deep', label: 'Deep Cleaning', description: 'Thorough top-to-bottom cleaning' },
-  { id: 'end_of_lease', label: 'End of Lease Cleaning', description: 'Bond back guarantee cleaning' },
+  { id: "general", label: "General Cleaning", description: "Standard house cleaning" },
+  { id: "deep", label: "Deep Cleaning", description: "Thorough top-to-bottom cleaning" },
+  {
+    id: "end_of_lease",
+    label: "End of Lease Cleaning",
+    description: "Bond back guarantee cleaning",
+  },
 ];
 
 export function useCleaningServices() {

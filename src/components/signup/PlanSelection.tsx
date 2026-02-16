@@ -1,4 +1,3 @@
-
 import { Check, Zap, Building2, Rocket, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -93,11 +92,11 @@ export function PlanSelection({
   return (
     <div className="space-y-6">
       {/* Trial Banner */}
-      <div className="bg-primary/10 border border-primary/20 rounded-lg p-4 text-center">
+      <div className="rounded-lg border border-primary/20 bg-primary/10 p-4 text-center">
         <p className="text-sm font-medium text-primary">
           Start your 14-day free trial - no charge until trial ends
         </p>
-        <p className="text-xs text-muted-foreground mt-1">
+        <p className="mt-1 text-xs text-muted-foreground">
           Cancel anytime before your trial ends and you won't be charged
         </p>
       </div>
@@ -107,22 +106,18 @@ export function PlanSelection({
         <Label
           htmlFor="annual-toggle"
           className={cn(
-            "text-sm font-medium cursor-pointer",
-            !isAnnual ? "text-foreground" : "text-muted-foreground"
+            "cursor-pointer text-sm font-medium",
+            !isAnnual ? "text-foreground" : "text-muted-foreground",
           )}
         >
           Monthly
         </Label>
-        <Switch
-          id="annual-toggle"
-          checked={isAnnual}
-          onCheckedChange={onToggleAnnual}
-        />
+        <Switch id="annual-toggle" checked={isAnnual} onCheckedChange={onToggleAnnual} />
         <Label
           htmlFor="annual-toggle"
           className={cn(
-            "text-sm font-medium cursor-pointer flex items-center gap-2",
-            isAnnual ? "text-foreground" : "text-muted-foreground"
+            "flex cursor-pointer items-center gap-2 text-sm font-medium",
+            isAnnual ? "text-foreground" : "text-muted-foreground",
           )}
         >
           Annual
@@ -146,16 +141,14 @@ export function PlanSelection({
               key={plan.id}
               className={cn(
                 "relative cursor-pointer transition-all hover:shadow-lg",
-                isSelected && "ring-2 ring-primary shadow-lg",
-                plan.popular && "border-primary"
+                isSelected && "shadow-lg ring-2 ring-primary",
+                plan.popular && "border-primary",
               )}
               onClick={() => onSelectPlan(plan.id, isAnnual)}
             >
               {plan.popular && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <Badge className="bg-primary text-primary-foreground">
-                    Most Popular
-                  </Badge>
+                  <Badge className="bg-primary text-primary-foreground">Most Popular</Badge>
                 </div>
               )}
 
@@ -163,58 +156,47 @@ export function PlanSelection({
                 <div className="flex items-center justify-between">
                   <div
                     className={cn(
-                      "h-10 w-10 rounded-lg flex items-center justify-center",
+                      "flex h-10 w-10 items-center justify-center rounded-lg",
                       isSelected
                         ? "bg-primary text-primary-foreground"
-                        : "bg-muted text-muted-foreground"
+                        : "bg-muted text-muted-foreground",
                     )}
                   >
                     {plan.icon}
                   </div>
                   {isSelected && (
-                    <div className="h-6 w-6 rounded-full bg-primary flex items-center justify-center">
+                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary">
                       <Check className="h-4 w-4 text-primary-foreground" />
                     </div>
                   )}
                 </div>
-                <CardTitle className="text-lg mt-3">{plan.name}</CardTitle>
-                <CardDescription className="text-xs">
-                  {plan.description}
-                </CardDescription>
+                <CardTitle className="mt-3 text-lg">{plan.name}</CardTitle>
+                <CardDescription className="text-xs">{plan.description}</CardDescription>
               </CardHeader>
 
               <CardContent className="space-y-4">
                 {/* Price */}
                 <div>
                   <div className="flex items-baseline gap-1">
-                    <span className="text-3xl font-bold">
-                      ${monthlyEquivalent}
-                    </span>
-                    <span className="text-muted-foreground text-sm">/month</span>
+                    <span className="text-3xl font-bold">${monthlyEquivalent}</span>
+                    <span className="text-sm text-muted-foreground">/month</span>
                   </div>
                   {isAnnual && (
-                    <p className="text-xs text-muted-foreground">
-                      ${price} billed annually
-                    </p>
+                    <p className="text-xs text-muted-foreground">${price} billed annually</p>
                   )}
                 </div>
 
                 {/* Staff Limit Badge */}
                 <div className="flex items-center gap-2">
                   <Users className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground">
-                    {plan.staffLimit}
-                  </span>
+                  <span className="text-sm text-muted-foreground">{plan.staffLimit}</span>
                 </div>
 
                 {/* Features */}
                 <ul className="space-y-2">
                   {plan.features.map((feature, idx) => (
-                    <li
-                      key={idx}
-                      className="flex items-start gap-2 text-sm text-muted-foreground"
-                    >
-                      <Check className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" />
+                    <li key={idx} className="flex items-start gap-2 text-sm text-muted-foreground">
+                      <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
                       <span>{feature}</span>
                     </li>
                   ))}
@@ -239,8 +221,8 @@ export function PlanSelection({
 
       {/* Trial Info */}
       <p className="text-center text-sm text-muted-foreground">
-        Your card will be charged after the 14-day trial period ends.
-        Cancel anytime from your account settings.
+        Your card will be charged after the 14-day trial period ends. Cancel anytime from your
+        account settings.
       </p>
     </div>
   );

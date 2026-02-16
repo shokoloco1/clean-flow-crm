@@ -14,7 +14,15 @@ import { cn } from "@/lib/utils";
 
 interface TimelineEvent {
   id: string;
-  type: "created" | "started" | "completed" | "cancelled" | "photo" | "checklist" | "alert" | "assigned";
+  type:
+    | "created"
+    | "started"
+    | "completed"
+    | "cancelled"
+    | "photo"
+    | "checklist"
+    | "alert"
+    | "assigned";
   title: string;
   description?: string;
   timestamp: string;
@@ -36,7 +44,12 @@ interface JobTimelineProps {
   alerts?: { created_at: string; message: string; is_resolved: boolean }[];
 }
 
-export function JobTimeline({ job, photos = [], checklistItems = [], alerts = [] }: JobTimelineProps) {
+export function JobTimeline({
+  job,
+  photos = [],
+  checklistItems = [],
+  alerts = [],
+}: JobTimelineProps) {
   const events: TimelineEvent[] = [];
 
   // Job created event
@@ -166,8 +179,8 @@ export function JobTimeline({ job, photos = [], checklistItems = [], alerts = []
 
   if (events.length === 0) {
     return (
-      <div className="text-center py-8 text-muted-foreground">
-        <Clock className="h-8 w-8 mx-auto mb-2 opacity-50" />
+      <div className="py-8 text-center text-muted-foreground">
+        <Clock className="mx-auto mb-2 h-8 w-8 opacity-50" />
         <p>No events recorded yet</p>
       </div>
     );
@@ -176,7 +189,7 @@ export function JobTimeline({ job, photos = [], checklistItems = [], alerts = []
   return (
     <div className="relative space-y-4">
       {/* Timeline line */}
-      <div className="absolute left-[19px] top-2 bottom-2 w-0.5 bg-border" />
+      <div className="absolute bottom-2 left-[19px] top-2 w-0.5 bg-border" />
 
       {events.map((event) => (
         <div key={event.id} className="relative flex gap-4">
@@ -184,28 +197,26 @@ export function JobTimeline({ job, photos = [], checklistItems = [], alerts = []
           <div
             className={cn(
               "relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2",
-              getEventColor(event.type)
+              getEventColor(event.type),
             )}
           >
             {getEventIcon(event.type)}
           </div>
 
           {/* Content */}
-          <div className="flex-1 min-w-0 pb-4">
+          <div className="min-w-0 flex-1 pb-4">
             <div className="flex items-start justify-between gap-2">
               <div>
                 <p className="font-medium text-foreground">{event.title}</p>
                 {event.description && (
-                  <p className="text-sm text-muted-foreground mt-0.5">
-                    {event.description}
-                  </p>
+                  <p className="mt-0.5 text-sm text-muted-foreground">{event.description}</p>
                 )}
                 {event.metadata && (
-                  <div className="flex gap-2 mt-1">
+                  <div className="mt-1 flex gap-2">
                     {Object.entries(event.metadata).map(([key, value]) => (
                       <span
                         key={key}
-                        className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground"
+                        className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground"
                       >
                         {value}
                       </span>
@@ -213,7 +224,7 @@ export function JobTimeline({ job, photos = [], checklistItems = [], alerts = []
                   </div>
                 )}
               </div>
-              <time className="text-xs text-muted-foreground whitespace-nowrap">
+              <time className="whitespace-nowrap text-xs text-muted-foreground">
                 {format(new Date(event.timestamp), "d MMM, HH:mm")}
               </time>
             </div>

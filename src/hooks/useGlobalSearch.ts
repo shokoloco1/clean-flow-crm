@@ -34,7 +34,8 @@ export function useGlobalSearch() {
       // Search jobs
       let jobsQuery = supabase
         .from("jobs")
-        .select(`
+        .select(
+          `
           id,
           location,
           scheduled_date,
@@ -43,7 +44,8 @@ export function useGlobalSearch() {
           assigned_staff_id,
           clients(name),
           properties(name)
-        `)
+        `,
+        )
         .or(`location.ilike.${searchTerm}`)
         .limit(10);
 
@@ -63,27 +65,27 @@ export function useGlobalSearch() {
       // Run all queries in parallel for faster results
       const [jobsResult, clientsResult, propertiesResult, staffResult] = await Promise.all([
         jobsQuery,
-        (!filters?.status && !filters?.staffId) 
+        !filters?.status && !filters?.staffId
           ? supabase
               .from("clients")
               .select("id, name, email, phone")
               .or(`name.ilike.${searchTerm},email.ilike.${searchTerm},phone.ilike.${searchTerm}`)
               .limit(5)
           : Promise.resolve({ data: null }),
-        (!filters?.status && !filters?.staffId)
+        !filters?.status && !filters?.staffId
           ? supabase
               .from("properties")
               .select("id, name, address, clients(name)")
               .or(`name.ilike.${searchTerm},address.ilike.${searchTerm}`)
               .limit(5)
           : Promise.resolve({ data: null }),
-        (!filters?.status)
+        !filters?.status
           ? supabase
               .from("profiles")
               .select("id, user_id, full_name, email, phone")
               .or(`full_name.ilike.${searchTerm},email.ilike.${searchTerm}`)
               .limit(5)
-          : Promise.resolve({ data: null })
+          : Promise.resolve({ data: null }),
       ]);
 
       // Process jobs
@@ -109,9 +111,9 @@ export function useGlobalSearch() {
             type: "client",
             title: client.name,
             subtitle: client.email || client.phone || "No contact info",
-            metadata: { 
+            metadata: {
               phone: client.phone ?? undefined,
-              email: client.email ?? undefined 
+              email: client.email ?? undefined,
             },
           });
         });
@@ -140,7 +142,7 @@ export function useGlobalSearch() {
             subtitle: member.email,
             metadata: {
               phone: (member as any).phone ?? undefined,
-              email: member.email ?? undefined
+              email: member.email ?? undefined,
             },
           });
         });

@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from './useAuth';
+import { useState, useEffect, useCallback } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "./useAuth";
 
 export interface Notification {
   id: string;
@@ -29,17 +29,17 @@ export function useNotifications() {
 
     try {
       const { data, error } = await supabase
-        .from('notifications')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
+        .from("notifications")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
         .limit(50);
 
       if (error) throw error;
 
       const notifs = (data || []) as Notification[];
       setNotifications(notifs);
-      setUnreadCount(notifs.filter(n => !n.is_read).length);
+      setUnreadCount(notifs.filter((n) => !n.is_read).length);
     } catch (error) {
       // Silent fail - notifications are non-critical
     } finally {
@@ -50,16 +50,16 @@ export function useNotifications() {
   const markAsRead = useCallback(async (notificationId: string) => {
     try {
       const { error } = await supabase
-        .from('notifications')
+        .from("notifications")
         .update({ is_read: true })
-        .eq('id', notificationId);
+        .eq("id", notificationId);
 
       if (error) throw error;
 
-      setNotifications(prev => 
-        prev.map(n => n.id === notificationId ? { ...n, is_read: true } : n)
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === notificationId ? { ...n, is_read: true } : n)),
       );
-      setUnreadCount(prev => Math.max(0, prev - 1));
+      setUnreadCount((prev) => Math.max(0, prev - 1));
     } catch (error) {
       // Silent fail
     }
@@ -70,48 +70,45 @@ export function useNotifications() {
 
     try {
       const { error } = await supabase
-        .from('notifications')
+        .from("notifications")
         .update({ is_read: true })
-        .eq('user_id', user.id)
-        .eq('is_read', false);
+        .eq("user_id", user.id)
+        .eq("is_read", false);
 
       if (error) throw error;
 
-      setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
+      setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
       setUnreadCount(0);
     } catch (error) {
       // Silent fail
     }
   }, [user]);
 
-  const deleteNotification = useCallback(async (notificationId: string) => {
-    try {
-      const notification = notifications.find(n => n.id === notificationId);
-      
-      const { error } = await supabase
-        .from('notifications')
-        .delete()
-        .eq('id', notificationId);
+  const deleteNotification = useCallback(
+    async (notificationId: string) => {
+      try {
+        const notification = notifications.find((n) => n.id === notificationId);
 
-      if (error) throw error;
+        const { error } = await supabase.from("notifications").delete().eq("id", notificationId);
 
-      setNotifications(prev => prev.filter(n => n.id !== notificationId));
-      if (notification && !notification.is_read) {
-        setUnreadCount(prev => Math.max(0, prev - 1));
+        if (error) throw error;
+
+        setNotifications((prev) => prev.filter((n) => n.id !== notificationId));
+        if (notification && !notification.is_read) {
+          setUnreadCount((prev) => Math.max(0, prev - 1));
+        }
+      } catch (error) {
+        // Silent fail
       }
-    } catch (error) {
-      // Silent fail
-    }
-  }, [notifications]);
+    },
+    [notifications],
+  );
 
   const clearAll = useCallback(async () => {
     if (!user) return;
 
     try {
-      const { error } = await supabase
-        .from('notifications')
-        .delete()
-        .eq('user_id', user.id);
+      const { error } = await supabase.from("notifications").delete().eq("user_id", user.id);
 
       if (error) throw error;
 
@@ -132,36 +129,36 @@ export function useNotifications() {
     if (!user) return;
 
     const channel = supabase
-      .channel('notifications-realtime')
+      .channel("notifications-realtime")
       .on(
-        'postgres_changes',
+        "postgres_changes",
         {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'notifications',
-          filter: `user_id=eq.${user.id}`
+          event: "INSERT",
+          schema: "public",
+          table: "notifications",
+          filter: `user_id=eq.${user.id}`,
         },
         (payload) => {
           const newNotification = payload.new as Notification;
-          setNotifications(prev => [newNotification, ...prev]);
-          setUnreadCount(prev => prev + 1);
-        }
+          setNotifications((prev) => [newNotification, ...prev]);
+          setUnreadCount((prev) => prev + 1);
+        },
       )
       .on(
-        'postgres_changes',
+        "postgres_changes",
         {
-          event: 'DELETE',
-          schema: 'public',
-          table: 'notifications',
-          filter: `user_id=eq.${user.id}`
+          event: "DELETE",
+          schema: "public",
+          table: "notifications",
+          filter: `user_id=eq.${user.id}`,
         },
         (payload) => {
           const deletedNotification = payload.old as Notification;
-          setNotifications(prev => prev.filter(n => n.id !== deletedNotification.id));
+          setNotifications((prev) => prev.filter((n) => n.id !== deletedNotification.id));
           if (!deletedNotification.is_read) {
-            setUnreadCount(prev => Math.max(0, prev - 1));
+            setUnreadCount((prev) => Math.max(0, prev - 1));
           }
-        }
+        },
       )
       .subscribe();
 
@@ -178,6 +175,6 @@ export function useNotifications() {
     markAllAsRead,
     deleteNotification,
     clearAll,
-    refetch: fetchNotifications
+    refetch: fetchNotifications,
   };
 }

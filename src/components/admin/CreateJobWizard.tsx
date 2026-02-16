@@ -4,18 +4,22 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
-  Loader2, Search, Plus, User, MapPin,
-  Calendar as CalendarIcon, CheckCircle, ArrowLeft, ArrowRight,
-  Phone, Building, AlertTriangle
+  Loader2,
+  Search,
+  Plus,
+  User,
+  MapPin,
+  Calendar as CalendarIcon,
+  CheckCircle,
+  ArrowLeft,
+  ArrowRight,
+  Phone,
+  Building,
+  AlertTriangle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format, isBefore, startOfDay } from "date-fns";
@@ -72,20 +76,20 @@ export function CreateJobWizard({
   formData,
   onFormChange,
   onSubmit,
-  onClientCreated
+  onClientCreated,
 }: CreateJobWizardProps) {
   const [currentStep, setCurrentStep] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(
-    formData.scheduled_date ? new Date(formData.scheduled_date) : new Date()
+    formData.scheduled_date ? new Date(formData.scheduled_date) : new Date(),
   );
   const [showQuickAdd, setShowQuickAdd] = useState(false);
   const [quickAddName, setQuickAddName] = useState("");
   const [quickAddPhone, setQuickAddPhone] = useState("");
   const [isCreatingClient, setIsCreatingClient] = useState(false);
   const [staffConflicts, setStaffConflicts] = useState<string[]>([]);
-  
+
   const { services, loading: loadingServices } = useCleaningServices();
 
   // Check if selected date is in the past
@@ -113,9 +117,12 @@ export function CreateJobWizard({
       if (existingJobs && existingJobs.length > 0) {
         // Check for time overlap (same time slot)
         const conflicts = existingJobs
-          .filter(job => job.scheduled_time === formData.scheduled_time)
-          .map(job => `Already assigned to ${(job.clients as { name?: string } | null)?.name || 'a job'} at ${job.scheduled_time}`);
-        
+          .filter((job) => job.scheduled_time === formData.scheduled_time)
+          .map(
+            (job) =>
+              `Already assigned to ${(job.clients as { name?: string } | null)?.name || "a job"} at ${job.scheduled_time}`,
+          );
+
         setStaffConflicts(conflicts);
       } else {
         setStaffConflicts([]);
@@ -129,17 +136,18 @@ export function CreateJobWizard({
   const filteredClients = useMemo(() => {
     if (!searchQuery.trim()) return clients;
     const query = searchQuery.toLowerCase();
-    return clients.filter(c => 
-      c.name.toLowerCase().includes(query) ||
-      c.phone?.toLowerCase().includes(query) ||
-      c.address?.toLowerCase().includes(query)
+    return clients.filter(
+      (c) =>
+        c.name.toLowerCase().includes(query) ||
+        c.phone?.toLowerCase().includes(query) ||
+        c.address?.toLowerCase().includes(query),
     );
   }, [clients, searchQuery]);
 
   // Get selected client
-  const selectedClient = useMemo(() => 
-    clients.find(c => c.id === formData.client_id),
-    [clients, formData.client_id]
+  const selectedClient = useMemo(
+    () => clients.find((c) => c.id === formData.client_id),
+    [clients, formData.client_id],
   );
 
   // Auto-suggest staff based on availability (simplified - first available)
@@ -162,29 +170,29 @@ export function CreateJobWizard({
     onFormChange({
       ...formData,
       client_id: client.id,
-      location: client.address || ""
+      location: client.address || "",
     });
   };
 
   const handleServiceToggle = (serviceId: string) => {
     const newServices = selectedServices.includes(serviceId)
-      ? selectedServices.filter(s => s !== serviceId)
+      ? selectedServices.filter((s) => s !== serviceId)
       : [...selectedServices, serviceId];
-    
+
     setSelectedServices(newServices);
-    
+
     const serviceLabels = newServices
-      .map(id => services.find(s => s.id === id)?.label)
+      .map((id) => services.find((s) => s.id === id)?.label)
       .filter(Boolean)
-      .join('\n');
-    
+      .join("\n");
+
     onFormChange({ ...formData, checklist: serviceLabels });
   };
 
   const handleDateSelect = (date: Date | undefined) => {
     setSelectedDate(date);
     if (date) {
-      onFormChange({ ...formData, scheduled_date: format(date, 'yyyy-MM-dd') });
+      onFormChange({ ...formData, scheduled_date: format(date, "yyyy-MM-dd") });
     }
   };
 
@@ -204,7 +212,7 @@ export function CreateJobWizard({
         .from("clients")
         .insert({
           name: quickAddName.trim(),
-          phone: quickAddPhone.trim() || null
+          phone: quickAddPhone.trim() || null,
         })
         .select()
         .single();
@@ -216,7 +224,7 @@ export function CreateJobWizard({
       setQuickAddPhone("");
       setShowQuickAdd(false);
       onClientCreated?.();
-      
+
       // Auto-select the new client
       handleClientSelect(data as Client);
     } catch (err) {
@@ -266,63 +274,69 @@ export function CreateJobWizard({
   };
 
   const getSelectedServiceNames = () => {
-    return selectedServices
-      .map(id => services.find(s => s.id === id)?.label)
-      .filter(Boolean);
+    return selectedServices.map((id) => services.find((s) => s.id === id)?.label).filter(Boolean);
   };
 
   const getSelectedStaffName = () => {
-    return staffList.find(s => s.user_id === formData.assigned_staff_id)?.full_name || "Not assigned";
+    return (
+      staffList.find((s) => s.user_id === formData.assigned_staff_id)?.full_name || "Not assigned"
+    );
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-lg h-[90vh] sm:h-auto sm:max-h-[85vh] flex flex-col p-0 gap-0">
-        <DialogHeader className="px-4 sm:px-6 pt-4 sm:pt-6 pb-2 shrink-0">
+      <DialogContent className="flex h-[90vh] flex-col gap-0 p-0 sm:h-auto sm:max-h-[85vh] sm:max-w-lg">
+        <DialogHeader className="shrink-0 px-4 pb-2 pt-4 sm:px-6 sm:pt-6">
           <DialogTitle className="text-xl">📋 New Job</DialogTitle>
-          
+
           {/* Step Indicator */}
-          <div className="flex items-center justify-between mt-4">
+          <div className="mt-4 flex items-center justify-between">
             {STEPS.map((step, index) => (
               <div key={step.id} className="flex items-center">
-                <div className={cn(
-                  "flex items-center justify-center w-8 h-8 rounded-full border-2 transition-colors",
-                  currentStep >= step.id 
-                    ? "bg-primary border-primary text-primary-foreground" 
-                    : "border-muted-foreground/30 text-muted-foreground"
-                )}>
+                <div
+                  className={cn(
+                    "flex h-8 w-8 items-center justify-center rounded-full border-2 transition-colors",
+                    currentStep >= step.id
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "border-muted-foreground/30 text-muted-foreground",
+                  )}
+                >
                   <step.icon className="h-4 w-4" />
                 </div>
-                <span className={cn(
-                  "ml-2 text-xs font-medium hidden sm:block",
-                  currentStep >= step.id ? "text-foreground" : "text-muted-foreground"
-                )}>
+                <span
+                  className={cn(
+                    "ml-2 hidden text-xs font-medium sm:block",
+                    currentStep >= step.id ? "text-foreground" : "text-muted-foreground",
+                  )}
+                >
                   {step.title}
                 </span>
                 {index < STEPS.length - 1 && (
-                  <div className={cn(
-                    "w-8 sm:w-12 h-0.5 mx-2",
-                    currentStep > step.id ? "bg-primary" : "bg-muted"
-                  )} />
+                  <div
+                    className={cn(
+                      "mx-2 h-0.5 w-8 sm:w-12",
+                      currentStep > step.id ? "bg-primary" : "bg-muted",
+                    )}
+                  />
                 )}
               </div>
             ))}
           </div>
         </DialogHeader>
 
-        <ScrollArea className="flex-1 min-h-0 overflow-y-auto">
-          <div className="space-y-4 py-4 px-4 sm:px-6 pb-6">
+        <ScrollArea className="min-h-0 flex-1 overflow-y-auto">
+          <div className="space-y-4 px-4 py-4 pb-6 sm:px-6">
             {/* Step 1: Select Client */}
             {currentStep === 1 && (
               <div className="space-y-4">
                 {/* Search Input */}
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
                     placeholder="Search by name, phone, or address..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10 h-12"
+                    className="h-12 pl-10"
                   />
                 </div>
 
@@ -330,24 +344,20 @@ export function CreateJobWizard({
                 {!showQuickAdd && (
                   <Button
                     variant="outline"
-                    className="w-full h-12 border-dashed"
+                    className="h-12 w-full border-dashed"
                     onClick={() => setShowQuickAdd(true)}
                   >
-                    <Plus className="h-4 w-4 mr-2" />
+                    <Plus className="mr-2 h-4 w-4" />
                     Quick Add Client
                   </Button>
                 )}
 
                 {/* Quick Add Form */}
                 {showQuickAdd && (
-                  <div className="p-4 border rounded-lg bg-muted/30 space-y-3">
+                  <div className="space-y-3 rounded-lg border bg-muted/30 p-4">
                     <div className="flex items-center justify-between">
                       <Label className="font-medium">New Client</Label>
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={() => setShowQuickAdd(false)}
-                      >
+                      <Button variant="ghost" size="sm" onClick={() => setShowQuickAdd(false)}>
                         Cancel
                       </Button>
                     </div>
@@ -361,15 +371,15 @@ export function CreateJobWizard({
                       value={quickAddPhone}
                       onChange={(e) => setQuickAddPhone(e.target.value)}
                     />
-                    <Button 
+                    <Button
                       className="w-full"
                       onClick={handleQuickAddClient}
                       disabled={isCreatingClient}
                     >
                       {isCreatingClient ? (
-                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       ) : (
-                        <Plus className="h-4 w-4 mr-2" />
+                        <Plus className="mr-2 h-4 w-4" />
                       )}
                       Add Client
                     </Button>
@@ -377,46 +387,46 @@ export function CreateJobWizard({
                 )}
 
                 {/* Client List */}
-                <div className="space-y-2 max-h-[300px] overflow-y-auto">
+                <div className="max-h-[300px] space-y-2 overflow-y-auto">
                   {filteredClients.length === 0 ? (
-                    <div className="text-center py-8 text-muted-foreground">
-                      <User className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    <div className="py-8 text-center text-muted-foreground">
+                      <User className="mx-auto mb-2 h-8 w-8 opacity-50" />
                       <p>No clients found</p>
                       <p className="text-sm">Try a different search or add a new client</p>
                     </div>
                   ) : (
-                    filteredClients.map(client => (
+                    filteredClients.map((client) => (
                       <button
                         key={client.id}
                         onClick={() => handleClientSelect(client)}
                         className={cn(
-                          "w-full text-left p-4 rounded-lg border transition-all",
+                          "w-full rounded-lg border p-4 text-left transition-all",
                           formData.client_id === client.id
                             ? "border-primary bg-primary/5 ring-1 ring-primary"
-                            : "hover:border-primary/50 hover:bg-muted/50"
+                            : "hover:border-primary/50 hover:bg-muted/50",
                         )}
                       >
                         <div className="flex items-start gap-3">
-                          <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10">
                             <User className="h-5 w-5 text-primary" />
                           </div>
-                          <div className="flex-1 min-w-0">
+                          <div className="min-w-0 flex-1">
                             <p className="font-medium text-foreground">{client.name}</p>
                             {client.phone && (
-                              <p className="text-sm text-muted-foreground flex items-center gap-1">
+                              <p className="flex items-center gap-1 text-sm text-muted-foreground">
                                 <Phone className="h-3 w-3" />
                                 {client.phone}
                               </p>
                             )}
                             {client.address && (
-                              <p className="text-sm text-muted-foreground flex items-center gap-1 truncate">
+                              <p className="flex items-center gap-1 truncate text-sm text-muted-foreground">
                                 <MapPin className="h-3 w-3 shrink-0" />
                                 {client.address}
                               </p>
                             )}
                           </div>
                           {formData.client_id === client.id && (
-                            <CheckCircle className="h-5 w-5 text-primary shrink-0" />
+                            <CheckCircle className="h-5 w-5 shrink-0 text-primary" />
                           )}
                         </div>
                       </button>
@@ -426,7 +436,7 @@ export function CreateJobWizard({
 
                 {/* Location Override */}
                 {formData.client_id && (
-                  <div className="space-y-2 pt-2 border-t">
+                  <div className="space-y-2 border-t pt-2">
                     <Label className="text-sm">Job Location</Label>
                     <Input
                       value={formData.location}
@@ -451,15 +461,15 @@ export function CreateJobWizard({
                     </div>
                   ) : (
                     <div className="flex flex-wrap gap-2">
-                      {services.map(service => (
+                      {services.map((service) => (
                         <button
                           key={service.id}
                           onClick={() => handleServiceToggle(service.id)}
                           className={cn(
-                            "px-4 py-2 rounded-full border text-sm font-medium transition-all",
+                            "rounded-full border px-4 py-2 text-sm font-medium transition-all",
                             selectedServices.includes(service.id)
-                              ? "bg-primary text-primary-foreground border-primary"
-                              : "bg-background hover:border-primary/50 hover:bg-muted/50"
+                              ? "border-primary bg-primary text-primary-foreground"
+                              : "bg-background hover:border-primary/50 hover:bg-muted/50",
                           )}
                         >
                           {service.label}
@@ -469,15 +479,18 @@ export function CreateJobWizard({
                   )}
                   {selectedServices.length > 0 && (
                     <p className="text-xs text-primary">
-                      ✓ {selectedServices.length} service{selectedServices.length !== 1 ? 's' : ''} selected
+                      ✓ {selectedServices.length} service{selectedServices.length !== 1 ? "s" : ""}{" "}
+                      selected
                     </p>
                   )}
                 </div>
 
                 {/* Date & Time Selection - Simple inputs */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
-                    <Label htmlFor="job-date" className="font-medium">Date *</Label>
+                    <Label htmlFor="job-date" className="font-medium">
+                      Date *
+                    </Label>
                     <Input
                       id="job-date"
                       type="date"
@@ -494,7 +507,9 @@ export function CreateJobWizard({
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="job-time" className="font-medium">Time *</Label>
+                    <Label htmlFor="job-time" className="font-medium">
+                      Time *
+                    </Label>
                     <Input
                       id="job-time"
                       type="time"
@@ -535,15 +550,17 @@ export function CreateJobWizard({
                     )}
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    {staffList.map(staff => (
+                    {staffList.map((staff) => (
                       <button
                         key={staff.user_id}
-                        onClick={() => onFormChange({ ...formData, assigned_staff_id: staff.user_id })}
+                        onClick={() =>
+                          onFormChange({ ...formData, assigned_staff_id: staff.user_id })
+                        }
                         className={cn(
-                          "px-4 py-2 rounded-full border text-sm font-medium transition-all flex items-center gap-2",
+                          "flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-all",
                           formData.assigned_staff_id === staff.user_id
-                            ? "bg-primary text-primary-foreground border-primary"
-                            : "bg-background hover:border-primary/50 hover:bg-muted/50"
+                            ? "border-primary bg-primary text-primary-foreground"
+                            : "bg-background hover:border-primary/50 hover:bg-muted/50",
                         )}
                       >
                         <User className="h-3 w-3" />
@@ -551,7 +568,7 @@ export function CreateJobWizard({
                       </button>
                     ))}
                   </div>
-                  
+
                   {/* Staff Conflict Warning */}
                   {staffConflicts.length > 0 && (
                     <Alert className="border-warning bg-warning/10 py-2">
@@ -580,10 +597,10 @@ export function CreateJobWizard({
             {/* Step 3: Confirmation */}
             {currentStep === 3 && (
               <div className="space-y-4">
-                <div className="bg-muted/30 rounded-lg p-4 space-y-4">
+                <div className="space-y-4 rounded-lg bg-muted/30 p-4">
                   {/* Client */}
                   <div className="flex items-start gap-3">
-                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10">
                       <User className="h-5 w-5 text-primary" />
                     </div>
                     <div>
@@ -594,7 +611,7 @@ export function CreateJobWizard({
 
                   {/* Location */}
                   <div className="flex items-start gap-3">
-                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10">
                       <MapPin className="h-5 w-5 text-primary" />
                     </div>
                     <div>
@@ -605,12 +622,12 @@ export function CreateJobWizard({
 
                   {/* Services */}
                   <div className="flex items-start gap-3">
-                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10">
                       <Building className="h-5 w-5 text-primary" />
                     </div>
                     <div>
                       <p className="text-xs text-muted-foreground">Services</p>
-                      <div className="flex flex-wrap gap-1 mt-1">
+                      <div className="mt-1 flex flex-wrap gap-1">
                         {getSelectedServiceNames().map((name, i) => (
                           <Badge key={i} variant="secondary" className="text-xs">
                             {name}
@@ -622,20 +639,21 @@ export function CreateJobWizard({
 
                   {/* Date & Time */}
                   <div className="flex items-start gap-3">
-                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10">
                       <CalendarIcon className="h-5 w-5 text-primary" />
                     </div>
                     <div>
                       <p className="text-xs text-muted-foreground">Date & Time</p>
                       <p className="font-medium">
-                        {selectedDate ? format(selectedDate, "EEEE, MMMM d, yyyy") : ""} at {formData.scheduled_time}
+                        {selectedDate ? format(selectedDate, "EEEE, MMMM d, yyyy") : ""} at{" "}
+                        {formData.scheduled_time}
                       </p>
                     </div>
                   </div>
 
                   {/* Staff */}
                   <div className="flex items-start gap-3">
-                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10">
                       <User className="h-5 w-5 text-primary" />
                     </div>
                     <div>
@@ -646,8 +664,8 @@ export function CreateJobWizard({
 
                   {/* Notes */}
                   {formData.notes && (
-                    <div className="pt-2 border-t">
-                      <p className="text-xs text-muted-foreground mb-1">Notes</p>
+                    <div className="border-t pt-2">
+                      <p className="mb-1 text-xs text-muted-foreground">Notes</p>
                       <p className="text-sm">{formData.notes}</p>
                     </div>
                   )}
@@ -658,30 +676,20 @@ export function CreateJobWizard({
         </ScrollArea>
 
         {/* Footer Navigation */}
-        <div className="flex items-center justify-between p-4 sm:p-6 pt-3 pb-4 border-t bg-background shrink-0">
-          <Button
-            variant="ghost"
-            onClick={handleBack}
-            disabled={currentStep === 1}
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
+        <div className="flex shrink-0 items-center justify-between border-t bg-background p-4 pb-4 pt-3 sm:p-6">
+          <Button variant="ghost" onClick={handleBack} disabled={currentStep === 1}>
+            <ArrowLeft className="mr-2 h-4 w-4" />
             Back
           </Button>
 
           {currentStep < 3 ? (
-            <Button
-              onClick={handleNext}
-              disabled={!canProceed()}
-            >
+            <Button onClick={handleNext} disabled={!canProceed()}>
               Next
-              <ArrowRight className="h-4 w-4 ml-2" />
+              <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           ) : (
-            <Button
-              onClick={onSubmit}
-              className="bg-primary hover:bg-primary/90"
-            >
-              <CheckCircle className="h-4 w-4 mr-2" />
+            <Button onClick={onSubmit} className="bg-primary hover:bg-primary/90">
+              <CheckCircle className="mr-2 h-4 w-4" />
               Create Job
             </Button>
           )}

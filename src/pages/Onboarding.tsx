@@ -5,15 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import {
-  CheckCircle2,
-  ArrowRight,
-  Loader2,
-  Calendar,
-  Users,
-  FileText,
-  Rocket,
-} from "lucide-react";
+import { CheckCircle2, ArrowRight, Loader2, Calendar, Users, FileText, Rocket } from "lucide-react";
 import { PulcrixLogo } from "@/components/PulcrixLogo";
 
 import { logger } from "@/lib/logger";
@@ -143,7 +135,7 @@ export default function Onboarding() {
 
   if (authLoading || isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-3">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
           <span className="text-sm text-muted-foreground">Setting up your account...</span>
@@ -156,7 +148,7 @@ export default function Onboarding() {
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
       {/* Header */}
       <header className="border-b border-border bg-background/80 backdrop-blur-sm">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+        <div className="container mx-auto flex items-center justify-between px-4 py-4">
           <PulcrixLogo variant="full" size="md" />
           <Button variant="outline" size="sm" onClick={() => navigate("/admin")}>
             Go to Dashboard
@@ -167,32 +159,32 @@ export default function Onboarding() {
 
       <main className="container mx-auto px-4 py-12">
         {/* Welcome Section */}
-        <div className="text-center max-w-2xl mx-auto mb-12">
-          <div className="inline-flex items-center justify-center h-20 w-20 rounded-full bg-primary/10 mb-6">
+        <div className="mx-auto mb-12 max-w-2xl text-center">
+          <div className="mb-6 inline-flex h-20 w-20 items-center justify-center rounded-full bg-primary/10">
             <CheckCircle2 className="h-10 w-10 text-primary" />
           </div>
-          <h1 className="text-3xl font-bold mb-4">Welcome to Pulcrix!</h1>
-          <p className="text-lg text-muted-foreground mb-6">
+          <h1 className="mb-4 text-3xl font-bold">Welcome to Pulcrix!</h1>
+          <p className="mb-6 text-lg text-muted-foreground">
             Your account is ready. You have{" "}
-            <span className="font-semibold text-primary">{getDaysRemaining()} days</span> of
-            free trial to explore all features.
+            <span className="font-semibold text-primary">{getDaysRemaining()} days</span> of free
+            trial to explore all features.
           </p>
 
           {/* Trial Info Card */}
-          <Card className="bg-primary/5 border-primary/20 max-w-md mx-auto">
+          <Card className="mx-auto max-w-md border-primary/20 bg-primary/5">
             <CardContent className="pt-6">
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">Plan</span>
                 <span className="font-medium capitalize">{plan || "Professional"}</span>
               </div>
-              <div className="flex items-center justify-between text-sm mt-2">
+              <div className="mt-2 flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">Trial ends</span>
                 <span className="font-medium">{formatTrialEnd()}</span>
               </div>
-              <div className="flex items-center justify-between text-sm mt-2">
+              <div className="mt-2 flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">Status</span>
-                <span className="inline-flex items-center gap-1 text-primary font-medium">
-                  <span className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+                <span className="inline-flex items-center gap-1 font-medium text-primary">
+                  <span className="h-2 w-2 animate-pulse rounded-full bg-primary" />
                   {subscriptionStatus === "trialing" ? "Trial Active" : "Active"}
                 </span>
               </div>
@@ -201,9 +193,9 @@ export default function Onboarding() {
         </div>
 
         {/* Getting Started Section */}
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-xl font-semibold mb-6 text-center">Get Started</h2>
-          <p className="text-center text-muted-foreground mb-8">
+        <div className="mx-auto max-w-4xl">
+          <h2 className="mb-6 text-center text-xl font-semibold">Get Started</h2>
+          <p className="mb-8 text-center text-muted-foreground">
             Here's what we recommend to make the most of your Pulcrix trial
           </p>
 
@@ -211,31 +203,29 @@ export default function Onboarding() {
             {onboardingSteps.map((step, idx) => (
               <Card
                 key={step.id}
-                className="hover:shadow-lg transition-shadow cursor-pointer group"
+                className="group cursor-pointer transition-shadow hover:shadow-lg"
                 onClick={() => navigate(step.link)}
               >
                 <CardHeader className="pb-2">
                   <div className="flex items-center gap-4">
-                    <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
                       {step.icon}
                     </div>
                     <div className="flex-1">
-                      <CardTitle className="text-base flex items-center gap-2">
-                        <span className="h-5 w-5 rounded-full bg-muted text-muted-foreground text-xs flex items-center justify-center">
+                      <CardTitle className="flex items-center gap-2 text-base">
+                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-muted text-xs text-muted-foreground">
                           {idx + 1}
                         </span>
                         {step.title}
                       </CardTitle>
-                      <CardDescription className="text-sm mt-1">
-                        {step.description}
-                      </CardDescription>
+                      <CardDescription className="mt-1 text-sm">{step.description}</CardDescription>
                     </div>
                   </div>
                 </CardHeader>
                 <CardContent>
                   <Button
                     variant="outline"
-                    className="w-full group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-primary transition-colors"
+                    className="w-full transition-colors group-hover:border-primary group-hover:bg-primary group-hover:text-primary-foreground"
                   >
                     {step.action}
                     <ArrowRight className="ml-2 h-4 w-4" />
@@ -247,24 +237,24 @@ export default function Onboarding() {
         </div>
 
         {/* Quick Actions */}
-        <div className="max-w-4xl mx-auto mt-12">
-          <Card className="bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20">
+        <div className="mx-auto mt-12 max-w-4xl">
+          <Card className="border-primary/20 bg-gradient-to-r from-primary/5 to-primary/10">
             <CardContent className="py-8">
-              <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+              <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
                 <div className="flex items-center gap-4">
-                  <div className="h-14 w-14 rounded-full bg-primary flex items-center justify-center">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary">
                     <Rocket className="h-7 w-7 text-primary-foreground" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-lg">Ready to explore?</h3>
-                    <p className="text-muted-foreground text-sm">
+                    <h3 className="text-lg font-semibold">Ready to explore?</h3>
+                    <p className="text-sm text-muted-foreground">
                       Jump straight into your dashboard and start managing your business
                     </p>
                   </div>
                 </div>
                 <Button size="lg" onClick={() => navigate("/admin")} className="group">
                   Open Dashboard
-                  <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                  <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
                 </Button>
               </div>
             </CardContent>
@@ -272,13 +262,13 @@ export default function Onboarding() {
         </div>
 
         {/* Help Section */}
-        <div className="max-w-2xl mx-auto mt-12 text-center">
+        <div className="mx-auto mt-12 max-w-2xl text-center">
           <p className="text-sm text-muted-foreground">
             Need help getting started?{" "}
             <a href="mailto:support@pulcrix.com" className="text-primary hover:underline">
               Contact our support team
-            </a>
-            {" "}or check out our{" "}
+            </a>{" "}
+            or check out our{" "}
             <Link to="/help" className="text-primary hover:underline">
               help documentation
             </Link>

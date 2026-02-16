@@ -38,9 +38,7 @@ type NavItem = {
   icon: typeof LayoutDashboard;
 };
 
-const mainNavItems: NavItem[] = [
-  { titleKey: "todays_view", url: "/admin", icon: LayoutDashboard },
-];
+const mainNavItems: NavItem[] = [{ titleKey: "todays_view", url: "/admin", icon: LayoutDashboard }];
 
 const operationsNavItems: NavItem[] = [
   { titleKey: "calendar", url: "/admin/calendar", icon: Calendar },
@@ -90,11 +88,7 @@ export function AdminSidebar() {
         const title = tAdmin(item.titleKey as Parameters<typeof tAdmin>[0]);
         return (
           <SidebarMenuItem key={item.titleKey}>
-            <SidebarMenuButton
-              asChild
-              isActive={isActive(item.url)}
-              tooltip={title}
-            >
+            <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={title}>
               <Link to={item.url}>
                 <item.icon className="h-4 w-4" />
                 <span>{title}</span>
@@ -109,13 +103,16 @@ export function AdminSidebar() {
   return (
     <Sidebar collapsible="icon" className="border-r border-border">
       <SidebarHeader className="border-b border-border">
-        <Link to="/" className="flex items-center gap-3 px-2 py-3 hover:opacity-80 transition-opacity">
+        <Link
+          to="/"
+          className="flex items-center gap-3 px-2 py-3 transition-opacity hover:opacity-80"
+        >
           {isCollapsed ? (
-            <PulcrixLogo variant="icon" size="sm" className="text-primary shrink-0" />
+            <PulcrixLogo variant="icon" size="sm" className="shrink-0 text-primary" />
           ) : (
             <div className="overflow-hidden">
               <PulcrixLogo size="sm" />
-              <p className="text-xs text-muted-foreground truncate">Admin Panel</p>
+              <p className="truncate text-xs text-muted-foreground">Admin Panel</p>
             </div>
           )}
         </Link>
@@ -123,25 +120,19 @@ export function AdminSidebar() {
 
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupContent>
-            {renderNavItems(mainNavItems)}
-          </SidebarGroupContent>
+          <SidebarGroupContent>{renderNavItems(mainNavItems)}</SidebarGroupContent>
         </SidebarGroup>
 
         <Separator className="mx-2 my-2" />
 
         <SidebarGroup>
-          <SidebarGroupContent>
-            {renderNavItems(operationsNavItems)}
-          </SidebarGroupContent>
+          <SidebarGroupContent>{renderNavItems(operationsNavItems)}</SidebarGroupContent>
         </SidebarGroup>
 
         <Separator className="mx-2 my-2" />
 
         <SidebarGroup>
-          <SidebarGroupContent>
-            {renderNavItems(insightsNavItems)}
-          </SidebarGroupContent>
+          <SidebarGroupContent>{renderNavItems(insightsNavItems)}</SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
 

@@ -46,19 +46,19 @@ export function StatsCards({ stats }: StatsCardsProps) {
   ];
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6 mb-6 md:mb-8">
+    <div className="mb-6 grid grid-cols-2 gap-3 md:mb-8 md:grid-cols-4 md:gap-6">
       {cards.map((card) => (
         <Tooltip key={card.title}>
           <TooltipTrigger asChild>
-            <Card className="border-border shadow-sm hover:shadow-md transition-shadow cursor-help">
-              <CardHeader className="flex flex-row items-center justify-between pb-1 md:pb-2 p-3 md:p-6">
-                <CardTitle className="text-xs md:text-sm font-medium text-muted-foreground truncate">
+            <Card className="cursor-help border-border shadow-sm transition-shadow hover:shadow-md">
+              <CardHeader className="flex flex-row items-center justify-between p-3 pb-1 md:p-6 md:pb-2">
+                <CardTitle className="truncate text-xs font-medium text-muted-foreground md:text-sm">
                   {card.title}
                 </CardTitle>
                 <card.icon className={`h-4 w-4 md:h-5 md:w-5 ${card.iconColor} flex-shrink-0`} />
               </CardHeader>
               <CardContent className="p-3 pt-0 md:p-6 md:pt-0">
-                <div className="text-2xl md:text-3xl font-bold text-foreground">{card.value}</div>
+                <div className="text-2xl font-bold text-foreground md:text-3xl">{card.value}</div>
               </CardContent>
             </Card>
           </TooltipTrigger>

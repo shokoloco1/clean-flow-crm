@@ -41,12 +41,12 @@ export function useSubscription() {
 
   const checkSubscription = useCallback(async () => {
     if (!session?.access_token) {
-      setState(prev => ({ ...prev, loading: false }));
+      setState((prev) => ({ ...prev, loading: false }));
       return;
     }
 
     try {
-      setState(prev => ({ ...prev, loading: true, error: null }));
+      setState((prev) => ({ ...prev, loading: true, error: null }));
 
       const { data, error } = await supabase.functions.invoke("check-subscription", {
         headers: {
@@ -65,7 +65,7 @@ export function useSubscription() {
         error: null,
       });
     } catch (err) {
-      setState(prev => ({
+      setState((prev) => ({
         ...prev,
         loading: false,
         error: err instanceof Error ? err.message : "Error checking subscription",
@@ -93,7 +93,7 @@ export function useSubscription() {
     if (data?.url) {
       window.location.href = data.url;
     }
-    
+
     return data;
   };
 
@@ -109,12 +109,12 @@ export function useSubscription() {
     });
 
     if (error) throw error;
-    
+
     // Use same-tab redirect for maximum browser compatibility (Brave, etc.)
     if (data?.url) {
       window.location.href = data.url;
     }
-    
+
     return data;
   };
 

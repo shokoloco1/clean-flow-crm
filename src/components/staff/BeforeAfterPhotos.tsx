@@ -7,7 +7,7 @@ import { useLanguage } from "@/hooks/useLanguage";
 interface JobPhoto {
   id: string;
   photo_url: string;
-  photo_type: 'before' | 'after';
+  photo_type: "before" | "after";
   created_at: string;
 }
 
@@ -18,24 +18,24 @@ interface BeforeAfterPhotosProps {
   onPhotosUpdated: () => void;
 }
 
-export function BeforeAfterPhotos({ 
-  jobId, 
-  photos, 
+export function BeforeAfterPhotos({
+  jobId,
+  photos,
   jobStatus,
-  onPhotosUpdated 
+  onPhotosUpdated,
 }: BeforeAfterPhotosProps) {
   const { t } = useLanguage();
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
-  
-  const beforePhotos = photos.filter(p => p.photo_type === 'before');
-  const afterPhotos = photos.filter(p => p.photo_type === 'after');
+
+  const beforePhotos = photos.filter((p) => p.photo_type === "before");
+  const afterPhotos = photos.filter((p) => p.photo_type === "after");
   const isInProgress = jobStatus === "in_progress";
   const isCompleted = jobStatus === "completed";
 
   return (
     <>
       <Card className="border-border shadow-sm">
-        <CardContent className="p-4 space-y-4">
+        <CardContent className="space-y-4 p-4">
           {/* Header */}
           <div className="flex items-center gap-2">
             <Camera className="h-5 w-5 text-primary" />
@@ -66,20 +66,20 @@ export function BeforeAfterPhotos({
               {/* Before Photos */}
               {beforePhotos.length > 0 && (
                 <div>
-                  <p className="text-xs font-medium text-muted-foreground mb-2">
+                  <p className="mb-2 text-xs font-medium text-muted-foreground">
                     {t("before")} ({beforePhotos.length})
                   </p>
                   <div className="flex gap-2 overflow-x-auto pb-1">
                     {beforePhotos.map((photo) => (
-                      <div 
+                      <div
                         key={photo.id}
-                        className="w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden bg-muted cursor-pointer border-2 border-muted"
+                        className="h-16 w-16 flex-shrink-0 cursor-pointer overflow-hidden rounded-lg border-2 border-muted bg-muted"
                         onClick={() => setSelectedPhoto(photo.photo_url)}
                       >
-                        <img 
-                          src={photo.photo_url} 
+                        <img
+                          src={photo.photo_url}
                           alt={t("before")}
-                          className="w-full h-full object-cover"
+                          className="h-full w-full object-cover"
                         />
                       </div>
                     ))}
@@ -90,20 +90,20 @@ export function BeforeAfterPhotos({
               {/* After Photos */}
               {afterPhotos.length > 0 && (
                 <div>
-                  <p className="text-xs font-medium text-muted-foreground mb-2">
+                  <p className="mb-2 text-xs font-medium text-muted-foreground">
                     {t("after")} ({afterPhotos.length})
                   </p>
                   <div className="flex gap-2 overflow-x-auto pb-1">
                     {afterPhotos.map((photo) => (
-                      <div 
+                      <div
                         key={photo.id}
-                        className="w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden bg-muted cursor-pointer border-2 border-success/50"
+                        className="h-16 w-16 flex-shrink-0 cursor-pointer overflow-hidden rounded-lg border-2 border-success/50 bg-muted"
                         onClick={() => setSelectedPhoto(photo.photo_url)}
                       >
-                        <img 
-                          src={photo.photo_url} 
+                        <img
+                          src={photo.photo_url}
                           alt={t("after")}
-                          className="w-full h-full object-cover"
+                          className="h-full w-full object-cover"
                         />
                       </div>
                     ))}
@@ -115,20 +115,17 @@ export function BeforeAfterPhotos({
 
           {/* Empty State - only show if pending (not started yet) */}
           {photos.length === 0 && !isInProgress && !isCompleted && (
-            <p className="text-sm text-muted-foreground text-center py-4">
-              {t("no_photos_yet")}
-            </p>
+            <p className="py-4 text-center text-sm text-muted-foreground">{t("no_photos_yet")}</p>
           )}
 
           {/* Completed Summary */}
           {isCompleted && photos.length > 0 && (
-            <div className="text-center py-2 bg-success/10 rounded-lg">
+            <div className="rounded-lg bg-success/10 py-2 text-center">
               <p className="text-sm font-medium text-success">
-                ✓ {beforePhotos.length} {t("before").toLowerCase()}, {afterPhotos.length} {t("after").toLowerCase()} photos
+                ✓ {beforePhotos.length} {t("before").toLowerCase()}, {afterPhotos.length}{" "}
+                {t("after").toLowerCase()} photos
               </p>
-              <p className="text-xs text-muted-foreground mt-1">
-                {t("you_can_still_add")}
-              </p>
+              <p className="mt-1 text-xs text-muted-foreground">{t("you_can_still_add")}</p>
             </div>
           )}
         </CardContent>
@@ -136,20 +133,20 @@ export function BeforeAfterPhotos({
 
       {/* Photo Lightbox */}
       {selectedPhoto && (
-        <div 
-          className="fixed inset-0 bg-background/95 z-50 flex items-center justify-center p-4"
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-background/95 p-4"
           onClick={() => setSelectedPhoto(null)}
         >
           <button
-            className="absolute top-4 right-4 text-foreground"
+            className="absolute right-4 top-4 text-foreground"
             onClick={() => setSelectedPhoto(null)}
           >
             <XCircle className="h-8 w-8" />
           </button>
-          <img 
-            src={selectedPhoto} 
-            alt="Full size" 
-            className="max-w-full max-h-full object-contain"
+          <img
+            src={selectedPhoto}
+            alt="Full size"
+            className="max-h-full max-w-full object-contain"
           />
         </div>
       )}

@@ -22,7 +22,16 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { ArrowLeft, Plus, FileText, FileSpreadsheet, Download, Eye, Trash2, Loader2 } from "lucide-react";
+import {
+  ArrowLeft,
+  Plus,
+  FileText,
+  FileSpreadsheet,
+  Download,
+  Eye,
+  Trash2,
+  Loader2,
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
 import { format } from "date-fns";
@@ -85,8 +94,8 @@ export default function PriceListPage() {
 
       if (error) throw error;
 
-      setPriceLists(prev =>
-        prev.map(pl => (pl.id === id ? { ...pl, is_active: !currentState } : pl))
+      setPriceLists((prev) =>
+        prev.map((pl) => (pl.id === id ? { ...pl, is_active: !currentState } : pl)),
       );
 
       toast({
@@ -107,7 +116,7 @@ export default function PriceListPage() {
   const handleDelete = async () => {
     if (!deletingId) return;
 
-    const priceList = priceLists.find(pl => pl.id === deletingId);
+    const priceList = priceLists.find((pl) => pl.id === deletingId);
     if (!priceList) return;
 
     try {
@@ -119,14 +128,11 @@ export default function PriceListPage() {
         await supabase.storage.from("price-lists").remove([filePath]);
       }
 
-      const { error } = await supabase
-        .from("price_lists")
-        .delete()
-        .eq("id", deletingId);
+      const { error } = await supabase.from("price_lists").delete().eq("id", deletingId);
 
       if (error) throw error;
 
-      setPriceLists(prev => prev.filter(pl => pl.id !== deletingId));
+      setPriceLists((prev) => prev.filter((pl) => pl.id !== deletingId));
       toast({
         title: "Deleted",
         description: "Price list deleted successfully",
@@ -190,28 +196,22 @@ export default function PriceListPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto p-4 md:p-6 max-w-6xl">
+      <div className="container mx-auto max-w-6xl p-4 md:p-6">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="mb-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => navigate("/admin")}
-            >
+            <Button variant="ghost" size="icon" onClick={() => navigate("/admin")}>
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <div>
-              <h1 className="text-2xl font-bold text-foreground">
-                Service Pricing
-              </h1>
+              <h1 className="text-2xl font-bold text-foreground">Service Pricing</h1>
               <p className="text-sm text-muted-foreground">
                 Upload rate cards for quick reference when quoting jobs
               </p>
             </div>
           </div>
           <Button onClick={() => setIsUploadOpen(true)}>
-            <Plus className="h-4 w-4 mr-2" />
+            <Plus className="mr-2 h-4 w-4" />
             Upload Price List
           </Button>
         </div>
@@ -227,18 +227,16 @@ export default function PriceListPage() {
                 <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
               </div>
             ) : priceLists.length === 0 ? (
-              <div className="text-center py-12">
-                <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+              <div className="py-12 text-center">
+                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
                   <FileText className="h-8 w-8 text-primary" />
                 </div>
-                <h3 className="text-lg font-medium text-foreground mb-2">
-                  No rate cards uploaded
-                </h3>
-                <p className="text-sm text-muted-foreground mb-6 max-w-sm mx-auto">
+                <h3 className="mb-2 text-lg font-medium text-foreground">No rate cards uploaded</h3>
+                <p className="mx-auto mb-6 max-w-sm text-sm text-muted-foreground">
                   Upload your rate card (PDF or Excel) to access it when creating quotes.
                 </p>
                 <Button onClick={() => setIsUploadOpen(true)}>
-                  <Plus className="h-4 w-4 mr-2" />
+                  <Plus className="mr-2 h-4 w-4" />
                   Upload Rate Card
                 </Button>
               </div>
@@ -263,7 +261,7 @@ export default function PriceListPage() {
                           <span className="font-medium">{priceList.name}</span>
                         </div>
                       </TableCell>
-                      <TableCell className="text-muted-foreground max-w-xs truncate">
+                      <TableCell className="max-w-xs truncate text-muted-foreground">
                         {priceList.description || "—"}
                       </TableCell>
                       <TableCell>{getFileTypeBadge(priceList.file_type)}</TableCell>
@@ -327,10 +325,7 @@ export default function PriceListPage() {
       />
 
       {/* Viewer Dialog */}
-      <PriceListViewer
-        priceList={viewingPriceList}
-        onClose={() => setViewingPriceList(null)}
-      />
+      <PriceListViewer priceList={viewingPriceList} onClose={() => setViewingPriceList(null)} />
 
       {/* Delete Confirmation */}
       <AlertDialog open={!!deletingId} onOpenChange={() => setDeletingId(null)}>

@@ -3,19 +3,31 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  MapPin, Clock, Image as ImageIcon, FileText, Loader2, History,
-  Phone, MessageSquare, User, CheckCircle, Circle, ClipboardCheck,
-  Receipt, Mail, Send, Navigation, MapPinned, AlertCircle, XCircle,
-  StickyNote, Camera
+  MapPin,
+  Clock,
+  Image as ImageIcon,
+  FileText,
+  Loader2,
+  History,
+  Phone,
+  MessageSquare,
+  User,
+  CheckCircle,
+  Circle,
+  ClipboardCheck,
+  Receipt,
+  Mail,
+  Send,
+  Navigation,
+  MapPinned,
+  AlertCircle,
+  XCircle,
+  StickyNote,
+  Camera,
 } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
@@ -32,7 +44,7 @@ import { logger } from "@/lib/logger";
 export interface JobPhoto {
   id: string;
   photo_url: string;
-  photo_type: 'before' | 'after';
+  photo_type: "before" | "after";
   created_at: string;
 }
 
@@ -82,27 +94,37 @@ function getStatusIndex(status: string): number {
 
 function getStatusColor(status: string) {
   switch (status) {
-    case "completed": return "bg-green-500/10 text-green-600 border-green-500/20";
-    case "in_progress": return "bg-blue-500/10 text-blue-600 border-blue-500/20";
-    case "cancelled": return "bg-red-500/10 text-red-600 border-red-500/20";
-    default: return "bg-yellow-500/10 text-yellow-600 border-yellow-500/20";
+    case "completed":
+      return "bg-green-500/10 text-green-600 border-green-500/20";
+    case "in_progress":
+      return "bg-blue-500/10 text-blue-600 border-blue-500/20";
+    case "cancelled":
+      return "bg-red-500/10 text-red-600 border-red-500/20";
+    default:
+      return "bg-yellow-500/10 text-yellow-600 border-yellow-500/20";
   }
 }
 
 export function JobDetailDialog({ job, photos, onClose }: JobDetailDialogProps) {
   const navigate = useNavigate();
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
-  const [checklistItems, setChecklistItems] = useState<{ 
-    completed_at: string | null; 
-    task_name: string; 
-    room_name: string;
-    status: string;
-    issue_note: string | null;
-    issue_photo_url: string | null;
-  }[]>([]);
-  const [alerts, setAlerts] = useState<{ created_at: string; message: string; is_resolved: boolean }[]>([]);
+  const [checklistItems, setChecklistItems] = useState<
+    {
+      completed_at: string | null;
+      task_name: string;
+      room_name: string;
+      status: string;
+      issue_note: string | null;
+      issue_photo_url: string | null;
+    }[]
+  >([]);
+  const [alerts, setAlerts] = useState<
+    { created_at: string; message: string; is_resolved: boolean }[]
+  >([]);
   const [clientInfo, setClientInfo] = useState<ClientInfo | null>(null);
-  const [generatedInvoice, setGeneratedInvoice] = useState<{ id: string; total: number } | null>(null);
+  const [generatedInvoice, setGeneratedInvoice] = useState<{ id: string; total: number } | null>(
+    null,
+  );
   const [gpsLocation, setGpsLocation] = useState<GPSLocation | null>(null);
   const [staffNotes, setStaffNotes] = useState<string | null>(null);
   const [issueReported, setIssueReported] = useState<string | null>(null);
@@ -126,15 +148,12 @@ export function JobDetailDialog({ job, photos, onClose }: JobDetailDialogProps) 
 
     const [checklistRes, alertsRes] = await Promise.all([
       supabase
-        .from('checklist_items')
-        .select('completed_at, task_name, room_name, status, issue_note, issue_photo_url')
-        .eq('job_id', job.id)
-        .order('room_name')
-        .order('sort_order'),
-      supabase
-        .from('job_alerts')
-        .select('created_at, message, is_resolved')
-        .eq('job_id', job.id)
+        .from("checklist_items")
+        .select("completed_at, task_name, room_name, status, issue_note, issue_photo_url")
+        .eq("job_id", job.id)
+        .order("room_name")
+        .order("sort_order"),
+      supabase.from("job_alerts").select("created_at, message, is_resolved").eq("job_id", job.id),
     ]);
 
     setChecklistItems(checklistRes.data || []);
@@ -146,9 +165,9 @@ export function JobDetailDialog({ job, photos, onClose }: JobDetailDialogProps) 
 
     // Fetch client info via the job
     const { data: jobData } = await supabase
-      .from('jobs')
-      .select('client_id, clients(id, name, phone, email, address)')
-      .eq('id', job.id)
+      .from("jobs")
+      .select("client_id, clients(id, name, phone, email, address)")
+      .eq("id", job.id)
       .single();
 
     if (jobData?.clients) {
@@ -160,9 +179,9 @@ export function JobDetailDialog({ job, photos, onClose }: JobDetailDialogProps) 
     if (!job) return;
 
     const { data: jobData } = await supabase
-      .from('jobs')
-      .select('checkin_lat, checkin_lng, checkout_lat, checkout_lng')
-      .eq('id', job.id)
+      .from("jobs")
+      .select("checkin_lat, checkin_lng, checkout_lat, checkout_lng")
+      .eq("id", job.id)
       .single();
 
     if (jobData) {
@@ -174,9 +193,9 @@ export function JobDetailDialog({ job, photos, onClose }: JobDetailDialogProps) 
     if (!job) return;
 
     const { data: jobData } = await supabase
-      .from('jobs')
-      .select('staff_notes, issue_reported')
-      .eq('id', job.id)
+      .from("jobs")
+      .select("staff_notes, issue_reported")
+      .eq("id", job.id)
       .single();
 
     if (jobData) {
@@ -186,7 +205,7 @@ export function JobDetailDialog({ job, photos, onClose }: JobDetailDialogProps) 
   };
 
   const openGoogleMaps = (lat: number, lng: number) => {
-    window.open(`https://www.google.com/maps?q=${lat},${lng}`, '_blank');
+    window.open(`https://www.google.com/maps?q=${lat},${lng}`, "_blank");
   };
 
   const handleCall = () => {
@@ -210,7 +229,7 @@ export function JobDetailDialog({ job, photos, onClose }: JobDetailDialogProps) 
 
   const handleCreateInvoice = async () => {
     if (!job) return;
-    
+
     const result = await generateInvoiceFromJob(job.id);
     if (result) {
       setGeneratedInvoice({ id: result.invoiceId, total: result.total });
@@ -219,7 +238,7 @@ export function JobDetailDialog({ job, photos, onClose }: JobDetailDialogProps) 
 
   const handleSendInvoice = async () => {
     if (!generatedInvoice) return;
-    
+
     const success = await sendInvoiceEmail(generatedInvoice.id);
     if (success) {
       toast.success("Invoice sent to client!");
@@ -237,22 +256,22 @@ export function JobDetailDialog({ job, photos, onClose }: JobDetailDialogProps) 
     setIsGeneratingPDF(true);
     try {
       const { data: items } = await supabase
-        .from('checklist_items')
-        .select('*')
-        .eq('job_id', job.id)
-        .order('sort_order');
+        .from("checklist_items")
+        .select("*")
+        .eq("job_id", job.id)
+        .order("sort_order");
 
       const doc = generateSingleJobPDF(
         job as Parameters<typeof generateSingleJobPDF>[0],
         photos,
-        items || []
+        items || [],
       );
-      
-      doc.save(`job_${job.clients?.name || 'job'}_${job.scheduled_date}.pdf`);
-      toast.success('PDF generated successfully');
+
+      doc.save(`job_${job.clients?.name || "job"}_${job.scheduled_date}.pdf`);
+      toast.success("PDF generated successfully");
     } catch (error) {
-      logger.error('Error generating PDF:', error);
-      toast.error('Error generating PDF');
+      logger.error("Error generating PDF:", error);
+      toast.error("Error generating PDF");
     } finally {
       setIsGeneratingPDF(false);
     }
@@ -260,13 +279,13 @@ export function JobDetailDialog({ job, photos, onClose }: JobDetailDialogProps) 
 
   if (!job) return null;
 
-  const beforePhotos = photos.filter(p => p.photo_type === 'before');
-  const afterPhotos = photos.filter(p => p.photo_type === 'after');
+  const beforePhotos = photos.filter((p) => p.photo_type === "before");
+  const afterPhotos = photos.filter((p) => p.photo_type === "after");
   const currentStatusIndex = getStatusIndex(job.status);
 
   return (
     <Dialog open={!!job} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">
             <span>{job.clients?.name || "Job Details"}</span>
@@ -283,31 +302,37 @@ export function JobDetailDialog({ job, photos, onClose }: JobDetailDialogProps) 
               const isActive = index <= currentStatusIndex;
               const isCurrent = index === currentStatusIndex;
               const StepIcon = step.icon;
-              
+
               return (
-                <div key={step.key} className="flex items-center flex-1 last:flex-none">
+                <div key={step.key} className="flex flex-1 items-center last:flex-none">
                   <div className="flex flex-col items-center">
-                    <div className={cn(
-                      "w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all",
-                      isActive 
-                        ? "bg-primary border-primary text-primary-foreground" 
-                        : "bg-muted border-muted-foreground/30 text-muted-foreground",
-                      isCurrent && "ring-4 ring-primary/20"
-                    )}>
+                    <div
+                      className={cn(
+                        "flex h-10 w-10 items-center justify-center rounded-full border-2 transition-all",
+                        isActive
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "border-muted-foreground/30 bg-muted text-muted-foreground",
+                        isCurrent && "ring-4 ring-primary/20",
+                      )}
+                    >
                       <StepIcon className="h-5 w-5" />
                     </div>
-                    <span className={cn(
-                      "text-xs mt-2 font-medium",
-                      isActive ? "text-foreground" : "text-muted-foreground"
-                    )}>
+                    <span
+                      className={cn(
+                        "mt-2 text-xs font-medium",
+                        isActive ? "text-foreground" : "text-muted-foreground",
+                      )}
+                    >
                       {step.label}
                     </span>
                   </div>
                   {index < STATUS_STEPS.length - 1 && (
-                    <div className={cn(
-                      "flex-1 h-1 mx-2 rounded-full",
-                      index < currentStatusIndex ? "bg-primary" : "bg-muted"
-                    )} />
+                    <div
+                      className={cn(
+                        "mx-2 h-1 flex-1 rounded-full",
+                        index < currentStatusIndex ? "bg-primary" : "bg-muted",
+                      )}
+                    />
                   )}
                 </div>
               );
@@ -316,31 +341,34 @@ export function JobDetailDialog({ job, photos, onClose }: JobDetailDialogProps) 
         </div>
 
         <Separator />
-        
-        <Tabs defaultValue={job.status === 'completed' ? 'report' : 'details'} className="mt-4">
+
+        <Tabs defaultValue={job.status === "completed" ? "report" : "details"} className="mt-4">
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="details">Details</TabsTrigger>
             <TabsTrigger value="photos">
-              <ImageIcon className="h-4 w-4 mr-2" />
+              <ImageIcon className="mr-2 h-4 w-4" />
               Photos
             </TabsTrigger>
-            <TabsTrigger value="report" className={job.status === 'completed' ? 'text-primary' : ''}>
-              <ClipboardCheck className="h-4 w-4 mr-2" />
+            <TabsTrigger
+              value="report"
+              className={job.status === "completed" ? "text-primary" : ""}
+            >
+              <ClipboardCheck className="mr-2 h-4 w-4" />
               Report
             </TabsTrigger>
             <TabsTrigger value="timeline">
-              <History className="h-4 w-4 mr-2" />
+              <History className="mr-2 h-4 w-4" />
               Timeline
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="details" className="space-y-6 mt-4">
+          <TabsContent value="details" className="mt-4 space-y-6">
             {/* Client Info Card */}
             {clientInfo && (
-              <div className="p-4 rounded-lg border bg-muted/30">
+              <div className="rounded-lg border bg-muted/30 p-4">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
                       <User className="h-6 w-6 text-primary" />
                     </div>
                     <div>
@@ -394,7 +422,7 @@ export function JobDetailDialog({ job, photos, onClose }: JobDetailDialogProps) 
 
             {/* Location */}
             <div className="flex items-start gap-3">
-              <MapPin className="h-5 w-5 text-primary mt-0.5" />
+              <MapPin className="mt-0.5 h-5 w-5 text-primary" />
               <div>
                 <p className="text-sm text-muted-foreground">Location</p>
                 <p className="font-medium text-foreground">{job.location}</p>
@@ -403,10 +431,10 @@ export function JobDetailDialog({ job, photos, onClose }: JobDetailDialogProps) 
 
             {/* Time Info */}
             <div className="flex items-start gap-3">
-              <Clock className="h-5 w-5 text-primary mt-0.5" />
+              <Clock className="mt-0.5 h-5 w-5 text-primary" />
               <div className="flex-1">
                 <p className="text-sm text-muted-foreground">Schedule & Duration</p>
-                <div className="grid grid-cols-2 gap-4 mt-2">
+                <div className="mt-2 grid grid-cols-2 gap-4">
                   <div>
                     <p className="text-xs text-muted-foreground">Scheduled</p>
                     <p className="font-medium text-foreground">
@@ -444,20 +472,22 @@ export function JobDetailDialog({ job, photos, onClose }: JobDetailDialogProps) 
             {/* GPS Check-in/Check-out */}
             {gpsLocation && (gpsLocation.checkin_lat || gpsLocation.checkout_lat) && (
               <div className="flex items-start gap-3">
-                <MapPinned className="h-5 w-5 text-primary mt-0.5" />
+                <MapPinned className="mt-0.5 h-5 w-5 text-primary" />
                 <div className="flex-1">
                   <p className="text-sm text-muted-foreground">Staff Location Verification</p>
-                  <div className="grid grid-cols-2 gap-4 mt-2">
+                  <div className="mt-2 grid grid-cols-2 gap-4">
                     {gpsLocation.checkin_lat && gpsLocation.checkin_lng && (
                       <div>
                         <p className="text-xs text-muted-foreground">Check-in Location</p>
                         <Button
                           variant="link"
                           size="sm"
-                          className="h-auto p-0 text-primary font-medium"
-                          onClick={() => openGoogleMaps(gpsLocation.checkin_lat!, gpsLocation.checkin_lng!)}
+                          className="h-auto p-0 font-medium text-primary"
+                          onClick={() =>
+                            openGoogleMaps(gpsLocation.checkin_lat!, gpsLocation.checkin_lng!)
+                          }
                         >
-                          <Navigation className="h-3 w-3 mr-1" />
+                          <Navigation className="mr-1 h-3 w-3" />
                           View on Map
                         </Button>
                       </div>
@@ -468,10 +498,12 @@ export function JobDetailDialog({ job, photos, onClose }: JobDetailDialogProps) 
                         <Button
                           variant="link"
                           size="sm"
-                          className="h-auto p-0 text-green-600 font-medium"
-                          onClick={() => openGoogleMaps(gpsLocation.checkout_lat!, gpsLocation.checkout_lng!)}
+                          className="h-auto p-0 font-medium text-green-600"
+                          onClick={() =>
+                            openGoogleMaps(gpsLocation.checkout_lat!, gpsLocation.checkout_lng!)
+                          }
                         >
-                          <Navigation className="h-3 w-3 mr-1" />
+                          <Navigation className="mr-1 h-3 w-3" />
                           View on Map
                         </Button>
                       </div>
@@ -483,36 +515,39 @@ export function JobDetailDialog({ job, photos, onClose }: JobDetailDialogProps) 
 
             {/* Notes */}
             {job.notes && (
-              <div className="p-3 rounded-lg bg-muted/50 text-sm">
-                <p className="text-muted-foreground text-xs mb-1">Notes</p>
+              <div className="rounded-lg bg-muted/50 p-3 text-sm">
+                <p className="mb-1 text-xs text-muted-foreground">Notes</p>
                 <p>{job.notes}</p>
               </div>
             )}
           </TabsContent>
 
-          <TabsContent value="photos" className="space-y-4 mt-4">
+          <TabsContent value="photos" className="mt-4 space-y-4">
             {photos.length > 0 ? (
               <div className="space-y-6">
                 {beforePhotos.length > 0 && (
                   <div>
-                    <div className="flex items-center gap-2 mb-3">
-                      <Badge variant="outline" className="bg-orange-500/10 text-orange-600 border-orange-500/20">
+                    <div className="mb-3 flex items-center gap-2">
+                      <Badge
+                        variant="outline"
+                        className="border-orange-500/20 bg-orange-500/10 text-orange-600"
+                      >
                         Before ({beforePhotos.length})
                       </Badge>
                     </div>
                     <div className="grid grid-cols-3 gap-2">
                       {beforePhotos.map((photo) => (
-                        <a 
-                          key={photo.id} 
-                          href={photo.photo_url} 
-                          target="_blank" 
+                        <a
+                          key={photo.id}
+                          href={photo.photo_url}
+                          target="_blank"
                           rel="noopener noreferrer"
-                          className="aspect-square rounded-lg bg-muted overflow-hidden hover:opacity-80 transition-opacity ring-2 ring-orange-500/20"
+                          className="aspect-square overflow-hidden rounded-lg bg-muted ring-2 ring-orange-500/20 transition-opacity hover:opacity-80"
                         >
-                          <img 
-                            src={photo.photo_url} 
+                          <img
+                            src={photo.photo_url}
                             alt="Before"
-                            className="w-full h-full object-cover"
+                            className="h-full w-full object-cover"
                           />
                         </a>
                       ))}
@@ -522,24 +557,27 @@ export function JobDetailDialog({ job, photos, onClose }: JobDetailDialogProps) 
 
                 {afterPhotos.length > 0 && (
                   <div>
-                    <div className="flex items-center gap-2 mb-3">
-                      <Badge variant="outline" className="bg-green-500/10 text-green-600 border-green-500/20">
+                    <div className="mb-3 flex items-center gap-2">
+                      <Badge
+                        variant="outline"
+                        className="border-green-500/20 bg-green-500/10 text-green-600"
+                      >
                         After ({afterPhotos.length})
                       </Badge>
                     </div>
                     <div className="grid grid-cols-3 gap-2">
                       {afterPhotos.map((photo) => (
-                        <a 
-                          key={photo.id} 
-                          href={photo.photo_url} 
-                          target="_blank" 
+                        <a
+                          key={photo.id}
+                          href={photo.photo_url}
+                          target="_blank"
                           rel="noopener noreferrer"
-                          className="aspect-square rounded-lg bg-muted overflow-hidden hover:opacity-80 transition-opacity ring-2 ring-green-500/20"
+                          className="aspect-square overflow-hidden rounded-lg bg-muted ring-2 ring-green-500/20 transition-opacity hover:opacity-80"
                         >
-                          <img 
-                            src={photo.photo_url} 
+                          <img
+                            src={photo.photo_url}
                             alt="After"
-                            className="w-full h-full object-cover"
+                            className="h-full w-full object-cover"
                           />
                         </a>
                       ))}
@@ -548,28 +586,32 @@ export function JobDetailDialog({ job, photos, onClose }: JobDetailDialogProps) 
                 )}
               </div>
             ) : (
-              <div className="text-center py-12 bg-muted/50 rounded-lg">
-                <ImageIcon className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
-                <p className="text-muted-foreground font-medium">No photos yet</p>
-                <p className="text-sm text-muted-foreground">Staff will upload before/after photos during the job</p>
+              <div className="rounded-lg bg-muted/50 py-12 text-center">
+                <ImageIcon className="mx-auto mb-3 h-10 w-10 text-muted-foreground" />
+                <p className="font-medium text-muted-foreground">No photos yet</p>
+                <p className="text-sm text-muted-foreground">
+                  Staff will upload before/after photos during the job
+                </p>
               </div>
             )}
           </TabsContent>
 
           {/* Report Tab - Comprehensive job completion report */}
-          <TabsContent value="report" className="space-y-6 mt-4">
-            {job.status !== 'completed' ? (
-              <div className="text-center py-12 bg-muted/50 rounded-lg">
-                <ClipboardCheck className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
-                <p className="text-muted-foreground font-medium">Report not available</p>
-                <p className="text-sm text-muted-foreground">The job report will be available once the job is completed</p>
+          <TabsContent value="report" className="mt-4 space-y-6">
+            {job.status !== "completed" ? (
+              <div className="rounded-lg bg-muted/50 py-12 text-center">
+                <ClipboardCheck className="mx-auto mb-3 h-10 w-10 text-muted-foreground" />
+                <p className="font-medium text-muted-foreground">Report not available</p>
+                <p className="text-sm text-muted-foreground">
+                  The job report will be available once the job is completed
+                </p>
               </div>
             ) : (
               <>
                 {/* Before/After Comparison */}
                 <Card>
                   <CardHeader className="pb-3">
-                    <CardTitle className="text-base flex items-center gap-2">
+                    <CardTitle className="flex items-center gap-2 text-base">
                       <Camera className="h-4 w-4" />
                       Before & After Photos
                     </CardTitle>
@@ -578,44 +620,50 @@ export function JobDetailDialog({ job, photos, onClose }: JobDetailDialogProps) 
                     {beforePhotos.length > 0 || afterPhotos.length > 0 ? (
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <Badge variant="outline" className="mb-2 bg-orange-500/10 text-orange-600 border-orange-500/20">
+                          <Badge
+                            variant="outline"
+                            className="mb-2 border-orange-500/20 bg-orange-500/10 text-orange-600"
+                          >
                             Before ({beforePhotos.length})
                           </Badge>
                           <div className="grid grid-cols-2 gap-2">
                             {beforePhotos.map((photo) => (
-                              <a 
-                                key={photo.id} 
-                                href={photo.photo_url} 
-                                target="_blank" 
+                              <a
+                                key={photo.id}
+                                href={photo.photo_url}
+                                target="_blank"
                                 rel="noopener noreferrer"
-                                className="aspect-square rounded-lg bg-muted overflow-hidden hover:opacity-80 transition-opacity ring-1 ring-orange-500/30"
+                                className="aspect-square overflow-hidden rounded-lg bg-muted ring-1 ring-orange-500/30 transition-opacity hover:opacity-80"
                               >
-                                <img 
-                                  src={photo.photo_url} 
+                                <img
+                                  src={photo.photo_url}
                                   alt="Before"
-                                  className="w-full h-full object-cover"
+                                  className="h-full w-full object-cover"
                                 />
                               </a>
                             ))}
                           </div>
                         </div>
                         <div>
-                          <Badge variant="outline" className="mb-2 bg-green-500/10 text-green-600 border-green-500/20">
+                          <Badge
+                            variant="outline"
+                            className="mb-2 border-green-500/20 bg-green-500/10 text-green-600"
+                          >
                             After ({afterPhotos.length})
                           </Badge>
                           <div className="grid grid-cols-2 gap-2">
                             {afterPhotos.map((photo) => (
-                              <a 
-                                key={photo.id} 
-                                href={photo.photo_url} 
-                                target="_blank" 
+                              <a
+                                key={photo.id}
+                                href={photo.photo_url}
+                                target="_blank"
                                 rel="noopener noreferrer"
-                                className="aspect-square rounded-lg bg-muted overflow-hidden hover:opacity-80 transition-opacity ring-1 ring-green-500/30"
+                                className="aspect-square overflow-hidden rounded-lg bg-muted ring-1 ring-green-500/30 transition-opacity hover:opacity-80"
                               >
-                                <img 
-                                  src={photo.photo_url} 
+                                <img
+                                  src={photo.photo_url}
                                   alt="After"
-                                  className="w-full h-full object-cover"
+                                  className="h-full w-full object-cover"
                                 />
                               </a>
                             ))}
@@ -623,7 +671,9 @@ export function JobDetailDialog({ job, photos, onClose }: JobDetailDialogProps) 
                         </div>
                       </div>
                     ) : (
-                      <p className="text-sm text-muted-foreground text-center py-4">No photos uploaded</p>
+                      <p className="py-4 text-center text-sm text-muted-foreground">
+                        No photos uploaded
+                      </p>
                     )}
                   </CardContent>
                 </Card>
@@ -631,11 +681,12 @@ export function JobDetailDialog({ job, photos, onClose }: JobDetailDialogProps) 
                 {/* Checklist Summary */}
                 <Card>
                   <CardHeader className="pb-3">
-                    <CardTitle className="text-base flex items-center gap-2">
+                    <CardTitle className="flex items-center gap-2 text-base">
                       <ClipboardCheck className="h-4 w-4" />
                       Checklist Summary
                       <Badge variant="secondary" className="ml-auto">
-                        {checklistItems.filter(i => i.status === 'completed').length}/{checklistItems.length} completed
+                        {checklistItems.filter((i) => i.status === "completed").length}/
+                        {checklistItems.length} completed
                       </Badge>
                     </CardTitle>
                   </CardHeader>
@@ -644,45 +695,53 @@ export function JobDetailDialog({ job, photos, onClose }: JobDetailDialogProps) 
                       <div className="space-y-3">
                         {/* Group by room */}
                         {Object.entries(
-                          checklistItems.reduce((acc, item) => {
-                            if (!acc[item.room_name]) acc[item.room_name] = [];
-                            acc[item.room_name].push(item);
-                            return acc;
-                          }, {} as Record<string, typeof checklistItems>)
+                          checklistItems.reduce(
+                            (acc, item) => {
+                              if (!acc[item.room_name]) acc[item.room_name] = [];
+                              acc[item.room_name].push(item);
+                              return acc;
+                            },
+                            {} as Record<string, typeof checklistItems>,
+                          ),
                         ).map(([roomName, items]) => (
-                          <div key={roomName} className="border rounded-lg p-3">
-                            <p className="font-medium text-sm mb-2">{roomName}</p>
+                          <div key={roomName} className="rounded-lg border p-3">
+                            <p className="mb-2 text-sm font-medium">{roomName}</p>
                             <div className="space-y-1.5">
                               {items.map((item, idx) => (
                                 <div key={idx} className="flex items-start gap-2 text-sm">
-                                  {item.status === 'completed' && (
-                                    <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                                  {item.status === "completed" && (
+                                    <CheckCircle className="mt-0.5 h-4 w-4 flex-shrink-0 text-green-500" />
                                   )}
-                                  {item.status === 'skipped' && (
-                                    <XCircle className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                                  {item.status === "skipped" && (
+                                    <XCircle className="mt-0.5 h-4 w-4 flex-shrink-0 text-muted-foreground" />
                                   )}
-                                  {item.status === 'issue' && (
-                                    <AlertCircle className="h-4 w-4 text-destructive mt-0.5 flex-shrink-0" />
+                                  {item.status === "issue" && (
+                                    <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0 text-destructive" />
                                   )}
-                                  {item.status === 'pending' && (
-                                    <Circle className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                                  {item.status === "pending" && (
+                                    <Circle className="mt-0.5 h-4 w-4 flex-shrink-0 text-muted-foreground" />
                                   )}
                                   <div className="flex-1">
-                                    <span className={cn(
-                                      item.status === 'completed' && 'text-foreground',
-                                      item.status === 'skipped' && 'text-muted-foreground line-through',
-                                      item.status === 'issue' && 'text-destructive',
-                                      item.status === 'pending' && 'text-muted-foreground'
-                                    )}>
+                                    <span
+                                      className={cn(
+                                        item.status === "completed" && "text-foreground",
+                                        item.status === "skipped" &&
+                                          "text-muted-foreground line-through",
+                                        item.status === "issue" && "text-destructive",
+                                        item.status === "pending" && "text-muted-foreground",
+                                      )}
+                                    >
                                       {item.task_name}
                                     </span>
                                     {item.issue_note && (
-                                      <p className="text-xs text-destructive mt-0.5">Issue: {item.issue_note}</p>
+                                      <p className="mt-0.5 text-xs text-destructive">
+                                        Issue: {item.issue_note}
+                                      </p>
                                     )}
                                     {item.issue_photo_url && (
-                                      <a 
-                                        href={item.issue_photo_url} 
-                                        target="_blank" 
+                                      <a
+                                        href={item.issue_photo_url}
+                                        target="_blank"
                                         rel="noopener noreferrer"
                                         className="text-xs text-primary hover:underline"
                                       >
@@ -697,7 +756,9 @@ export function JobDetailDialog({ job, photos, onClose }: JobDetailDialogProps) 
                         ))}
                       </div>
                     ) : (
-                      <p className="text-sm text-muted-foreground text-center py-4">No checklist items</p>
+                      <p className="py-4 text-center text-sm text-muted-foreground">
+                        No checklist items
+                      </p>
                     )}
                   </CardContent>
                 </Card>
@@ -706,23 +767,23 @@ export function JobDetailDialog({ job, photos, onClose }: JobDetailDialogProps) 
                 {(staffNotes || issueReported) && (
                   <Card>
                     <CardHeader className="pb-3">
-                      <CardTitle className="text-base flex items-center gap-2">
+                      <CardTitle className="flex items-center gap-2 text-base">
                         <StickyNote className="h-4 w-4" />
                         Staff Notes & Issues
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-3">
                       {staffNotes && (
-                        <div className="p-3 rounded-lg bg-muted/50">
-                          <p className="text-xs text-muted-foreground mb-1">Staff Notes</p>
+                        <div className="rounded-lg bg-muted/50 p-3">
+                          <p className="mb-1 text-xs text-muted-foreground">Staff Notes</p>
                           <p className="text-sm">{staffNotes}</p>
                         </div>
                       )}
                       {issueReported && (
-                        <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20">
-                          <div className="flex items-center gap-2 mb-1">
+                        <div className="rounded-lg border border-destructive/20 bg-destructive/10 p-3">
+                          <div className="mb-1 flex items-center gap-2">
                             <AlertCircle className="h-4 w-4 text-destructive" />
-                            <p className="text-xs text-destructive font-medium">Issue Reported</p>
+                            <p className="text-xs font-medium text-destructive">Issue Reported</p>
                           </div>
                           <p className="text-sm text-destructive">{issueReported}</p>
                         </div>
@@ -737,7 +798,7 @@ export function JobDetailDialog({ job, photos, onClose }: JobDetailDialogProps) 
                     <div className="grid grid-cols-3 gap-4 text-center">
                       <div>
                         <p className="text-2xl font-bold text-primary">
-                          {calculateDuration(job.start_time, job.end_time) || '--'}
+                          {calculateDuration(job.start_time, job.end_time) || "--"}
                         </p>
                         <p className="text-xs text-muted-foreground">Duration</p>
                       </div>
@@ -747,9 +808,14 @@ export function JobDetailDialog({ job, photos, onClose }: JobDetailDialogProps) 
                       </div>
                       <div>
                         <p className="text-2xl font-bold text-green-500">
-                          {checklistItems.length > 0 
-                            ? Math.round((checklistItems.filter(i => i.status === 'completed').length / checklistItems.length) * 100)
-                            : 0}%
+                          {checklistItems.length > 0
+                            ? Math.round(
+                                (checklistItems.filter((i) => i.status === "completed").length /
+                                  checklistItems.length) *
+                                  100,
+                              )
+                            : 0}
+                          %
                         </p>
                         <p className="text-xs text-muted-foreground">Completion</p>
                       </div>
@@ -771,8 +837,11 @@ export function JobDetailDialog({ job, photos, onClose }: JobDetailDialogProps) 
                 scheduled_date: job.scheduled_date,
                 scheduled_time: job.scheduled_time,
               }}
-              photos={photos.map(p => ({ created_at: p.created_at, photo_type: p.photo_type }))}
-              checklistItems={checklistItems.map(i => ({ completed_at: i.completed_at, task_name: i.task_name }))}
+              photos={photos.map((p) => ({ created_at: p.created_at, photo_type: p.photo_type }))}
+              checklistItems={checklistItems.map((i) => ({
+                completed_at: i.completed_at,
+                task_name: i.task_name,
+              }))}
               alerts={alerts}
             />
           </TabsContent>
@@ -781,37 +850,30 @@ export function JobDetailDialog({ job, photos, onClose }: JobDetailDialogProps) 
         {/* Actions */}
         <Separator className="my-4" />
         <div className="flex flex-wrap gap-2">
-          <Button 
-            variant="outline" 
-            onClick={handleDownloadPDF}
-            disabled={isGeneratingPDF}
-          >
+          <Button variant="outline" onClick={handleDownloadPDF} disabled={isGeneratingPDF}>
             {isGeneratingPDF ? (
               <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Generating...
               </>
             ) : (
               <>
-                <FileText className="h-4 w-4 mr-2" />
+                <FileText className="mr-2 h-4 w-4" />
                 Download PDF
               </>
             )}
           </Button>
-          
+
           {job.status === "completed" && !generatedInvoice && (
-            <Button 
-              onClick={handleCreateInvoice}
-              disabled={isGeneratingInvoice}
-            >
+            <Button onClick={handleCreateInvoice} disabled={isGeneratingInvoice}>
               {isGeneratingInvoice ? (
                 <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Creating...
                 </>
               ) : (
                 <>
-                  <Receipt className="h-4 w-4 mr-2" />
+                  <Receipt className="mr-2 h-4 w-4" />
                   Generate Invoice
                 </>
               )}
@@ -819,30 +881,27 @@ export function JobDetailDialog({ job, photos, onClose }: JobDetailDialogProps) 
           )}
 
           {generatedInvoice && (
-            <div className="flex gap-2 items-center">
+            <div className="flex items-center gap-2">
               <Badge variant="secondary" className="h-9 px-3">
                 Invoice: {formatAUD(generatedInvoice.total)}
               </Badge>
-              <Button 
-                variant="outline"
-                onClick={handleViewInvoice}
-              >
+              <Button variant="outline" onClick={handleViewInvoice}>
                 View
               </Button>
               {clientInfo?.email && (
-                <Button 
+                <Button
                   onClick={handleSendInvoice}
                   disabled={isSendingEmail}
                   className="bg-primary"
                 >
                   {isSendingEmail ? (
                     <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       Sending...
                     </>
                   ) : (
                     <>
-                      <Send className="h-4 w-4 mr-2" />
+                      <Send className="mr-2 h-4 w-4" />
                       Send to Client
                     </>
                   )}

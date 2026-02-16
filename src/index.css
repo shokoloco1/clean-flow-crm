@@ -90,12 +90,13 @@
     /* ========== SHADOWS ========== */
     --shadow-color: 166 50% 30%;
     --shadow-sm: 0 1px 2px 0 hsl(var(--shadow-color) / 0.05);
-    --shadow-md: 0 4px 6px -1px hsl(var(--shadow-color) / 0.1),
-                 0 2px 4px -2px hsl(var(--shadow-color) / 0.1);
-    --shadow-lg: 0 10px 15px -3px hsl(var(--shadow-color) / 0.1),
-                 0 4px 6px -4px hsl(var(--shadow-color) / 0.1);
-    --shadow-xl: 0 20px 25px -5px hsl(var(--shadow-color) / 0.1),
-                 0 8px 10px -6px hsl(var(--shadow-color) / 0.1);
+    --shadow-md:
+      0 4px 6px -1px hsl(var(--shadow-color) / 0.1), 0 2px 4px -2px hsl(var(--shadow-color) / 0.1);
+    --shadow-lg:
+      0 10px 15px -3px hsl(var(--shadow-color) / 0.1), 0 4px 6px -4px hsl(var(--shadow-color) / 0.1);
+    --shadow-xl:
+      0 20px 25px -5px hsl(var(--shadow-color) / 0.1),
+      0 8px 10px -6px hsl(var(--shadow-color) / 0.1);
     --shadow-glow: 0 0 20px hsl(var(--accent-glow));
     --shadow-primary-glow: 0 0 20px hsl(166 91% 30% / 0.3);
 
@@ -199,12 +200,29 @@
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family:
+      "Inter",
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      Roboto,
+      sans-serif;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
 
-  h1, h2, h3, h4, h5, h6 {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family:
+      "Inter",
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      Roboto,
+      sans-serif;
     @apply font-semibold tracking-tight;
   }
 
@@ -246,7 +264,7 @@
   }
 
   .btn-primary::before {
-    content: '';
+    content: "";
     @apply absolute inset-0 opacity-0;
     background: linear-gradient(
       45deg,
@@ -339,7 +357,7 @@
   }
 
   .card-accent-hover::before {
-    content: '';
+    content: "";
     @apply absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-secondary to-amber-400;
     transform: scaleX(0);
     transform-origin: left;
@@ -367,12 +385,12 @@
   }
 
   .tab-item[data-state="active"] {
-    @apply text-primary font-medium;
+    @apply font-medium text-primary;
   }
 
   .tab-item[data-state="active"]::after {
-    content: '';
-    @apply absolute -bottom-px left-0 right-0 h-0.5 bg-primary rounded-full;
+    content: "";
+    @apply absolute -bottom-px left-0 right-0 h-0.5 rounded-full bg-primary;
     animation: tabSlideIn var(--transition-normal) var(--ease-bounce);
   }
 
@@ -387,7 +405,7 @@
   }
 
   .input-focus-ring:focus {
-    @apply outline-none ring-2 ring-primary/30 border-primary;
+    @apply border-primary outline-none ring-2 ring-primary/30;
     box-shadow: 0 0 0 4px hsl(var(--primary) / 0.1);
   }
 
@@ -419,8 +437,8 @@
   }
 
   .badge-new::before {
-    content: '';
-    @apply absolute -top-1 -right-1 w-2 h-2 bg-amber-400 rounded-full;
+    content: "";
+    @apply absolute -right-1 -top-1 h-2 w-2 rounded-full bg-amber-400;
     animation: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite;
   }
 
@@ -432,8 +450,8 @@
   }
 
   .nav-item::after {
-    content: '';
-    @apply absolute bottom-0 left-1/2 w-0 h-0.5 bg-primary rounded-full;
+    content: "";
+    @apply absolute bottom-0 left-1/2 h-0.5 w-0 rounded-full bg-primary;
     transform: translateX(-50%);
     transition: width var(--transition-normal) var(--ease-bounce);
   }
@@ -453,8 +471,8 @@
   }
 
   .sidebar-nav-item::before {
-    content: '';
-    @apply absolute left-0 top-0 bottom-0 w-1 bg-primary scale-y-0;
+    content: "";
+    @apply absolute bottom-0 left-0 top-0 w-1 scale-y-0 bg-primary;
     transition: transform var(--transition-fast) var(--ease-bounce);
   }
 
@@ -506,19 +524,14 @@
   }
 
   .skeleton::after {
-    content: '';
+    content: "";
     @apply absolute inset-0;
-    background: linear-gradient(
-      90deg,
-      transparent,
-      hsl(var(--primary) / 0.1),
-      transparent
-    );
+    background: linear-gradient(90deg, transparent, hsl(var(--primary) / 0.1), transparent);
     animation: skeletonShimmer 1.5s ease-in-out infinite;
   }
 
   .spinner {
-    @apply w-5 h-5 border-2 border-primary/30 border-t-primary rounded-full;
+    @apply h-5 w-5 rounded-full border-2 border-primary/30 border-t-primary;
     animation: spin 0.8s linear infinite;
   }
 
@@ -527,7 +540,7 @@
   }
 
   .spinner-dots span {
-    @apply w-2 h-2 bg-primary rounded-full;
+    @apply h-2 w-2 rounded-full bg-primary;
     animation: bounce 1.4s ease-in-out infinite;
   }
 
@@ -542,7 +555,7 @@
   /* ========== SUCCESS/ERROR STATES ========== */
 
   .success-checkmark {
-    @apply w-12 h-12 rounded-full bg-success flex items-center justify-center;
+    @apply flex h-12 w-12 items-center justify-center rounded-full bg-success;
     animation: successPop var(--transition-slow) var(--ease-bounce);
   }
 
@@ -559,11 +572,11 @@
   /* ========== PROGRESS BAR ========== */
 
   .progress-bar {
-    @apply h-2 bg-muted rounded-full overflow-hidden;
+    @apply h-2 overflow-hidden rounded-full bg-muted;
   }
 
   .progress-bar-fill {
-    @apply h-full bg-gradient-to-r from-primary to-secondary rounded-full;
+    @apply h-full rounded-full bg-gradient-to-r from-primary to-secondary;
     transition: width var(--transition-slow) var(--ease-smooth);
   }
 
@@ -652,17 +665,17 @@
   }
 
   .table-row-selected {
-    @apply bg-primary/15 border-l-2 border-primary;
+    @apply border-l-2 border-primary bg-primary/15;
   }
 
   /* ========== AVATAR ========== */
 
   .avatar-ring {
-    @apply ring-2 ring-offset-2 ring-primary;
+    @apply ring-2 ring-primary ring-offset-2;
   }
 
   .avatar-status {
-    @apply absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white;
+    @apply absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-white;
   }
 
   .avatar-status-online {
@@ -711,8 +724,8 @@
   }
 
   .stat-card::before {
-    content: '';
-    @apply absolute top-0 right-0 w-32 h-32 rounded-full bg-primary/5;
+    content: "";
+    @apply absolute right-0 top-0 h-32 w-32 rounded-full bg-primary/5;
     transform: translate(30%, -30%);
   }
 
@@ -725,11 +738,11 @@
   }
 
   .stat-card-trend-up {
-    @apply text-success flex items-center gap-1;
+    @apply flex items-center gap-1 text-success;
   }
 
   .stat-card-trend-down {
-    @apply text-destructive flex items-center gap-1;
+    @apply flex items-center gap-1 text-destructive;
   }
 }
 
@@ -826,7 +839,9 @@
 }
 
 @keyframes bounce {
-  0%, 80%, 100% {
+  0%,
+  80%,
+  100% {
     transform: scale(0);
   }
   40% {
@@ -835,7 +850,8 @@
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
@@ -844,7 +860,8 @@
 }
 
 @keyframes ping {
-  75%, 100% {
+  75%,
+  100% {
     transform: scale(2);
     opacity: 0;
   }
@@ -871,19 +888,28 @@
 }
 
 @keyframes shake {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateX(0);
   }
-  10%, 30%, 50%, 70%, 90% {
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
     transform: translateX(-4px);
   }
-  20%, 40%, 60%, 80% {
+  20%,
+  40%,
+  60%,
+  80% {
     transform: translateX(4px);
   }
 }
 
 @keyframes progressPulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
@@ -914,7 +940,8 @@
 }
 
 @keyframes float {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0);
   }
   50% {
@@ -951,7 +978,12 @@
   }
 
   .bg-gradient-fresh {
-    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--secondary)) 50%, hsl(var(--amber)) 100%);
+    background: linear-gradient(
+      135deg,
+      hsl(var(--primary)) 0%,
+      hsl(var(--secondary)) 50%,
+      hsl(var(--amber)) 100%
+    );
   }
 
   .bg-gradient-subtle {
@@ -964,11 +996,11 @@
   }
 
   .glass {
-    @apply bg-white/70 backdrop-blur-lg border border-white/20;
+    @apply border border-white/20 bg-white/70 backdrop-blur-lg;
   }
 
   .glass-dark {
-    @apply bg-black/50 backdrop-blur-lg border border-white/10;
+    @apply border border-white/10 bg-black/50 backdrop-blur-lg;
   }
 
   .focus-ring {
@@ -980,7 +1012,7 @@
   }
 
   .interactive {
-    @apply transition-all duration-200 ease-out cursor-pointer;
+    @apply cursor-pointer transition-all duration-200 ease-out;
   }
 
   .interactive:hover {
@@ -1021,8 +1053,9 @@
   .border-gradient {
     @apply relative;
     border: 2px solid transparent;
-    background: linear-gradient(white, white) padding-box,
-                linear-gradient(135deg, hsl(var(--primary)), hsl(var(--amber))) border-box;
+    background:
+      linear-gradient(white, white) padding-box,
+      linear-gradient(135deg, hsl(var(--primary)), hsl(var(--amber))) border-box;
   }
 
   .border-gradient-animated {
@@ -1030,9 +1063,15 @@
   }
 
   .border-gradient-animated::before {
-    content: '';
+    content: "";
     @apply absolute -inset-[2px] rounded-lg;
-    background: linear-gradient(45deg, hsl(var(--primary)), hsl(var(--amber)), hsl(var(--secondary)), hsl(var(--primary)));
+    background: linear-gradient(
+      45deg,
+      hsl(var(--primary)),
+      hsl(var(--amber)),
+      hsl(var(--secondary)),
+      hsl(var(--primary))
+    );
     background-size: 300% 300%;
     animation: gradientRotate 3s ease infinite;
     z-index: -1;

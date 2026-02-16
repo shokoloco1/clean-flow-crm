@@ -33,7 +33,7 @@ export function Breadcrumbs() {
   pathSegments.forEach((segment, index) => {
     currentPath += `/${segment}`;
     const label = ROUTE_LABELS[segment] || segment.charAt(0).toUpperCase() + segment.slice(1);
-    
+
     breadcrumbs.push({
       label,
       href: index < pathSegments.length - 1 ? currentPath : undefined,
@@ -46,14 +46,11 @@ export function Breadcrumbs() {
         <div key={index} className="flex items-center gap-1">
           {index > 0 && <ChevronRight className="h-4 w-4" />}
           {crumb.href ? (
-            <Link
-              to={crumb.href}
-              className="hover:text-foreground transition-colors"
-            >
+            <Link to={crumb.href} className="transition-colors hover:text-foreground">
               {crumb.label}
             </Link>
           ) : (
-            <span className="text-foreground font-medium">{crumb.label}</span>
+            <span className="font-medium text-foreground">{crumb.label}</span>
           )}
         </div>
       ))}

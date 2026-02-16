@@ -10,26 +10,21 @@ import { PhotoCapture } from "@/components/staff/PhotoCapture";
 import { ArrowLeft, ArrowRight, Loader2, Camera, AlertCircle } from "lucide-react";
 
 // Default areas for photo capture
-const DEFAULT_AREAS = [
-  "Living Room",
-  "Kitchen", 
-  "Bathroom",
-  "Bedroom"
-];
+const DEFAULT_AREAS = ["Living Room", "Kitchen", "Bathroom", "Bedroom"];
 
 const AREA_TRANSLATIONS: Record<string, Record<string, string>> = {
   en: {
     "Living Room": "Living Room",
-    "Kitchen": "Kitchen",
-    "Bathroom": "Bathroom", 
-    "Bedroom": "Bedroom"
+    Kitchen: "Kitchen",
+    Bathroom: "Bathroom",
+    Bedroom: "Bedroom",
   },
   es: {
     "Living Room": "Sala",
-    "Kitchen": "Cocina",
-    "Bathroom": "Baño",
-    "Bedroom": "Dormitorio"
-  }
+    Kitchen: "Cocina",
+    Bathroom: "Baño",
+    Bedroom: "Dormitorio",
+  },
 };
 
 interface JobData {
@@ -72,14 +67,16 @@ export default function JobPhotosBeforePage() {
         // Fetch job details
         const { data: jobData, error: jobError } = await supabase
           .from("jobs")
-          .select(`
+          .select(
+            `
             id,
             start_time,
             status,
             properties (
               estimated_hours
             )
-          `)
+          `,
+          )
           .eq("id", id)
           .single();
 
@@ -94,10 +91,12 @@ export default function JobPhotosBeforePage() {
           .eq("photo_type", "before");
 
         if (existingPhotos) {
-          setPhotos(existingPhotos.map(p => ({ 
-            area: p.area || "General", 
-            url: p.photo_url 
-          })));
+          setPhotos(
+            existingPhotos.map((p) => ({
+              area: p.area || "General",
+              url: p.photo_url,
+            })),
+          );
         }
       } catch (err) {
         console.error("Error fetching job:", err);
@@ -112,9 +111,9 @@ export default function JobPhotosBeforePage() {
 
   const handlePhotoCapture = async (area: string, file: File) => {
     if (!id) return;
-    
+
     setUploadingArea(area);
-    
+
     try {
       // Create unique file path
       const fileExt = file.name.split(".").pop() || "jpg";
@@ -125,7 +124,7 @@ export default function JobPhotosBeforePage() {
         .from("job-evidence")
         .upload(fileName, file, {
           cacheControl: "3600",
-          upsert: false
+          upsert: false,
         });
 
       if (uploadError) throw uploadError;
@@ -138,21 +137,19 @@ export default function JobPhotosBeforePage() {
       const photoUrl = signedUrlData?.signedUrl || fileName;
 
       // Save to job_photos table
-      const { error: insertError } = await supabase
-        .from("job_photos")
-        .insert({
-          job_id: id,
-          photo_url: photoUrl,
-          photo_type: "before",
-          area: area
-        });
+      const { error: insertError } = await supabase.from("job_photos").insert({
+        job_id: id,
+        photo_url: photoUrl,
+        photo_type: "before",
+        area: area,
+      });
 
       if (insertError) throw insertError;
 
       // Update local state
-      setPhotos(prev => {
+      setPhotos((prev) => {
         // Remove existing photo for this area if any
-        const filtered = prev.filter(p => p.area !== area);
+        const filtered = prev.filter((p) => p.area !== area);
         return [...filtered, { area, url: photoUrl }];
       });
 
@@ -165,7 +162,7 @@ export default function JobPhotosBeforePage() {
       toast({
         title: t("error"),
         description: t("failed_upload"),
-        variant: "destructive"
+        variant: "destructive",
       });
     } finally {
       setUploadingArea(null);
@@ -186,7 +183,7 @@ export default function JobPhotosBeforePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-3">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
           <p className="text-sm text-muted-foreground">{t("loading")}</p>
@@ -197,16 +194,12 @@ export default function JobPhotosBeforePage() {
 
   if (error || !job) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <div className="flex min-h-screen items-center justify-center bg-background p-4">
         <Card className="w-full max-w-md">
           <CardContent className="pt-6 text-center">
-            <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
-            <p className="text-destructive font-medium">{error || "Job not found"}</p>
-            <Button 
-              variant="outline" 
-              className="mt-4" 
-              onClick={() => navigate("/staff")}
-            >
+            <AlertCircle className="mx-auto mb-4 h-12 w-12 text-destructive" />
+            <p className="font-medium text-destructive">{error || "Job not found"}</p>
+            <Button variant="outline" className="mt-4" onClick={() => navigate("/staff")}>
               {t("go_back")}
             </Button>
           </CardContent>
@@ -224,36 +217,30 @@ export default function JobPhotosBeforePage() {
   return (
     <div className="min-h-screen bg-background pb-24">
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-background border-b px-4 py-3">
+      <div className="sticky top-0 z-10 border-b bg-background px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={() => navigate("/staff")}
-            >
+            <Button variant="ghost" size="icon" onClick={() => navigate("/staff")}>
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <div>
               <h1 className="text-lg font-semibold">{t("photos_before_title")}</h1>
-              <p className="text-xs text-muted-foreground">
-                {t("capture_before_state")}
-              </p>
+              <p className="text-xs text-muted-foreground">{t("capture_before_state")}</p>
             </div>
           </div>
-          
+
           {/* Timer */}
           {job.start_time && (
-            <JobTimer 
-              startedAt={new Date(job.start_time)} 
+            <JobTimer
+              startedAt={new Date(job.start_time)}
               estimatedHours={job.properties?.estimated_hours || undefined}
-              compact 
+              compact
             />
           )}
         </div>
       </div>
 
-      <div className="p-4 space-y-4">
+      <div className="space-y-4 p-4">
         {/* Progress Indicator */}
         <Card>
           <CardContent className="py-4">
@@ -265,20 +252,18 @@ export default function JobPhotosBeforePage() {
                 </span>
               </div>
               {photos.length < MIN_PHOTOS && (
-                <span className="text-xs text-muted-foreground">
-                  {t("minimum_photos")}
-                </span>
+                <span className="text-xs text-muted-foreground">{t("minimum_photos")}</span>
               )}
               {photos.length >= MIN_PHOTOS && (
-                <span className="text-xs text-success font-medium">
+                <span className="text-xs font-medium text-success">
                   ✓ {t("minimum_photos").replace("required", "complete")}
                 </span>
               )}
             </div>
-            
+
             {/* Progress bar */}
-            <div className="mt-2 h-2 bg-muted rounded-full overflow-hidden">
-              <div 
+            <div className="mt-2 h-2 overflow-hidden rounded-full bg-muted">
+              <div
                 className="h-full bg-success transition-all duration-300"
                 style={{ width: `${Math.min((photos.length / MIN_PHOTOS) * 100, 100)}%` }}
               />
@@ -297,7 +282,7 @@ export default function JobPhotosBeforePage() {
                 <PhotoCapture
                   key={area}
                   area={getAreaTranslation(area)}
-                  existingPhoto={photos.find(p => p.area === area)?.url}
+                  existingPhoto={photos.find((p) => p.area === area)?.url}
                   onCapture={(file) => handlePhotoCapture(area, file)}
                   disabled={uploadingArea !== null}
                 />
@@ -307,16 +292,14 @@ export default function JobPhotosBeforePage() {
         </Card>
 
         {/* Info */}
-        <p className="text-xs text-center text-muted-foreground px-4">
-          {t("you_can_still_add")}
-        </p>
+        <p className="px-4 text-center text-xs text-muted-foreground">{t("you_can_still_add")}</p>
       </div>
 
       {/* Fixed Bottom Button */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t">
+      <div className="fixed bottom-0 left-0 right-0 border-t bg-background p-4">
         <Button
           size="xl"
-          className="w-full h-14 text-lg font-bold gap-2"
+          className="h-14 w-full gap-2 text-lg font-bold"
           onClick={handleContinue}
           disabled={!canContinue}
         >

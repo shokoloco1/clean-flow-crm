@@ -1,0 +1,7 @@
+dist
+node_modules
+supabase/functions
+bun.lockb
+package-lock.json
+*.min.js
+*.min.css

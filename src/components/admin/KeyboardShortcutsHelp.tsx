@@ -21,7 +21,12 @@ export function KeyboardShortcutsHelp() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="icon" className="hidden md:flex" aria-label="Keyboard shortcuts">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="hidden md:flex"
+          aria-label="Keyboard shortcuts"
+        >
           <Keyboard className="h-4 w-4" />
         </Button>
       </DialogTrigger>
@@ -35,14 +40,12 @@ export function KeyboardShortcutsHelp() {
         <div className="space-y-3 py-4">
           {shortcuts.map((shortcut, i) => (
             <div key={i} className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">
-                {shortcut.description}
-              </span>
+              <span className="text-sm text-muted-foreground">{shortcut.description}</span>
               <div className="flex items-center gap-1">
                 {shortcut.keys.map((key, j) => (
                   <kbd
                     key={j}
-                    className="px-2 py-1 text-xs font-semibold bg-muted rounded border border-border"
+                    className="rounded border border-border bg-muted px-2 py-1 text-xs font-semibold"
                   >
                     {key}
                   </kbd>
@@ -51,7 +54,7 @@ export function KeyboardShortcutsHelp() {
             </div>
           ))}
         </div>
-        <p className="text-xs text-muted-foreground text-center">
+        <p className="text-center text-xs text-muted-foreground">
           Shortcuts are disabled when typing in input fields
         </p>
       </DialogContent>

@@ -1,10 +1,5 @@
 import { useState, useEffect } from "react";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, Download, ExternalLink, FileText, FileSpreadsheet } from "lucide-react";
@@ -89,55 +84,48 @@ export function PriceListViewer({ priceList, onClose }: PriceListViewerProps) {
 
   return (
     <Sheet open={!!priceList} onOpenChange={(open) => !open && onClose()}>
-      <SheetContent className="w-full sm:max-w-2xl overflow-hidden flex flex-col">
+      <SheetContent className="flex w-full flex-col overflow-hidden sm:max-w-2xl">
         <SheetHeader className="flex-shrink-0">
           <SheetTitle className="flex items-center gap-2">
             {getFileIcon()}
             {priceList?.name}
           </SheetTitle>
           {priceList?.description && (
-            <p className="text-sm text-muted-foreground">
-              {priceList.description}
-            </p>
+            <p className="text-sm text-muted-foreground">{priceList.description}</p>
           )}
           <div className="flex items-center gap-2 pt-2">
-            <Badge variant="outline">
-              {priceList?.file_type.toUpperCase()}
-            </Badge>
+            <Badge variant="outline">{priceList?.file_type.toUpperCase()}</Badge>
             <Badge variant={priceList?.is_active ? "default" : "secondary"}>
               {priceList?.is_active ? "Active" : "Inactive"}
             </Badge>
           </div>
         </SheetHeader>
 
-        <div className="flex-1 mt-4 overflow-hidden">
+        <div className="mt-4 flex-1 overflow-hidden">
           {loading ? (
-            <div className="flex items-center justify-center h-full">
+            <div className="flex h-full items-center justify-center">
               <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
             </div>
           ) : signedUrl && priceList?.file_type === "pdf" ? (
             <iframe
               src={signedUrl}
-              className="w-full h-full rounded-lg border border-border"
+              className="h-full w-full rounded-lg border border-border"
               title={priceList.name}
             />
           ) : (
-            <div className="flex flex-col items-center justify-center h-full text-center p-8">
+            <div className="flex h-full flex-col items-center justify-center p-8 text-center">
               {getFileIcon()}
-              <h3 className="text-lg font-medium mt-4">
-                Preview not available
-              </h3>
-              <p className="text-sm text-muted-foreground mt-2 max-w-sm">
-                Excel and CSV files cannot be previewed. 
-                Download the file to view its contents.
+              <h3 className="mt-4 text-lg font-medium">Preview not available</h3>
+              <p className="mt-2 max-w-sm text-sm text-muted-foreground">
+                Excel and CSV files cannot be previewed. Download the file to view its contents.
               </p>
-              <div className="flex gap-2 mt-6">
+              <div className="mt-6 flex gap-2">
                 <Button variant="outline" onClick={handleOpenExternal}>
-                  <ExternalLink className="h-4 w-4 mr-2" />
+                  <ExternalLink className="mr-2 h-4 w-4" />
                   Open
                 </Button>
                 <Button onClick={handleDownload}>
-                  <Download className="h-4 w-4 mr-2" />
+                  <Download className="mr-2 h-4 w-4" />
                   Download
                 </Button>
               </div>
@@ -146,13 +134,13 @@ export function PriceListViewer({ priceList, onClose }: PriceListViewerProps) {
         </div>
 
         {signedUrl && priceList?.file_type === "pdf" && (
-          <div className="flex-shrink-0 pt-4 flex gap-2 justify-end">
+          <div className="flex flex-shrink-0 justify-end gap-2 pt-4">
             <Button variant="outline" onClick={handleOpenExternal}>
-              <ExternalLink className="h-4 w-4 mr-2" />
+              <ExternalLink className="mr-2 h-4 w-4" />
               Open in new tab
             </Button>
             <Button onClick={handleDownload}>
-              <Download className="h-4 w-4 mr-2" />
+              <Download className="mr-2 h-4 w-4" />
               Download
             </Button>
           </div>

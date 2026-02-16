@@ -30,34 +30,34 @@ type KanbanColumn = {
 };
 
 const columns: KanbanColumn[] = [
-  { 
-    id: "scheduled", 
-    title: "Scheduled", 
-    status: ["scheduled", "pending"], 
+  {
+    id: "scheduled",
+    title: "Scheduled",
+    status: ["scheduled", "pending"],
     color: "text-blue-600",
     bgColor: "bg-blue-50 dark:bg-blue-950/30",
     badgeVariant: "secondary",
   },
-  { 
-    id: "in_progress", 
-    title: "In Progress", 
-    status: ["in_progress"], 
+  {
+    id: "in_progress",
+    title: "In Progress",
+    status: ["in_progress"],
     color: "text-amber-600",
     bgColor: "bg-amber-50 dark:bg-amber-950/30",
     badgeVariant: "secondary",
   },
-  { 
-    id: "completed", 
-    title: "Completed", 
-    status: ["completed"], 
+  {
+    id: "completed",
+    title: "Completed",
+    status: ["completed"],
     color: "text-emerald-600",
     bgColor: "bg-[#E8F5E9] dark:bg-emerald-950/40",
     badgeVariant: "default",
   },
 ];
 
-function JobCard({ 
-  job, 
+function JobCard({
+  job,
   onViewJob,
   updatingJobId,
   onAdvanceStatus,
@@ -66,8 +66,8 @@ function JobCard({
   onGenerateInvoice,
   isGeneratingInvoice,
   translations,
-}: { 
-  job: Job; 
+}: {
+  job: Job;
   onViewJob: (job: Job) => void;
   updatingJobId: string | null;
   onAdvanceStatus: (jobId: string, status: string) => void;
@@ -85,26 +85,26 @@ function JobCard({
   return (
     <button
       onClick={() => onViewJob(job)}
-      className="w-full text-left bg-card border border-border rounded-lg p-3 hover:shadow-md transition-shadow cursor-pointer group"
+      className="group w-full cursor-pointer rounded-lg border border-border bg-card p-3 text-left transition-shadow hover:shadow-md"
     >
-      <div className="flex items-start justify-between gap-2 mb-2">
-        <h4 className="font-medium text-sm text-foreground line-clamp-1">
+      <div className="mb-2 flex items-start justify-between gap-2">
+        <h4 className="line-clamp-1 text-sm font-medium text-foreground">
           {job.clients?.name || translations.unknownClient}
         </h4>
-        <ChevronRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
+        <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
       </div>
-      
+
       <div className="space-y-1.5">
         <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
           <Clock className="h-3 w-3 shrink-0" />
           <span>{job.scheduled_time}</span>
         </div>
-        
+
         <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
           <MapPin className="h-3 w-3 shrink-0" />
           <span className="line-clamp-1">{job.location}</span>
         </div>
-        
+
         {job.profiles?.full_name && (
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <User className="h-3 w-3 shrink-0" />
@@ -113,7 +113,7 @@ function JobCard({
         )}
       </div>
 
-      <div className="flex items-center justify-between mt-3 gap-2">
+      <div className="mt-3 flex items-center justify-between gap-2">
         <div className="flex items-center gap-1">
           {!job.assigned_staff_id && (
             <Badge variant="destructive" className="text-[10px]">
@@ -123,7 +123,7 @@ function JobCard({
           <Button
             variant="ghost"
             size="icon"
-            className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity"
+            className="h-7 w-7 opacity-0 transition-opacity group-hover:opacity-100"
             onClick={(e) => {
               e.stopPropagation();
               onDuplicate(job.id);
@@ -138,7 +138,7 @@ function JobCard({
             <Button
               variant="ghost"
               size="icon"
-              className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-primary"
+              className="h-7 w-7 text-primary opacity-0 transition-opacity group-hover:opacity-100"
               onClick={(e) => {
                 e.stopPropagation();
                 onGenerateInvoice(job.id);
@@ -151,7 +151,7 @@ function JobCard({
             </Button>
           )}
         </div>
-        
+
         <QuickStatusChip
           currentStatus={job.status}
           isUpdating={updatingJobId === job.id}
@@ -162,9 +162,9 @@ function JobCard({
   );
 }
 
-function KanbanColumnComponent({ 
-  column, 
-  jobs, 
+function KanbanColumnComponent({
+  column,
+  jobs,
   onViewJob,
   updatingJobId,
   onAdvanceStatus,
@@ -173,8 +173,8 @@ function KanbanColumnComponent({
   onGenerateInvoice,
   isGeneratingInvoice,
   translations,
-}: { 
-  column: KanbanColumn; 
+}: {
+  column: KanbanColumn;
   jobs: Job[];
   onViewJob: (job: Job) => void;
   updatingJobId: string | null;
@@ -192,35 +192,28 @@ function KanbanColumnComponent({
   };
 }) {
   const isCompleted = column.id === "completed";
-  
+
   return (
-    <div className="w-full md:flex-shrink-0 md:min-w-[280px] md:w-80">
+    <div className="w-full md:w-80 md:min-w-[280px] md:flex-shrink-0">
       <div className={cn("rounded-lg p-3", column.bgColor)}>
-        <div className="flex items-center justify-between mb-3">
-          <h3 className={cn("font-semibold text-sm", column.color)}>
-            {column.title}
-          </h3>
-          <Badge 
-            variant={isCompleted ? "default" : "secondary"} 
-            className={cn(
-              "text-xs",
-              isCompleted && "bg-success hover:bg-success"
-            )}
+        <div className="mb-3 flex items-center justify-between">
+          <h3 className={cn("text-sm font-semibold", column.color)}>{column.title}</h3>
+          <Badge
+            variant={isCompleted ? "default" : "secondary"}
+            className={cn("text-xs", isCompleted && "bg-success hover:bg-success")}
           >
             {jobs.length}
           </Badge>
         </div>
-        
-        <div className="space-y-2 min-h-[100px] md:min-h-[200px]">
+
+        <div className="min-h-[100px] space-y-2 md:min-h-[200px]">
           {jobs.length === 0 ? (
-            <p className="text-xs text-muted-foreground text-center py-8">
-              {translations.noJobs}
-            </p>
+            <p className="py-8 text-center text-xs text-muted-foreground">{translations.noJobs}</p>
           ) : (
             jobs.map((job) => (
-              <JobCard 
-                key={job.id} 
-                job={job} 
+              <JobCard
+                key={job.id}
+                job={job}
                 onViewJob={onViewJob}
                 updatingJobId={updatingJobId}
                 onAdvanceStatus={onAdvanceStatus}
@@ -244,28 +237,34 @@ export function TodayKanban({ jobs, loading, onViewJob, onJobsChange }: TodayKan
   const { duplicateJob, isDuplicating } = useDuplicateJob(onJobsChange);
   const { generateInvoiceFromJob, isGenerating: isGeneratingInvoice } = useQuickInvoice();
   const today = format(new Date(), "yyyy-MM-dd");
-  
-  const translations = useMemo(() => ({
-    noJobs: tAdmin("no_jobs"),
-    unknownClient: tAdmin("unknown_client"),
-    unassigned: tAdmin("unassigned"),
-    duplicateJobTomorrow: tAdmin("duplicate_job_tomorrow"),
-    generateInvoice: tAdmin("generate_invoice"),
-    todaysJobs: tAdmin("todays_jobs"),
-  }), [tAdmin]);
 
-  const todayJobs = useMemo(() => 
-    jobs.filter(job => job.scheduled_date === today),
-    [jobs, today]
+  const translations = useMemo(
+    () => ({
+      noJobs: tAdmin("no_jobs"),
+      unknownClient: tAdmin("unknown_client"),
+      unassigned: tAdmin("unassigned"),
+      duplicateJobTomorrow: tAdmin("duplicate_job_tomorrow"),
+      generateInvoice: tAdmin("generate_invoice"),
+      todaysJobs: tAdmin("todays_jobs"),
+    }),
+    [tAdmin],
+  );
+
+  const todayJobs = useMemo(
+    () => jobs.filter((job) => job.scheduled_date === today),
+    [jobs, today],
   );
 
   const jobsByColumn = useMemo(() => {
-    return columns.reduce((acc, column) => {
-      acc[column.id] = todayJobs.filter(job => 
-        column.status.includes(job.status)
-      ).sort((a, b) => a.scheduled_time.localeCompare(b.scheduled_time));
-      return acc;
-    }, {} as Record<string, Job[]>);
+    return columns.reduce(
+      (acc, column) => {
+        acc[column.id] = todayJobs
+          .filter((job) => column.status.includes(job.status))
+          .sort((a, b) => a.scheduled_time.localeCompare(b.scheduled_time));
+        return acc;
+      },
+      {} as Record<string, Job[]>,
+    );
   }, [todayJobs]);
 
   const handleAdvanceStatus = (jobId: string, status: string) => {
@@ -288,7 +287,7 @@ export function TodayKanban({ jobs, loading, onViewJob, onJobsChange }: TodayKan
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+            <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary" />
           </div>
         </CardContent>
       </Card>
@@ -324,7 +323,7 @@ export function TodayKanban({ jobs, loading, onViewJob, onJobsChange }: TodayKan
             />
           ))}
         </div>
-        
+
         {/* Desktop: Horizontal scroll */}
         <div className="hidden md:block">
           <ScrollArea className="w-full">

@@ -28,13 +28,13 @@ export function useJobDetail() {
 
   const handleViewJob = async (job: JobForDetail) => {
     setSelectedJob(job);
-    
+
     const { data } = await supabase
       .from("job_photos")
       .select("*")
       .eq("job_id", job.id)
       .order("created_at", { ascending: true });
-    
+
     setJobPhotos((data as JobPhoto[]) || []);
   };
 

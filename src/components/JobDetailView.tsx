@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { 
+import {
   ArrowLeft,
   MapPin,
   Clock,
@@ -25,7 +25,7 @@ import {
   Sofa,
   Timer,
   Key,
-  ExternalLink
+  ExternalLink,
 } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
@@ -91,7 +91,7 @@ interface Job {
 interface JobPhoto {
   id: string;
   photo_url: string;
-  photo_type: 'before' | 'after';
+  photo_type: "before" | "after";
   created_at: string;
 }
 
@@ -114,7 +114,8 @@ export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewPr
   const [allAreasComplete, setAllAreasComplete] = useState(false);
 
   // Check if job has required areas for area-based photo documentation
-  const hasRequiredAreas = currentJob.required_areas?.areas && currentJob.required_areas.areas.length > 0;
+  const hasRequiredAreas =
+    currentJob.required_areas?.areas && currentJob.required_areas.areas.length > 0;
 
   useEffect(() => {
     fetchPhotos();
@@ -135,7 +136,7 @@ export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewPr
       .select("*")
       .eq("id", job.property_id)
       .single();
-    
+
     if (data) {
       setProperty(data as Property);
     }
@@ -148,14 +149,14 @@ export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewPr
       .select("*")
       .eq("property_id", job.property_id)
       .order("created_at", { ascending: true });
-    
+
     if (data) {
       setPropertyPhotos(data as PropertyPhoto[]);
     }
   };
 
   const fetchAccessCode = async () => {
-    const { data, error } = await supabase.rpc('get_job_access_code', { _job_id: job.id });
+    const { data, error } = await supabase.rpc("get_job_access_code", { _job_id: job.id });
     if (!error && data) {
       setAccessCode(data);
     }
@@ -167,7 +168,7 @@ export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewPr
       .select("*")
       .eq("job_id", job.id)
       .order("created_at", { ascending: true });
-    
+
     setPhotos((data as JobPhoto[]) || []);
   };
 
@@ -183,14 +184,14 @@ export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewPr
         (position) => {
           resolve({
             lat: position.coords.latitude,
-            lng: position.coords.longitude
+            lng: position.coords.longitude,
           });
         },
         () => {
           toast.warning(t("gps_capture_failed"));
           resolve(null);
         },
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 },
       );
     });
   };
@@ -212,14 +213,14 @@ export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewPr
       toast.error(t("upload_at_least_one"));
       return;
     }
-    
+
     setIsUpdating(true);
-    
+
     const location = await captureGPSLocation();
-    
+
     const updateData: Record<string, unknown> = {
-      status: "completed", 
-      end_time: new Date().toISOString()
+      status: "completed",
+      end_time: new Date().toISOString(),
     };
 
     if (location) {
@@ -227,18 +228,15 @@ export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewPr
       updateData.checkout_lng = location.lng;
     }
 
-    const { error } = await supabase
-      .from("jobs")
-      .update(updateData)
-      .eq("id", currentJob.id);
+    const { error } = await supabase.from("jobs").update(updateData).eq("id", currentJob.id);
 
     if (error) {
       toast.error(t("error_completing"));
     } else {
-      setCurrentJob({ 
-        ...currentJob, 
-        status: "completed", 
-        end_time: new Date().toISOString() 
+      setCurrentJob({
+        ...currentJob,
+        status: "completed",
+        end_time: new Date().toISOString(),
       });
       toast.success(t("job_completed"));
       onUpdate();
@@ -271,7 +269,7 @@ export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewPr
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-card border-b border-border sticky top-0 z-10 px-4 py-4 safe-area-inset-top">
+      <header className="safe-area-inset-top sticky top-0 z-10 border-b border-border bg-card px-4 py-4">
         <div className="flex items-center gap-4">
           <Button
             variant="ghost"
@@ -283,7 +281,7 @@ export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewPr
             <ArrowLeft className="h-6 w-6" />
           </Button>
           <div className="flex-1">
-            <h1 className="text-xl font-bold text-foreground truncate">
+            <h1 className="truncate text-xl font-bold text-foreground">
               {currentJob.clients?.name || t("job_details")}
             </h1>
             <p className="text-sm text-muted-foreground">
@@ -293,28 +291,27 @@ export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewPr
         </div>
       </header>
 
-      <main className="px-4 py-6 space-y-5 pb-32">
+      <main className="space-y-5 px-4 py-6 pb-32">
         {/* Location Card with Maps Button */}
         <Card className="border-border shadow-sm">
           <CardContent className="p-5">
             <div className="flex items-start justify-between gap-3">
               <div className="flex-1">
-                <div className="flex items-center gap-2 mb-2">
+                <div className="mb-2 flex items-center gap-2">
                   <MapPin className="h-5 w-5 text-primary" />
                   <span className="font-semibold text-foreground">{t("location")}</span>
                 </div>
-                <p className="text-muted-foreground ml-7 text-base">{currentJob.location}</p>
+                <p className="ml-7 text-base text-muted-foreground">{currentJob.location}</p>
                 {property && (property.suburb || property.state) && (
-                  <p className="text-sm text-muted-foreground ml-7">
-                    {[property.suburb, property.state, property.post_code].filter(Boolean).join(', ')}
+                  <p className="ml-7 text-sm text-muted-foreground">
+                    {[property.suburb, property.state, property.post_code]
+                      .filter(Boolean)
+                      .join(", ")}
                   </p>
                 )}
               </div>
-              <Button 
-                onClick={openInMaps}
-                className="h-14 px-5"
-              >
-                <Navigation className="h-5 w-5 mr-2" />
+              <Button onClick={openInMaps} className="h-14 px-5">
+                <Navigation className="mr-2 h-5 w-5" />
                 {t("maps")}
               </Button>
             </div>
@@ -329,65 +326,61 @@ export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewPr
                 <Home className="h-5 w-5 text-primary" />
                 {t("property_details")}
               </CardTitle>
-              <CardDescription>
-                {t("reference_info")}
-              </CardDescription>
+              <CardDescription>{t("reference_info")}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               {/* Property Reference Photos */}
               {propertyPhotos.length > 0 && (
                 <div>
-                  <p className="text-sm font-medium mb-2 flex items-center gap-2">
+                  <p className="mb-2 flex items-center gap-2 text-sm font-medium">
                     <Camera className="h-4 w-4" />
                     {t("reference_photos")} ({propertyPhotos.length})
                   </p>
                   <div className="grid grid-cols-3 gap-2">
                     {propertyPhotos.map((photo) => (
-                      <div 
-                        key={photo.id} 
-                        className="aspect-square rounded-lg overflow-hidden bg-muted cursor-pointer"
+                      <div
+                        key={photo.id}
+                        className="aspect-square cursor-pointer overflow-hidden rounded-lg bg-muted"
                         onClick={() => setSelectedPhoto(photo.photo_url)}
                       >
-                        <img 
-                          src={photo.photo_url} 
+                        <img
+                          src={photo.photo_url}
                           alt={photo.room_area || "Reference"}
-                          className="w-full h-full object-cover"
+                          className="h-full w-full object-cover"
                         />
                       </div>
                     ))}
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {t("tap_to_enlarge")}
-                  </p>
+                  <p className="mt-1 text-xs text-muted-foreground">{t("tap_to_enlarge")}</p>
                 </div>
               )}
-              
+
               {/* Property Stats Grid */}
               <div className="grid grid-cols-4 gap-2 text-center">
                 {(property.bedrooms ?? 0) > 0 && (
-                  <div className="p-2 bg-background rounded-lg">
-                    <Bed className="h-5 w-5 mx-auto mb-1 text-primary" />
+                  <div className="rounded-lg bg-background p-2">
+                    <Bed className="mx-auto mb-1 h-5 w-5 text-primary" />
                     <p className="text-xl font-bold">{property.bedrooms}</p>
                     <p className="text-xs text-muted-foreground">{t("bedrooms")}</p>
                   </div>
                 )}
                 {(property.bathrooms ?? 0) > 0 && (
-                  <div className="p-2 bg-background rounded-lg">
-                    <Bath className="h-5 w-5 mx-auto mb-1 text-primary" />
+                  <div className="rounded-lg bg-background p-2">
+                    <Bath className="mx-auto mb-1 h-5 w-5 text-primary" />
                     <p className="text-xl font-bold">{property.bathrooms}</p>
                     <p className="text-xs text-muted-foreground">{t("bathrooms")}</p>
                   </div>
                 )}
                 {(property.living_areas ?? 0) > 0 && (
-                  <div className="p-2 bg-background rounded-lg">
-                    <Sofa className="h-5 w-5 mx-auto mb-1 text-primary" />
+                  <div className="rounded-lg bg-background p-2">
+                    <Sofa className="mx-auto mb-1 h-5 w-5 text-primary" />
                     <p className="text-xl font-bold">{property.living_areas}</p>
                     <p className="text-xs text-muted-foreground">{t("living")}</p>
                   </div>
                 )}
                 {(property.floors ?? 0) > 1 && (
-                  <div className="p-2 bg-background rounded-lg">
-                    <Layers className="h-5 w-5 mx-auto mb-1 text-primary" />
+                  <div className="rounded-lg bg-background p-2">
+                    <Layers className="mx-auto mb-1 h-5 w-5 text-primary" />
                     <p className="text-xl font-bold">{property.floors}</p>
                     <p className="text-xs text-muted-foreground">{t("floors")}</p>
                   </div>
@@ -399,7 +392,7 @@ export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewPr
                 {property.has_pets && (
                   <Badge variant="outline" className="gap-1">
                     <PawPrint className="h-3 w-3" />
-                    {t("pets")}: {property.pet_details || 'Yes'}
+                    {t("pets")}: {property.pet_details || "Yes"}
                   </Badge>
                 )}
                 {property.has_pool && (
@@ -422,20 +415,23 @@ export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewPr
                 )}
                 {property.estimated_hours && (
                   <Badge variant="outline" className="gap-1">
-                    <Timer className="h-3 w-3" />
-                    ~{property.estimated_hours}h {t("estimated")}
+                    <Timer className="h-3 w-3" />~{property.estimated_hours}h {t("estimated")}
                   </Badge>
                 )}
               </div>
 
               {/* Special Instructions */}
               {property.special_instructions && (
-                <div className="p-3 bg-warning/10 border border-warning/30 rounded-lg">
+                <div className="rounded-lg border border-warning/30 bg-warning/10 p-3">
                   <div className="flex items-start gap-2">
-                    <AlertTriangle className="h-4 w-4 text-warning mt-0.5" />
+                    <AlertTriangle className="mt-0.5 h-4 w-4 text-warning" />
                     <div>
-                      <p className="text-sm font-medium text-warning">{t("special_instructions")}</p>
-                      <p className="text-sm text-muted-foreground mt-1">{property.special_instructions}</p>
+                      <p className="text-sm font-medium text-warning">
+                        {t("special_instructions")}
+                      </p>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        {property.special_instructions}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -443,22 +439,24 @@ export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewPr
 
               {/* Access Code */}
               {accessCode && (
-                <div className="p-3 bg-primary/10 border border-primary/30 rounded-lg">
+                <div className="rounded-lg border border-primary/30 bg-primary/10 p-3">
                   <div className="flex items-center gap-2">
                     <Key className="h-4 w-4 text-primary" />
-                    <p className="text-sm font-medium">{t("access_code")}: <span className="font-mono text-lg">{accessCode}</span></p>
+                    <p className="text-sm font-medium">
+                      {t("access_code")}: <span className="font-mono text-lg">{accessCode}</span>
+                    </p>
                   </div>
                 </div>
               )}
 
               {/* Google Maps Link */}
               {property.google_maps_link && (
-                <Button 
-                  variant="outline" 
-                  className="w-full" 
-                  onClick={() => window.open(property.google_maps_link!, '_blank')}
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => window.open(property.google_maps_link!, "_blank")}
                 >
-                  <ExternalLink className="h-4 w-4 mr-2" />
+                  <ExternalLink className="mr-2 h-4 w-4" />
                   {t("open_google_maps")}
                 </Button>
               )}
@@ -469,25 +467,25 @@ export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewPr
         {/* Status & Time */}
         <Card className="border-border shadow-sm">
           <CardContent className="p-5">
-            <div className="flex items-center justify-between mb-4">
+            <div className="mb-4 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Clock className="h-5 w-5 text-primary" />
                 <span className="font-semibold text-foreground">{t("schedule")}</span>
               </div>
-              <Badge 
-                variant={currentJob.status === 'completed' ? 'default' : 'secondary'}
-                className={currentJob.status === 'completed' ? 'bg-success' : ''}
+              <Badge
+                variant={currentJob.status === "completed" ? "default" : "secondary"}
+                className={currentJob.status === "completed" ? "bg-success" : ""}
               >
-                {currentJob.status.replace('_', ' ').toUpperCase()}
+                {currentJob.status.replace("_", " ").toUpperCase()}
               </Badge>
             </div>
-            
+
             <div className="space-y-3">
               <div className="flex justify-between text-base">
                 <span className="text-muted-foreground">{t("scheduled_time")}:</span>
                 <span className="font-medium text-foreground">{currentJob.scheduled_time}</span>
               </div>
-              
+
               {currentJob.start_time && (
                 <div className="flex justify-between text-base">
                   <span className="text-muted-foreground">{t("started")}:</span>
@@ -496,7 +494,7 @@ export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewPr
                   </span>
                 </div>
               )}
-              
+
               {currentJob.end_time && (
                 <div className="flex justify-between text-base">
                   <span className="text-muted-foreground">{t("completed")}:</span>
@@ -507,9 +505,9 @@ export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewPr
               )}
 
               {currentJob.start_time && (
-                <div className="flex justify-between text-base border-t border-border pt-3 mt-3">
+                <div className="mt-3 flex justify-between border-t border-border pt-3 text-base">
                   <span className="text-muted-foreground">{t("duration")}:</span>
-                  <span className="font-bold text-primary text-lg">{calculateDuration()}</span>
+                  <span className="text-lg font-bold text-primary">{calculateDuration()}</span>
                 </div>
               )}
             </div>
@@ -520,18 +518,18 @@ export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewPr
         {currentJob.notes && (
           <Card className="border-border shadow-sm">
             <CardContent className="p-5">
-              <div className="flex items-center gap-2 mb-3">
+              <div className="mb-3 flex items-center gap-2">
                 <AlertTriangle className="h-5 w-5 text-warning" />
                 <span className="font-semibold text-foreground">{t("notes")}</span>
               </div>
-              <p className="text-muted-foreground ml-7 text-base">{currentJob.notes}</p>
+              <p className="ml-7 text-base text-muted-foreground">{currentJob.notes}</p>
             </CardContent>
           </Card>
         )}
 
         {/* Advanced Checklist */}
         {currentJob.status !== "pending" && (
-          <AdvancedChecklist 
+          <AdvancedChecklist
             jobId={currentJob.id}
             jobStatus={currentJob.status}
             legacyChecklist={checklist}
@@ -539,8 +537,8 @@ export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewPr
         )}
 
         {/* Before/After Photos */}
-        {currentJob.status !== "pending" && (
-          hasRequiredAreas ? (
+        {currentJob.status !== "pending" &&
+          (hasRequiredAreas ? (
             <AreaPhotoDocumentation
               jobId={currentJob.id}
               jobStatus={currentJob.status}
@@ -555,40 +553,37 @@ export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewPr
               jobStatus={currentJob.status}
               onPhotosUpdated={fetchPhotos}
             />
-          )
-        )}
+          ))}
 
         {/* Action Buttons - Fixed at bottom */}
-        <div className="fixed bottom-0 left-0 right-0 p-4 bg-card border-t border-border safe-area-inset-bottom">
+        <div className="safe-area-inset-bottom fixed bottom-0 left-0 right-0 border-t border-border bg-card p-4">
           {currentJob.status === "pending" && (
-            <Button 
-              className="w-full h-16 text-xl font-bold"
-              onClick={handleStartJob}
-            >
-              <Play className="h-6 w-6 mr-2" />
-              ▶ {t("start_job").toUpperCase()}
+            <Button className="h-16 w-full text-xl font-bold" onClick={handleStartJob}>
+              <Play className="mr-2 h-6 w-6" />▶ {t("start_job").toUpperCase()}
             </Button>
           )}
 
           {currentJob.status === "in_progress" && (
             <div className="flex flex-col gap-3">
               <Button
-                className="w-full h-14 text-lg font-bold"
+                className="h-14 w-full text-lg font-bold"
                 variant="outline"
                 onClick={() => navigate(`/staff/job/${currentJob.id}/checklist`)}
               >
-                <Play className="h-5 w-5 mr-2" />
+                <Play className="mr-2 h-5 w-5" />
                 {t("continue_workflow")}
               </Button>
               <Button
-                className="w-full h-16 text-xl font-bold bg-success hover:bg-success/90"
+                className="h-16 w-full bg-success text-xl font-bold hover:bg-success/90"
                 onClick={handleCompleteJob}
-                disabled={isUpdating || (hasRequiredAreas ? !allAreasComplete : photos.length === 0)}
+                disabled={
+                  isUpdating || (hasRequiredAreas ? !allAreasComplete : photos.length === 0)
+                }
               >
                 {isUpdating ? (
-                  <Loader2 className="h-6 w-6 mr-2 animate-spin" />
+                  <Loader2 className="mr-2 h-6 w-6 animate-spin" />
                 ) : (
-                  <CheckCircle2 className="h-6 w-6 mr-2" />
+                  <CheckCircle2 className="mr-2 h-6 w-6" />
                 )}
                 ✓ {t("complete_job").toUpperCase()}
                 {hasRequiredAreas && !allAreasComplete && (
@@ -612,23 +607,23 @@ export default function JobDetailView({ job, onBack, onUpdate }: JobDetailViewPr
 
       {/* Photo Lightbox */}
       {selectedPhoto && (
-        <div 
-          className="fixed inset-0 bg-background/95 z-50 flex items-center justify-center p-4"
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-background/95 p-4"
           onClick={() => setSelectedPhoto(null)}
         >
           <Button
             variant="ghost"
             size="icon"
-            className="absolute top-4 right-4 text-white"
+            className="absolute right-4 top-4 text-white"
             onClick={() => setSelectedPhoto(null)}
             aria-label={t("close")}
           >
             <XCircle className="h-8 w-8" />
           </Button>
-          <img 
-            src={selectedPhoto} 
-            alt="Full size" 
-            className="max-w-full max-h-full object-contain"
+          <img
+            src={selectedPhoto}
+            alt="Full size"
+            className="max-h-full max-w-full object-contain"
           />
         </div>
       )}

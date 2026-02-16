@@ -15,15 +15,15 @@ export const ProtectedRoute = memo(function ProtectedRoute({
   children,
   allowedRoles,
   requireEmailVerification = true, // Default to requiring email verification
-  requireSubscription = true // Default to requiring subscription (with trial)
+  requireSubscription = true, // Default to requiring subscription (with trial)
 }: ProtectedRouteProps) {
   const { user, role, loading, emailVerified } = useAuth();
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-3">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+          <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary" />
           <span className="text-sm text-muted-foreground">Loading...</span>
         </div>
       </div>
