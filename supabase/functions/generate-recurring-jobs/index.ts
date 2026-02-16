@@ -22,6 +22,18 @@ interface RecurringSchedule {
   next_generation_date: string | null
 }
 
+interface GeneratedJob {
+  client_id: string | null
+  property_id: string | null
+  assigned_staff_id: string | null
+  location: string
+  scheduled_date: string
+  scheduled_time: string
+  notes: string | null
+  checklist: string[]
+  status: 'pending'
+}
+
 Deno.serve(async (req) => {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
@@ -108,7 +120,7 @@ Deno.serve(async (req) => {
 
     console.log(`[generate-recurring-jobs] Found ${schedules?.length || 0} active schedules`)
 
-    const jobsToCreate: any[] = []
+    const jobsToCreate: GeneratedJob[] = []
     const schedulesToUpdate: { id: string; last_generated_date: string; next_generation_date: string }[] = []
 
     for (const schedule of (schedules as RecurringSchedule[]) || []) {
@@ -122,15 +134,16 @@ Deno.serve(async (req) => {
       let nextDate = todayStr
 
       switch (schedule.frequency) {
-        case 'daily':
+        case 'daily': {
           shouldGenerate = true
           // Next generation is tomorrow
           const tomorrow = new Date(today)
           tomorrow.setDate(tomorrow.getDate() + 1)
           nextDate = tomorrow.toISOString().split('T')[0]
           break
+        }
 
-        case 'weekly':
+        case 'weekly': {
           // Check if today is one of the scheduled days
           shouldGenerate = schedule.days_of_week.includes(dayOfWeek)
           if (shouldGenerate) {
@@ -140,8 +153,9 @@ Deno.serve(async (req) => {
             nextDate = nextWeekDay.toISOString().split('T')[0]
           }
           break
+        }
 
-        case 'biweekly':
+        case 'biweekly': {
           // Similar to weekly but every 2 weeks
           shouldGenerate = schedule.days_of_week.includes(dayOfWeek)
           if (shouldGenerate && schedule.last_generated_date) {
@@ -155,8 +169,9 @@ Deno.serve(async (req) => {
             nextDate = next.toISOString().split('T')[0]
           }
           break
+        }
 
-        case 'monthly':
+        case 'monthly': {
           // Check if today is the scheduled day of month
           shouldGenerate = schedule.day_of_month === dayOfMonth
           if (shouldGenerate) {
@@ -166,6 +181,7 @@ Deno.serve(async (req) => {
             nextDate = next.toISOString().split('T')[0]
           }
           break
+        }
       }
 
       if (shouldGenerate) {

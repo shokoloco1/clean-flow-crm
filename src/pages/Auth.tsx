@@ -35,7 +35,11 @@ export default function Auth() {
 
   // Clear any in-progress signup flag — user navigated to login instead
   useEffect(() => {
-    try { sessionStorage.removeItem("pulcrix_signup_in_progress"); } catch {}
+    try {
+      sessionStorage.removeItem("pulcrix_signup_in_progress");
+    } catch {
+      void 0;
+    }
   }, []);
 
   const handlePasswordReset = async (e: React.FormEvent) => {
@@ -82,6 +86,7 @@ export default function Auth() {
             await refreshRole();
           } catch {
             // User might already have a role or bootstrap failed
+            void 0;
           }
         }
       }, 500);

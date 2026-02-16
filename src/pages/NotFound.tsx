@@ -17,7 +17,7 @@ const NotFound = () => {
   useEffect(() => {
     if (location.pathname.startsWith("/~oauth")) {
       // Force a full page reload to let the server handle OAuth
-      window.location.href = window.location.href;
+      window.location.reload();
     }
   }, [location.pathname]);
 

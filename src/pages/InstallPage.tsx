@@ -24,6 +24,10 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 }
 
+interface IOSNavigator extends Navigator {
+  standalone?: boolean;
+}
+
 export default function InstallPage() {
   const navigate = useNavigate();
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
@@ -36,8 +40,7 @@ export default function InstallPage() {
     // Check if already installed
     const checkInstalled = () => {
       const standalone = window.matchMedia("(display-mode: standalone)").matches;
-      // @ts-ignore - navigator.standalone is iOS-specific
-      const iosStandalone = window.navigator.standalone === true;
+      const iosStandalone = (window.navigator as IOSNavigator).standalone === true;
       setIsStandalone(standalone || iosStandalone);
       setIsInstalled(standalone || iosStandalone);
     };
