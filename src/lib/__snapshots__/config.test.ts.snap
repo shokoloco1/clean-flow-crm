@@ -1,0 +1,49 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`CONFIG > should match snapshot to catch accidental changes 1`] = `
+{
+  "alerts": {
+    "lateStartThresholdMinutes": 15,
+    "overdueWarningDays": 7,
+  },
+  "api": {
+    "cacheExpiry": 3600000,
+    "defaultTimeout": 8000,
+    "maxRetries": 2,
+    "retryDelay": 1500,
+  },
+  "business": {
+    "defaultCompanyName": "Pulcrix",
+    "defaultHourlyRate": 50,
+    "defaultTrialDays": 14,
+  },
+  "imageCompression": {
+    "initialQuality": 0.9,
+    "maxDimension": 1920,
+    "maxSizeMB": 2,
+    "minQuality": 0.1,
+  },
+  "pagination": {
+    "defaultPageSize": 20,
+    "maxPageSize": 100,
+  },
+  "refresh": {
+    "dashboard": 30000,
+    "subscription": 60000,
+  },
+  "staffAvailability": {
+    "defaultEndTime": "17:00",
+    "defaultStartTime": "09:00",
+    "workDays": [
+      1,
+      2,
+      3,
+      4,
+      5,
+    ],
+  },
+  "ui": {
+    "feedbackDuration": 2000,
+  },
+}
+`;

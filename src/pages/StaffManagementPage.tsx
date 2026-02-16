@@ -1,6 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { queryKeys } from "@/lib/queries/keys";
+import { fetchStaffPaginated, type StaffMember } from "@/lib/queries/staff";
+import { DEFAULT_PAGE_SIZE } from "@/lib/queries/pagination";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -40,7 +44,17 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import { InviteStaffDialog } from "@/components/staff/InviteStaffDialog";
 import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+import {
   ArrowLeft,
+  User,
   Users,
   Plus,
   Phone,
@@ -62,21 +76,7 @@ import {
   Trash2,
 } from "lucide-react";
 
-interface StaffProfile {
-  id: string;
-  user_id: string;
-  full_name: string;
-  email: string;
-  phone: string | null;
-  emergency_contact_name: string | null;
-  emergency_contact_phone: string | null;
-  skills: string[];
-  certifications: string[];
-  hire_date: string | null;
-  hourly_rate: number | null;
-  is_active: boolean;
-  created_at: string;
-}
+type StaffProfile = StaffMember;
 
 interface StaffAvailability {
   id: string;
@@ -136,39 +136,28 @@ export default function StaffManagementPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive">("all");
   const [staffToDelete, setStaffToDelete] = useState<StaffProfile | null>(null);
+  const [page, setPage] = useState(1);
+  const debouncedSearch = useDebouncedValue(searchQuery, 300);
 
-  // Fetch all staff members (profiles with staff role)
-  const { data: staffList, isLoading } = useQuery({
-    queryKey: ["staff-list"],
-    queryFn: async () => {
-      // Get all staff user_ids from user_roles
-      const { data: staffRoles, error: rolesError } = await supabase
-        .from("user_roles")
-        .select("user_id")
-        .eq("role", "staff");
+  // Reset to page 1 when search or filter changes
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch, statusFilter]);
 
-      if (rolesError) throw rolesError;
-
-      const staffUserIds = staffRoles.map((r) => r.user_id);
-
-      if (staffUserIds.length === 0) return [];
-
-      // Get profiles for those users
-      const { data: profiles, error: profilesError } = await supabase
-        .from("profiles")
-        .select("*")
-        .in("user_id", staffUserIds);
-
-      if (profilesError) throw profilesError;
-
-      return profiles.map((p) => ({
-        ...p,
-        skills: Array.isArray(p.skills) ? p.skills : [],
-        certifications: Array.isArray(p.certifications) ? p.certifications : [],
-        is_active: p.is_active ?? true,
-      })) as StaffProfile[];
-    },
+  // Fetch staff members with server-side pagination
+  const { data: staffResult, isLoading } = useQuery({
+    queryKey: queryKeys.staff.list({ page, search: debouncedSearch, status: statusFilter }),
+    queryFn: () =>
+      fetchStaffPaginated({
+        page,
+        pageSize: DEFAULT_PAGE_SIZE,
+        search: debouncedSearch,
+        status: statusFilter,
+      }),
   });
+  const staffList = staffResult?.data ?? [];
+  const totalCount = staffResult?.count ?? 0;
+  const totalPages = Math.ceil(totalCount / DEFAULT_PAGE_SIZE);
 
   // Fetch metrics for all staff
   const { data: metricsData } = useQuery({
@@ -260,7 +249,7 @@ export default function StaffManagementPage() {
     },
     onSuccess: () => {
       toast({ title: "Profile updated successfully" });
-      queryClient.invalidateQueries({ queryKey: ["staff-list"] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.staff.all() });
     },
     onError: (error) => {
       toast({
@@ -313,7 +302,7 @@ export default function StaffManagementPage() {
         title: staff.is_active ? "Staff deactivated" : "Staff activated",
         description: `${staff.full_name} has been ${staff.is_active ? "deactivated" : "activated"}.`,
       });
-      queryClient.invalidateQueries({ queryKey: ["staff-list"] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.staff.all() });
     } catch (error: any) {
       toast({
         title: "Error updating status",
@@ -339,7 +328,7 @@ export default function StaffManagementPage() {
         title: "Staff member removed",
         description: `${staffToDelete.full_name} has been deactivated.`,
       });
-      queryClient.invalidateQueries({ queryKey: ["staff-list"] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.staff.all() });
       setStaffToDelete(null);
     } catch (error: any) {
       toast({
@@ -393,21 +382,9 @@ export default function StaffManagementPage() {
     return staffAvailability?.find((a) => a.day_of_week === dayIndex);
   };
 
-  // Filter staff list
-  const filteredStaffList = staffList?.filter((staff) => {
-    const matchesSearch =
-      staff.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      staff.email.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus =
-      statusFilter === "all" ||
-      (statusFilter === "active" && staff.is_active) ||
-      (statusFilter === "inactive" && !staff.is_active);
-    return matchesSearch && matchesStatus;
-  });
-
-  // Calculate stats
-  const totalStaff = staffList?.length || 0;
-  const activeStaff = staffList?.filter((s) => s.is_active).length || 0;
+  // Calculate stats (from totalCount for paginated data)
+  const totalStaff = totalCount;
+  const activeStaff = staffList.filter((s) => s.is_active).length;
   const avgRating = metricsData
     ? Object.values(metricsData)
         .filter((m) => m.avg_quality_score)
@@ -567,8 +544,8 @@ export default function StaffManagementPage() {
               <div>
                 <CardTitle>Team Members</CardTitle>
                 <CardDescription>
-                  {filteredStaffList?.length || 0} employee
-                  {filteredStaffList?.length !== 1 ? "s" : ""} found
+                  {totalCount} employee
+                  {totalCount !== 1 ? "s" : ""} found
                 </CardDescription>
               </div>
             </div>
@@ -578,18 +555,20 @@ export default function StaffManagementPage() {
               <div className="flex items-center justify-center py-12">
                 <div className="animate-pulse text-muted-foreground">Loading employees...</div>
               </div>
-            ) : filteredStaffList?.length === 0 ? (
+            ) : staffList.length === 0 ? (
               <div className="py-12 text-center">
                 <Users className="mx-auto mb-4 h-12 w-12 text-muted-foreground/50" />
                 <h3 className="mb-2 text-lg font-semibold">
-                  {staffList?.length === 0 ? "No employees registered" : "No results found"}
+                  {debouncedSearch || statusFilter !== "all"
+                    ? "No results found"
+                    : "No employees registered"}
                 </h3>
                 <p className="mb-4 text-muted-foreground">
-                  {staffList?.length === 0
-                    ? "Add your first employee to start managing your team"
-                    : "Try different search terms or filters"}
+                  {debouncedSearch || statusFilter !== "all"
+                    ? "Try different search terms or filters"
+                    : "Add your first employee to start managing your team"}
                 </p>
-                {staffList?.length === 0 && (
+                {!debouncedSearch && statusFilter === "all" && (
                   <Button onClick={() => setIsInviteDialogOpen(true)} className="gap-2">
                     <Plus className="h-4 w-4" />
                     Add First Employee
@@ -598,7 +577,7 @@ export default function StaffManagementPage() {
               </div>
             ) : (
               <div className="space-y-3">
-                {filteredStaffList?.map((staff) => {
+                {staffList.map((staff) => {
                   const metrics = getMetrics(staff.user_id);
                   return (
                     <div
@@ -754,6 +733,61 @@ export default function StaffManagementPage() {
             )}
           </CardContent>
         </Card>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="mt-4 flex items-center justify-between">
+            <p className="text-sm text-muted-foreground">
+              Page {page} of {totalPages}
+            </p>
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    className={page <= 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                  />
+                </PaginationItem>
+                {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+                  let pageNum: number;
+                  if (totalPages <= 5) {
+                    pageNum = i + 1;
+                  } else if (page <= 3) {
+                    pageNum = i + 1;
+                  } else if (page >= totalPages - 2) {
+                    pageNum = totalPages - 4 + i;
+                  } else {
+                    pageNum = page - 2 + i;
+                  }
+                  return (
+                    <PaginationItem key={pageNum}>
+                      <PaginationLink
+                        onClick={() => setPage(pageNum)}
+                        isActive={page === pageNum}
+                        className="cursor-pointer"
+                      >
+                        {pageNum}
+                      </PaginationLink>
+                    </PaginationItem>
+                  );
+                })}
+                {totalPages > 5 && page < totalPages - 2 && (
+                  <PaginationItem>
+                    <PaginationEllipsis />
+                  </PaginationItem>
+                )}
+                <PaginationItem>
+                  <PaginationNext
+                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    className={
+                      page >= totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"
+                    }
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </div>
+        )}
       </main>
 
       {/* Staff Detail Sheet */}

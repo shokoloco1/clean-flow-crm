@@ -11,8 +11,7 @@ export const queryKeys = {
   },
   clients: {
     all: () => ["clients"] as const,
-    list: (params: { page: number; search: string }) =>
-      ["clients", "list", params] as const,
+    list: (params: { page: number; search: string }) => ["clients", "list", params] as const,
     byId: (id: string) => ["clients", id] as const,
     dropdown: () => ["clients", "dropdown"] as const,
   },
@@ -24,6 +23,8 @@ export const queryKeys = {
   },
   staff: {
     all: () => ["staff"] as const,
+    list: (params: { page: number; search: string; status: string }) =>
+      ["staff", "list", params] as const,
     byId: (id: string) => ["staff", id] as const,
     dropdown: () => ["staff", "dropdown"] as const,
   },
