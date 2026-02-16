@@ -213,6 +213,22 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error("Missing required fields: 'to' and 'type' are required");
     }
 
+    // Restrict custom emails to admin users only
+    if (type === 'custom') {
+      const { data: roleData } = await supabaseClient
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .single();
+      if (roleData?.role !== 'admin') {
+        console.error("[send-email] Non-admin attempted custom email");
+        return new Response(
+          JSON.stringify({ success: false, error: "Admin access required for custom emails" }),
+          { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders } }
+        );
+      }
+    }
+
     const template = getEmailTemplate(type, data);
 
     // NOTE: Update this to your verified domain in Resend
