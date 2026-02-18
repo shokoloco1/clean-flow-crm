@@ -3,10 +3,10 @@ import { useNavigate, Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/queries/keys";
 import { fetchCalendarJobs } from "@/lib/queries/calendar";
-import { fetchClientsDropdown } from "@/lib/queries/reference";
-import { fetchStaffDropdown } from "@/lib/queries/reference";
+import { fetchClientsDropdown, fetchStaffDropdown } from "@/lib/queries/reference";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -34,6 +34,7 @@ import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
+import listPlugin from "@fullcalendar/list";
 import type { EventClickArg, DateSelectArg, EventDropArg } from "@fullcalendar/core";
 
 interface Job {
@@ -66,6 +67,7 @@ export default function CalendarPage() {
   const { signOut } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const isMobile = useIsMobile();
   const [isSigningOut, setIsSigningOut] = useState(false);
 
   const handleSignOut = async () => {
@@ -74,12 +76,10 @@ export default function CalendarPage() {
     await signOut();
   };
 
-  // Dialog states
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isViewOpen, setIsViewOpen] = useState(false);
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
 
-  // Create/Edit form state
   const [formData, setFormData] = useState({
     client_id: "",
     location: "",
@@ -102,7 +102,6 @@ export default function CalendarPage() {
     }
   };
 
-  // --- React Query: data fetching ---
   const { data: calendarJobs = [], isLoading: loading } = useQuery({
     queryKey: queryKeys.calendar.jobs(),
     queryFn: fetchCalendarJobs,
@@ -125,7 +124,7 @@ export default function CalendarPage() {
       const colors = getStatusColor(job.status);
       const startDateTime = `${job.scheduled_date}T${job.scheduled_time}`;
       const [hours, minutes] = job.scheduled_time.split(":").map(Number);
-      const endHour = hours + 2; // Default 2-hour duration
+      const endHour = hours + 2;
       const endTime = `${String(endHour).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
       const endDateTime = `${job.scheduled_date}T${endTime}`;
 
@@ -147,7 +146,6 @@ export default function CalendarPage() {
     [calendarJobs, transformJobsToEvents],
   );
 
-  // Real-time subscription: invalidate calendar query on any jobs table change
   useEffect(() => {
     const channel = supabase
       .channel("calendar-jobs")
@@ -186,10 +184,7 @@ export default function CalendarPage() {
 
     const { error } = await supabase
       .from("jobs")
-      .update({
-        scheduled_date: newDate,
-        scheduled_time: newTime,
-      })
+      .update({ scheduled_date: newDate, scheduled_time: newTime })
       .eq("id", job.id);
 
     if (error) {
@@ -279,11 +274,78 @@ export default function CalendarPage() {
     }
   };
 
+  const mobileHeaderToolbar = {
+    left: "prev,next",
+    center: "title",
+    right: "today",
+  };
+
+  const desktopHeaderToolbar = {
+    left: "prev,next today",
+    center: "title",
+    right: "dayGridMonth,timeGridWeek,timeGridDay",
+  };
+
+  const calendarWrapperClass = [
+    "fc-wrapper",
+    // Toolbar buttons
+    "[&_.fc-button]:border-primary [&_.fc-button]:bg-primary [&_.fc-button]:text-primary-foreground",
+    "[&_.fc-button:hover]:bg-primary/90 [&_.fc-button-active]:!bg-primary/80",
+    "[&_.fc-button]:rounded-lg [&_.fc-button]:font-medium",
+    // Header cells
+    "[&_.fc-col-header-cell-cushion]:text-foreground [&_.fc-col-header-cell-cushion]:font-semibold",
+    // Day numbers
+    "[&_.fc-daygrid-day-number]:text-foreground",
+    // Borders & backgrounds
+    "[&_.fc-daygrid-day]:border-border [&_.fc-scrollgrid]:border-border",
+    "[&_.fc-scrollgrid-section>*]:border-border",
+    "[&_.fc]:bg-card [&_.fc-day-today]:bg-accent/30",
+    // Time grid
+    "[&_.fc-timegrid-slot-label]:text-muted-foreground [&_.fc-timegrid-slot]:border-border",
+    // Toolbar title
+    "[&_.fc-toolbar-title]:text-foreground [&_.fc-toolbar-title]:font-bold",
+    // Events cursor
+    "[&_.fc-event]:cursor-pointer [&_.fc-event]:rounded-md",
+    // List view styling
+    "[&_.fc-list-day-cushion]:bg-primary/10 [&_.fc-list-day-text]:text-foreground",
+    "[&_.fc-list-day-side-text]:text-muted-foreground",
+    "[&_.fc-list-event]:border-border [&_.fc-list-event]:min-h-[52px]",
+    "[&_.fc-list-event-title]:text-foreground [&_.fc-list-event-title]:font-medium",
+    "[&_.fc-list-event-time]:text-muted-foreground [&_.fc-list-event-time]:text-xs",
+    "[&_.fc-list-empty-cushion]:text-muted-foreground",
+    "[&_.fc-list-event:hover_td]:bg-accent/20",
+    "[&_.fc-list-table]:border-border",
+    // Mobile: compact toolbar
+    "[&_.fc-toolbar]:flex-wrap [&_.fc-toolbar]:gap-2",
+    "[&_.fc-toolbar-chunk]:flex [&_.fc-toolbar-chunk]:items-center",
+  ].join(" ");
+
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
+      {/* Desktop Header */}
       <header className="sticky top-0 z-10 border-b border-border bg-card">
-        <div className="container mx-auto flex items-center justify-between px-4 py-4">
+        {/* Mobile header */}
+        <div className="flex items-center justify-between px-3 py-3 md:hidden">
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => navigate("/admin")}>
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <div className="flex items-center gap-2">
+              <Calendar className="h-5 w-5 text-primary" />
+              <span className="text-lg font-bold text-foreground">Calendar</span>
+            </div>
+          </div>
+          <Button variant="ghost" size="icon" className="h-9 w-9" onClick={handleSignOut} disabled={isSigningOut}>
+            {isSigningOut ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <LogOut className="h-4 w-4" />
+            )}
+          </Button>
+        </div>
+
+        {/* Desktop header */}
+        <div className="container mx-auto hidden items-center justify-between px-4 py-4 md:flex">
           <div className="flex items-center gap-4">
             <Button variant="ghost" size="icon" onClick={() => navigate("/admin")}>
               <ArrowLeft className="h-5 w-5" />
@@ -297,12 +359,7 @@ export default function CalendarPage() {
             </Link>
           </div>
           <div className="flex items-center gap-2">
-            <Button
-              onClick={() => {
-                resetForm();
-                setIsCreateOpen(true);
-              }}
-            >
+            <Button onClick={() => { resetForm(); setIsCreateOpen(true); }}>
               <Plus className="mr-2 h-4 w-4" />
               New Job
             </Button>
@@ -318,48 +375,51 @@ export default function CalendarPage() {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-6">
+      <main className="container mx-auto px-3 py-4 md:px-4 md:py-6">
         <Card className="border-border">
-          <CardHeader className="pb-2">
-            <div className="flex items-center gap-2">
-              <Calendar className="h-5 w-5 text-primary" />
-              <CardTitle className="text-foreground">Schedule</CardTitle>
-            </div>
-            <div className="mt-2 flex items-center gap-4 text-sm text-muted-foreground">
+          <CardHeader className="pb-2 pt-4">
+            <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="h-3 w-3 rounded-full bg-secondary" />
+                <Calendar className="h-5 w-5 text-primary" />
+                <CardTitle className="text-foreground">Schedule</CardTitle>
+              </div>
+            </div>
+            {/* Legend - responsive */}
+            <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-muted-foreground sm:flex sm:flex-row sm:gap-4 sm:text-sm">
+              <div className="flex items-center gap-1.5">
+                <div className="h-2.5 w-2.5 rounded-full bg-secondary" />
                 <span>Pending</span>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="h-3 w-3 rounded-full bg-warning" />
+              <div className="flex items-center gap-1.5">
+                <div className="h-2.5 w-2.5 rounded-full bg-warning" />
                 <span>In Progress</span>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="h-3 w-3 rounded-full bg-success" />
+              <div className="flex items-center gap-1.5">
+                <div className="h-2.5 w-2.5 rounded-full bg-success" />
                 <span>Completed</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <div className="h-2.5 w-2.5 rounded-full bg-destructive" />
+                <span>Cancelled</span>
               </div>
             </div>
           </CardHeader>
-          <CardContent className="p-4">
+          <CardContent className="p-2 md:p-4">
             {loading ? (
               <div className="flex h-96 items-center justify-center">
                 <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary" />
               </div>
             ) : (
-              <div className="fc-wrapper [&_.fc-button-active]:!bg-primary/80 [&_.fc-button:hover]:bg-primary/90 [&_.fc-button]:border-primary [&_.fc-button]:bg-primary [&_.fc-button]:text-primary-foreground [&_.fc-col-header-cell-cushion]:text-foreground [&_.fc-day-today]:bg-accent/30 [&_.fc-daygrid-day-number]:text-foreground [&_.fc-daygrid-day]:border-border [&_.fc-event]:cursor-pointer [&_.fc-scrollgrid-section>*]:border-border [&_.fc-scrollgrid]:border-border [&_.fc-timegrid-slot-label]:text-muted-foreground [&_.fc-timegrid-slot]:border-border [&_.fc-toolbar-title]:text-foreground [&_.fc]:bg-card">
+              <div className={calendarWrapperClass}>
                 <FullCalendar
-                  plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-                  initialView="dayGridMonth"
-                  headerToolbar={{
-                    left: "prev,next today",
-                    center: "title",
-                    right: "dayGridMonth,timeGridWeek,timeGridDay",
-                  }}
+                  plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
+                  initialView={isMobile ? "listWeek" : "dayGridMonth"}
+                  headerToolbar={isMobile ? mobileHeaderToolbar : desktopHeaderToolbar}
                   events={events}
-                  editable={true}
+                  editable={!isMobile}
                   selectable={true}
                   selectMirror={true}
-                  dayMaxEvents={3}
+                  dayMaxEvents={isMobile ? false : 3}
                   eventClick={handleEventClick}
                   select={handleDateSelect}
                   eventDrop={handleEventDrop}
@@ -369,13 +429,28 @@ export default function CalendarPage() {
                     month: "Month",
                     week: "Week",
                     day: "Day",
+                    list: "List",
                   }}
+                  listDayFormat={{ weekday: "long", month: "short", day: "numeric" }}
+                  listDaySideFormat={false}
+                  noEventsText="No jobs scheduled"
                 />
               </div>
             )}
           </CardContent>
         </Card>
       </main>
+
+      {/* Mobile FAB */}
+      {isMobile && (
+        <Button
+          onClick={() => { resetForm(); setIsCreateOpen(true); }}
+          size="lg"
+          className="fixed bottom-6 right-4 z-50 h-14 w-14 rounded-full shadow-lg shadow-primary/30 transition-all hover:shadow-xl hover:shadow-primary/40"
+        >
+          <Plus className="h-6 w-6" />
+        </Button>
+      )}
 
       {/* Create Job Dialog */}
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
@@ -390,11 +465,7 @@ export default function CalendarPage() {
                 value={formData.client_id}
                 onValueChange={(v) => {
                   const client = clients.find((c) => c.id === v);
-                  setFormData({
-                    ...formData,
-                    client_id: v,
-                    location: client?.address || formData.location,
-                  });
+                  setFormData({ ...formData, client_id: v, location: client?.address || formData.location });
                 }}
               >
                 <SelectTrigger>
@@ -402,9 +473,7 @@ export default function CalendarPage() {
                 </SelectTrigger>
                 <SelectContent>
                   {clients.map((client) => (
-                    <SelectItem key={client.id} value={client.id}>
-                      {client.name}
-                    </SelectItem>
+                    <SelectItem key={client.id} value={client.id}>{client.name}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -430,9 +499,7 @@ export default function CalendarPage() {
                 </SelectTrigger>
                 <SelectContent>
                   {staffList.map((staff) => (
-                    <SelectItem key={staff.user_id} value={staff.user_id}>
-                      {staff.full_name}
-                    </SelectItem>
+                    <SelectItem key={staff.user_id} value={staff.user_id}>{staff.full_name}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -468,22 +535,17 @@ export default function CalendarPage() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsCreateOpen(false)}>
-              Cancel
+            <Button variant="outline" onClick={() => setIsCreateOpen(false)}>Cancel</Button>
+            <Button onClick={handleCreateJob} disabled={createJobMutation.isPending}>
+              {createJobMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+              Create Job
             </Button>
-            <Button onClick={handleCreateJob}>Create Job</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       {/* View/Edit Job Dialog */}
-      <Dialog
-        open={isViewOpen}
-        onOpenChange={(open) => {
-          setIsViewOpen(open);
-          if (!open) setSelectedJob(null);
-        }}
-      >
+      <Dialog open={isViewOpen} onOpenChange={(open) => { setIsViewOpen(open); if (!open) setSelectedJob(null); }}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>Job Details</DialogTitle>
@@ -497,29 +559,27 @@ export default function CalendarPage() {
                     {selectedJob.clients?.name || "No client"}
                   </span>
                 </div>
-                <span
-                  className={`rounded-full px-2 py-1 text-xs font-medium ${getStatusBadgeClass(selectedJob.status)}`}
-                >
+                <span className={`rounded-full px-2 py-1 text-xs font-medium ${getStatusBadgeClass(selectedJob.status)}`}>
                   {selectedJob.status}
                 </span>
               </div>
 
               <div className="flex items-center gap-2 text-muted-foreground">
-                <MapPin className="h-4 w-4" />
-                <span>{selectedJob.location}</span>
+                <MapPin className="h-4 w-4 shrink-0" />
+                <span className="text-sm">{selectedJob.location}</span>
               </div>
 
               <div className="flex items-center gap-2 text-muted-foreground">
-                <Clock className="h-4 w-4" />
-                <span>
+                <Clock className="h-4 w-4 shrink-0" />
+                <span className="text-sm">
                   {format(parseISO(selectedJob.scheduled_date), "EEEE, MMMM d, yyyy")} at{" "}
                   {selectedJob.scheduled_time}
                 </span>
               </div>
 
               <div className="flex items-center gap-2 text-muted-foreground">
-                <User className="h-4 w-4" />
-                <span>Assigned to: {selectedJob.profiles?.full_name || "Unassigned"}</span>
+                <User className="h-4 w-4 shrink-0" />
+                <span className="text-sm">Assigned to: {selectedJob.profiles?.full_name || "Unassigned"}</span>
               </div>
 
               {selectedJob.notes && (
@@ -536,9 +596,7 @@ export default function CalendarPage() {
                     <Input
                       type="date"
                       defaultValue={selectedJob.scheduled_date}
-                      onChange={(e) =>
-                        setFormData((prev) => ({ ...prev, scheduled_date: e.target.value }))
-                      }
+                      onChange={(e) => setFormData((prev) => ({ ...prev, scheduled_date: e.target.value }))}
                     />
                   </div>
                   <div>
@@ -546,9 +604,7 @@ export default function CalendarPage() {
                     <Input
                       type="time"
                       defaultValue={selectedJob.scheduled_time}
-                      onChange={(e) =>
-                        setFormData((prev) => ({ ...prev, scheduled_time: e.target.value }))
-                      }
+                      onChange={(e) => setFormData((prev) => ({ ...prev, scheduled_time: e.target.value }))}
                     />
                   </div>
                 </div>
@@ -557,18 +613,14 @@ export default function CalendarPage() {
                   <Label>Reassign Staff</Label>
                   <Select
                     defaultValue={selectedJob.assigned_staff_id || undefined}
-                    onValueChange={(v) =>
-                      setFormData((prev) => ({ ...prev, assigned_staff_id: v }))
-                    }
+                    onValueChange={(v) => setFormData((prev) => ({ ...prev, assigned_staff_id: v }))}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select staff member" />
                     </SelectTrigger>
                     <SelectContent>
                       {staffList.map((staff) => (
-                        <SelectItem key={staff.user_id} value={staff.user_id}>
-                          {staff.full_name}
-                        </SelectItem>
+                        <SelectItem key={staff.user_id} value={staff.user_id}>{staff.full_name}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -577,9 +629,7 @@ export default function CalendarPage() {
             </div>
           )}
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsViewOpen(false)}>
-              Close
-            </Button>
+            <Button variant="outline" onClick={() => setIsViewOpen(false)}>Close</Button>
             <Button onClick={handleEditJob}>Save Changes</Button>
           </DialogFooter>
         </DialogContent>
