@@ -45,6 +45,7 @@ export default defineConfig(({ mode }) => ({
     },
     chunkSizeWarningLimit: 600,
   },
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   plugins: [
     react(),
     mode === "development" && componentTagger(),
@@ -115,6 +116,7 @@ export default defineConfig(({ mode }) => ({
       workbox: {
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB limit
+        navigateFallbackDenylist: [/^\/~oauth/],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/.*\.supabase\.co\/.*/i,
@@ -153,7 +155,7 @@ export default defineConfig(({ mode }) => ({
         filename: "dist/bundle-stats.html",
         gzipSize: true,
       }),
-  ].filter(Boolean),
+  ].filter(Boolean) as any,
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),

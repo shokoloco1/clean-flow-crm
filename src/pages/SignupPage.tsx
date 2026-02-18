@@ -17,9 +17,7 @@ import {
   Loader2,
   Users,
   CheckCircle,
-  Chrome,
 } from "lucide-react";
-import { lovable } from "@/integrations/lovable";
 import { PulcrixLogo } from "@/components/PulcrixLogo";
 import { signupSchema, validatePassword } from "@/lib/passwordSecurity";
 import { PasswordStrengthIndicator } from "@/components/PasswordStrengthIndicator";
@@ -697,46 +695,6 @@ const SignupPage = () => {
                   </Button>
                 </form>
 
-                {/* Social login divider */}
-                <div className="relative my-6">
-                  <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t border-border" />
-                  </div>
-                  <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
-                  </div>
-                </div>
-
-                {/* Google Sign Up */}
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="h-12 w-full"
-                  onClick={async () => {
-                    setIsSubmitting(true);
-                    // Clear stale cache and mark signup in progress BEFORE the OAuth redirect
-                    try {
-                      localStorage.removeItem("pulcrix_user_role");
-                      localStorage.removeItem("pulcrix_user_id");
-                    } catch {
-                      /* storage may be unavailable */
-                    }
-                    markSignupStarted();
-                    // Use /signup without query params - sessionStorage handles the flow tracking
-                    const { error } = await lovable.auth.signInWithOAuth("google", {
-                      redirect_uri: `${window.location.origin}/signup`,
-                    });
-                    if (error) {
-                      toast.error("Failed to sign up with Google");
-                      clearSignupFlag();
-                      setIsSubmitting(false);
-                    }
-                  }}
-                  disabled={isSubmitting}
-                >
-                  <Chrome className="mr-2 h-5 w-5" />
-                  Sign up with Google
-                </Button>
               </CardContent>
             </Card>
           )}
