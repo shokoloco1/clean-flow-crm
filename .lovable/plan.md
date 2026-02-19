@@ -1,64 +1,68 @@
 
-## Fix: invite-staff Edge Function — Duplicate Profile Error
+# Plan: Separar "Inactivar" y "Eliminar" Staff
 
-### Root Cause
+## Problema actual
 
-When an existing user is re-invited (already has an auth account but perhaps no role yet), the function:
+El botón "Delete" en `StaffManagementPage.tsx` actualmente solo hace `update({ is_active: false })`, es decir, **es exactamente lo mismo que "Deactivate"**. El usuario pide que:
 
-1. Detects the user already exists → sets `isExistingUser = true`
-2. Only runs the "update profile" path if `existingRole` is found
-3. If NO role exists yet → the code falls through to line 375 (`if (!isExistingUser)`) — but `isExistingUser` IS true, so the insert is skipped
-4. BUT wait — re-reading more carefully: when `existingRole` is null, the user IS existing but profile insert IS skipped. The crash is the opposite case.
+- **Inactivar** = solo pone `is_active: false` (el staff no puede recibir jobs, pero sus datos quedan)
+- **Eliminar** = borrado real y permanente: elimina el registro de auth, `profiles`, `user_roles`, y datos relacionados
 
-Actually, looking at the logs more carefully:
+## Solución
 
+### 1. Nueva Edge Function: `delete-staff`
+
+Crear `supabase/functions/delete-staff/index.ts` con permisos de service role para:
+1. Verificar que el llamante es admin
+2. Desasignar al staff de jobs futuros (`assigned_staff_id = null` en jobs pendientes/en progreso)
+3. Eliminar el usuario de `auth.users` usando `supabase.auth.admin.deleteUser(userId)` — esto activa el CASCADE que elimina `profiles` y `user_roles` automáticamente (por la FK `ON DELETE CASCADE`)
+
+### 2. Cambios en `StaffManagementPage.tsx`
+
+**En el DropdownMenu de cada staff row:**
+
+Antes (ambas acciones hacían lo mismo):
 ```
-[invite-staff] User ID: 857c0efc-..., existing: false   ← isExistingUser is FALSE
-[invite-staff] Profile creation error: duplicate key... ← but profile already exists
-```
-
-The real bug: `isExistingUser = false` when the user was **just created by `auth.admin.createUser`**, BUT the `handle_new_user()` trigger on `auth.users` **automatically creates a profile** in the `public.profiles` table. So by the time line 376 tries to `INSERT` into `profiles`, the trigger has already inserted one → **duplicate key**.
-
-### The Fix
-
-**File: `supabase/functions/invite-staff/index.ts`**
-
-Replace the `profiles` INSERT with an `UPSERT` (using `onConflict: "user_id"`) so it's safe whether the trigger already fired or not. Same fix applies to `user_roles` insert.
-
-Specifically:
-
-1. **Line 376-386**: Change `profiles.insert(...)` → `profiles.upsert(..., { onConflict: "user_id" })` — this handles the case where `handle_new_user()` trigger already created the profile.
-
-2. **Line 408-415**: Change `user_roles.insert(...)` → `user_roles.upsert(..., { onConflict: "user_id" })` — same protection in case the trigger also inserted a default `staff` role.
-
-3. **Line 394-404**: Change `profiles_sensitive.insert(...)` → already uses `upsert` in the existing-user path, make the new-user path consistent too.
-
-### Why This Works
-
-The `handle_new_user()` database trigger fires immediately when `auth.admin.createUser()` succeeds. It inserts a row into `public.profiles` with basic info. The Edge Function then tries to insert a second profile row with the enriched data (phone, certifications, hire_date) — which fails with `duplicate key`.
-
-Using `upsert` with `onConflict: "user_id"` means:
-- If the trigger already inserted a profile → update it with the full data
-- If no profile exists yet → insert fresh (new install without trigger)
-
-This is a 3-line change in one file, zero database changes needed.
-
-### Technical Details
-
-```
-File modified: supabase/functions/invite-staff/index.ts
-
-Change 1 (line ~376):
-  .from("profiles").insert({...})
-→ .from("profiles").upsert({...}, { onConflict: "user_id" })
-
-Change 2 (line ~408):
-  .from("user_roles").insert({ user_id: userId, role: "staff" })
-→ .from("user_roles").upsert({ user_id: userId, role: "staff" }, { onConflict: "user_id" })
-
-Change 3 (line ~394):
-  .from("profiles_sensitive").insert({...})
-→ .from("profiles_sensitive").upsert({...}, { onConflict: "user_id" })
+Edit Profile
+Deactivate/Activate   ← togglea is_active
+── separator ──
+Delete                ← también solo ponía is_active: false ← INCORRECTO
 ```
 
-No UI changes required. No database migrations needed. After deploying the updated Edge Function, re-inviting staff will work correctly even if the auth trigger has already pre-created their profile.
+Después (separación clara):
+```
+Edit Profile
+Deactivate/Activate   ← solo togglea is_active (preserva cuenta, sin acceso a jobs)
+── separator ──
+Delete Permanently    ← llama delete-staff edge function → borrado real de auth + datos
+```
+
+**Diálogo de confirmación de Delete** — actualizar el texto para que sea claro:
+- Título: "Permanently Delete Staff Member"
+- Descripción: "This action CANNOT be undone. It will permanently delete [name]'s account, profile, and all access. Their completed job history will be preserved, but they will no longer be able to log in."
+- Botón: "Yes, Delete Permanently" (en rojo destructivo)
+
+**La función `handleDeleteStaff`** pasará a llamar la edge function `delete-staff` en lugar de hacer update.
+
+**La función `handleQuickToggleStatus`** permanece igual — solo togglea `is_active`.
+
+### 3. Archivos a modificar
+
+```text
+supabase/functions/delete-staff/index.ts  — NUEVO (edge function de borrado real)
+src/pages/StaffManagementPage.tsx         — Actualizar handleDeleteStaff + UI del diálogo
+```
+
+### Detalles técnicos
+
+**Edge Function `delete-staff`:**
+- Recibe `{ staffUserId: string }` en el body
+- Autentica al llamante y verifica rol admin via JWT
+- Desasigna jobs pendientes/en progreso: `UPDATE jobs SET assigned_staff_id = NULL WHERE assigned_staff_id = staffUserId AND status IN ('pending', 'in_progress')`
+- Llama `supabase.auth.admin.deleteUser(staffUserId)` — el CASCADE de FK elimina automáticamente `profiles` y `user_roles`
+
+**Por qué se necesita una edge function:**
+`supabase.auth.admin.deleteUser()` solo está disponible con el `service_role` key, que **nunca debe usarse en el cliente**. La edge function tiene acceso seguro a `SUPABASE_SERVICE_ROLE_KEY`.
+
+**Por qué NO se borran los jobs completados:**
+Los jobs completados tienen valor histórico (facturación, métricas). Solo se desasigna el staff de jobs FUTUROS que todavía no han empezado, para que no queden bloqueados sin un limpiador asignado.
