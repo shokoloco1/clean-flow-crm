@@ -95,8 +95,24 @@ export default function PropertiesPage() {
 
   // List view
   return (
-    <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-10 border-b border-border bg-card">
+    <div className="min-h-screen bg-background pb-24">
+      {/* Mobile Header */}
+      <header className="sticky top-0 z-10 border-b border-border bg-card md:hidden">
+        <div className="flex items-center justify-between px-4 py-3">
+          <div className="flex items-center gap-3">
+            <Button variant="ghost" size="icon" onClick={() => navigate("/admin")}>
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <h1 className="text-lg font-bold text-foreground">Properties</h1>
+          </div>
+          <Button variant="ghost" size="icon" onClick={() => propertyForm.handleDialogOpenChange(true)}>
+            <Plus className="h-5 w-5" />
+          </Button>
+        </div>
+      </header>
+
+      {/* Desktop Header */}
+      <header className="sticky top-0 z-10 hidden border-b border-border bg-card md:block">
         <div className="container mx-auto flex items-center gap-4 px-4 py-4">
           <Button variant="ghost" size="icon" onClick={() => navigate("/admin")}>
             <ArrowLeft className="h-5 w-5" />
@@ -179,6 +195,15 @@ export default function PropertiesPage() {
           </AlertDialogContent>
         </AlertDialog>
       </main>
+
+      {/* Mobile FAB */}
+      <button
+        onClick={() => propertyForm.handleDialogOpenChange(true)}
+        className="fixed bottom-24 right-4 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-primary shadow-lg transition-transform active:scale-95 md:hidden"
+        aria-label="Add Property"
+      >
+        <Plus className="h-6 w-6 text-primary-foreground" />
+      </button>
 
       {/* Form Dialog */}
       <PropertyFormDialog
