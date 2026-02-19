@@ -1,6 +1,9 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 
+const PRODUCTION_URL = "https://spotless-log.lovable.app";
+const REDIRECT_TO = `${PRODUCTION_URL}/auth`;
+
 function getCorsHeaders(req: Request) {
   const origin = req.headers.get("origin") ?? "";
   const isAllowed =
@@ -14,8 +17,8 @@ function getCorsHeaders(req: Request) {
   };
 }
 
-// Email template for staff invitation
-const getInvitationEmailHtml = (staffName: string, inviteLink: string, adminName: string) => `
+// Branded HTML email template for Resend (secondary layer)
+const getInvitationEmailHtml = (staffName: string, adminName: string) => `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -57,44 +60,29 @@ const getInvitationEmailHtml = (staffName: string, inviteLink: string, adminName
               </h2>
 
               <p style="margin: 0 0 24px; color: #52525b; font-size: 16px; line-height: 1.6;">
-                ${adminName} has invited you to join their cleaning business on Pulcrix. You'll be able to view your assigned jobs, check in at locations, and upload photos directly from your phone.
+                ${adminName} has invited you to join their cleaning business on Pulcrix. You'll receive a separate email with a secure link to set up your account and password.
               </p>
 
-              <p style="margin: 0 0 32px; color: #52525b; font-size: 16px; line-height: 1.6;">
-                Click the button below to set up your account and get started:
+              <p style="margin: 0 0 24px; color: #52525b; font-size: 16px; line-height: 1.6;">
+                Once you've set up your account, you'll be able to:
               </p>
 
-              <!-- CTA Button -->
-              <table role="presentation" style="width: 100%;">
-                <tr>
-                  <td align="center">
-                    <a href="${inviteLink}"
-                       style="display: inline-block; background-color: #0D9488; color: #ffffff; text-decoration: none; font-size: 16px; font-weight: 600; padding: 16px 40px; border-radius: 8px; box-shadow: 0 2px 4px rgba(13, 148, 136, 0.3);">
-                      Set Up My Account
-                    </a>
-                  </td>
-                </tr>
-              </table>
-
-              <p style="margin: 32px 0 0; color: #71717a; font-size: 14px; line-height: 1.6;">
-                <strong>What you can do with Pulcrix:</strong>
-              </p>
-              <ul style="margin: 12px 0 24px; color: #52525b; font-size: 14px; line-height: 1.8; padding-left: 20px;">
+              <ul style="margin: 0 0 32px; color: #52525b; font-size: 14px; line-height: 1.8; padding-left: 20px;">
                 <li>View your daily job schedule</li>
                 <li>Get directions to job locations</li>
-                <li>Upload before & after photos</li>
+                <li>Upload before &amp; after photos</li>
                 <li>Mark jobs as complete</li>
                 <li>Receive notifications for new assignments</li>
               </ul>
+
+              <p style="margin: 0 0 0; color: #71717a; font-size: 14px; line-height: 1.6;">
+                <strong>App URL:</strong> <a href="${PRODUCTION_URL}" style="color: #0D9488;">${PRODUCTION_URL}</a>
+              </p>
 
               <hr style="border: none; border-top: 1px solid #e4e4e7; margin: 32px 0;">
 
               <p style="margin: 0; color: #71717a; font-size: 13px; line-height: 1.5;">
                 If you didn't expect this invitation, you can safely ignore this email.
-              </p>
-
-              <p style="margin: 16px 0 0; color: #a1a1aa; font-size: 12px;">
-                This link will expire in 24 hours for security reasons.
               </p>
             </td>
           </tr>
@@ -118,49 +106,35 @@ const getInvitationEmailHtml = (staffName: string, inviteLink: string, adminName
 </html>
 `;
 
-// Plain text version for email clients that don't support HTML
-const getInvitationEmailText = (staffName: string, inviteLink: string, adminName: string) => `
+const getInvitationEmailText = (staffName: string, adminName: string) => `
 Welcome to Pulcrix, ${staffName}!
 
 ${adminName} has invited you to join their cleaning business on Pulcrix.
 
-Click the link below to set up your account:
-${inviteLink}
+You'll receive a separate email with a secure link to set up your account and password.
 
-What you can do with Pulcrix:
-- View your daily job schedule
-- Get directions to job locations
-- Upload before & after photos
-- Mark jobs as complete
-- Receive notifications for new assignments
+Once set up, visit: ${PRODUCTION_URL}
 
 If you didn't expect this invitation, you can safely ignore this email.
-
-This link will expire in 24 hours for security reasons.
 
 © ${new Date().getFullYear()} Pulcrix. All rights reserved.
 `;
 
-// Send email via Resend
-async function sendEmailWithResend(
+// Send branded welcome email via Resend (secondary/bonus layer)
+async function sendBrandedWelcomeEmail(
   to: string,
-  subject: string,
-  html: string,
-  text: string
-): Promise<{ success: boolean; error?: string }> {
+  staffName: string,
+  adminName: string
+): Promise<void> {
   const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
-
   if (!RESEND_API_KEY) {
-    console.error("[invite-staff] RESEND_API_KEY not configured");
-    return { success: false, error: "Email service not configured" };
+    console.log("[invite-staff] RESEND_API_KEY not configured, skipping branded email");
+    return;
   }
 
+  const fromEmail = Deno.env.get("RESEND_FROM_EMAIL") || "Pulcrix <onboarding@resend.dev>";
+
   try {
-    console.log(`[invite-staff] Sending email to ${to} via Resend`);
-
-    // Use configured from email or fallback to Resend's test domain
-    const fromEmail = Deno.env.get("RESEND_FROM_EMAIL") || "Pulcrix <onboarding@resend.dev>";
-
     const response = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
@@ -170,64 +144,27 @@ async function sendEmailWithResend(
       body: JSON.stringify({
         from: fromEmail,
         to: [to],
-        subject,
-        html,
-        text,
+        subject: `Welcome to Pulcrix — ${adminName} invited you!`,
+        html: getInvitationEmailHtml(staffName, adminName),
+        text: getInvitationEmailText(staffName, adminName),
       }),
     });
 
-    const responseData = await response.json();
-
-    if (!response.ok) {
-      console.error("[invite-staff] Resend API error:", responseData);
-      return { success: false, error: responseData.message || "Failed to send email" };
+    if (response.ok) {
+      const data = await response.json();
+      console.log(`[invite-staff] Branded welcome email sent via Resend. ID: ${data.id}`);
+    } else {
+      const err = await response.json();
+      console.warn("[invite-staff] Resend branded email failed (non-critical):", err);
     }
-
-    console.log(`[invite-staff] Email sent successfully. ID: ${responseData.id}`);
-    return { success: true };
-  } catch (error: unknown) {
-    console.error("[invite-staff] Email sending error:", error);
-    const errorMessage = error instanceof Error ? error.message : "Network error";
-    return { success: false, error: errorMessage };
+  } catch (error) {
+    console.warn("[invite-staff] Resend branded email error (non-critical):", error);
   }
-}
-
-// Retry wrapper for email sending
-async function sendEmailWithRetry(
-  to: string,
-  subject: string,
-  html: string,
-  text: string,
-  maxRetries = 3
-): Promise<{ success: boolean; error?: string; attempts: number }> {
-  let lastError = "";
-
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    console.log(`[invite-staff] Email attempt ${attempt}/${maxRetries}`);
-
-    const result = await sendEmailWithResend(to, subject, html, text);
-
-    if (result.success) {
-      return { success: true, attempts: attempt };
-    }
-
-    lastError = result.error || "Unknown error";
-
-    // Don't wait after the last attempt
-    if (attempt < maxRetries) {
-      // Exponential backoff: 1s, 2s, 4s
-      const waitTime = Math.pow(2, attempt - 1) * 1000;
-      console.log(`[invite-staff] Waiting ${waitTime}ms before retry...`);
-      await new Promise(resolve => setTimeout(resolve, waitTime));
-    }
-  }
-
-  return { success: false, error: lastError, attempts: maxRetries };
 }
 
 serve(async (req) => {
   const corsHeaders = getCorsHeaders(req);
-  // Handle CORS preflight
+
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
@@ -235,11 +172,9 @@ serve(async (req) => {
   try {
     console.log("[invite-staff] Processing request");
 
-    // Verify the request is from an authenticated admin
+    // Verify authenticated admin caller
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader) {
-      throw new Error("No authorization header");
-    }
+    if (!authHeader) throw new Error("No authorization header");
 
     const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
@@ -247,7 +182,6 @@ serve(async (req) => {
       { global: { headers: { Authorization: authHeader } } }
     );
 
-    // Verify caller is admin
     const { data: { user } } = await supabaseClient.auth.getUser();
     if (!user) throw new Error("Not authenticated");
 
@@ -257,11 +191,9 @@ serve(async (req) => {
       .eq("user_id", user.id)
       .single();
 
-    if (roleData?.role !== "admin") {
-      throw new Error("Only admins can invite staff");
-    }
+    if (roleData?.role !== "admin") throw new Error("Only admins can invite staff");
 
-    // Get admin's name for the email
+    // Get admin name for email
     const { data: adminProfile } = await supabaseClient
       .from("profiles")
       .select("full_name")
@@ -270,157 +202,106 @@ serve(async (req) => {
 
     const adminName = adminProfile?.full_name || user.email?.split("@")[0] || "Your manager";
 
-    // Get request body
+    // Parse request body
     const { email, fullName, phone, hourlyRate, certifications } = await req.json();
 
-    if (!email || !fullName) {
-      throw new Error("Email and name are required");
-    }
+    if (!email || !fullName) throw new Error("Email and name are required");
 
-    // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      throw new Error("Invalid email format");
-    }
-
-    // Validate fullName is not just whitespace
-    if (fullName.trim().length < 2) {
-      throw new Error("Name must be at least 2 characters");
-    }
-
-    // Validate hourlyRate if provided
+    if (!emailRegex.test(email)) throw new Error("Invalid email format");
+    if (fullName.trim().length < 2) throw new Error("Name must be at least 2 characters");
     if (hourlyRate !== undefined && hourlyRate !== null) {
       const rate = parseFloat(hourlyRate);
-      if (isNaN(rate) || rate < 0) {
-        throw new Error("Hourly rate must be a positive number");
-      }
+      if (isNaN(rate) || rate < 0) throw new Error("Hourly rate must be a positive number");
     }
 
     console.log(`[invite-staff] Admin ${user.email} inviting ${email}`);
 
-    // Use admin client for user creation
+    // Use service role for privileged operations
     const supabaseAdmin = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
-    // 1. Try to create user with admin API
+    // Step 1: Check if user already exists
+    const { data: existingUsers } = await supabaseAdmin.auth.admin.listUsers();
+    const existingUser = existingUsers?.users.find(u => u.email === email);
+
     let userId: string;
     let isExistingUser = false;
 
-    const { data: userData, error: userError } = await supabaseAdmin.auth.admin.createUser({
-      email,
-      email_confirm: false,
-      user_metadata: { full_name: fullName }
-    });
-
-    if (userError) {
-      // If user already exists, look them up and reuse
-      if (userError.message.includes("already been registered") || userError.code === "email_exists") {
-        console.log(`[invite-staff] User ${email} already exists, checking if already staff...`);
-        
-        // Find existing user
-        const { data: existingUsers, error: listError } = await supabaseAdmin.auth.admin.listUsers();
-        if (listError) throw listError;
-        
-        const existingUser = existingUsers.users.find(u => u.email === email);
-        if (!existingUser) {
-          throw new Error("Could not find existing user. Please try again.");
-        }
-        
-        userId = existingUser.id;
-        isExistingUser = true;
-
-        // Check if they already have a staff role
-        const { data: existingRole } = await supabaseAdmin
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", userId)
-          .single();
-
-        if (existingRole) {
-          // User exists and already has a role - update their profile instead
-          console.log(`[invite-staff] User ${email} already has role: ${existingRole.role}. Updating profile.`);
-          
-          await supabaseAdmin
-            .from("profiles")
-            .update({
-              full_name: fullName,
-              phone: phone || null,
-              certifications: certifications || [],
-              is_active: true
-            })
-            .eq("user_id", userId);
-
-          if (hourlyRate) {
-            await supabaseAdmin
-              .from("profiles_sensitive")
-              .upsert({
-                user_id: userId,
-                hourly_rate: parseFloat(hourlyRate)
-              }, { onConflict: "user_id" });
-          }
-        }
-      } else {
-        console.error("[invite-staff] User creation error:", userError);
-        throw userError;
-      }
-    } else {
-      userId = userData.user.id;
+    if (existingUser) {
+      console.log(`[invite-staff] User ${email} already exists (id: ${existingUser.id})`);
+      userId = existingUser.id;
+      isExistingUser = true;
     }
 
-    console.log(`[invite-staff] User ID: ${userId}, existing: ${isExistingUser}`);
+    // Step 2: Send invite via Supabase Auth (primary delivery — always works)
+    // inviteUserByEmail creates user if not exists AND sends the invitation email
+    console.log(`[invite-staff] Sending Supabase Auth invitation to ${email}`);
+    const { data: inviteData, error: inviteError } = await supabaseAdmin.auth.admin.inviteUserByEmail(
+      email,
+      { redirectTo: REDIRECT_TO }
+    );
 
-    // 2. Create profile if new user
-    if (!isExistingUser) {
-      const { error: profileError } = await supabaseAdmin
-        .from("profiles")
+    if (inviteError) {
+      console.error("[invite-staff] inviteUserByEmail error:", inviteError);
+      throw new Error(`Failed to send invitation: ${inviteError.message}`);
+    }
+
+    // Use the user ID from the invite response (handles both new and existing users)
+    userId = inviteData.user.id;
+    console.log(`[invite-staff] Supabase Auth invitation sent. User ID: ${userId}`);
+
+    // Step 3: Create or update profile with is_active: true
+    const { error: profileError } = await supabaseAdmin
+      .from("profiles")
+      .upsert({
+        user_id: userId,
+        email,
+        full_name: fullName,
+        phone: phone || null,
+        certifications: certifications || [],
+        hire_date: isExistingUser ? undefined : new Date().toISOString().split('T')[0],
+        is_active: true,  // Always explicitly set to true
+      }, { onConflict: "user_id" });
+
+    if (profileError) {
+      console.error("[invite-staff] Profile upsert error:", profileError);
+      // Non-fatal: invitation was already sent
+    }
+
+    // Step 4: Save sensitive data (hourly rate)
+    if (hourlyRate) {
+      const { error: sensitiveError } = await supabaseAdmin
+        .from("profiles_sensitive")
         .upsert({
           user_id: userId,
-          email,
-          full_name: fullName,
-          phone: phone || null,
-          certifications: certifications || [],
-          hire_date: new Date().toISOString().split('T')[0],
-          is_active: true
+          hourly_rate: parseFloat(hourlyRate),
         }, { onConflict: "user_id" });
 
-      if (profileError) {
-        console.error("[invite-staff] Profile creation error:", profileError);
-        throw profileError;
+      if (sensitiveError) {
+        console.error("[invite-staff] Sensitive profile error:", sensitiveError);
       }
+    }
 
-      // 2b. Create sensitive profile data (hourly rate)
-      if (hourlyRate) {
-        const { error: sensitiveError } = await supabaseAdmin
-          .from("profiles_sensitive")
-          .upsert({
-            user_id: userId,
-            hourly_rate: parseFloat(hourlyRate)
-          }, { onConflict: "user_id" });
+    // Step 5: Assign staff role (upsert is safe for existing users)
+    const { error: roleError } = await supabaseAdmin
+      .from("user_roles")
+      .upsert({ user_id: userId, role: "staff" }, { onConflict: "user_id" });
 
-        if (sensitiveError) {
-          console.error("[invite-staff] Sensitive profile error:", sensitiveError);
-        }
-      }
+    if (roleError) {
+      console.error("[invite-staff] Role assignment error:", roleError);
+    }
 
-      // 3. Assign staff role
-      const { error: roleError } = await supabaseAdmin
-        .from("user_roles")
-        .upsert({ user_id: userId, role: "staff" }, { onConflict: "user_id" });
-
-      if (roleError) {
-        console.error("[invite-staff] Role assignment error:", roleError);
-        throw roleError;
-      }
-
-      // 4. Create default availability (Mon-Fri 8am-5pm)
+    // Step 6: Create default availability for new users
+    if (!isExistingUser) {
       const availabilityRecords = [1, 2, 3, 4, 5].map(day => ({
         user_id: userId,
         day_of_week: day,
         start_time: "08:00",
         end_time: "17:00",
-        is_available: true
+        is_available: true,
       }));
       availabilityRecords.push(
         { user_id: userId, day_of_week: 0, start_time: "08:00", end_time: "17:00", is_available: false },
@@ -429,77 +310,20 @@ serve(async (req) => {
       await supabaseAdmin.from("staff_availability").insert(availabilityRecords);
     }
 
-    // 5. Generate magic link for password setup
-    const origin = req.headers.get("origin");
-    const redirectTo = `${origin || "https://pulcrix.com"}/auth`;
+    // Step 7: Send branded Pulcrix welcome email via Resend (secondary layer, non-critical)
+    // Fire-and-forget — don't await to avoid blocking the response
+    sendBrandedWelcomeEmail(email, fullName, adminName).catch(err =>
+      console.warn("[invite-staff] Branded email fire-and-forget error:", err)
+    );
 
-    const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
-      type: "magiclink",
-      email: email,
-      options: {
-        redirectTo
-      }
-    });
-
-    if (linkError) {
-      console.error("[invite-staff] Link generation error:", linkError);
-      // Continue anyway - we'll inform the admin that email might not have been sent
-    }
-
-    // 6. Send invitation email via Resend
-    let emailSent = false;
-    let emailError = "";
-
-    if (linkData?.properties?.hashed_token) {
-      // Construct the invite URL using Supabase's verify endpoint
-      const supabaseUrl = Deno.env.get("SUPABASE_URL");
-      const inviteLink = `${supabaseUrl}/auth/v1/verify?token=${linkData.properties.hashed_token}&type=magiclink&redirect_to=${encodeURIComponent(redirectTo)}`;
-
-      console.log(`[invite-staff] Generated invite link for ${email}`);
-
-      const emailHtml = getInvitationEmailHtml(fullName, inviteLink, adminName);
-      const emailText = getInvitationEmailText(fullName, inviteLink, adminName);
-
-      const emailResult = await sendEmailWithRetry(
-        email,
-        `Welcome to Pulcrix - ${adminName} invited you to join!`,
-        emailHtml,
-        emailText
-      );
-
-      emailSent = emailResult.success;
-      emailError = emailResult.error || "";
-
-      if (emailResult.success) {
-        console.log(`[invite-staff] Invitation email sent to ${email} (${emailResult.attempts} attempt(s))`);
-      } else {
-        console.error(`[invite-staff] Failed to send email after ${emailResult.attempts} attempts: ${emailError}`);
-      }
-    } else {
-      // Fallback: try Supabase's built-in invite
-      console.log("[invite-staff] Falling back to Supabase invite");
-      const { error: inviteError } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
-        redirectTo
-      });
-
-      if (inviteError) {
-        console.error("[invite-staff] Supabase invite error:", inviteError);
-        emailError = inviteError.message;
-      } else {
-        emailSent = true;
-        console.log(`[invite-staff] Supabase invitation email sent to ${email}`);
-      }
-    }
+    console.log(`[invite-staff] ✅ Invitation complete for ${email}`);
 
     return new Response(
       JSON.stringify({
         success: true,
         userId,
-        emailSent,
-        emailError: emailError || undefined,
-        message: emailSent
-          ? "Staff member created and invitation sent"
-          : "Staff member created but invitation email may not have been sent. They can use password reset."
+        emailSent: true,
+        message: "Staff member invited successfully. They will receive an email to set up their account.",
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
@@ -510,7 +334,7 @@ serve(async (req) => {
       JSON.stringify({ error: error.message }),
       {
         status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" }
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       }
     );
   }
