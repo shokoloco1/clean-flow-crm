@@ -134,7 +134,7 @@ export function useSubscription() {
     }
   }, [user, checkSubscription]);
 
-  // Auto-refresh every minute
+  // Auto-refresh every 10 minutes
   useEffect(() => {
     if (!user) return;
 

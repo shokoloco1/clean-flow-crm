@@ -31,7 +31,7 @@ CREATE TRIGGER update_system_settings_updated_at
 
 -- Insert default settings
 INSERT INTO public.system_settings (key, value, description) VALUES
-  ('company_name', '"CleanTrack Pro"', 'Nombre de la empresa'),
+  ('company_name', '"Pulcrix"', 'Nombre de la empresa'),
   ('company_logo', '""', 'URL del logo de la empresa'),
   ('default_geofence_radius', '100', 'Radio de geofence por defecto en metros'),
   ('working_hours', '{"start": "08:00", "end": "18:00"}', 'Horario laboral'),

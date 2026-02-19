@@ -151,7 +151,7 @@ export function AdminSidebar() {
           <SidebarMenuItem>
             <SidebarMenuButton
               onClick={handleSignOut}
-              tooltip={tAdmin("loading")}
+              tooltip={isSigningOut ? tAdmin("loading") : "Sign Out"}
               disabled={isSigningOut}
               className="text-muted-foreground hover:text-foreground disabled:opacity-50"
             >

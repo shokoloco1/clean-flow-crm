@@ -121,7 +121,7 @@ serve(async (req) => {
     trialEnd.setDate(trialEnd.getDate() + TRIAL_DAYS);
 
     // Generate idempotency key to prevent duplicate checkout sessions
-    const idempotencyKey = `checkout_${user.id}_${priceId}_${Date.now()}`;
+    const idempotencyKey = `checkout_${user.id}_${priceId}`;
     logStep("Using idempotency key", { idempotencyKey });
 
     const session = await stripe.checkout.sessions.create({

@@ -11,7 +11,7 @@ describe("CONFIG", () => {
 
   it("should have correct refresh intervals", () => {
     expect(CONFIG.refresh.dashboard).toBe(30000);
-    expect(CONFIG.refresh.subscription).toBe(60000);
+    expect(CONFIG.refresh.subscription).toBe(600000);
   });
 
   it("should have correct image compression settings", () => {

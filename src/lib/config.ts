@@ -13,7 +13,7 @@ export const CONFIG = {
   // Auto-refresh intervals
   refresh: {
     dashboard: 30000, // 30 seconds
-    subscription: 60000, // 60 seconds
+    subscription: 600000, // 10 minutes
   },
 
   // Image compression settings

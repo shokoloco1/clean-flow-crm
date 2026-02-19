@@ -151,16 +151,23 @@ describe("useAuth", () => {
       });
 
       await act(async () => {
-        await result.current.signUp("test@example.com", "password123", "John Doe", "staff");
+        await result.current.signUp(
+          "test@example.com",
+          "password123",
+          "John Doe",
+          "Test Business",
+          "staff",
+        );
       });
 
       expect(mockSignUp).toHaveBeenCalledWith({
         email: "test@example.com",
         password: "password123",
         options: {
-          emailRedirectTo: "http://localhost:3000/",
+          emailRedirectTo: "http://localhost:3000/auth",
           data: {
             full_name: "John Doe",
+            business_name: "Test Business",
             intended_role: "staff",
           },
         },
@@ -177,13 +184,20 @@ describe("useAuth", () => {
       });
 
       await act(async () => {
-        await result.current.signUp("test@example.com", "password123", "John Doe", "admin");
+        await result.current.signUp(
+          "test@example.com",
+          "password123",
+          "John Doe",
+          "Test Business",
+          "admin",
+        );
       });
 
       expect(mockSignUp).toHaveBeenCalledWith(
         expect.objectContaining({
           options: expect.objectContaining({
             data: expect.objectContaining({
+              business_name: "Test Business",
               intended_role: "admin",
             }),
           }),
@@ -201,7 +215,7 @@ describe("useAuth", () => {
       });
 
       await act(async () => {
-        await result.current.signUp("test@example.com", "password123", "John Doe", null);
+        await result.current.signUp("test@example.com", "password123", "John Doe", "", null);
       });
 
       expect(mockSignUp).toHaveBeenCalledWith(

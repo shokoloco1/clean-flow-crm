@@ -24,6 +24,7 @@ interface AuthContextType {
     email: string,
     password: string,
     fullName: string,
+    businessName: string,
     role: AppRole,
   ) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
@@ -203,8 +204,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signUp = useCallback(
-    async (email: string, password: string, fullName: string, intendedRole?: AppRole) => {
-      const redirectUrl = `${window.location.origin}/`;
+    async (
+      email: string,
+      password: string,
+      fullName: string,
+      businessName: string,
+      intendedRole?: AppRole,
+    ) => {
+      const redirectUrl = `${window.location.origin}/auth`;
 
       const { error } = await supabase.auth.signUp({
         email,
@@ -213,6 +220,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           emailRedirectTo: redirectUrl,
           data: {
             full_name: fullName,
+            business_name: businessName,
             intended_role: intendedRole || "staff",
           },
         },

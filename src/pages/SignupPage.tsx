@@ -258,7 +258,7 @@ const SignupPage = () => {
       markSignupStarted();
     }
 
-    const { error } = await signUp(email, password, fullName, userRole);
+    const { error } = await signUp(email, password, fullName, businessName, userRole);
 
     if (error) {
       if (error.message?.includes("already registered")) {
@@ -313,15 +313,15 @@ const SignupPage = () => {
         },
       });
 
-      console.log("[Checkout] Response:", { data, error });
+      logger.debug("[Checkout] Response:", { data, error });
 
       if (error) {
-        console.error("[Checkout] Function error:", error);
+        logger.error("[Checkout] Function error:", error);
         throw error;
       }
 
       if (data?.url) {
-        console.log("[Checkout] Redirecting to:", data.url);
+        logger.debug("[Checkout] Redirecting to:", data.url);
         // Try redirect, with fallback to new tab for iframe restrictions
         try {
           window.location.href = data.url;
@@ -334,7 +334,10 @@ const SignupPage = () => {
             }
           }, 2000);
         } catch (redirectError) {
-          console.error("[Checkout] Redirect failed:", redirectError);
+          logger.error(
+            "[Checkout] Redirect failed:",
+            redirectError instanceof Error ? redirectError : new Error(String(redirectError)),
+          );
           window.open(data.url, "_blank");
           setIsSubmitting(false);
         }
@@ -343,7 +346,7 @@ const SignupPage = () => {
         setIsSubmitting(false);
         navigate("/admin", { replace: true });
       } else {
-        console.error("[Checkout] No URL in response:", data);
+        logger.error("[Checkout] No URL in response:", new Error("No checkout URL returned"));
         throw new Error("No checkout URL returned");
       }
     } catch (error) {
@@ -694,7 +697,6 @@ const SignupPage = () => {
                     )}
                   </Button>
                 </form>
-
               </CardContent>
             </Card>
           )}

@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import Stripe from "https://esm.sh/stripe@14.21.0";
+import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 
 const logStep = (step: string, details?: Record<string, unknown>) => {
@@ -44,7 +44,7 @@ serve(async (req) => {
     if (!stripeKey) throw new Error("STRIPE_SECRET_KEY not configured");
     if (!webhookSecret) throw new Error("STRIPE_WEBHOOK_SECRET not configured");
 
-    const stripe = new Stripe(stripeKey, { apiVersion: "2023-10-16" });
+    const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
 
     const supabaseAdmin = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
@@ -284,7 +284,7 @@ serve(async (req) => {
           const { data: sub } = await supabaseAdmin
             .from("subscriptions")
             .select("user_id, trial_end")
-            .eq("stripe_subscription_id", invoice.subscription as string)
+            .eq("stripe_subscription_id", typeof invoice.subscription === "string" ? invoice.subscription : invoice.subscription?.id ?? "")
             .maybeSingle();
 
           if (sub?.user_id && sub.trial_end) {
@@ -312,7 +312,7 @@ serve(async (req) => {
           const { error } = await supabaseAdmin
             .from("subscriptions")
             .update({ status: "past_due" })
-            .eq("stripe_subscription_id", invoice.subscription as string);
+            .eq("stripe_subscription_id", typeof invoice.subscription === "string" ? invoice.subscription : invoice.subscription?.id ?? "");
 
           if (error) {
             logStep("ERROR updating to past_due", { error: error.message });

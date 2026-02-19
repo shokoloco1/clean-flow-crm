@@ -1,6 +1,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, RefreshCw } from "lucide-react";
+import { captureError } from "@/lib/sentry";
 
 interface Props {
   children: React.ReactNode;
@@ -24,8 +25,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error("Uncaught error:", error, errorInfo);
-    // Error is already captured by getDerivedStateFromError
-    // In production, this would be sent to error tracking service
+    captureError(error, { componentStack: errorInfo.componentStack });
   }
 
   handleReload = () => {

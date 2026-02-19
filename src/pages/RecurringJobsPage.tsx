@@ -329,7 +329,9 @@ export default function RecurringJobsPage() {
               disabled={generateMutation.isPending}
               title="Generate Now"
             >
-              <RefreshCw className={`h-5 w-5 ${generateMutation.isPending ? "animate-spin" : ""}`} />
+              <RefreshCw
+                className={`h-5 w-5 ${generateMutation.isPending ? "animate-spin" : ""}`}
+              />
             </Button>
             <Button variant="ghost" size="icon" onClick={openCreateDialog}>
               <Plus className="h-5 w-5" />
@@ -351,7 +353,9 @@ export default function RecurringJobsPage() {
               </div>
               <div>
                 <h1 className="text-xl font-bold text-foreground">Recurring Jobs</h1>
-                <p className="text-sm text-muted-foreground">{schedules.length} schedules</p>
+                <p className="text-sm text-muted-foreground">
+                  {schedules.length} {schedules.length === 1 ? "schedule" : "schedules"}
+                </p>
               </div>
             </div>
           </div>
@@ -473,11 +477,7 @@ export default function RecurringJobsPage() {
                       <Button variant="ghost" size="icon" onClick={() => handleEdit(schedule)}>
                         <Edit className="h-4 w-4" />
                       </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleDelete(schedule.id)}
-                      >
+                      <Button variant="ghost" size="icon" onClick={() => handleDelete(schedule.id)}>
                         <Trash2 className="h-4 w-4 text-destructive" />
                       </Button>
                     </div>

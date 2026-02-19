@@ -77,16 +77,10 @@ export default function Auth() {
   useEffect(() => {
     if (!loading && user && !role && session && !bootstrapTried) {
       setBootstrapTried(true);
-      // Only try bootstrap after a brief delay to allow role fetch to complete
+      // Allow time for role to propagate from webhook, then re-check
       const timer = setTimeout(async () => {
-        // Re-check if role was fetched
         if (!role) {
-          try {
-            await supabase.functions.invoke("bootstrap-role");
-            await refreshRole();
-          } catch {
-            // User might already have a role or bootstrap failed
-          }
+          await refreshRole();
         }
       }, 500);
       return () => clearTimeout(timer);
@@ -179,7 +173,7 @@ export default function Auth() {
             </CardHeader>
             <CardContent className="space-y-3">
               <Button className="w-full" onClick={handleBootstrapAdmin} disabled={isBootstrapping}>
-                {isBootstrapping ? "Configuring..." : "Configure as Admin (first time only)"}
+                {isBootstrapping ? "Setting up..." : "Set Up Admin Access"}
               </Button>
               <Button variant="outline" className="w-full" onClick={signOut}>
                 Sign Out

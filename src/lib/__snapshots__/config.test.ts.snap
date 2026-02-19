@@ -29,7 +29,7 @@ exports[`CONFIG > should match snapshot to catch accidental changes 1`] = `
   },
   "refresh": {
     "dashboard": 30000,
-    "subscription": 60000,
+    "subscription": 600000,
   },
   "staffAvailability": {
     "defaultEndTime": "17:00",

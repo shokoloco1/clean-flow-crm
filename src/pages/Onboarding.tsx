@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useSearchParams, Link } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -267,11 +267,7 @@ export default function Onboarding() {
             Need help getting started?{" "}
             <a href="mailto:support@pulcrix.com" className="text-primary hover:underline">
               Contact our support team
-            </a>{" "}
-            or check out our{" "}
-            <Link to="/help" className="text-primary hover:underline">
-              help documentation
-            </Link>
+            </a>
             .
           </p>
         </div>
