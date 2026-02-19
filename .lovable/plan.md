@@ -1,126 +1,93 @@
 
-# Plan de Optimización UX Móvil — Pulcrix (Completo)
+# Diagnóstico: Invitación de Staff por Email
 
-## Diagnóstico por página
+## Situación actual detectada
 
-### Páginas con AdminLayout (ya tienen MobileBottomNav)
-- **AdminDashboard** — Bien adaptado. Tiene FAB, header compacto. Minor: el Kanban board horizontal en móvil puede ser confuso.
-- **ReportsPage** — Los tabs se apilan bien, pero las pestañas con texto "Business/Operations/PDF/CSV" se ven pequeñas sin iconos claros en móvil.
-- **SettingsPage** — Sin revisión de adaptación móvil del formulario.
+Al revisar la base de datos, los logs y el código de la función `invite-staff`, encontré lo siguiente:
 
-### Páginas SIN AdminLayout (headers propios, fuera del sistema de navegación)
-- **InvoicesPage** — Header sin versión móvil compacta. Tabla de 7 columnas NO funciona en móvil (scroll horizontal forzado, ilegible). Stats en grid 1 columna pero ocupa mucho espacio vertical. Sin FAB.
-- **PropertiesPage** — Header sin versión móvil. Sin FAB. Cards en grid, aceptable pero sin optimización táctil.
-- **RecurringJobsPage** — Header con dos botones "Generate Now" y "New Schedule" apilados en pantalla pequeña. Cards con información densa.
-- **CalendarPage** — Ya optimizado (listWeek + FAB).
-- **ClientsPage** — Ya optimizado (lista táctil + FAB).
-- **StaffManagementPage** — Parcialmente adaptado (responsive en stats y lista), pero sin FAB y header puede mejorar.
-- **StaffDashboard** — Ya optimizado para móvil (es la pantalla principal del staff).
+**Tim Vandertop** (`pulcrix.sales@gmail.com`) fue creado en el sistema con `is_active: false`, lo que confirma que el proceso de creación del usuario SÍ funcionó (el fix de upsert fue efectivo), pero el email de invitación probablemente NO llegó.
+
+### Causa raíz identificada: `is_active: false`
+
+El perfil de Tim se creó con `is_active: false` porque la función hace:
+
+```
+upsert({ is_active: true, ... })
+```
+
+Pero el trigger `handle_new_user()` que se ejecuta primero crea el perfil con los valores por defecto de la columna `is_active`. Si el valor por defecto en la tabla `profiles` es `false`, el trigger lo crea como inactivo, y luego el upsert actualiza todos los campos correctamente — EXCEPTO que a veces el upsert con `onConflict` solo hace UPDATE si la fila ya existe, lo que debería funcionar.
+
+**El problema real es distinto**: El magic link generado por `supabase.auth.admin.generateLink` con `type: "magiclink"` tiene un comportamiento distinto a una invitación real. El email se envía vía **Resend** desde el `RESEND_FROM_EMAIL` configurado. Si ese dominio no está verificado en Resend, o si el email destinatario está fuera de los permitidos en la prueba de Resend, el envío falla silenciosamente.
+
+### Problemas identificados
+
+1. **`is_active: false` en Tim Vandertop** — El staff creado está marcado como inactivo, lo que podría impedirle iniciar sesión en el staff dashboard.
+
+2. **El magic link usa el dominio de Supabase directamente** — La URL generada es `supabase.co/auth/v1/verify?token=...&redirect_to=...`. Si el `redirect_to` no coincide con los dominios permitidos en las configuraciones de autenticación, el link puede redirigir incorrectamente.
+
+3. **Resend en modo prueba** — Si `RESEND_FROM_EMAIL` usa `onboarding@resend.dev` (el dominio de prueba de Resend), solo puede enviarse a emails verificados en la cuenta de Resend. Si Tim Vandertop usa un email externo, Resend lo bloquea en modo prueba.
+
+4. **El `redirect_to` apunta al origin de la petición** — En producción podría apuntar a la preview URL (`*.lovable.app`) en lugar de a `https://spotless-log.lovable.app` o al dominio real.
 
 ---
 
-## Cambios a implementar
+## Plan de corrección
 
-### 1. InvoicesPage — Mayor prioridad
+### Cambio 1: Activar a Tim Vandertop inmediatamente
 
-**Problema crítico: Tabla de 7 columnas en móvil**
+Hacer un fix rápido en la base de datos para poner `is_active: true` en el perfil de Tim, para que pueda usar la app cuando reciba el link.
 
-- Header: crear versión móvil compacta `md:hidden` (solo back + título + icono logout), ocultar `AccountingExport` en móvil.
-- Stats: cambiar a scroll horizontal `overflow-x-auto flex gap-3` en móvil, cards de 120px de ancho mínimo.
-- Tabla → reemplazar por lista de tarjetas en móvil:
-  - Cada factura como una card tappable con: número de factura + nombre cliente (grande), fecha y monto (en una fila), badge de estado + botón de acción.
-  - En desktop, mantener la tabla actual.
-- FAB verde "New Invoice" en la esquina inferior derecha en móvil.
-- Padding inferior `pb-24` en el contenido para evitar que el bottom nav tape el contenido.
+### Cambio 2: Usar `inviteUserByEmail` en lugar de `generateLink` + Resend manual
 
-### 2. RecurringJobsPage — Prioridad alta
+La función actualmente hace:
+1. Crea usuario con `createUser`
+2. Genera un magic link con `generateLink`
+3. Construye manualmente la URL del token
+4. Envía via Resend con HTML personalizado
 
-**Problema: Header con 2 botones que se comprimen**
+El problema es que este flujo construye la URL del token manualmente y el link puede no funcionar correctamente. 
 
-- Header móvil compacto: solo back + título + un botón "+" (icono). Ocultar "Generate Now" en el header móvil.
-- "Generate Now" moverlo a un botón secundario dentro del contenido o accesible via un dropdown en móvil.
-- Cards de schedules: la sección de acciones (Switch + Edit + Delete) se puede colapsar en un dropdown `MoreVertical` en móvil.
-- FAB para crear nuevo schedule en móvil.
+**La solución correcta**: Usar `supabase.auth.admin.inviteUserByEmail(email, { redirectTo })` directamente, que hace TODO en un solo paso:
+- Crea el usuario si no existe
+- Genera el link de tipo `invite` (no magiclink)
+- Lo envía via el sistema de email de Supabase/Auth automáticamente
 
-### 3. PropertiesPage — Prioridad media
+Luego, adicionalmente, usar Resend para enviar un email de bienvenida más elaborado con HTML bonito, pero usando el link de Supabase como respaldo.
 
-**Problema: Header sin versión móvil, sin FAB**
+### Cambio 3: Refactorizar el flujo de invitación
 
-- Header móvil compacto: back + "Properties" + icono "+" solamente.
-- Las PropertyCards ya son responsive en grid 1 columna, mejorar el padding táctil.
-- FAB "Add Property" en móvil.
+Nuevo flujo simplificado:
 
-### 4. StaffManagementPage — Prioridad media
+```
+1. Verificar que el caller es admin ✓
+2. Verificar si el usuario ya existe
+   - Si existe: actualizar perfil + reenviar invitación
+   - Si no existe: usar inviteUserByEmail() → crea usuario + envía email automático
+3. Crear/actualizar perfil, sensitive data, rol, y disponibilidad
+4. Enviar email adicional con HTML de Pulcrix vía Resend (si RESEND_API_KEY está configurado)
+5. Si Resend falla: el email de Supabase Auth ya fue enviado como respaldo
+```
 
-**Problema: Sin FAB, header aceptable pero mejorable**
+### Cambio 4: Asegurar `redirect_to` correcto
 
-- El header ya tiene texto abreviado en móvil (`sm:hidden` para texto corto).
-- Agregar FAB "+" para invitar staff en móvil.
-- Las tarjetas de staff ya son responsive. Verificar que el DropdownMenu es táctilmente accesible.
-
-### 5. AdminDashboard — TodayKanban en móvil
-
-**Problema: Kanban horizontal con ScrollArea puede ser confuso**
-
-- En móvil, cambiar la presentación de columnas Kanban a una vista de acordeón o tabs verticales: "Scheduled (N)", "In Progress (N)", "Completed (N)" — donde N es el conteo de jobs.
-- Cada job card dentro del kanban debe tener al menos 48px de altura táctil.
-
-### 6. ReportsPage — Prioridad baja
-
-**Problema: Tabs con texto pequeño en móvil**
-
-- Los tabs ya muestran solo iconos en móvil (`hidden sm:inline`), eso es correcto.
-- Asegurar que el contenido de cada tab tenga scroll adecuado.
+El `redirect_to` debe siempre apuntar a `https://spotless-log.lovable.app/auth` (la URL publicada), no al origin variable de la petición.
 
 ---
 
 ## Archivos a modificar
 
 ```text
-src/pages/InvoicesPage.tsx          — Header móvil + lista de cards + FAB
-src/pages/RecurringJobsPage.tsx     — Header móvil + acciones en dropdown + FAB
-src/pages/PropertiesPage.tsx        — Header móvil + FAB
-src/pages/StaffManagementPage.tsx   — FAB para invitar staff
-src/components/admin/TodayKanban.tsx — Vista en móvil mejorada (tabs/acordeón)
+supabase/functions/invite-staff/index.ts  — Refactorizar flujo de invitación
 ```
+
+Y una corrección directa en base de datos para activar a Tim Vandertop.
 
 ---
 
-## Patrón de diseño unificado que se aplicará
+## Beneficios del nuevo flujo
 
-Todas las páginas de admin seguirán este patrón consistente:
-
-```text
-MÓVIL:
-┌─────────────────────────────────────┐
-│ [←] Título              [Notif] [👤] │  ← Header compacto (h-14)
-├─────────────────────────────────────┤
-│ ◄──── Stats en scroll horizontal ────►  │  ← Cards de 100-120px min-w
-├─────────────────────────────────────┤
-│  [🔍 Search...]                      │  ← Input de búsqueda full-width
-│  [Filtro A] [Filtro B] [Filtro C]    │  ← Chips de filtros
-├─────────────────────────────────────┤
-│ ● Item 1 —— Info principal           │
-│   Sub-info                           │  ← Lista tappable
-│ ● Item 2 ——                          │   (min-h-[64px] por item)
-│   ...                                │
-├─────────────────────────────────────┤
-│ [Dashboard] [Jobs] [Clients] [...] │  ← MobileBottomNav (ya existente)
-└────────────────────────────────────┘
-                               [+]       ← FAB (bottom-right, encima del nav)
-DESKTOP:
-┌─── Sidebar ─── │ ────── Contenido completo ────┐
-│  Nav items      │  Header con todos los botones  │
-│                 │  Tabla / Grid completo          │
-└─────────────────┴────────────────────────────────┘
-```
-
----
-
-## Notas técnicas
-
-- Los FABs se posicionarán en `fixed bottom-24 right-4` para estar por encima del `MobileBottomNav` (que tiene `h-16 + safe-area`).
-- Los headers móviles usarán `md:hidden` y los de desktop `hidden md:flex`, igual que el patrón ya establecido en `CalendarPage` y `ClientsPage`.
-- Las listas de facturas en móvil usarán `divide-y divide-border` en lugar de `Table`, evitando scroll horizontal forzado.
-- El `TodayKanban` en móvil usará `Tabs` de Radix para separar las columnas verticalmente, manteniendo el layout horizontal en desktop.
-- Todos los botones de acción táctiles tendrán mínimo `min-h-[44px]` (estándar Apple HIG).
+- El email de Supabase Auth llega SIEMPRE (es el sistema nativo, no depende de Resend)
+- Resend se usa como capa extra con HTML bonito de Pulcrix
+- Si Resend falla, el staff igual recibe la invitación
+- El link de tipo `invite` permite al staff establecer su contraseña, no solo un magic link de un uso
+- `is_active` siempre estará en `true` para staff recién invitado
