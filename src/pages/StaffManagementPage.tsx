@@ -109,19 +109,24 @@ export default function StaffManagementPage() {
   const handleDeleteStaff = async () => {
     if (!staffToDelete) return;
     try {
-      const { error } = await supabase
-        .from("profiles")
-        .update({ is_active: false })
-        .eq("id", staffToDelete.id);
-      if (error) throw error;
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Not authenticated");
+
+      const response = await supabase.functions.invoke("delete-staff", {
+        body: { staffUserId: staffToDelete.user_id },
+      });
+
+      if (response.error) throw new Error(response.error.message);
+      if (response.data?.error) throw new Error(response.data.error);
+
       toast({
-        title: "Staff member removed",
-        description: `${staffToDelete.full_name} has been deactivated.`,
+        title: "Staff member deleted",
+        description: `${staffToDelete.full_name} has been permanently deleted.`,
       });
       queryClient.invalidateQueries({ queryKey: queryKeys.staff.all() });
       setStaffToDelete(null);
     } catch (error: any) {
-      toast({ title: "Error removing staff", description: error.message, variant: "destructive" });
+      toast({ title: "Error deleting staff", description: error.message, variant: "destructive" });
     }
   };
 
@@ -439,7 +444,7 @@ export default function StaffManagementPage() {
                                 }}
                               >
                                 <Trash2 className="mr-2 h-4 w-4" />
-                                Delete
+                                Delete Permanently
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
@@ -481,10 +486,11 @@ export default function StaffManagementPage() {
       <AlertDialog open={!!staffToDelete} onOpenChange={() => setStaffToDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Staff Member</AlertDialogTitle>
+            <AlertDialogTitle>Permanently Delete Staff Member</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to remove {staffToDelete?.full_name}? This will deactivate their
-              account but preserve their job history.
+              This action <strong>cannot be undone</strong>. It will permanently delete{" "}
+              <strong>{staffToDelete?.full_name}</strong>'s account, profile, and all access. Their
+              completed job history will be preserved, but they will no longer be able to log in.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -493,7 +499,7 @@ export default function StaffManagementPage() {
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               onClick={handleDeleteStaff}
             >
-              Delete
+              Yes, Delete Permanently
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
