@@ -23,6 +23,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   ArrowLeft,
@@ -37,6 +44,7 @@ import {
   Repeat,
   CalendarSync,
   Search,
+  MoreVertical,
 } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
@@ -110,7 +118,6 @@ export default function RecurringJobsPage() {
     day_of_month: 1,
   });
 
-  // Reset to page 1 when search changes
   useEffect(() => {
     setPage(1);
   }, [debouncedSearch]);
@@ -298,10 +305,41 @@ export default function RecurringJobsPage() {
     ? properties.filter((p) => p.client_id === formData.client_id)
     : properties;
 
+  const openCreateDialog = () => {
+    resetForm();
+    setIsDialogOpen(true);
+  };
+
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="sticky top-0 z-10 border-b border-border bg-card">
+    <div className="min-h-screen bg-background pb-24">
+      {/* Mobile Header */}
+      <header className="sticky top-0 z-10 border-b border-border bg-card md:hidden">
+        <div className="flex items-center justify-between px-4 py-3">
+          <div className="flex items-center gap-3">
+            <Button variant="ghost" size="icon" onClick={() => navigate("/admin")}>
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <h1 className="text-lg font-bold text-foreground">Recurring Jobs</h1>
+          </div>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleGenerateNow}
+              disabled={generateMutation.isPending}
+              title="Generate Now"
+            >
+              <RefreshCw className={`h-5 w-5 ${generateMutation.isPending ? "animate-spin" : ""}`} />
+            </Button>
+            <Button variant="ghost" size="icon" onClick={openCreateDialog}>
+              <Plus className="h-5 w-5" />
+            </Button>
+          </div>
+        </div>
+      </header>
+
+      {/* Desktop Header */}
+      <header className="sticky top-0 z-10 hidden border-b border-border bg-card md:block">
         <div className="container mx-auto flex items-center justify-between px-4 py-4">
           <div className="flex items-center gap-4">
             <Button variant="ghost" size="icon" onClick={() => navigate("/admin")}>
@@ -328,12 +366,7 @@ export default function RecurringJobsPage() {
               />
               Generate Now
             </Button>
-            <Button
-              onClick={() => {
-                resetForm();
-                setIsDialogOpen(true);
-              }}
-            >
+            <Button onClick={openCreateDialog}>
               <Plus className="mr-2 h-4 w-4" />
               New Schedule
             </Button>
@@ -368,12 +401,7 @@ export default function RecurringJobsPage() {
                 Set up weekly or monthly cleaning schedules and let Pulcrix auto-generate jobs for
                 you.
               </p>
-              <Button
-                onClick={() => {
-                  resetForm();
-                  setIsDialogOpen(true);
-                }}
-              >
+              <Button onClick={openCreateDialog}>
                 <Plus className="mr-2 h-4 w-4" />
                 Create Your First Schedule
               </Button>
@@ -386,11 +414,11 @@ export default function RecurringJobsPage() {
                 key={schedule.id}
                 className={`border-border ${!schedule.is_active ? "opacity-60" : ""}`}
               >
-                <CardContent className="p-5">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1 space-y-3">
-                      <div className="flex items-center gap-3">
-                        <h3 className="text-lg font-semibold text-foreground">
+                <CardContent className="p-4 md:p-5">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0 flex-1 space-y-2">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h3 className="font-semibold text-foreground">
                           {schedule.clients?.name || "No client"}
                         </h3>
                         <Badge variant={schedule.is_active ? "default" : "secondary"}>
@@ -399,31 +427,31 @@ export default function RecurringJobsPage() {
                         <Badge variant="outline">{getFrequencyLabel(schedule.frequency)}</Badge>
                       </div>
 
-                      <div className="grid grid-cols-1 gap-3 text-sm md:grid-cols-3">
+                      <div className="grid grid-cols-1 gap-2 text-sm md:grid-cols-3 md:gap-3">
                         <div className="flex items-center gap-2 text-muted-foreground">
-                          <MapPin className="h-4 w-4" />
-                          <span>{schedule.location}</span>
+                          <MapPin className="h-4 w-4 shrink-0" />
+                          <span className="truncate">{schedule.location}</span>
                         </div>
                         <div className="flex items-center gap-2 text-muted-foreground">
-                          <Clock className="h-4 w-4" />
+                          <Clock className="h-4 w-4 shrink-0" />
                           <span>{schedule.scheduled_time}</span>
                         </div>
                         <div className="flex items-center gap-2 text-muted-foreground">
-                          <User className="h-4 w-4" />
+                          <User className="h-4 w-4 shrink-0" />
                           <span>{schedule.profiles?.full_name || "Unassigned"}</span>
                         </div>
                       </div>
 
                       {(schedule.frequency === "weekly" || schedule.frequency === "biweekly") && (
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <Calendar className="h-4 w-4" />
+                          <Calendar className="h-4 w-4 shrink-0" />
                           <span>Days: {getDaysLabel(schedule.days_of_week)}</span>
                         </div>
                       )}
 
                       {schedule.frequency === "monthly" && schedule.day_of_month && (
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <Calendar className="h-4 w-4" />
+                          <Calendar className="h-4 w-4 shrink-0" />
                           <span>Day of month: {schedule.day_of_month}</span>
                         </div>
                       )}
@@ -436,7 +464,8 @@ export default function RecurringJobsPage() {
                       )}
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    {/* Desktop actions */}
+                    <div className="hidden items-center gap-2 md:flex">
                       <Switch
                         checked={schedule.is_active}
                         onCheckedChange={() => handleToggleActive(schedule)}
@@ -444,9 +473,42 @@ export default function RecurringJobsPage() {
                       <Button variant="ghost" size="icon" onClick={() => handleEdit(schedule)}>
                         <Edit className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="icon" onClick={() => handleDelete(schedule.id)}>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleDelete(schedule.id)}
+                      >
                         <Trash2 className="h-4 w-4 text-destructive" />
                       </Button>
+                    </div>
+
+                    {/* Mobile actions: dropdown */}
+                    <div className="flex items-center gap-1 md:hidden">
+                      <Switch
+                        checked={schedule.is_active}
+                        onCheckedChange={() => handleToggleActive(schedule)}
+                      />
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="shrink-0">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => handleEdit(schedule)}>
+                            <Edit className="mr-2 h-4 w-4" />
+                            Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            className="text-destructive focus:text-destructive"
+                            onClick={() => handleDelete(schedule.id)}
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                   </div>
                 </CardContent>
@@ -457,6 +519,15 @@ export default function RecurringJobsPage() {
 
         <PaginatedControls page={page} totalPages={totalPages} onPageChange={setPage} />
       </main>
+
+      {/* Mobile FAB */}
+      <button
+        onClick={openCreateDialog}
+        className="fixed bottom-24 right-4 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-primary shadow-lg transition-transform active:scale-95 md:hidden"
+        aria-label="New Schedule"
+      >
+        <Plus className="h-6 w-6 text-primary-foreground" />
+      </button>
 
       {/* Create/Edit Dialog */}
       <Dialog

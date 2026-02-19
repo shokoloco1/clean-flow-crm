@@ -3,6 +3,7 @@ import { Clock, MapPin, User, ChevronRight, Copy, Receipt } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
@@ -305,23 +306,48 @@ export function TodayKanban({ jobs, loading, onViewJob, onJobsChange }: TodayKan
         </div>
       </CardHeader>
       <CardContent className="px-3">
-        {/* Mobile: Vertical stack */}
-        <div className="flex flex-col gap-4 md:hidden">
-          {columns.map((column) => (
-            <KanbanColumnComponent
-              key={column.id}
-              column={column}
-              jobs={jobsByColumn[column.id] || []}
-              onViewJob={onViewJob}
-              updatingJobId={updatingJobId}
-              onAdvanceStatus={handleAdvanceStatus}
-              onDuplicate={handleDuplicate}
-              isDuplicating={isDuplicating}
-              onGenerateInvoice={handleGenerateInvoice}
-              isGeneratingInvoice={isGeneratingInvoice}
-              translations={translations}
-            />
-          ))}
+        {/* Mobile: Tabs */}
+        <div className="md:hidden">
+          <Tabs defaultValue="scheduled">
+            <TabsList className="mb-3 grid w-full grid-cols-3">
+              {columns.map((col) => (
+                <TabsTrigger key={col.id} value={col.id} className="gap-1.5 text-xs">
+                  {col.title}
+                  <Badge variant="secondary" className="ml-1 h-4 min-w-[18px] px-1 text-[10px]">
+                    {jobsByColumn[col.id]?.length ?? 0}
+                  </Badge>
+                </TabsTrigger>
+              ))}
+            </TabsList>
+            {columns.map((col) => (
+              <TabsContent key={col.id} value={col.id}>
+                <div className={cn("rounded-lg p-3", col.bgColor)}>
+                  <div className="min-h-[100px] space-y-2">
+                    {(jobsByColumn[col.id] ?? []).length === 0 ? (
+                      <p className="py-8 text-center text-xs text-muted-foreground">
+                        {translations.noJobs}
+                      </p>
+                    ) : (
+                      (jobsByColumn[col.id] ?? []).map((job) => (
+                        <JobCard
+                          key={job.id}
+                          job={job}
+                          onViewJob={onViewJob}
+                          updatingJobId={updatingJobId}
+                          onAdvanceStatus={handleAdvanceStatus}
+                          onDuplicate={handleDuplicate}
+                          isDuplicating={isDuplicating}
+                          onGenerateInvoice={handleGenerateInvoice}
+                          isGeneratingInvoice={isGeneratingInvoice}
+                          translations={translations}
+                        />
+                      ))
+                    )}
+                  </div>
+                </div>
+              </TabsContent>
+            ))}
+          </Tabs>
         </div>
 
         {/* Desktop: Horizontal scroll */}
