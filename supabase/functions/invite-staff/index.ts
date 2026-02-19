@@ -375,7 +375,7 @@ serve(async (req) => {
     if (!isExistingUser) {
       const { error: profileError } = await supabaseAdmin
         .from("profiles")
-        .insert({
+        .upsert({
           user_id: userId,
           email,
           full_name: fullName,
@@ -383,7 +383,7 @@ serve(async (req) => {
           certifications: certifications || [],
           hire_date: new Date().toISOString().split('T')[0],
           is_active: true
-        });
+        }, { onConflict: "user_id" });
 
       if (profileError) {
         console.error("[invite-staff] Profile creation error:", profileError);
@@ -394,10 +394,10 @@ serve(async (req) => {
       if (hourlyRate) {
         const { error: sensitiveError } = await supabaseAdmin
           .from("profiles_sensitive")
-          .insert({
+          .upsert({
             user_id: userId,
             hourly_rate: parseFloat(hourlyRate)
-          });
+          }, { onConflict: "user_id" });
 
         if (sensitiveError) {
           console.error("[invite-staff] Sensitive profile error:", sensitiveError);
@@ -407,7 +407,7 @@ serve(async (req) => {
       // 3. Assign staff role
       const { error: roleError } = await supabaseAdmin
         .from("user_roles")
-        .insert({ user_id: userId, role: "staff" });
+        .upsert({ user_id: userId, role: "staff" }, { onConflict: "user_id" });
 
       if (roleError) {
         console.error("[invite-staff] Role assignment error:", roleError);
