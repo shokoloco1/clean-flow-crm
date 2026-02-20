@@ -105,6 +105,7 @@ export default {
       },
       fontFamily: {
         sans: ["Inter", "system-ui", "sans-serif"],
+        display: ["Plus Jakarta Sans", "Inter", "system-ui", "sans-serif"],
       },
       boxShadow: {
         "glow-primary": "0 0 20px hsl(var(--primary) / 0.3)",
