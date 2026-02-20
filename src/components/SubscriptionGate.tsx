@@ -75,7 +75,7 @@ export function SubscriptionGate({ children, trialDays = 14 }: SubscriptionGateP
       try {
         const { data, error } = await supabase
           .from("subscriptions")
-          .select("status, current_period_end, trial_end, stripe_price_id")
+          .select("status, current_period_end, stripe_price_id")
           .eq("user_id", user.id)
           .maybeSingle();
 
@@ -83,8 +83,8 @@ export function SubscriptionGate({ children, trialDays = 14 }: SubscriptionGateP
           logger.error("Error fetching trial info:", error);
           // Fall back to legacy behavior
           setTrialInfo(getLegacyTrialStatus());
-        } else if (data?.status === "trialing" && (data.trial_end || data.current_period_end)) {
-          const trialEnd = new Date(data.trial_end ?? data.current_period_end);
+        } else if (data?.status === "trialing" && data.current_period_end) {
+          const trialEnd = new Date(data.current_period_end);
           const now = new Date();
           const diffTime = trialEnd.getTime() - now.getTime();
           const daysRemaining = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
