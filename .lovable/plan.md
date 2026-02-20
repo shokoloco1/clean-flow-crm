@@ -1,54 +1,66 @@
 
-# Cambio de tipografía: Syne → Plus Jakarta Sans
+## Problem Diagnosis
 
-## Qué vamos a cambiar
+The user `davidshawcc@gmail.com` hits the "Trial Ended" paywall despite having an `active` subscription record in the database. The cause is a two-layer verification mismatch:
 
-### Por qué Plus Jakarta Sans
-Es moderna, geométrica, con personalidad propia pero muy legible. Sus pesos 700/800 tienen mucho impacto visual en headings grandes, y combina perfectamente con Inter para el cuerpo de texto. Es la elección más popular en productos SaaS en 2024-2026.
+**Layer 1 — Edge Function (`check-subscription`):**
+- Queries Stripe by email → no real Stripe customer exists (only a fake `cus_demo_davidshawcc` ID) → returns `subscribed: false`
 
-### Comparación
+**Layer 2 — SubscriptionGate (local DB fallback):**
+- Reads the `subscriptions` table → finds `status: 'active'` → but the code only grants access on `'trialing'` status, not `'active'`, for the trial banner path
+- The `subscribed` flag from the edge function is `false`, so it falls through to the paywall
+
+**Result:** Both checks fail → "Your Free Trial Has Expired" screen is shown.
+
+---
+
+## Fix Plan
+
+### 1. Update `check-subscription` edge function — add DB fallback
+
+Modify the function to check the local `subscriptions` table **before** returning a negative result when Stripe has no customer. If the DB record has `status = 'active'` with a future `current_period_end`, return `subscribed: true`.
+
+This is the correct pattern for:
+- Manually activated test/demo accounts
+- Accounts migrated from external systems
+- Grace periods between webhook delivery and DB sync
+
+The updated logic flow:
 ```text
-Antes : Syne        — muy estilizada, angular, nicho display
-Ahora : Plus Jakarta Sans — moderna, geométrica, SaaS-ready
-Body  : Inter       — sin cambios, sigue igual
+1. Authenticate user
+2. Query Stripe → if active subscription found → return subscribed: true
+3. If NOT found in Stripe → query local subscriptions table
+4. If DB has status='active' AND current_period_end > now → return subscribed: true
+5. If DB has status='trialing' AND current_period_end > now → return subscribed: false but include trial info
+6. Otherwise → return subscribed: false
 ```
 
-## Archivos a modificar (solo 2)
+### 2. File to change
 
-### 1. `index.html` — Línea 46
-Reemplazar el `<link>` de Google Fonts:
+**`supabase/functions/check-subscription/index.ts`** — After the Stripe "no customer found" early return and after the "no active sub" branch, add a fallback query to `public.subscriptions` using the Supabase service role client.
 
-```
-Antes: family=Syne:wght@700;800
-Ahora: family=Plus+Jakarta+Sans:wght@700;800
-```
+### Technical Details
 
-### 2. `tailwind.config.ts` — Línea 106-108
-Agregar la familia `display` al objeto `fontFamily` para que la clase `font-display` usada en `Index.tsx` funcione:
+The edge function already has `supabaseClient` initialized with `SUPABASE_SERVICE_ROLE_KEY`, so querying the `subscriptions` table is straightforward. The key addition:
 
 ```typescript
-// Antes
-fontFamily: {
-  sans: ["Inter", "system-ui", "sans-serif"],
-},
+// After Stripe finds no customer OR no active subscription:
+const { data: dbSub } = await supabaseClient
+  .from("subscriptions")
+  .select("status, current_period_end, stripe_price_id")
+  .eq("user_id", user.id)
+  .maybeSingle();
 
-// Después
-fontFamily: {
-  sans: ["Inter", "system-ui", "sans-serif"],
-  display: ["Plus Jakarta Sans", "Inter", "system-ui", "sans-serif"],
-},
+if (dbSub?.status === "active" && dbSub.current_period_end) {
+  const periodEnd = new Date(dbSub.current_period_end);
+  if (periodEnd > new Date()) {
+    return { subscribed: true, plan: "manual", subscription_end: periodEnd.toISOString() };
+  }
+}
 ```
 
-## Dónde se aplica la nueva fuente
+This makes the system correctly recognize manually-activated accounts without needing a real Stripe record.
 
-La clase `font-display` ya existe en `Index.tsx` en:
-- `h1` del hero (línea 454) — título principal del landing
-- `h3` de las feature tabs (línea 330) — subtítulos de las pestañas
-- Todos los demás `font-display` del landing
+### No database changes needed
 
-No hay que tocar `Index.tsx` — solo cambiar qué fuente carga esa clase.
-
-## Impacto visual
-- Solo afecta la landing page (los headings dentro de la app siguen en Inter)
-- Carga instantánea con `display=swap` de Google Fonts
-- Sin cambios de layout ni de spacing
+The `subscriptions` table already has the correct data (`status: 'active'`, `current_period_end: 2027-02-20`). Only the edge function logic needs updating.
