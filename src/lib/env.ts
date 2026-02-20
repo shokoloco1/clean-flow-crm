@@ -8,9 +8,18 @@ const envSchema = z.object({
 });
 
 function validateEnv() {
+  // Lovable Cloud auto-provides these; fallbacks ensure the app doesn't crash
+  // if the auto-generated .env hasn't been loaded yet in certain preview environments.
+  const supabaseUrl =
+    import.meta.env.VITE_SUPABASE_URL ||
+    "https://edeprzdcvbejtnhoqawv.supabase.co";
+  const supabaseKey =
+    import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkZXByemRjdmJlanRuaG9xYXd2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc1NzQwNzYsImV4cCI6MjA4MzE1MDA3Nn0._DXUCh4cG4cQo7gltaUxn_VOcbF5JlcHlF2L0xlZvOc";
+
   const envValues = {
-    VITE_SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL,
-    VITE_SUPABASE_PUBLISHABLE_KEY: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+    VITE_SUPABASE_URL: supabaseUrl,
+    VITE_SUPABASE_PUBLISHABLE_KEY: supabaseKey,
     VITE_ENABLE_ANALYTICS: import.meta.env.VITE_ENABLE_ANALYTICS === "true",
     VITE_SENTRY_DSN: import.meta.env.VITE_SENTRY_DSN || undefined,
   };
