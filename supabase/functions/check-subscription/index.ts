@@ -28,6 +28,21 @@ const PRODUCT_TO_PLAN: Record<string, string> = {
   // Annual products map to the same plans
 };
 
+// Helper: check local DB for active subscription
+async function checkDbSubscription(supabaseClient: ReturnType<typeof createClient>, userId: string) {
+  const { data: dbSub, error } = await supabaseClient
+    .from("subscriptions")
+    .select("status, current_period_end, stripe_price_id")
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (error) {
+    logStep("DB subscription query error", { error: error.message });
+    return null;
+  }
+  return dbSub;
+}
+
 serve(async (req) => {
   const corsHeaders = getCorsHeaders(req);
 
@@ -61,7 +76,28 @@ serve(async (req) => {
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
 
     if (customers.data.length === 0) {
-      logStep("No customer found");
+      logStep("No Stripe customer found, checking local DB");
+
+      // Fallback: check local subscriptions table
+      const dbSub = await checkDbSubscription(supabaseClient, user.id);
+
+      if (dbSub?.status === "active" && dbSub.current_period_end) {
+        const periodEnd = new Date(dbSub.current_period_end);
+        if (periodEnd > new Date()) {
+          logStep("DB active subscription found (no Stripe customer)", { periodEnd: periodEnd.toISOString() });
+          return new Response(JSON.stringify({
+            subscribed: true,
+            plan: "manual",
+            is_annual: false,
+            subscription_end: periodEnd.toISOString(),
+          }), {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+            status: 200,
+          });
+        }
+      }
+
+      logStep("No valid subscription in Stripe or DB");
       return new Response(JSON.stringify({ 
         subscribed: false,
         plan: null,
@@ -94,17 +130,36 @@ serve(async (req) => {
       const priceInterval = subscription.items.data[0].price.recurring?.interval;
       isAnnual = priceInterval === "year";
       
-      // Map product to plan name
       plan = PRODUCT_TO_PLAN[productId] || "unknown";
       
-      logStep("Active subscription found", { 
+      logStep("Active Stripe subscription found", { 
         subscriptionId: subscription.id, 
         plan,
         isAnnual,
         endDate: subscriptionEnd 
       });
     } else {
-      logStep("No active subscription found");
+      // Stripe customer exists but no active subscription — check DB as fallback
+      logStep("No active Stripe subscription, checking local DB");
+      const dbSub = await checkDbSubscription(supabaseClient, user.id);
+
+      if (dbSub?.status === "active" && dbSub.current_period_end) {
+        const periodEnd = new Date(dbSub.current_period_end);
+        if (periodEnd > new Date()) {
+          logStep("DB active subscription found (Stripe customer has no active sub)", { periodEnd: periodEnd.toISOString() });
+          return new Response(JSON.stringify({
+            subscribed: true,
+            plan: "manual",
+            is_annual: false,
+            subscription_end: periodEnd.toISOString(),
+          }), {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+            status: 200,
+          });
+        }
+      }
+
+      logStep("No active subscription found in Stripe or DB");
     }
 
     return new Response(JSON.stringify({
