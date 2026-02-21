@@ -128,6 +128,32 @@ export function useCreateJob(onJobCreated?: () => void) {
       setIsCreateOpen(false);
       setNewJob(initialJobData);
       onJobCreated?.();
+
+      // Send email notification to assigned staff (fire-and-forget)
+      const assignedStaff = staffList.find(s => s.user_id === newJob.assigned_staff_id);
+      if (assignedStaff) {
+        // Get staff email from profiles
+        const { data: staffProfile } = await supabase
+          .from("profiles")
+          .select("email, full_name")
+          .eq("user_id", newJob.assigned_staff_id)
+          .single();
+
+        if (staffProfile?.email) {
+          supabase.functions.invoke("send-email", {
+            body: {
+              to: staffProfile.email,
+              type: "job_notification",
+              data: {
+                name: staffProfile.full_name || assignedStaff.full_name,
+                jobLocation: newJob.location,
+                jobDate: newJob.scheduled_date,
+                jobTime: newJob.scheduled_time,
+              },
+            },
+          }).catch(err => logger.error("Failed to send job notification email:", err));
+        }
+      }
     }
   };
 

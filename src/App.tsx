@@ -42,6 +42,7 @@ const JobChecklistPage = lazy(() => import("./pages/staff/JobChecklistPage"));
 const JobPhotosAfterPage = lazy(() => import("./pages/staff/JobPhotosAfterPage"));
 const JobCompletePage = lazy(() => import("./pages/staff/JobCompletePage"));
 const TimeHistoryPage = lazy(() => import("./pages/staff/TimeHistoryPage"));
+const AcceptInvitePage = lazy(() => import("./pages/staff/AcceptInvitePage"));
 
 // Admin time tracking pages
 const TimeTrackingPage = lazy(() => import("./pages/TimeTrackingPage"));
@@ -255,6 +256,7 @@ const App = () => (
                           </ProtectedRoute>
                         }
                       />
+                      <Route path="/staff/accept-invite" element={<AcceptInvitePage />} />
                       <Route path="/install" element={<InstallPage />} />
                       <Route path="/terms" element={<TermsPage />} />
                       <Route path="/privacy" element={<PrivacyPage />} />
