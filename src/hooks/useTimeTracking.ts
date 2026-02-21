@@ -44,7 +44,7 @@ export function useTimeTracking(jobId?: string) {
   const { data: activeEntry = null, isLoading } = useQuery({
     queryKey: queryKeys.timeEntries.active(user?.id ?? ""),
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("time_entries")
         .select("*")
         .eq("staff_id", user!.id)
@@ -100,7 +100,7 @@ export function useTimeTracking(jobId?: string) {
       setIsClockingIn(true);
       try {
         const location = await captureGps();
-        const { error } = await supabase.from("time_entries").insert({
+        const { error } = await (supabase as any).from("time_entries").insert({
           job_id: jId,
           staff_id: user.id,
           clock_in: new Date().toISOString(),
@@ -137,7 +137,7 @@ export function useTimeTracking(jobId?: string) {
         const clockInTime = new Date(activeEntry.clock_in);
         const totalMinutes = Math.round((clockOutTime.getTime() - clockInTime.getTime()) / 60000);
 
-        const { error } = await supabase
+        const { error } = await (supabase as any)
           .from("time_entries")
           .update({
             clock_out: clockOutTime.toISOString(),

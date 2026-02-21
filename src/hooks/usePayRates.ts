@@ -35,7 +35,7 @@ export function usePayRates() {
 
       // Get current pay rates (where effective_to IS NULL or >= today)
       const today = new Date().toISOString().split("T")[0];
-      const { data: rates, error: ratesError } = await supabase
+      const { data: rates, error: ratesError } = await (supabase as any)
         .from("staff_pay_rates")
         .select("*")
         .or(`effective_to.is.null,effective_to.gte.${today}`)
@@ -83,14 +83,14 @@ export function usePayRates() {
     try {
       // Close the current active rate (set effective_to = today)
       const today = new Date().toISOString().split("T")[0];
-      await supabase
+      await (supabase as any)
         .from("staff_pay_rates")
         .update({ effective_to: today, updated_at: new Date().toISOString() })
         .eq("staff_id", staffId)
         .is("effective_to", null);
 
       // Insert new rate
-      const { error } = await supabase.from("staff_pay_rates").insert({
+      const { error } = await (supabase as any).from("staff_pay_rates").insert({
         staff_id: staffId,
         hourly_rate: hourlyRate,
         overtime_rate: overtimeRate ?? null,
