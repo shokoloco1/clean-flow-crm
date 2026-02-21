@@ -41,6 +41,12 @@ const JobPhotosBeforePage = lazy(() => import("./pages/staff/JobPhotosBeforePage
 const JobChecklistPage = lazy(() => import("./pages/staff/JobChecklistPage"));
 const JobPhotosAfterPage = lazy(() => import("./pages/staff/JobPhotosAfterPage"));
 const JobCompletePage = lazy(() => import("./pages/staff/JobCompletePage"));
+const TimeHistoryPage = lazy(() => import("./pages/staff/TimeHistoryPage"));
+
+// Admin time tracking pages
+const TimeTrackingPage = lazy(() => import("./pages/TimeTrackingPage"));
+const PayRatesPage = lazy(() => import("./pages/PayRatesPage"));
+const PayReportsPage = lazy(() => import("./pages/PayReportsPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -170,10 +176,42 @@ const App = () => (
                         }
                       />
                       <Route
+                        path="/admin/time-tracking"
+                        element={
+                          <ProtectedRoute allowedRoles={["admin"]}>
+                            <TimeTrackingPage />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/admin/pay-rates"
+                        element={
+                          <ProtectedRoute allowedRoles={["admin"]}>
+                            <PayRatesPage />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/admin/pay-reports"
+                        element={
+                          <ProtectedRoute allowedRoles={["admin"]}>
+                            <PayReportsPage />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
                         path="/staff"
                         element={
                           <ProtectedRoute allowedRoles={["staff"]}>
                             <StaffDashboard />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/staff/time-history"
+                        element={
+                          <ProtectedRoute allowedRoles={["staff"]}>
+                            <TimeHistoryPage />
                           </ProtectedRoute>
                         }
                       />

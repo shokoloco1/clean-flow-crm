@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { LogOut, Calendar, Smile, ChevronDown, Clock, Loader2 } from "lucide-react";
+import { LogOut, Calendar, Smile, ChevronDown, Clock, Loader2, Timer } from "lucide-react";
 import { PulcrixLogo } from "@/components/PulcrixLogo";
 import { format } from "date-fns";
 import JobDetailView from "@/components/JobDetailView";
@@ -140,6 +140,15 @@ export default function StaffDashboard() {
             </div>
           </Link>
           <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate("/staff/time-history")}
+              className="h-12 w-12"
+              title={t("my_hours")}
+            >
+              <Timer className="h-5 w-5" />
+            </Button>
             <LanguageSwitcher />
             <NotificationCenter />
             <Button

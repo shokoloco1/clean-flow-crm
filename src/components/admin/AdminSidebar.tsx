@@ -14,6 +14,8 @@ import {
   DollarSign,
   Loader2,
   Globe,
+  Clock,
+  Receipt,
 } from "lucide-react";
 import {
   Sidebar,
@@ -45,6 +47,9 @@ const operationsNavItems: NavItem[] = [
   { titleKey: "clients", url: "/admin/clients", icon: Users },
   { titleKey: "properties", url: "/admin/properties", icon: Building2 },
   { titleKey: "staff", url: "/admin/staff", icon: UserCog },
+  { titleKey: "time_tracking", url: "/admin/time-tracking", icon: Clock },
+  { titleKey: "pay_rates", url: "/admin/pay-rates", icon: DollarSign },
+  { titleKey: "pay_reports", url: "/admin/pay-reports", icon: Receipt },
   { titleKey: "invoices", url: "/admin/invoices", icon: FileText },
   { titleKey: "recurring_jobs", url: "/admin/recurring", icon: RefreshCw },
   { titleKey: "pricing", url: "/admin/price-lists", icon: DollarSign },

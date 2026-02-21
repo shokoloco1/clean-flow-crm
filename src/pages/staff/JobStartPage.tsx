@@ -5,6 +5,7 @@ import { useLanguage } from "@/hooks/useLanguage";
 import { useJobWorkflow } from "@/hooks/useJobWorkflow";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ClockInOutCard } from "@/components/staff/ClockInOutCard";
 import {
   ArrowLeft,
   MapPin,
@@ -19,6 +20,7 @@ import {
   Play,
   FileText,
   Home,
+  Camera,
 } from "lucide-react";
 
 interface JobData {
@@ -152,11 +154,7 @@ export default function JobStartPage() {
     );
   }
 
-  // If job is already in progress, redirect to photos
-  if (job.status === "in_progress") {
-    navigate(`/staff/job/${id}/photos-before`, { replace: true });
-    return null;
-  }
+  const isInProgress = job.status === "in_progress";
 
   return (
     <div className="min-h-screen bg-background pb-24">
@@ -167,7 +165,9 @@ export default function JobStartPage() {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div>
-            <h1 className="text-lg font-semibold">{t("job_start_title")}</h1>
+            <h1 className="text-lg font-semibold">
+              {isInProgress ? job.clients?.name || t("job_details") : t("job_start_title")}
+            </h1>
             <p className="text-xs text-muted-foreground">
               {job.scheduled_date} • {job.scheduled_time}
             </p>
@@ -308,27 +308,44 @@ export default function JobStartPage() {
         )}
       </div>
 
-      {/* Fixed Bottom Button */}
-      <div className="fixed bottom-0 left-0 right-0 border-t bg-background p-4">
-        <Button
-          size="xl"
-          className="h-16 w-full gap-3 bg-success text-xl font-bold hover:bg-success/90"
-          onClick={handleStartJob}
-          disabled={isStarting}
-        >
-          {isStarting ? (
-            <>
-              <Loader2 className="h-6 w-6 animate-spin" />
-              {t("starting_job")}
-            </>
-          ) : (
-            <>
-              <Play className="h-6 w-6" />
-              {t("begin_work")}
-            </>
-          )}
-        </Button>
-      </div>
+      {/* Clock In/Out Card (when in_progress) */}
+      {isInProgress && id && (
+        <div className="space-y-3 p-4 pt-0">
+          <ClockInOutCard jobId={id} />
+          <Button
+            variant="outline"
+            className="w-full gap-2"
+            onClick={() => navigate(`/staff/job/${id}/photos-before`)}
+          >
+            <Camera className="h-4 w-4" />
+            {t("continue_to_checklist")}
+          </Button>
+        </div>
+      )}
+
+      {/* Fixed Bottom Button (before starting) */}
+      {!isInProgress && (
+        <div className="fixed bottom-0 left-0 right-0 border-t bg-background p-4">
+          <Button
+            size="xl"
+            className="h-16 w-full gap-3 bg-success text-xl font-bold hover:bg-success/90"
+            onClick={handleStartJob}
+            disabled={isStarting}
+          >
+            {isStarting ? (
+              <>
+                <Loader2 className="h-6 w-6 animate-spin" />
+                {t("starting_job")}
+              </>
+            ) : (
+              <>
+                <Play className="h-6 w-6" />
+                {t("begin_work")}
+              </>
+            )}
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

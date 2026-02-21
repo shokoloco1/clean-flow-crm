@@ -61,4 +61,22 @@ export const queryKeys = {
     myJobs: (userId: string) => ["staffDashboard", "myJobs", userId] as const,
     checklistProgress: (userId: string) => ["staffDashboard", "checklist", userId] as const,
   },
+  timeEntries: {
+    all: () => ["timeEntries"] as const,
+    active: (staffId: string) => ["timeEntries", "active", staffId] as const,
+    byJob: (jobId: string) => ["timeEntries", "job", jobId] as const,
+    list: (params: { staffId?: string; dateFrom?: string; dateTo?: string }) =>
+      ["timeEntries", "list", params] as const,
+    staffWeek: (staffId: string, weekStart: string) =>
+      ["timeEntries", "staff", staffId, weekStart] as const,
+  },
+  payRates: {
+    all: () => ["payRates"] as const,
+    byStaff: (staffId: string) => ["payRates", staffId] as const,
+  },
+  payReports: {
+    all: () => ["payReports"] as const,
+    list: () => ["payReports", "list"] as const,
+    byId: (id: string) => ["payReports", id] as const,
+  },
 } as const;
