@@ -1,8 +1,8 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 
-const PRODUCTION_URL = "https://spotless-log.lovable.app";
-const REDIRECT_TO = `${PRODUCTION_URL}/auth`;
+const PRODUCTION_URL = Deno.env.get("APP_URL") || "https://spotless-log.lovable.app";
+const REDIRECT_TO = `${PRODUCTION_URL}/staff/accept-invite`;
 
 function getCorsHeaders(req: Request) {
   const origin = req.headers.get("origin") ?? "";
@@ -60,11 +60,11 @@ const getInvitationEmailHtml = (staffName: string, adminName: string) => `
               </h2>
 
               <p style="margin: 0 0 24px; color: #52525b; font-size: 16px; line-height: 1.6;">
-                ${adminName} has invited you to join their cleaning business on Pulcrix. You'll receive a separate email with a secure link to set up your account and password.
+                ${adminName} te ha invitado a unirte a su empresa de limpieza en Pulcrix. Revisa tu bandeja de entrada (y spam) para encontrar el correo de verificación con el enlace para configurar tu cuenta.
               </p>
 
               <p style="margin: 0 0 24px; color: #52525b; font-size: 16px; line-height: 1.6;">
-                Once you've set up your account, you'll be able to:
+                Una vez configurada tu cuenta, podrás:
               </p>
 
               <ul style="margin: 0 0 32px; color: #52525b; font-size: 14px; line-height: 1.8; padding-left: 20px;">
@@ -144,7 +144,7 @@ async function sendBrandedWelcomeEmail(
       body: JSON.stringify({
         from: fromEmail,
         to: [to],
-        subject: `Welcome to Pulcrix — ${adminName} invited you!`,
+        subject: `Pulcrix - ${adminName} te ha invitado`,
         html: getInvitationEmailHtml(staffName, adminName),
         text: getInvitationEmailText(staffName, adminName),
       }),
