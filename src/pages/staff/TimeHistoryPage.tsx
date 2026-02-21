@@ -7,7 +7,7 @@ import { usePayRates } from "@/hooks/usePayRates";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, ChevronLeft, ChevronRight, Clock, Loader2 } from "lucide-react";
-import { format, startOfWeek, endOfWeek, addWeeks, subWeeks, isSameDay, parseISO } from "date-fns";
+import { format, startOfWeek, endOfWeek, addWeeks, parseISO } from "date-fns";
 import type { TimeEntryWithDetails } from "@/types/time-tracking";
 
 function formatMinutes(mins: number): string {

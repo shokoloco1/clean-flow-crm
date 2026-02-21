@@ -18,7 +18,7 @@ export function usePayReport() {
   const { data: reports = [], isLoading } = useQuery({
     queryKey: queryKeys.payReports.list(),
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("pay_reports")
         .select("*")
         .order("generated_at", { ascending: false });
@@ -36,7 +36,7 @@ export function usePayReport() {
   ): Promise<PayReport | null> => {
     try {
       // 1. Fetch all completed time entries in the period
-      const { data: entries, error: entriesError } = await supabase
+      const { data: entries, error: entriesError } = await (supabase as any)
         .from("time_entries")
         .select(
           `
@@ -57,7 +57,7 @@ export function usePayReport() {
       if (entriesError) throw entriesError;
 
       // 2. Fetch pay rates
-      const { data: rates, error: ratesError } = await supabase
+      const { data: rates, error: ratesError } = await (supabase as any)
         .from("staff_pay_rates")
         .select("*")
         .or(`effective_to.is.null,effective_to.gte.${periodStart}`)
@@ -159,7 +159,7 @@ export function usePayReport() {
       };
 
       // 6. Insert report
-      const { data: report, error: insertError } = await supabase
+      const { data: report, error: insertError } = await (supabase as any)
         .from("pay_reports")
         .insert({
           period_start: periodStart,

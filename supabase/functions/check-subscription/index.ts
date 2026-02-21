@@ -29,7 +29,8 @@ const PRODUCT_TO_PLAN: Record<string, string> = {
 };
 
 // Helper: check local DB for active subscription
-async function checkDbSubscription(supabaseClient: ReturnType<typeof createClient>, userId: string) {
+// deno-lint-ignore no-explicit-any
+async function checkDbSubscription(supabaseClient: any, userId: string) {
   const { data: dbSub, error } = await supabaseClient
     .from("subscriptions")
     .select("status, current_period_end, stripe_price_id")

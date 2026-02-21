@@ -16,7 +16,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { FileText, Download, FileDown, Loader2, Calendar } from "lucide-react";
 import { format, startOfWeek, endOfWeek } from "date-fns";
-import type { PayReport, PayReportData } from "@/types/time-tracking";
+import type { PayReportData } from "@/types/time-tracking";
+// PayReport type inferred from usePayReport hook
 
 export default function PayReportsPage() {
   const { tAdmin } = useLanguage();

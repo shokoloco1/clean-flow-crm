@@ -25,7 +25,7 @@ export function useTimeEntries(filters: UseTimeEntriesFilters = {}) {
       dateTo: filters.dateTo,
     }),
     queryFn: async () => {
-      let query = supabase
+      let query = (supabase as any)
         .from("time_entries")
         .select(
           `
@@ -90,7 +90,7 @@ export function useTimeEntries(filters: UseTimeEntriesFilters = {}) {
     }
 
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from("time_entries")
         .update({
           ...updates,
