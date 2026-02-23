@@ -24,6 +24,12 @@ export default function Auth() {
   const [resetEmail, setResetEmail] = useState("");
   const [resetSent, setResetSent] = useState(false);
 
+  // Password recovery state
+  const [isRecoveryMode, setIsRecoveryMode] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmNewPassword, setConfirmNewPassword] = useState("");
+  const [recoveryComplete, setRecoveryComplete] = useState(false);
+
   // Login form state
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
@@ -33,13 +39,22 @@ export default function Auth() {
   const [bootstrapTried, setBootstrapTried] = useState(false);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
-  // Clear any in-progress signup flag — user navigated to login instead
+  // Clear any in-progress signup flag and detect recovery mode
   useEffect(() => {
     try {
       sessionStorage.removeItem("pulcrix_signup_in_progress");
     } catch {
       /* sessionStorage may be unavailable */
     }
+
+    // Listen for PASSWORD_RECOVERY event from Supabase
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "PASSWORD_RECOVERY") {
+        setIsRecoveryMode(true);
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const handlePasswordReset = async (e: React.FormEvent) => {
@@ -143,10 +158,100 @@ export default function Auth() {
     setIsSubmitting(false);
   };
 
+  const handleRecoveryPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (newPassword.length < 8) {
+      toast.error("Password must be at least 8 characters");
+      return;
+    }
+    if (newPassword !== confirmNewPassword) {
+      toast.error("Passwords do not match");
+      return;
+    }
+
+    setIsSubmitting(true);
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    if (error) {
+      toast.error(error.message || "Failed to update password");
+    } else {
+      setRecoveryComplete(true);
+      toast.success("Password updated successfully!");
+      setTimeout(() => {
+        setIsRecoveryMode(false);
+        setRecoveryComplete(false);
+        setNewPassword("");
+        setConfirmNewPassword("");
+      }, 2000);
+    }
+    setIsSubmitting(false);
+  };
+
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="animate-pulse text-primary">Loading...</div>
+      </div>
+    );
+  }
+
+  // Password recovery mode
+  if (isRecoveryMode) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-background via-background to-primary/5 p-4">
+        <div className="w-full max-w-md space-y-6">
+          <div className="space-y-2 text-center">
+            <Link to="/" className="flex items-center justify-center transition-opacity hover:opacity-80">
+              <PulcrixLogo variant="icon" size="lg" className="text-primary" />
+            </Link>
+            <h1 className="text-2xl font-bold text-foreground sm:text-3xl">Pulcrix</h1>
+          </div>
+          <Card className="border-border shadow-xl">
+            <CardHeader className="text-center">
+              <CardTitle className="text-lg sm:text-xl">
+                {recoveryComplete ? "✅ Password Updated" : "🔐 Set New Password"}
+              </CardTitle>
+              <CardDescription>
+                {recoveryComplete ? "You can now sign in with your new password." : "Enter your new password below."}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {recoveryComplete ? (
+                <div className="text-center text-sm text-muted-foreground">Redirecting to login...</div>
+              ) : (
+                <form onSubmit={handleRecoveryPassword} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="new-password">New Password</Label>
+                    <Input
+                      id="new-password"
+                      type="password"
+                      placeholder="Minimum 8 characters"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      required
+                      minLength={8}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="confirm-new-password">Confirm Password</Label>
+                    <Input
+                      id="confirm-new-password"
+                      type="password"
+                      placeholder="Repeat your password"
+                      value={confirmNewPassword}
+                      onChange={(e) => setConfirmNewPassword(e.target.value)}
+                      required
+                      minLength={8}
+                    />
+                  </div>
+                  <Button type="submit" className="w-full" disabled={isSubmitting}>
+                    {isSubmitting ? "Updating..." : "Update Password"}
+                  </Button>
+                </form>
+              )}
+            </CardContent>
+          </Card>
+        </div>
       </div>
     );
   }
