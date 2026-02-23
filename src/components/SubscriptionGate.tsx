@@ -210,7 +210,7 @@ export function SubscriptionGate({ children, trialDays = 14 }: SubscriptionGateP
 
             {/* Pricing hint */}
             <p className="text-center text-sm text-muted-foreground">
-              Plans start at <span className="font-medium text-foreground">$89/month</span>
+              Plans start at <span className="font-medium text-foreground">$49/month</span>
             </p>
           </CardContent>
         </Card>

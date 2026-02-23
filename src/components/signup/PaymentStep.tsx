@@ -14,9 +14,9 @@ interface PaymentStepProps {
 }
 
 const planDetails: Record<PlanType, { name: string; monthlyPrice: number; annualPrice: number }> = {
-  starter: { name: "Starter", monthlyPrice: 89, annualPrice: 890 },
-  professional: { name: "Professional", monthlyPrice: 149, annualPrice: 1490 },
-  business: { name: "Business", monthlyPrice: 249, annualPrice: 2490 },
+  starter: { name: "Starter", monthlyPrice: 49, annualPrice: 490 },
+  professional: { name: "Professional", monthlyPrice: 89, annualPrice: 890 },
+  business: { name: "Business", monthlyPrice: 149, annualPrice: 1490 },
 };
 
 export function PaymentStep({
