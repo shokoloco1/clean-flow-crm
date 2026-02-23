@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -7,7 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { PasswordStrengthIndicator } from "@/components/PasswordStrengthIndicator";
-import { Loader2, CheckCircle } from "lucide-react";
+import { PulcrixLogo } from "@/components/PulcrixLogo";
+import { Loader2 } from "lucide-react";
 
 export default function AcceptInvitePage() {
   const navigate = useNavigate();
@@ -16,12 +17,10 @@ export default function AcceptInvitePage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSessionReady, setIsSessionReady] = useState(false);
   const [sessionError, setSessionError] = useState<string | null>(null);
+  const sessionReadyRef = useRef(false);
 
   useEffect(() => {
-    // Supabase automatically processes the token from the URL hash
-    // and establishes a session. We just need to wait for it.
     const checkSession = async () => {
-      // Give Supabase a moment to process the hash tokens
       const { data: { session }, error } = await supabase.auth.getSession();
 
       if (error) {
@@ -31,19 +30,20 @@ export default function AcceptInvitePage() {
       }
 
       if (session) {
+        sessionReadyRef.current = true;
         setIsSessionReady(true);
       } else {
-        // Listen for auth state change (token processing may be async)
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-          if (event === "SIGNED_IN" && session) {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, sess) => {
+          if (event === "SIGNED_IN" && sess) {
+            sessionReadyRef.current = true;
             setIsSessionReady(true);
             subscription.unsubscribe();
           }
         });
 
-        // Timeout after 10 seconds
+        // Timeout after 10 seconds - use ref to avoid stale closure
         setTimeout(() => {
-          if (!isSessionReady) {
+          if (!sessionReadyRef.current) {
             setSessionError("No se pudo verificar la invitación. El enlace puede haber expirado.");
           }
         }, 10000);
@@ -122,8 +122,8 @@ export default function AcceptInvitePage() {
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-            <CheckCircle className="h-8 w-8 text-primary" />
+          <div className="flex items-center justify-center mb-2">
+            <PulcrixLogo variant="icon" size="lg" className="text-primary" />
           </div>
           <CardTitle className="text-2xl">¡Bienvenido a Pulcrix!</CardTitle>
           <CardDescription>
