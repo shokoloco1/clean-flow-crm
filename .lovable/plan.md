@@ -1,33 +1,41 @@
 
 
-# Unificar Precios: $49 / $89 / $149
+# Crear Usuarios de Prueba (Demo)
 
-Los precios correctos (de la landing page) son:
-- **Starter**: $49/mo ($490/year)
-- **Professional**: $89/mo ($890/year)  
-- **Business/Enterprise**: $149/mo ($1,490/year)
+Se creara una Edge Function temporal llamada `create-demo-users` que usara el Admin API para crear dos cuentas con credenciales conocidas. Luego la invocaremos para crear los usuarios.
 
-## Archivos a modificar
+## Credenciales de los usuarios demo
 
-### 1. `src/pages/PricingPage.tsx`
-- Starter: $89 → $49, annual $890 → $490, annualMonthly $74 → $41
-- Professional: $149 → $89, annual $1,490 → $890, annualMonthly $124 → $74
-- Business: $249 → $149, annual $2,490 → $1,490, annualMonthly $207 → $124
+| Rol | Email | Contrasena |
+|-------|-------------------------------|-----------------|
+| Admin | demo.admin@pulcrix.com | PulcrixDemo2025! |
+| Staff | demo.staff@pulcrix.com | PulcrixDemo2025! |
 
-### 2. `src/components/signup/PlanSelection.tsx`
-- Starter: $89 → $49, annual $890 → $490
-- Professional: $149 → $89, annual $1,490 → $890
-- Business: $249 → $149, annual $2,490 → $1,490
+## Implementacion
 
-### 3. `src/components/signup/PaymentStep.tsx`
-- Same price updates in `planDetails` object
+### 1. Crear Edge Function `create-demo-users`
+Archivo: `supabase/functions/create-demo-users/index.ts`
 
-### 4. `src/components/SubscriptionGate.tsx`
-- "Plans start at $89/month" → "Plans start at $49/month"
+- Usa el `SUPABASE_SERVICE_ROLE_KEY` para crear usuarios via `auth.admin.createUser()`
+- Establece `email_confirm: true` para que no requieran verificacion de email
+- Crea ambos usuarios con sus credenciales
+- La funcion `handle_new_user` (trigger existente) se encargara automaticamente de:
+  - Crear el perfil en `profiles`
+  - Asignar rol `staff` por defecto en `user_roles`
+- Despues de crear el admin, promovemos su rol a `admin` usando el service role client
 
-### 5. Stripe Price IDs
-The Stripe price IDs in `useSubscription.ts` will need to be updated to match the new prices. This requires creating new prices in Stripe or verifying the existing price IDs correspond to the correct amounts. **This is critical** -- if the displayed prices don't match what Stripe charges, customers will be billed incorrectly.
+### 2. Invocar la funcion
+- Desplegar y ejecutar la funcion para crear los usuarios
+- Verificar que ambos usuarios existan con sus roles correctos
 
-## Important Note
-The landing page (`Index.tsx`) already shows the correct prices -- no changes needed there. The plan name "Enterprise" on the landing page vs "Business" elsewhere is a minor inconsistency that can be addressed separately.
+### 3. Crear suscripciones demo
+- Insertar registros en la tabla `subscriptions` para ambos usuarios (como los existentes para las cuentas de testing internas), con fecha de expiracion en 2027, para que no sean bloqueados por el `SubscriptionGate`
+
+### 4. Limpieza
+- Eliminar la Edge Function despues de usarla (es un one-time setup)
+
+## Resultado final
+El cliente potencial podra:
+- Iniciar sesion como **Admin** en `/auth` y ver el dashboard completo en `/admin`
+- Iniciar sesion como **Staff** en `/auth` y ver el dashboard de staff en `/staff`
 
