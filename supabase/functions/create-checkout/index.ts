@@ -25,24 +25,24 @@ const logStep = (step: string, details?: Record<string, unknown>) => {
 // Map price IDs to plan names
 function getPlanFromPriceId(priceId: string): string {
   const planMap: Record<string, string> = {
-    // Starter
-    "price_1SsrkkPatNmvLMdZMIy3yxsG": "starter",
-    "price_1SsrlTPatNmvLMdZ6E12DUTK": "starter",
-    // Professional
-    "price_1SsrlGPatNmvLMdZ5bMSzXje": "professional",
-    "price_1SsrlUPatNmvLMdZZsHJ4Eax": "professional",
-    // Business
-    "price_1SsrlPPatNmvLMdZa5u7hME2": "business",
-    "price_1SsrlWPatNmvLMdZQFvR99qN": "business",
+    // Starter ($49/mo, $490/yr)
+    "price_1T497WPatNmvLMdZcYkpXYj0": "starter",
+    "price_1T497XPatNmvLMdZf1MiIAqh": "starter",
+    // Professional ($89/mo, $890/yr)
+    "price_1T497YPatNmvLMdZQja1qB74": "professional",
+    "price_1T497ZPatNmvLMdZuxBI7nGO": "professional",
+    // Business ($149/mo, $1,490/yr)
+    "price_1T497aPatNmvLMdZNWa4p227": "business",
+    "price_1T497bPatNmvLMdZBXiKExTV": "business",
   };
   return planMap[priceId] || "unknown";
 }
 
 function isAnnualPrice(priceId: string): boolean {
   const annualPrices = [
-    "price_1SsrlTPatNmvLMdZ6E12DUTK", // starter annual
-    "price_1SsrlUPatNmvLMdZZsHJ4Eax", // professional annual
-    "price_1SsrlWPatNmvLMdZQFvR99qN", // business annual
+    "price_1T497XPatNmvLMdZf1MiIAqh", // starter annual
+    "price_1T497ZPatNmvLMdZuxBI7nGO", // professional annual
+    "price_1T497bPatNmvLMdZBXiKExTV", // business annual
   ];
   return annualPrices.includes(priceId);
 }
