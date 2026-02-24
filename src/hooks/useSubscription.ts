@@ -15,16 +15,16 @@ export interface SubscriptionState {
 // Stripe price IDs - Monthly
 export const PRICE_IDS = {
   starter: {
-    monthly: "price_1SsrkkPatNmvLMdZMIy3yxsG",
-    annual: "price_1SsrlTPatNmvLMdZ6E12DUTK",
+    monthly: "price_1T497WPatNmvLMdZcYkpXYj0",
+    annual: "price_1T497XPatNmvLMdZf1MiIAqh",
   },
   professional: {
-    monthly: "price_1SsrlGPatNmvLMdZ5bMSzXje",
-    annual: "price_1SsrlUPatNmvLMdZZsHJ4Eax",
+    monthly: "price_1T497YPatNmvLMdZQja1qB74",
+    annual: "price_1T497ZPatNmvLMdZuxBI7nGO",
   },
   business: {
-    monthly: "price_1SsrlPPatNmvLMdZa5u7hME2",
-    annual: "price_1SsrlWPatNmvLMdZQFvR99qN",
+    monthly: "price_1T497aPatNmvLMdZNWa4p227",
+    annual: "price_1T497bPatNmvLMdZBXiKExTV",
   },
 } as const;
 

@@ -22,10 +22,17 @@ const logStep = (step: string, details?: Record<string, unknown>) => {
 
 // Map Stripe product IDs to plan names
 const PRODUCT_TO_PLAN: Record<string, string> = {
+  // New products ($49/$89/$149)
+  "prod_U2DYHwpMG48Sgf": "starter",
+  "prod_U2DYlErowarGjO": "starter",      // annual
+  "prod_U2DYZz8miQvBNA": "professional",
+  "prod_U2DYDzVdXHJZpw": "professional",  // annual
+  "prod_U2DY99QD3G0noB": "business",
+  "prod_U2DYiW1jgsgXGR": "business",      // annual
+  // Legacy products (for existing subscribers)
   "prod_TqYsXCeRh77yKE": "starter",
-  "prod_TqYtBATWyj2Z1M": "professional", 
+  "prod_TqYtBATWyj2Z1M": "professional",
   "prod_TqYtRfuIbEqzoD": "business",
-  // Annual products map to the same plans
 };
 
 // Helper: check local DB for active subscription
