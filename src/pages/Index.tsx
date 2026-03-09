@@ -41,7 +41,7 @@ const copy = {
       trust1: "Setup in less than 2 minutes",
       trust2: "No credit card required",
     },
-    stats: { jobs: "Jobs Managed", satisfaction: "Client Satisfaction", time: "Time Saved / Week", businesses: "Active Businesses" },
+    stats: { trial: "Free trial, no credit card", setup: "Average setup time", price: "Flat rate, no per-user fees", gst: "Built for Australia" },
     pain: {
       title: "Sound familiar?",
       sub: "Cleaning businesses waste hours every week on admin that should be automatic.",
