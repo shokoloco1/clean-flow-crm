@@ -387,6 +387,7 @@ export default function Index() {
 
   // Scroll reveal refs
   const revealStats = useScrollReveal();
+  const revealCost = useScrollReveal();
   const revealPain = useScrollReveal();
   const revealFeatures = useScrollReveal();
   const revealRoles = useScrollReveal();
