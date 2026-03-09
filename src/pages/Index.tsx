@@ -451,7 +451,8 @@ export default function Index() {
               </Badge>
 
               <h1 className="font-display mb-4 text-3xl font-bold leading-tight text-foreground sm:text-4xl md:text-5xl lg:text-6xl">
-                {c.hero.h1a}{" "}
+                {c.hero.h1a}
+                <br />
                 <span className="text-primary">{c.hero.h1b}</span>
               </h1>
 
@@ -459,10 +460,10 @@ export default function Index() {
                 {c.hero.sub}
               </p>
 
-              <div className="mb-6 flex flex-col justify-center gap-3 sm:flex-row md:justify-start">
+              <div className="mb-4 flex flex-col justify-center gap-3 sm:flex-row md:justify-start">
                 <Button
                   size="lg"
-                  className="group h-12 w-full px-6 text-base shadow-lg shadow-primary/30 transition-all hover:shadow-primary/50 sm:h-14 sm:w-auto sm:px-8"
+                  className="group h-12 w-full bg-[#0D9488] px-6 text-base text-white shadow-lg shadow-[#0D9488]/30 transition-all hover:bg-[#0D9488]/90 hover:shadow-[#0D9488]/50 sm:h-14 sm:w-auto sm:px-8"
                   onClick={() => navigate("/signup")}
                 >
                   {c.hero.cta1}
@@ -471,23 +472,30 @@ export default function Index() {
                 <Button
                   size="lg"
                   variant="outline"
-                  className="h-12 w-full px-6 text-base sm:h-14 sm:w-auto sm:px-8"
-                  onClick={() => navigate("/auth")}
+                  className="h-12 w-full border-[#0D9488] px-6 text-base text-[#0D9488] hover:bg-[#0D9488]/10 sm:h-14 sm:w-auto sm:px-8"
+                  onClick={() => {
+                    const featuresEl = document.getElementById("features-section");
+                    featuresEl?.scrollIntoView({ behavior: "smooth" });
+                  }}
                 >
                   {c.hero.cta2}
                 </Button>
               </div>
 
-              <div className="flex flex-col items-center justify-center gap-2 text-xs text-muted-foreground sm:flex-row sm:gap-4 sm:text-sm md:justify-start">
-                <div className="flex items-center gap-1">
-                  <Zap className="h-3.5 w-3.5 text-warning" />
-                  <span>{c.hero.trust1}</span>
-                </div>
-                <span className="hidden sm:inline">•</span>
-                <div className="flex items-center gap-1">
-                  <Star className="h-3.5 w-3.5 text-warning" />
-                  <span>{c.hero.trust2}</span>
-                </div>
+              <p className="mb-5 text-center text-xs text-muted-foreground md:text-left">{c.hero.trustLine}</p>
+
+              {/* Trust badges */}
+              <div className="flex flex-wrap justify-center gap-2 md:justify-start">
+                {[
+                  lang === "en" ? "🇦🇺 Built for Australia" : "🇦🇺 Hecho para Australia",
+                  "GST + ABN ready",
+                  lang === "en" ? "Flat rate pricing" : "Tarifa fija",
+                  lang === "en" ? "Setup in 10 minutes" : "Configuración en 10 min",
+                ].map((badge) => (
+                  <span key={badge} className="rounded-full bg-[#0D9488]/10 px-3 py-1 text-xs font-medium text-[#0D9488]">
+                    {badge}
+                  </span>
+                ))}
               </div>
             </div>
 
@@ -517,6 +525,9 @@ export default function Index() {
               </div>
             </div>
           </div>
+
+          {/* Social proof line */}
+          <p className="mt-8 text-center text-sm text-muted-foreground">{c.hero.socialProof}</p>
         </div>
       </div>
 
