@@ -554,6 +554,67 @@ export default function Index() {
         </div>
       </section>
 
+      {/* ── Cost of Manual Management ── */}
+      <section className="bg-muted/20 py-12 md:py-16">
+        <div ref={revealCost} className="scroll-reveal container mx-auto px-4">
+          <div className="mb-8 text-center">
+            <h2 className="font-display mb-3 text-2xl font-bold text-foreground sm:text-3xl">
+              {lang === "en" ? "How much is manual management costing you?" : "¿Cuánto te está costando la gestión manual?"}
+            </h2>
+            <p className="text-muted-foreground">
+              {lang === "en"
+                ? "Most cleaning businesses lose $500–$1,000/month without realising it."
+                : "La mayoría de las empresas de limpieza pierden $500–$1,000/mes sin darse cuenta."}
+            </p>
+          </div>
+          <div className="mx-auto grid max-w-4xl gap-6 md:grid-cols-3">
+            {[
+              {
+                icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-[#0D9488]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="10" y1="14" x2="14" y2="18"/><line x1="14" y1="14" x2="10" y2="18"/></svg>,
+                title: lang === "en" ? "Double-bookings & missed jobs" : "Reservas dobles y trabajos perdidos",
+                body: lang === "en"
+                  ? "Managing bookings on WhatsApp or paper means jobs fall through the cracks. One missed booking = one unhappy client."
+                  : "Gestionar reservas por WhatsApp o papel significa que los trabajos se pierden. Una reserva perdida = un cliente insatisfecho.",
+              },
+              {
+                icon: <Clock className="h-8 w-8 text-[#0D9488]" />,
+                title: lang === "en" ? "Invoices paid weeks late" : "Facturas pagadas semanas tarde",
+                body: lang === "en"
+                  ? "Manual invoicing means chasing payment. The average cleaning business waits 3+ weeks to get paid. Automated invoicing fixes this."
+                  : "La facturación manual significa perseguir pagos. La empresa promedio espera 3+ semanas para cobrar. La facturación automática lo soluciona.",
+              },
+              {
+                icon: <MapPin className="h-8 w-8 text-[#0D9488]" />,
+                title: lang === "en" ? "No idea who's where" : "Sin saber quién está dónde",
+                body: lang === "en"
+                  ? "Coordinating a 6-person team by text is chaos. Pulcrix gives you a live view of your team schedule in one screen."
+                  : "Coordinar un equipo de 6 personas por mensaje es un caos. Pulcrix te da una vista en vivo del horario de tu equipo en una pantalla.",
+              },
+            ].map((card) => (
+              <Card key={card.title} className="border-border bg-card p-6 shadow-sm">
+                <div className="mb-4">{card.icon}</div>
+                <h3 className="mb-2 text-lg font-bold text-foreground">{card.title}</h3>
+                <p className="text-sm leading-relaxed text-muted-foreground">{card.body}</p>
+              </Card>
+            ))}
+          </div>
+          <div className="mx-auto mt-8 max-w-2xl rounded-xl bg-[#0D9488] px-6 py-4 text-center shadow-md">
+            <p className="mb-3 text-sm font-medium text-white/90">
+              {lang === "en"
+                ? "Pulcrix solves all three — setup takes 10 minutes"
+                : "Pulcrix resuelve los tres — la configuración toma 10 minutos"}
+            </p>
+            <Button
+              size="lg"
+              onClick={() => navigate("/signup")}
+              className="bg-white text-[#0D9488] hover:bg-white/90 font-semibold gap-2"
+            >
+              {lang === "en" ? "Start Free Trial" : "Prueba Gratuita"} <ArrowRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      </section>
+
       {/* ── Pain → Solution ── */}
       <section className="bg-muted/20 py-12 md:py-16">
         <div ref={revealPain} className="scroll-reveal container mx-auto px-4">
