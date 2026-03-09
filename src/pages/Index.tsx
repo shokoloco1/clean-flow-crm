@@ -147,47 +147,7 @@ function useScrollReveal() {
   return ref;
 }
 
-function useCounter(target: number, duration = 1800) {
-  const [value, setValue] = useState(0);
-  const ref = useRef<HTMLDivElement>(null);
-  const started = useRef(false);
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const obs = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && !started.current) {
-          started.current = true;
-          const start = performance.now();
-          const tick = (now: number) => {
-            const p = Math.min((now - start) / duration, 1);
-            const eased = 1 - Math.pow(1 - p, 3);
-            setValue(Math.floor(eased * target));
-            if (p < 1) requestAnimationFrame(tick);
-          };
-          requestAnimationFrame(tick);
-        }
-      },
-      { threshold: 0.3 }
-    );
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, [target, duration]);
-  return { ref, value };
-}
-
 // ─── Sub-components ───────────────────────────────────────────────────────────
-function AnimatedStat({ target, suffix, label }: { target: number; suffix: string; label: string }) {
-  const { ref, value } = useCounter(target);
-  return (
-    <div ref={ref} className="text-center">
-      <div className="font-display text-3xl font-bold text-primary sm:text-4xl md:text-5xl">
-        {value.toLocaleString()}{suffix}
-      </div>
-      <div className="mt-1 text-sm text-muted-foreground sm:text-base">{label}</div>
-    </div>
-  );
-}
 
 function DashboardMockup() {
   const jobs = [
