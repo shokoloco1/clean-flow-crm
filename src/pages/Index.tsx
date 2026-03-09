@@ -311,9 +311,9 @@ function FeatureTabs({ lang }: { lang: "en" | "es" }) {
 }
 
 const testimonials = [
-  { name: "Jessica M.", company: "Sparkle Clean Co.", text: "We went from spending 3 hours on admin to under 30 minutes. Game changer for our team.", rating: 5 },
-  { name: "Carlos R.", company: "Elite Cleaning Services", text: "The before/after photos feature alone saved us from two dispute situations with clients.", rating: 5 },
-  { name: "Priya S.", company: "Fresh Start Cleaning", text: "GST invoices in seconds. My accountant is very happy. I'm very happy. Setup was easy.", rating: 5 },
+  { name: "Sarah T.", role: { en: "Owner, 4-person cleaning crew, Brisbane", es: "Propietaria, equipo de 4, Brisbane" }, text: { en: "We switched from managing bookings on WhatsApp and lost 2 clients in one week. Pulcrix fixed that in the first day.", es: "Pasamos de gestionar reservas por WhatsApp y perdimos 2 clientes en una semana. Pulcrix lo solucionó el primer día." }, initials: "ST", color: "bg-[#0D9488]" },
+  { name: "Marcus L.", role: { en: "Founder, residential cleaning, Melbourne", es: "Fundador, limpieza residencial, Melbourne" }, text: { en: "The flat rate is the reason I signed up. I have 9 cleaners and I was dreading what our software bill would look like. $89 flat — done.", es: "La tarifa fija es la razón por la que me registré. Tengo 9 limpiadores y temía lo que costaría el software. $89 fijo — listo." }, initials: "ML", color: "bg-[#FBBF24]" },
+  { name: "Ana G.", role: { en: "Solo operator growing to 3 staff, Sydney", es: "Operadora individual creciendo a 3 empleados, Sydney" }, text: { en: "Setup took 12 minutes. I was invoicing the same afternoon. No training, no onboarding calls, just works.", es: "La configuración tomó 12 minutos. Estaba facturando esa misma tarde. Sin capacitación, sin llamadas, simplemente funciona." }, initials: "AG", color: "bg-[#0D9488]" },
 ];
 
 const pricingPlans = [
