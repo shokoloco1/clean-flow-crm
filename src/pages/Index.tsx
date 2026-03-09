@@ -498,13 +498,20 @@ export default function Index() {
       </section>
 
       {/* ── Stats ── */}
-      <section className="py-12 md:py-16">
+      <section className="border-y border-border bg-muted/30 py-12 md:py-16">
         <div ref={revealStats} className="scroll-reveal container mx-auto px-4">
-          <div className="grid grid-cols-2 gap-6 md:grid-cols-4 md:gap-8">
-            <AnimatedStat target={12400} suffix="+" label={c.stats.jobs} />
-            <AnimatedStat target={98} suffix="%" label={c.stats.satisfaction} />
-            <AnimatedStat target={8} suffix="h" label={c.stats.time} />
-            <AnimatedStat target={340} suffix="+" label={c.stats.businesses} />
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-6">
+            {[
+              { value: "14-day", label: c.stats.trial },
+              { value: "10 min", label: c.stats.setup },
+              { value: "$89/mo", label: c.stats.price },
+              { value: "GST ready", label: c.stats.gst },
+            ].map((item) => (
+              <div key={item.value} className="rounded-xl border border-border bg-card p-5 text-center shadow-sm">
+                <div className="text-2xl font-bold text-[#0D9488] sm:text-3xl md:text-4xl">{item.value}</div>
+                <div className="mt-1.5 text-xs text-muted-foreground sm:text-sm">{item.label}</div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
