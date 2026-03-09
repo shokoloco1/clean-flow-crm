@@ -83,7 +83,7 @@ const copy = {
       badge: "Para empresas de limpieza en Australia",
       h1a: "Dirige tu empresa de limpieza.",
       h1b: "Deja de gestionar el caos.",
-      sub: "Programación, facturación y gestión de equipo en un solo lugar — hecho para empresas de limpieza australianas. Tarifa fija desde $49/mes.",
+      sub: "Programación, facturación y gestión de equipo en un solo lugar. Hecho para empresas de limpieza australianas. Tarifa fija desde $49/mes.",
       cta1: "Prueba Gratuita",
       cta2: "Ver cómo funciona →",
       trustLine: "14 días de prueba · Sin tarjeta · GST incluido",
