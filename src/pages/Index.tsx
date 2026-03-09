@@ -699,49 +699,58 @@ export default function Index() {
             <h2 className="font-display mb-3 text-2xl font-bold text-foreground sm:text-3xl">{c.pricing.title}</h2>
             <p className="text-muted-foreground">{c.pricing.sub}</p>
           </div>
-          <div className="mx-auto grid max-w-4xl gap-6 md:grid-cols-3 md:items-center">
+          <div className="mx-auto grid max-w-5xl grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {pricingPlans.map((plan) => (
               <Card
                 key={plan.name}
                 className={cn(
-                  "relative border p-6 transition-all",
+                  "relative flex flex-col border p-6 transition-all",
                   plan.featured
-                    ? "scale-105 border-primary/50 shadow-xl shadow-primary/10"
+                    ? "border-[#0D9488]/50 shadow-xl shadow-[#0D9488]/10 ring-2 ring-[#0D9488]/20"
                     : "border-border card-hover"
                 )}
               >
                 {plan.featured && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <Badge className="bg-primary text-primary-foreground shadow-md">{c.pricing.popular}</Badge>
+                  <div className="absolute -top-3 right-4">
+                    <Badge className="bg-[#FBBF24] text-foreground shadow-md hover:bg-[#FBBF24]/90 font-semibold text-xs">{c.pricing.popular}</Badge>
                   </div>
                 )}
-                <CardContent className="p-0">
+                <CardContent className="flex flex-1 flex-col p-0">
                   <div className="mb-4">
                     <h3 className="text-lg font-bold text-foreground">{plan.name}</h3>
-                    <div className="mt-2 flex items-baseline gap-1">
+                    <p className="mt-1 text-xs text-muted-foreground">{plan.subtitle[lang]}</p>
+                    <div className="mt-3 flex items-baseline gap-1">
                       <span className="font-display text-3xl font-bold text-foreground">${plan.price}</span>
-                      <span className="text-sm text-muted-foreground">{c.pricing.mo}</span>
+                      <span className="text-sm text-muted-foreground">AUD{c.pricing.mo}</span>
                     </div>
+                    <p className="mt-1 text-xs font-medium text-[#0D9488]">{plan.team[lang]}</p>
                   </div>
-                  <ul className="mb-6 space-y-2">
-                    {plan.features.map((f) => (
-                      <li key={f} className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <CheckCircle className="h-4 w-4 shrink-0 text-success" />
+                  <ul className="mb-5 flex-1 space-y-2">
+                    {plan.features[lang].map((f) => (
+                      <li key={f} className="flex items-start gap-2 text-sm text-muted-foreground">
+                        <CheckCircle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#0D9488]" />
                         {f}
                       </li>
                     ))}
                   </ul>
+                  <p className="mb-3 text-[10px] leading-tight text-muted-foreground/70 italic">{c.pricing.flat}</p>
                   <Button
-                    className="w-full"
-                    variant={plan.featured ? "default" : "outline"}
-                    onClick={() => navigate("/signup")}
+                    className={cn(
+                      "w-full",
+                      plan.isSales
+                        ? "border-[#0D9488] text-[#0D9488] hover:bg-[#0D9488]/10"
+                        : "bg-[#0D9488] text-white hover:bg-[#0D9488]/90"
+                    )}
+                    variant={plan.isSales ? "outline" : "default"}
+                    onClick={() => navigate(plan.isSales ? "/pricing" : "/signup")}
                   >
-                    {plan.featured ? c.pricing.ctaPro : c.pricing.cta}
+                    {plan.isSales ? c.pricing.ctaSales : c.pricing.cta}
                   </Button>
                 </CardContent>
               </Card>
             ))}
           </div>
+          <p className="mt-6 text-center text-xs text-muted-foreground">{c.pricing.footer}</p>
         </div>
       </section>
 
