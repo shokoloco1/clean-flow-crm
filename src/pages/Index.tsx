@@ -36,7 +36,7 @@ const copy = {
       badge: "Built for Australian Cleaning Businesses",
       h1a: "Run your cleaning business.",
       h1b: "Stop managing chaos.",
-      sub: "Scheduling, invoicing, and team management in one place — built for Australian cleaning businesses. Flat rate from $49/month.",
+      sub: "Scheduling, invoicing, and team management in one place. Built for Australian cleaning businesses. Flat rate from $49/month.",
       cta1: "Start Free Trial",
       cta2: "See how it works →",
       trustLine: "14-day free trial · No credit card · GST included",
