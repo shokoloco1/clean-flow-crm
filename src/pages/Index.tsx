@@ -754,7 +754,70 @@ export default function Index() {
         </div>
       </section>
 
-      {/* ── Final CTA ── */}
+      {/* ── Comparison Table ── */}
+      <section className="bg-muted/20 py-12 md:py-16">
+        <div className="container mx-auto px-4">
+          <div className="mb-8 text-center">
+            <h2 className="font-display mb-3 text-2xl font-bold text-foreground sm:text-3xl">
+              {lang === "en" ? "How Pulcrix compares" : "Cómo se compara Pulcrix"}
+            </h2>
+            <p className="text-muted-foreground">
+              {lang === "en"
+                ? "Purpose-built for Australian cleaning businesses — at a fraction of the cost"
+                : "Diseñado para empresas de limpieza australianas — a una fracción del costo"}
+            </p>
+          </div>
+          <div className="mx-auto max-w-4xl overflow-x-auto rounded-xl border border-border shadow-sm">
+            <table className="w-full min-w-[600px] text-sm">
+              <thead>
+                <tr className="border-b border-border">
+                  <th className="p-3 text-left font-semibold text-foreground md:p-4">{lang === "en" ? "Feature" : "Característica"}</th>
+                  <th className="bg-[#0D9488] p-3 text-center font-semibold text-white md:p-4">Pulcrix</th>
+                  <th className="bg-muted/60 p-3 text-center font-semibold text-muted-foreground md:p-4">ServiceM8</th>
+                  <th className="bg-muted/60 p-3 text-center font-semibold text-muted-foreground md:p-4">Jobber</th>
+                  <th className="bg-muted/60 p-3 text-center font-semibold text-muted-foreground md:p-4">ZenMaid</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  { feature: lang === "en" ? "Pricing model" : "Modelo de precios", pulcrix: lang === "en" ? "Flat rate" : "Tarifa fija", s: lang === "en" ? "Per user" : "Por usuario", j: lang === "en" ? "Per user" : "Por usuario", z: lang === "en" ? "Per user" : "Por usuario" },
+                  { feature: lang === "en" ? "5-person team" : "Equipo de 5", pulcrix: "$89/mo", s: "$79–159/mo", j: "$224/mo", z: "$39+/mo" },
+                  { feature: lang === "en" ? "10-person team" : "Equipo de 10", pulcrix: "$89/mo", s: "$159–319/mo", j: "$440+/mo", z: "$59+/mo" },
+                  { feature: lang === "en" ? "Built for cleaning" : "Hecho para limpieza", pulcrix: true, s: lang === "en" ? "No (trades)" : "No (oficios)", j: lang === "en" ? "No (generic)" : "No (genérico)", z: lang === "en" ? "Partial" : "Parcial" },
+                  { feature: "GST + ABN ready", pulcrix: true, s: lang === "en" ? "Partial" : "Parcial", j: "No", z: "No" },
+                  { feature: lang === "en" ? "Australian support" : "Soporte australiano", pulcrix: true, s: true, j: false, z: false },
+                  { feature: lang === "en" ? "Setup time" : "Tiempo de configuración", pulcrix: lang === "en" ? "10 minutes" : "10 minutos", s: lang === "en" ? "2–4 weeks" : "2–4 semanas", j: lang === "en" ? "2–4 weeks" : "2–4 semanas", z: lang === "en" ? "1–2 weeks" : "1–2 semanas" },
+                  { feature: lang === "en" ? "Spanish support" : "Soporte en español", pulcrix: true, s: false, j: false, z: false },
+                  { feature: lang === "en" ? "Free trial" : "Prueba gratis", pulcrix: lang === "en" ? "14 days, no card" : "14 días, sin tarjeta", s: lang === "en" ? "Limited" : "Limitada", j: lang === "en" ? "14 days" : "14 días", z: lang === "en" ? "14 days" : "14 días" },
+                ].map((row, i) => {
+                  const renderCell = (val: string | boolean, isPulcrix: boolean) => {
+                    if (val === true) return <CheckCircle className={cn("mx-auto h-5 w-5", isPulcrix ? "text-white" : "text-[#0D9488]")} />;
+                    if (val === false) return <X className="mx-auto h-5 w-5 text-destructive/60" />;
+                    return <span className={isPulcrix ? "font-semibold text-white" : "text-muted-foreground"}>{val}</span>;
+                  };
+                  return (
+                    <tr key={row.feature} className={cn("border-b border-border last:border-0", i % 2 === 0 ? "bg-card" : "bg-muted/30")}>
+                      <td className="p-3 font-medium text-foreground md:p-4">{row.feature}</td>
+                      <td className="bg-[#0D9488]/90 p-3 text-center md:p-4">{renderCell(row.pulcrix, true)}</td>
+                      <td className="p-3 text-center md:p-4">{renderCell(row.s, false)}</td>
+                      <td className="p-3 text-center md:p-4">{renderCell(row.j, false)}</td>
+                      <td className="p-3 text-center md:p-4">{renderCell(row.z, false)}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+          <div className="mx-auto mt-6 max-w-2xl rounded-lg border border-[#0D9488]/30 bg-[#0D9488]/5 px-5 py-3 text-center">
+            <p className="text-sm font-semibold text-[#0D9488]">
+              💰 {lang === "en"
+                ? "A team of 10 cleaners saves $200–350/month vs Jobber or ServiceM8"
+                : "Un equipo de 10 limpiadores ahorra $200–350/mes vs Jobber o ServiceM8"}
+            </p>
+          </div>
+        </div>
+      </section>
+
       <section className="border-t border-border bg-gradient-to-br from-primary/5 to-transparent py-14 md:py-20">
         <div className="container mx-auto px-4 text-center">
           <h2 className="font-display mb-4 text-2xl font-bold text-foreground sm:text-3xl md:text-4xl">
