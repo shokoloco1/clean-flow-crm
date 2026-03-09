@@ -16,6 +16,7 @@ import {
   Star,
   Zap,
   Lock,
+  Clock,
   FileText,
   BarChart3,
   Globe,
