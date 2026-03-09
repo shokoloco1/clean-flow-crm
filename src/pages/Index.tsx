@@ -668,27 +668,32 @@ export default function Index() {
       <section className="bg-muted/20 py-12 md:py-16">
         <div ref={revealTestimonials} className="scroll-reveal container mx-auto px-4">
           <h2 className="font-display mb-8 text-center text-2xl font-bold text-foreground">{c.testimonials.title}</h2>
-          <div className="mx-auto grid max-w-4xl gap-6 md:grid-cols-3">
+          <div className="mx-auto grid max-w-5xl gap-6 md:grid-cols-3">
             {testimonials.map((t) => (
               <Card key={t.name} className="card-hover border-border bg-card p-6">
                 <div className="mb-3 flex gap-0.5">
-                  {Array.from({ length: t.rating }).map((_, i) => (
-                    <Star key={i} className="h-4 w-4 fill-warning text-warning" />
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <Star key={i} className="h-4 w-4 fill-[#FBBF24] text-[#FBBF24]" />
                   ))}
                 </div>
-                <p className="mb-4 text-sm text-muted-foreground">"{t.text}"</p>
+                <p className="mb-5 text-lg leading-relaxed text-foreground">"{t.text[lang]}"</p>
                 <div className="flex items-center gap-3">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
-                    {t.name[0]}
+                  <div className={cn("flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold text-white", t.color)}>
+                    {t.initials}
                   </div>
                   <div>
                     <div className="text-sm font-semibold text-foreground">{t.name}</div>
-                    <div className="text-xs text-muted-foreground">{t.company}</div>
+                    <div className="text-xs text-muted-foreground">{t.role[lang]}</div>
                   </div>
                 </div>
               </Card>
             ))}
           </div>
+          <p className="mt-6 text-center text-xs text-muted-foreground">
+            {lang === "en"
+              ? "Join Australian cleaning businesses that chose Pulcrix · 14-day free trial"
+              : "Únete a empresas de limpieza australianas que eligieron Pulcrix · 14 días de prueba gratis"}
+          </p>
         </div>
       </section>
 
