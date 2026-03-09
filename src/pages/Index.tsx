@@ -317,9 +317,42 @@ const testimonials = [
 ];
 
 const pricingPlans = [
-  { name: "Starter", price: 49, mo: "month", features: ["Up to 2 staff", "50 jobs/month", "Basic invoicing", "Email support"], featured: false },
-  { name: "Professional", price: 89, mo: "month", features: ["Up to 10 staff", "Unlimited jobs", "GST invoicing + Xero", "Photo documentation", "Reports & analytics", "Priority support"], featured: true },
-  { name: "Enterprise", price: 149, mo: "month", features: ["Unlimited staff", "Unlimited jobs", "All Pro features", "Custom branding", "Dedicated account manager", "API access"], featured: false },
+  {
+    name: "Micro",
+    price: 49,
+    subtitle: { en: "Perfect for solo operators and pairs", es: "Perfecto para operadores individuales y parejas" },
+    team: { en: "1–2 staff", es: "1–2 empleados" },
+    features: { en: ["Scheduling", "Invoicing", "Client management", "GST-ready", "Email support"], es: ["Programación", "Facturación", "Gestión de clientes", "Listo para GST", "Soporte por email"] },
+    featured: false,
+    isSales: false,
+  },
+  {
+    name: "Starter",
+    price: 89,
+    subtitle: { en: "Most popular for growing teams", es: "El más popular para equipos en crecimiento" },
+    team: { en: "1–5 staff", es: "1–5 empleados" },
+    features: { en: ["Everything in Micro", "Team calendar", "Automated reminders", "Client portal", "Priority support"], es: ["Todo en Micro", "Calendario de equipo", "Recordatorios automáticos", "Portal de clientes", "Soporte prioritario"] },
+    featured: true,
+    isSales: false,
+  },
+  {
+    name: "Professional",
+    price: 149,
+    subtitle: { en: "For established cleaning businesses", es: "Para empresas de limpieza establecidas" },
+    team: { en: "5–15 staff", es: "5–15 empleados" },
+    features: { en: ["Everything in Starter", "Advanced reporting", "Route optimisation", "Bulk invoicing", "Phone support"], es: ["Todo en Starter", "Reportes avanzados", "Optimización de rutas", "Facturación masiva", "Soporte telefónico"] },
+    featured: false,
+    isSales: false,
+  },
+  {
+    name: "Business",
+    price: 249,
+    subtitle: { en: "Scale without limits", es: "Escala sin límites" },
+    team: { en: "15–25+ staff", es: "15–25+ empleados" },
+    features: { en: ["Everything in Professional", "Custom workflows", "API access", "Dedicated account manager", "SLA guarantee"], es: ["Todo en Professional", "Flujos personalizados", "Acceso a API", "Gerente de cuenta dedicado", "Garantía SLA"] },
+    featured: false,
+    isSales: true,
+  },
 ];
 
 const marqueeItems = [
