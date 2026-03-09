@@ -41,7 +41,7 @@ const copy = {
       trust1: "Setup in less than 2 minutes",
       trust2: "No credit card required",
     },
-    stats: { jobs: "Jobs Managed", satisfaction: "Client Satisfaction", time: "Time Saved / Week", businesses: "Active Businesses" },
+    stats: { trial: "Free trial, no credit card", setup: "Average setup time", price: "Flat rate, no per-user fees", gst: "Built for Australia" },
     pain: {
       title: "Sound familiar?",
       sub: "Cleaning businesses waste hours every week on admin that should be automatic.",
@@ -86,7 +86,7 @@ const copy = {
       trust1: "Configuración en menos de 2 minutos",
       trust2: "Sin tarjeta de crédito",
     },
-    stats: { jobs: "Trabajos Gestionados", satisfaction: "Satisfacción del Cliente", time: "Tiempo Ahorrado / Semana", businesses: "Empresas Activas" },
+    stats: { trial: "Prueba gratis, sin tarjeta", setup: "Tiempo promedio de configuración", price: "Tarifa fija, sin costo por usuario", gst: "Hecho para Australia" },
     pain: {
       title: "¿Te suena familiar?",
       sub: "Las empresas de limpieza pierden horas cada semana en administración que debería ser automática.",
@@ -147,47 +147,7 @@ function useScrollReveal() {
   return ref;
 }
 
-function useCounter(target: number, duration = 1800) {
-  const [value, setValue] = useState(0);
-  const ref = useRef<HTMLDivElement>(null);
-  const started = useRef(false);
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const obs = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && !started.current) {
-          started.current = true;
-          const start = performance.now();
-          const tick = (now: number) => {
-            const p = Math.min((now - start) / duration, 1);
-            const eased = 1 - Math.pow(1 - p, 3);
-            setValue(Math.floor(eased * target));
-            if (p < 1) requestAnimationFrame(tick);
-          };
-          requestAnimationFrame(tick);
-        }
-      },
-      { threshold: 0.3 }
-    );
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, [target, duration]);
-  return { ref, value };
-}
-
 // ─── Sub-components ───────────────────────────────────────────────────────────
-function AnimatedStat({ target, suffix, label }: { target: number; suffix: string; label: string }) {
-  const { ref, value } = useCounter(target);
-  return (
-    <div ref={ref} className="text-center">
-      <div className="font-display text-3xl font-bold text-primary sm:text-4xl md:text-5xl">
-        {value.toLocaleString()}{suffix}
-      </div>
-      <div className="mt-1 text-sm text-muted-foreground sm:text-base">{label}</div>
-    </div>
-  );
-}
 
 function DashboardMockup() {
   const jobs = [
@@ -538,13 +498,20 @@ export default function Index() {
       </section>
 
       {/* ── Stats ── */}
-      <section className="py-12 md:py-16">
+      <section className="border-y border-border bg-muted/30 py-12 md:py-16">
         <div ref={revealStats} className="scroll-reveal container mx-auto px-4">
-          <div className="grid grid-cols-2 gap-6 md:grid-cols-4 md:gap-8">
-            <AnimatedStat target={12400} suffix="+" label={c.stats.jobs} />
-            <AnimatedStat target={98} suffix="%" label={c.stats.satisfaction} />
-            <AnimatedStat target={8} suffix="h" label={c.stats.time} />
-            <AnimatedStat target={340} suffix="+" label={c.stats.businesses} />
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-6">
+            {[
+              { value: "14-day", label: c.stats.trial },
+              { value: "10 min", label: c.stats.setup },
+              { value: "$89/mo", label: c.stats.price },
+              { value: "GST ready", label: c.stats.gst },
+            ].map((item) => (
+              <div key={item.value} className="rounded-xl border border-border bg-card p-5 text-center shadow-sm">
+                <div className="text-2xl font-bold text-[#0D9488] sm:text-3xl md:text-4xl">{item.value}</div>
+                <div className="mt-1.5 text-xs text-muted-foreground sm:text-sm">{item.label}</div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
