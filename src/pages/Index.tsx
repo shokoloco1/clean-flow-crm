@@ -86,7 +86,7 @@ const copy = {
       trust1: "Configuración en menos de 2 minutos",
       trust2: "Sin tarjeta de crédito",
     },
-    stats: { jobs: "Trabajos Gestionados", satisfaction: "Satisfacción del Cliente", time: "Tiempo Ahorrado / Semana", businesses: "Empresas Activas" },
+    stats: { trial: "Prueba gratis, sin tarjeta", setup: "Tiempo promedio de configuración", price: "Tarifa fija, sin costo por usuario", gst: "Hecho para Australia" },
     pain: {
       title: "¿Te suena familiar?",
       sub: "Las empresas de limpieza pierden horas cada semana en administración que debería ser automática.",
