@@ -14,7 +14,7 @@ import {
   ArrowRight,
   CheckCircle,
   Star,
-  Zap,
+  
   Lock,
   Clock,
   FileText,
